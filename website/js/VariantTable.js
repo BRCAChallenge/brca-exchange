@@ -220,57 +220,8 @@ const researchModeGroups = [
                 ]
 
             },
-            {
-                source: "ExAC",
-                chart: [
-                    {title: 'Allele Frequency Charts (ExAC)', prop: 'Allele_Frequency_Charts_ExAC', replace: alleleFrequencyCharts, tableKey: false, dummy: true},
-                ],
-                data: [
-                    {title: 'Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC', core: true},
-                    {title: 'AFR Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_AFR_ExAC', core: true},
-                    {title: 'AMR Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_AMR_ExAC', core: true},
-                    {title: 'EAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_EAS_ExAC', core: true},
-                    {title: 'FIN Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_FIN_ExAC', core: true},
-                    {title: 'NFE Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_NFE_ExAC', core: true},
-                    {title: 'SAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_SAS_ExAC', core: true},
-                    {title: 'OTH Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_OTH_ExAC', core: true}
-                ]
-            },
-            {
-                source: "1000 Genomes",
-                chart: [
-                    {title: 'Allele Frequency Charts (1000 Genomes)', prop: 'Allele_Frequency_Charts_1000_Genomes', replace: alleleFrequencyCharts, tableKey: false, dummy: true},
-                ],
-                data: [
-                    {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes', core: true},
-                    {title: 'AFR Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes', core: true},
-                    {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes', core: true},
-                    {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes', core: true},
-                    {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes', core: true},
-                    {title: 'SAS Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes', core: true},
-                ]
-            },
-            {
-                source: "ESP",
-                chart: [],
-                data: [
-                    {title: 'EA Allele Frequency (ESP)', prop: 'EA_Allele_Frequency_ESP', core: true},
-                    {title: 'AA Allele Frequency (ESP)', prop: 'AA_Allele_Frequency_ESP', core: true},
-                    {title: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP', core: true},
-                ]
-            }
         ]
     },
-
-    {groupTitle: 'Allele Counts (ExAC minus TCGA)', internalGroupName: 'Allele Counts (ExAC minus TCGA)', innerCols: [
-        {title: 'AFR Allele count', prop: 'Allele_count_AFR_ExAC', core: true},
-        {title: 'AMR Allele count', prop: 'Allele_count_AMR_ExAC', core: true},
-        {title: 'EAS Allele count', prop: 'Allele_count_EAS_ExAC', core: true},
-        {title: 'FIN Allele count', prop: 'Allele_count_FIN_ExAC', core: true},
-        {title: 'NFE Allele count', prop: 'Allele_count_NFE_ExAC', core: true},
-        {title: 'OTH Allele count', prop: 'Allele_count_OTH_ExAC', core: true},
-        {title: 'SAS Allele count', prop: 'Allele_count_SAS_ExAC', core: true},
-    ]},
 
     {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
         {title: 'Posterior probability of pathogenicity', prop: 'Posterior_probability_exLOVD', core: true},
@@ -441,16 +392,8 @@ const researchModeColumns = [
     {title: 'Condition ID Value (ENIGMA)', prop: 'Condition_ID_value_ENIGMA'},
     {title: 'Submitter (ClinVar)', prop: 'Submitter_ClinVar'},
     {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA'},
-    {title: 'AFR Allele Frequency (1000 Genomes)', prop: 'AFR_Allele_frequency_1000_Genomes'},
     {title: 'Allele Frequency', prop: 'Allele_Frequency'},
-    {title: 'Allele Frequency (1000 Genomes)', prop: 'Allele_frequency_1000_Genomes'},
-    {title: 'AMR Allele Frequency (1000 Genomes)', prop: 'AMR_Allele_frequency_1000_Genomes'},
-    {title: 'EAS Allele Frequency (1000 Genomes)', prop: 'EAS_Allele_frequency_1000_Genomes'},
-    {title: 'EUR Allele Frequency (1000 Genomes)', prop: 'EUR_Allele_frequency_1000_Genomes'},
     {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency'},
-    {title: 'EA Allele Frequency (ESP)', prop: 'EA_Allele_Frequency_ESP'},
-    {title: 'AA Allele Frequency (ESP)', prop: 'AA_Allele_Frequency_ESP'},
-    {title: 'Allele Frequency (ESP)', prop: 'Allele_Frequency_ESP'},
     {title: 'Allele frequency (gnomAD V3.1 Genomes)', prop: 'Allele_frequency_genome_GnomADv3'},
     {title: 'AFR Allele frequency (gnomAD V3.1 Genomes)', prop: 'Allele_frequency_genome_AFR_GnomADv3'},
     {title: 'AMR Allele frequency (gnomAD V3.1 Genomes)', prop: 'Allele_frequency_genome_AMR_GnomADv3'},
@@ -471,36 +414,24 @@ const researchModeColumns = [
     {title: 'NFE Allele frequency (gnomAD V2.1 Exomes)', prop: 'Allele_frequency_exome_NFE_GnomAD'},
     {title: 'OTH Allele frequency (gnomAD V2.1 Exomes)', prop: 'Allele_frequency_exome_OTH_GnomAD'},
     {title: 'SAS Allele frequency (gnomAD V2.1 Exomes)', prop: 'Allele_frequency_exome_SAS_GnomAD'},
-    {title: 'Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_ExAC'},
-    {title: 'AFR Allele count (ExAC minus TCGA)', prop: 'Allele_count_AFR_ExAC'},
-    {title: 'AFR Allele number (ExAC minus TCGA)', prop: 'Allele_number_AFR_ExAC'},
-    {title: 'AFR Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_AFR_ExAC'},
-    {title: 'AFR Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_AFR_ExAC'},
-    {title: 'AMR Allele count (ExAC minus TCGA)', prop: 'Allele_count_AMR_ExAC'},
-    {title: 'AMR Allele number (ExAC minus TCGA)', prop: 'Allele_number_AMR_ExAC'},
-    {title: 'AMR Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_AMR_ExAC'},
-    {title: 'AMR Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_AMR_ExAC'},
-    {title: 'EAS Allele count (ExAC minus TCGA)', prop: 'Allele_count_EAS_ExAC'},
-    {title: 'EAS Allele number (ExAC minus TCGA)', prop: 'Allele_number_EAS_ExAC'},
-    {title: 'EAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_EAS_ExAC'},
-    {title: 'EAS Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_EAS_ExAC'},
-    {title: 'FIN Allele count (ExAC minus TCGA)', prop: 'Allele_count_FIN_ExAC'},
-    {title: 'FIN Allele number (ExAC minus TCGA)', prop: 'Allele_number_FIN_ExAC'},
-    {title: 'FIN Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_FIN_ExAC'},
-    {title: 'FIN Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_FIN_ExAC'},
-    {title: 'NFE Allele count (ExAC minus TCGA)', prop: 'Allele_count_NFE_ExAC'},
-    {title: 'NFE Allele number (ExAC minus TCGA)', prop: 'Allele_number_NFE_ExAC'},
-    {title: 'NFE Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_NFE_ExAC'},
-    {title: 'NFE Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_NFE_ExAC'},
-    {title: 'OTH Allele count (ExAC minus TCGA)', prop: 'Allele_count_OTH_ExAC'},
-    {title: 'OTH Allele number (ExAC minus TCGA)', prop: 'Allele_number_OTH_ExAC'},
-    {title: 'OTH Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_OTH_ExAC'},
-    {title: 'OTH Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_OTH_ExAC'},
-    {title: 'SAS Allele count (ExAC minus TCGA)', prop: 'Allele_count_SAS_ExAC'},
-    {title: 'SAS Allele number (ExAC minus TCGA)', prop: 'Allele_number_SAS_ExAC'},
-    {title: 'SAS Allele frequency (ExAC minus TCGA)', prop: 'Allele_frequency_SAS_ExAC'},
-    {title: 'SAS Homozygous count (ExAC minus TCGA)', prop: 'Homozygous_count_SAS_ExAC'},
-    {title: 'SAS Allele Frequency (1000 Genomes)', prop: 'SAS_Allele_frequency_1000_Genomes'},
+    {title: 'Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_GnomAD'},
+    {title: 'AFR Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_AFR_GnomAD'},
+    {title: 'AMR Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_AMR_GnomAD'},
+    {title: 'ASJ Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_ASJ_GnomAD'},
+    {title: 'EAS Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_EAS_GnomAD'},
+    {title: 'FIN Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_FIN_GnomAD'},
+    {title: 'NFE Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_NFE_GnomAD'},
+    {title: 'OTH Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_OTH_GnomAD'},
+    {title: 'SAS Allele frequency (gnomAD Genomes)', prop: 'Allele_frequency_genome_SAS_GnomAD'},
+    {title: 'Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_GnomAD'},
+    {title: 'AFR Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_AFR_GnomAD'},
+    {title: 'AMR Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_AMR_GnomAD'},
+    {title: 'ASJ Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_ASJ_GnomAD'},
+    {title: 'EAS Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_EAS_GnomAD'},
+    {title: 'FIN Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_FIN_GnomAD'},
+    {title: 'NFE Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_NFE_GnomAD'},
+    {title: 'OTH Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_OTH_GnomAD'},
+    {title: 'SAS Allele frequency (gnomAD Exomes)', prop: 'Allele_frequency_exome_SAS_GnomAD'},
     {title: 'Variant Frequency (LOVD)', prop: 'Variant_frequency_LOVD'},
     {title: 'In Silico Prior Probability', prop: 'applicablePrior'},
     {title: 'Protein-level Estimation', prop: 'proteinPrior'},
@@ -695,7 +626,6 @@ var ResearchVariantTableSupplier = function (Component) {
             </label>);
         },
         getSourceName: function(name) {
-            // eg "Variant_in_1000_Genomes" => "1000 Genomes"
             let source = name.substring(11).replace(/_/g, " ");
             if (source.toLowerCase() === "exlovd") {
                 source = "ExUV";
@@ -705,6 +635,12 @@ var ResearchVariantTableSupplier = function (Component) {
                 source = "gnomAD 2.1 Exomes";
             } else if (source.toLowerCase() === "gnomadv3") {
                 source = "gnomAD 3.1 Genomes";
+            } else if (source.toLowerCase() === "esp") {
+                source = "ESP (deprecated)";
+            } else if (source.toLowerCase() === "exac") {
+                source = "ExAC (deprecated)";
+            } else if (source.toLowerCase() === "1000 genomes") {
+                source = "1000 Genomes (deprecated)";
             }
             return source;
         },

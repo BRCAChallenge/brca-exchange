@@ -17,7 +17,7 @@ const allSources = {
     "Variant_in_exLOVD": 1,
     "Variant_in_Findlay_BRCA1_Ring_Function_Scores": 1,
     "Variant_in_GnomAD": 1,
-    "Variant_in_GnomADv3": 1,
+    "Variant_in_GnomADv3": 1
 };
 
 const getDefaultExpertColumns = function() {

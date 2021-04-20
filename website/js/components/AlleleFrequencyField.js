@@ -186,24 +186,6 @@ const AlleleFrequencyField = React.createClass({
             isChart = true;
         } else if (fieldName === "gnomAD V2.1 Exomes, Non-Cancer (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
-        } else if (fieldName === "ExAC (Graphical)") {
-            renderedRows = field.replace(variant, field.prop);
-            if (!variant.Variant_in_ExAC) {
-                allEmpty = true;
-            }
-            isChart = true;
-        } else if (fieldName === "ExAC (Numerical)") {
-            renderedRows = this.getRowsAndDetermineIfEmpty("ExAC", field, variant);
-        } else if (fieldName === "1000 Genomes (Graphical)") {
-            renderedRows = field.replace(variant, field.prop);
-            if (!variant.Variant_in_1000_Genomes) {
-                allEmpty = true;
-            }
-            isChart = true;
-        } else if (fieldName === "1000 Genomes (Numerical)") {
-            renderedRows = this.getRowsAndDetermineIfEmpty("1000 Genomes", field, variant);
-        } else if (fieldName === "ESP (Numerical)") {
-            renderedRows = this.getRowsAndDetermineIfEmpty("ESP", field, variant);
         }
 
         if (Array.isArray(renderedRows)) {
