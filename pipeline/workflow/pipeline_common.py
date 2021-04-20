@@ -147,17 +147,16 @@ class CopyOutputToOutputDir(DefaultPipelineTask):
             return luigi.LocalTarget(
                 self.out_dir + "/" + os.path.basename(self.input()[0].path))
 
+    def _copy_output_to_output_directory(self, required_task_output_path, output_path):
+        pipeline_utils.create_path_if_nonexistent(
+            os.path.dirname(output_path))
+
+        copy(required_task_output_path, output_path)
+        pipeline_utils.check_file_for_contents(output_path)
+
     def run(self):
         if isinstance(self.output(), dict):
             for k, v in self.output().items():
-                pipeline_utils.create_path_if_nonexistent(
-                    os.path.dirname(v.path))
-
-                copy(self.req_task.output()[k].path, v.path)
-                pipeline_utils.check_file_for_contents(v.path)
+                self._copy_output_to_output_directory(self.req_task.output()[k].path, v.path)
         else:
-            pipeline_utils.create_path_if_nonexistent(
-                os.path.dirname(self.output().path))
-
-            copy(self.req_task.output().path, self.output().path)
-            pipeline_utils.check_file_for_contents(self.output().path)
+            self._copy_output_to_output_directory(self.req_task.output().path, self.output().path)

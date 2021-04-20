@@ -1,6 +1,5 @@
 import logging
 import os
-import tarfile
 import luigi
 from luigi.util import requires
 
@@ -31,14 +30,14 @@ class DownloadGnomADData(GnomADTask):
         return { "v2": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomAD_v2_hg19_10_02_2020.tsv"),
                  "v3": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomAD_v3_GRCh38_03_10_2021.tsv")}
 
-    def run(self):
-        data = pipeline_utils.urlopen_with_retry(self.gnomAD_v2_static_data_url).read()
-        with open(self.output()["v2"].path, "wb") as f:
+    def _download_file(self, url, output_path):
+        data = pipeline_utils.urlopen_with_retry(url).read()
+        with open(output_path, "wb") as f:
             f.write(data)
 
-        data = pipeline_utils.urlopen_with_retry(self.gnomAD_v3_static_data_url).read()
-        with open(self.output()["v3"].path, "wb") as f:
-            f.write(data)
+    def run(self):
+        self._download_file(self.gnomAD_v2_static_data_url, self.output()["v2"].path)
+        self._download_file(self.gnomAD_v3_static_data_url, self.output()["v3"].path)
 
 
 @requires(DownloadGnomADData)
