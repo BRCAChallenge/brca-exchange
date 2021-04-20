@@ -926,8 +926,6 @@ var VariantDetail = React.createClass({
                 if (bicClass !== 'Class 1' && bicClass !== 'Class 5') {
                     innerCols = innerCols.filter(x => x.prop !== 'Clinical_classification_BIC' && x.prop !== 'Clinical_importance_BIC');
                 }
-            } else if (groupTitle === 'Allele Counts (ExAC minus TCGA)') {
-                return false;
             }
 
             // now map the group's columns to a list of row objects

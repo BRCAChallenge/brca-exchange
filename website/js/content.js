@@ -251,18 +251,6 @@ const helpContentResearch = [
 			name: "gnomAD: Genome Aggregation Database (non-cancer cohort)",
                         contents: require("../content/help/research/allele-frequency-gnomad.md")
                     },
-                    {
-			name: "ExAC: Exome Aggregation Consortium (minus TCGA)",
-                        contents: require("../content/help/research/allele-frequency-exac.md")
-                    },
-                    {
-                        name: "1000 Genomes",
-                        contents: require("../content/help/research/allele-frequency-1000-genomes.md")
-                    },
-                    {
-                        name: "Exome Sequencing Project",
-                        contents: require("../content/help/research/allele-frequency-exome.md")
-                    },
                 ]
             },
             {

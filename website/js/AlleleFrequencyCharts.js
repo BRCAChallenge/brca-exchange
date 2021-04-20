@@ -33,38 +33,7 @@ class AlleleFrequencyCharts extends React.Component {
     render() {
         let {variant, prop} = this.props;
         let frequencyProps, title, pointFormat;
-        if (prop === 'Allele_Frequency_Charts_1000_Genomes') {
-            if (!variant['Variant_in_1000_Genomes']) { // eslint-disable-line dot-notation
-                return false;
-            }
-            frequencyProps = [
-                {label: 'AFR', prop: 'AFR_Allele_frequency_1000_Genomes'},
-                {label: 'AMR', prop: 'AMR_Allele_frequency_1000_Genomes'},
-                {label: 'EAS', prop: 'EAS_Allele_frequency_1000_Genomes'},
-                {label: 'EUR', prop: 'EUR_Allele_frequency_1000_Genomes'},
-                {label: 'SAS', prop: 'SAS_Allele_frequency_1000_Genomes'},
-            ];
-            title = '1000 Genomes';
-            pointFormat =  "{point.y}";
-        }
-        else if (prop === 'Allele_Frequency_Charts_ExAC') {
-            if (!variant['Variant_in_ExAC']) {
-                return false;
-            }
-            frequencyProps = [
-                {label: 'AFR', prop: 'Allele_frequency_AFR_ExAC'},
-                {label: 'AMR', prop: 'Allele_frequency_AMR_ExAC'},
-                {label: 'EAS', prop: 'Allele_frequency_EAS_ExAC'},
-                {label: 'FIN', prop: 'Allele_frequency_FIN_ExAC'},
-                {label: 'NFE', prop: 'Allele_frequency_NFE_ExAC'},
-                {label: 'OTH', prop: 'Allele_frequency_OTH_ExAC'},
-                {label: 'SAS', prop: 'Allele_frequency_SAS_ExAC'},
-            ];
-
-            title = 'ExAC';
-            pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
-        }
-        else if (prop === 'Allele_Frequency_Charts_Exome_GnomAD') {
+        if (prop === 'Allele_Frequency_Charts_Exome_GnomAD') {
             if (!variant['Variant_in_GnomAD']) {
                 return false;
             }
