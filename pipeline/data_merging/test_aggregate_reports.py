@@ -256,7 +256,56 @@ class TestStringMethods(unittest.TestCase):
                         "Allele_number_exome_GnomAD",
                         "Allele_count_exome_GnomAD",
                         "Allele_frequency_exome_GnomAD",
-                        "BX_ID_GnomAD"]
+                        "BX_ID_GnomAD",
+                        "HGVS_cDNA_GnomADv3",
+                        "Flags_GnomADv3",
+                        "Variant_id_GnomADv3",
+                        "faf95_popmax_genome_GnomADv3",
+                        "faf95_popmax_population_genome_GnomADv3",
+                        "Allele_count_genome_AFR_GnomADv3",
+                        "Allele_count_hom_genome_AFR_GnomADv3",
+                        "Allele_number_genome_AFR_GnomADv3",
+                        "Allele_frequency_genome_AFR_GnomADv3",
+                        "Allele_count_genome_AMR_GnomADv3",
+                        "Allele_count_hom_genome_AMR_GnomADv3",
+                        "Allele_number_genome_AMR_GnomADv3",
+                        "Allele_frequency_genome_AMR_GnomADv3",
+                        "Allele_count_genome_ASJ_GnomADv3",
+                        "Allele_count_hom_genome_ASJ_GnomADv3",
+                        "Allele_number_genome_ASJ_GnomADv3",
+                        "Allele_frequency_genome_ASJ_GnomADv3",
+                        "Allele_count_genome_EAS_GnomADv3",
+                        "Allele_count_hom_genome_EAS_GnomADv3",
+                        "Allele_number_genome_EAS_GnomADv3",
+                        "Allele_frequency_genome_EAS_GnomADv3",
+                        "Allele_count_genome_FIN_GnomADv3",
+                        "Allele_count_hom_genome_FIN_GnomADv3",
+                        "Allele_number_genome_FIN_GnomADv3",
+                        "Allele_frequency_genome_FIN_GnomADv3",
+                        "Allele_count_genome_NFE_GnomADv3",
+                        "Allele_count_hom_genome_NFE_GnomADv3",
+                        "Allele_number_genome_NFE_GnomADv3",
+                        "Allele_frequency_genome_NFE_GnomADv3",
+                        "Allele_count_genome_OTH_GnomADv3",
+                        "Allele_count_hom_genome_OTH_GnomADv3",
+                        "Allele_number_genome_OTH_GnomADv3",
+                        "Allele_frequency_genome_OTH_GnomADv3",
+                        "Allele_count_genome_SAS_GnomADv3",
+                        "Allele_count_hom_genome_SAS_GnomADv3",
+                        "Allele_number_genome_SAS_GnomADv3",
+                        "Allele_frequency_genome_SAS_GnomADv3",
+                        "Allele_count_genome_MID_GnomADv3",
+                        "Allele_count_hom_genome_MID_GnomADv3",
+                        "Allele_number_genome_MID_GnomADv3",
+                        "Allele_frequency_genome_MID_GnomADv3",
+                        "Allele_count_genome_AMI_GnomADv3",
+                        "Allele_count_hom_genome_AMI_GnomADv3",
+                        "Allele_number_genome_AMI_GnomADv3",
+                        "Allele_frequency_genome_AMI_GnomADv3",
+                        "Allele_count_genome_GnomADv3",
+                        "Allele_number_genome_GnomADv3",
+                        "Allele_frequency_genome_GnomADv3",
+                        "BX_ID_GnomADv3"]
 
         self.sources = list(aggregate_reports.FIELD_DICT.keys()) + ["ENIGMA"]
         self.vcf_test_file = VCF_TESTDATA_FILENAME
@@ -281,7 +330,7 @@ class TestStringMethods(unittest.TestCase):
 
     def test_get_reports_files(self):
         reports_files = aggregate_reports.get_reports_files(INPUT_DIRECTORY)
-        self.assertEqual(len(reports_files), 10)
+        self.assertEqual(len(reports_files), 11)
         self.assertNotIn("1000_Genomesready.vcf", reports_files)
 
     def test_aggregate_reports(self):

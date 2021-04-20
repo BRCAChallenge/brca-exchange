@@ -4,52 +4,44 @@ gnomAD provides _BRCA1_ and _BRCA2_ allele frequencies for the BRCA Exchange. Th
 As an aggregation database, gnomAD data subsumes much of ExAC and 1000 Genomes data. 
 
 #### Exomes and Genomes 
-gnomAD provides frequencies from both exome and genome sequencing projects. On the BRCA Exchange, these frequencies are presented in different subtiles. A small "E" indicates Exomes data, while a small "G" icon indicates Genomes data. If data is available on both Exomes and Genomes, a total of four subtiles will be available:
+gnomAD provides frequencies from both genome (Version 3.1) and exome (Version 2.1) sequencing projects. On the BRCA Exchange, these frequencies are presented in different subtiles. A small "E" indicates Exomes data, while a small "G" icon indicates Genomes data. If data is available on both Exomes and Genomes, a total of four subtiles will be available:
 
-* gnomAD Exomes (Graphical) 
-* gnomAD Exomes (Numerical) 
-* gnomAD Genomes (Graphical) 
-* gnomAD Genomes (Numerical) 
+* gnomAD V2.1 Exomes, Non-Cancer (Graphical)
+* gnomAD V2.1 Exomes, Non-Cancer (Numerical)
+* gnomAD V3.1 Genomes, Non-Cancer (Graphical)
+* gnomAD V3.1 Genomes, Non-Cancer (Numerical)
 
 This data is updated during the monthly release cycle, and will contain any new information provided by gnomAD. 
 
 #### gnomAD Populations
 
-The BRCA Exchange displays the primary subsets used by ExAC and gnomAD (i.e. “East  Asian”), For gnomAD, detailed population data (i.e. “Japanese,” “Korean”) is shown numerically but not graphically. Additional detailed population data, such as female and male distributions, can be found in gnomAD. 
+The BRCA Exchange displays the primary subsets used by ExAC and gnomAD (i.e. “East  Asian”). Additional detailed population data, such as female and male distributions, can be found in gnomAD. All data are from gnomAD's non-cancer subset, meaning that these allele frequencies do not include observations from any cancer studies.
 
-* ##### Allele Frequency (gnomAD non-cancer cohort)
-	* Minor allele frequency, per ExAC (excluding cancer sequencing data)
+* ##### Allele Frequency
+	* Minor allele frequency
 * ##### African/African American (AFR)
 	* Allele frequency in African/African American populations, per gnomAD
+* ##### Amish (AMI)
+	* Allele frequency in Amish populations, per gnomAD
 * ##### Latino (AMR)
 	* Allele frequency in Admixed American/Latino populations, per gnomAD
 * ##### Ashkenazi Jewish (ASJ)
 	* Allele frequency in Ahskenazi Jewish populations, per gnomAD
 * ##### East Asian (EAS)
 	* Allele frequency in East Asian populations, per gnomAD
-	* Subsets available:
-		* Japanese (EAS_JPN)
-		* Korean (EAS_KOR)
-		* Other East Asian (EAS_OEA)
 * ##### Finnish (FIN)
 	* Allele frequency in Finnish populations, per gnomAD and separated from European because of an enriched data set
+* ##### Middle Eastern (MID)
+	* Allele frequency in Middle Eastern populations, per gnomAD
 * ##### Non-Finnish European (NFE)
 	* Allele frequency in Non-Finnish European populations, per gnomAD
-	* Subsets available:
-		* Bulgarian (NFE_BGR)
-		* Estonian (NFE_EST)
-		* North-western European (NFE_NWE)
-		* Other non-Finnish European (NFE_ONF)
-		* Southern European (NFE_SEU)
-		* Swedish (NFE_SWE)
 * ##### South Asian (SAS)
 	* Allele frequency in South Asian populations, per gnomAD
 * ##### Other (OTH)
 	* Allele frequency in populations that “did not unambiguously cluster with the major populations in a principal component analysis,” per gnomAD
-	* South Asian genomes only contain 31 samples; thus for genome data, the SAS population is grouped with Other.
 
 #### Graphical gnomAD Data
-Graphical gnomAD data can be viewed by expanding the gnomAD (Graphical) subtile. Two Graphs are available; one of the graphs is custom scaled to the allele frequencies by default (right side). Hovering over each bar will give you the numerical value represented in the population subset. You can click anywhere on the gnomAD (scaled) graph to change the scale between 1.0% (.01), 0.1% (.001), and the custom, default scale. This variety of scales will allow you to view all possible Allele Frequencies graphically.
+Graphical gnomAD data can be viewed by expanding any of the gnomAD (Graphical) subtiles. Two Graphs are available; one of the graphs is custom scaled to the allele frequencies by default (right side). Hovering over each bar will give you the numerical value represented in the population subset. You can click anywhere on the gnomAD (scaled) graph to change the scale between 1.0% (.01), 0.1% (.001), and the custom, default scale. This variety of scales will allow you to view all possible Allele Frequencies graphically.
 Each group found on the x-axis of the bar chart can be found in the list of fields described in the gnomAD Populations section.
 
 #### Numerical gnomAD Data

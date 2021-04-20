@@ -25,7 +25,8 @@ def main():
                               "BIC": 0,
                               "ESP": 0,
                               "Findlay_BRCA1_Ring_Function_Scores": 0,
-                              "GnomAD": 0
+                              "GnomAD": 0,
+                              "GnomADv3": 0
                              }
 
     num_variants_by_change_type = {
