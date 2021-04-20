@@ -157,6 +157,6 @@ class CopyOutputToOutputDir(DefaultPipelineTask):
     def run(self):
         if isinstance(self.output(), dict):
             for k, v in self.output().items():
-                self._copy_output_to_output_directory(k, v)
+                self._copy_output_to_output_directory(self.req_task.output()[k].path, v.path)
         else:
             self._copy_output_to_output_directory(self.req_task.output().path, self.output().path)
