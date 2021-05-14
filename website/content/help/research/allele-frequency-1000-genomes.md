@@ -1,3 +1,5 @@
+_As of May 2021, BRCA Exchange has retired the display of 1000 Genomes data in favor of gnomAD, which has incorporated most of the 1000 Genomes content.  We still have historic 1000 Genomes data in our database, as reflected in the Variant History section of the Variant Details Page._
+
 The 1000 Genomes Project contributes allele frequency data to BRCA Exchange. The goal of the 1000 Genomes Project is “to provide a comprehensive description of common human genetic variation by applying whole-genome sequencing to a diverse set of individuals from multiple populations” \([The 1000 Genomes Project Consortium](https://www.nature.com/articles/nature15393)\).  Whereas ExAC aggregates sequence data, 1000 Genomes works on adding new, more diverse genomes to existing data sets.
 
 For more information about 1000 Genomes, please visit the [International Genome Sample Resource](http://www.internationalgenome.org/) website or their [publications](http://www.internationalgenome.org/1000-genomes-project-publications).
