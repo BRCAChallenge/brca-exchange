@@ -52,7 +52,7 @@ def victor_results_as_df(paths):
 @click.option('--output', required=True, type=click.Path(writable=True))
 def main(vcf_parts, built_tsv, output):
     df_victor = victor_results_as_df(vcf_parts)
-    df = pd.read_csv(built_tsv, sep='\t')
+    df = pd.read_csv(built_tsv, sep='\t', keep_default_na=False)
 
     df_merged = df.merge(df_victor, left_on='Genomic_Coordinate_hg38', right_on=coord_col, how='left')
 
