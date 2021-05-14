@@ -1,4 +1,4 @@
-_As of May 2021, BRCA Exchange has retired the display of ExAC data in favor gnomAD, which has the successor to ExAC. We still have historic ExAC data in our database, as reflected in the Variant History section of the Variant Details Page._
+_As of May 2021, BRCA Exchange has retired the display of ExAC data in favor of gnomAD, which has the successor to ExAC. We still have historic ExAC data in our database, as reflected in the Variant History section of the Variant Details Page._
 
 ExAC is a data source that provides _BRCA1_ and _BRCA2_ allele frequencies for the BRCA Exchange. The goal of ExAC is to “aggregate and harmonize exome sequencing data from a variety of large-scale sequencing projects, and to make summary data available for the wider scientific community” \([About ExAC](http://exac.broadinstitute.org/about)\). The ExAC data set used by BRCA Exchange excludes data from [TCGA](https://tcga-data.nci.nih.gov/docs/publications/tcga/about.html), to ensure that frequencies used to assess pathogenicity are not skewed by sampling errors. ExAC data has been updated to the gnomAD data set.
 
