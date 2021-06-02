@@ -22,12 +22,8 @@ def add_submission_ids(f_in_data_frame):
     for index, row in f_in_data_frame.iterrows():
         # submission id's are used to identify equivalent submissions
         cdna = row['cDNA']
-        submitters = row['submitters']
-        remarks = row['remarks']
-        if isinstance(row['remarks'], str):
-            remarks = row['remarks']
-        else:
-            remarks = ''
+        remarks = row['remarks'] if isinstance(row['remarks'], str) else ''
+        submitters = row['submitters'] if isinstance(row['submitters'], str) else ''
         f_in_data_frame.loc[index, 'submission_id'] = cdna + submitters + remarks
     return f_in_data_frame
 
