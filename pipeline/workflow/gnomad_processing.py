@@ -23,12 +23,12 @@ class GnomADTask(DefaultPipelineTask):
 class DownloadGnomADData(GnomADTask):
     gnomAD_v2_static_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/gnomAD_v2_hg19_10_02_2020.tsv',
                                             description='URL to download static gnomAD v2 data from')
-    gnomAD_v3_static_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/gnomAD_v3_GRCh38_03_10_2021.tsv',
+    gnomAD_v3_static_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/gnomAD_v3_1_1_GRCh38_06_07_2021.tsv',
                                             description='URL to download static gnomAD v3 data from')
 
     def output(self):
         return { "v2": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomAD_v2_hg19_10_02_2020.tsv"),
-                 "v3": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomAD_v3_GRCh38_03_10_2021.tsv")}
+                 "v3": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomAD_v3_1_1_GRCh38_06_07_2021.tsv")}
 
     def _download_file(self, url, output_path):
         data = pipeline_utils.urlopen_with_retry(url).read()
