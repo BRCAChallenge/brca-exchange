@@ -81,10 +81,11 @@ const AlleleFrequencyField = React.createClass({
 
     getPopMax: function(fieldName, variant) {
         /*eslint-disable camelcase*/
-        let popmax = parseFloat(variant.faf95_popmax_genome_GnomADv3) ? parseFloat(variant.faf95_popmax_genome_GnomADv3).toPrecision(4) : '-';
         if (fieldName.includes("Genomes, Non-Cancer (Graphical)")) {
+            let popmax = parseFloat(variant.faf95_popmax_genome_GnomADv3) ? parseFloat(variant.faf95_popmax_genome_GnomADv3).toPrecision(4) : '-';
             return popmax + ' (' + variant.faf95_popmax_population_genome_GnomADv3 + ')';
         } else {
+            let popmax = parseFloat(variant.faf95_popmax_exome_GnomAD) ? parseFloat(variant.faf95_popmax_exome_GnomAD).toPrecision(4) : '-';
             return popmax + ' (' + variant.faf95_popmax_population_exome_GnomAD + ')';
         }
         /*eslint-enable camelcase*/
@@ -145,7 +146,6 @@ const AlleleFrequencyField = React.createClass({
         let isChart = false;
         let isGnomad = false;
         let popmax = this.getPopMax(fieldName, variant);
-
 
         if (fieldName.toLowerCase().includes('gnomad')) {
             flag = variant.Flags_GnomAD;
