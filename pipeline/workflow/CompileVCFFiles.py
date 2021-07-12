@@ -505,7 +505,7 @@ class DownloadFunctionalAssaysInputFile(DefaultPipelineTask):
 @requires(DownloadFunctionalAssaysInputFile)
 class ConvertFunctionalAssaysToVCF(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.assays_dir + "/fa.hg19.vcf")
+        return luigi.LocalTarget(self.assays_dir + "/functional_assays_scores.hg19.vcf")
 
     def run(self):
         os.chdir(functional_assays_method_dir)
@@ -522,7 +522,7 @@ class ConvertFunctionalAssaysToVCF(DefaultPipelineTask):
 @requires(ConvertFunctionalAssaysToVCF)
 class CrossmapFunctionalAssays(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.assays_dir, "ENIGMA_BRCA12_functional_assays_scores.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.assays_dir, "functional_assays_scores.hg38.vcf"))
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
@@ -538,7 +538,7 @@ class CrossmapFunctionalAssays(DefaultPipelineTask):
 @requires(CrossmapFunctionalAssays)
 class SortFunctionalAssays(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.assays_dir, "ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.assays_dir, "functional_assays_scores.sorted.hg38.vcf"))
 
     def run(self):
         args = ["vcf-sort", self.input().path]
@@ -550,7 +550,7 @@ class SortFunctionalAssays(DefaultPipelineTask):
 @requires(SortFunctionalAssays)
 class CopyFunctionalAssaysOutputToOutputDir(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.cfg.output_dir, "ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.cfg.output_dir, "functional_assays_scores.sorted.hg38.vcf"))
 
     def run(self):
         copy(self.input().path, self.cfg.output_dir)
