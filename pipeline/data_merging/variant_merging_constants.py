@@ -457,6 +457,6 @@ GNOMAD_V2_FILE = "gnomADv2.sorted.hg38.vcf"
 GNOMAD_V3_FILE = "gnomADv3.sorted.hg38.vcf"
 
 # Functional Assays
-FUNCTIONAL_ASSAYS_SCORES_FILE = "functional_assays_scores.sorted.hg38.vcf"
+FUNCTIONAL_ASSAYS_SCORES_FILE = "ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf"
 
 VCFVariant = namedtuple("VCFVariant", "chr,pos,ref,alt")
