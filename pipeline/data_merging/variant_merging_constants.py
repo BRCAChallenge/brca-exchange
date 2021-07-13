@@ -437,7 +437,7 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "BIC": BIC_FIELDS,
               "GnomAD": GNOMAD_V2_FIELDS,
               "GnomADv3": GNOMAD_V3_FIELDS,
-              "Functional_Assays": ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS}
+              "ENIGMA_BRCA12_Functional_Assays": ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS}
 
 LIST_TYPE_FIELDS = {
     "SCV", # Clinvar, treating it as list, to have the same order as with SCV_Version
