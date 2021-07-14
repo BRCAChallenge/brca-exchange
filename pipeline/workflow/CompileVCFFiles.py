@@ -490,11 +490,11 @@ class CopyEnigmaOutputToOutputDir(DefaultPipelineTask):
 
 
 class DownloadFunctionalAssaysInputFile(DefaultPipelineTask):
-    findlay_BRCA1_ring_function_scores_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/ENIGMA_BRCA12_FunctionalAssays_2021-07-08_with_function_scores.tsv',
+    findlay_BRCA1_ring_function_scores_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/ENIGMA_BRCA12_FunctionalAssays_2021-07-14_with_function_scores.tsv',
                                             description='URL to download functional assay data from')
 
     def output(self):
-        return luigi.LocalTarget(self.assays_dir + "/ENIGMA_BRCA12_FunctionalAssays_2021-07-08_with_function_scores.tsv")
+        return luigi.LocalTarget(self.assays_dir + "/ENIGMA_BRCA12_FunctionalAssays_2021-07-14_with_function_scores.tsv")
 
     def run(self):
         data = pipeline_utils.urlopen_with_retry(self.findlay_BRCA1_ring_function_scores_url).read()
