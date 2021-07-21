@@ -422,7 +422,7 @@ ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS = {
               "CBDCA_fClass_Ikegami": "CBDCA_fClass_Ikegami",
               "Cell_Survival_Biwas": "HAT_(Cell_Survival)_Biwas",
               "Drug_Sensitivity_Biwas": "DS_(Drug_Sensitivity)_Biwas",
-              "HAT+DS_Score_Biwas": "HAT+DS_Score_Biwas",
+              "HAT_DS_Score_Biwas": "HAT+DS_Score_Biwas",
               "Result_Biwas": "Result_Biwas",
               "BX_ID": "BX_ID"
 }

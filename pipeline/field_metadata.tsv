@@ -332,7 +332,7 @@ Rucaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeho
 CBDCA_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
 Cell_Survival_Biwas_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
 Drug_Sensitivity_Biwas_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
-HAT+DS_Score_Biwas_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+HAT_DS_Score_Biwas_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
 Result_Biwas_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
 BX_ID_ENIGMA_BRCA12_Functional_Assays	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	6981
 Gene_Symbol	Nomenclature	#COPY	HUGO symbol for the gene containing the variant	BRCA1

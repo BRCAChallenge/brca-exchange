@@ -115,7 +115,7 @@ class TestStringMethods(unittest.TestCase):
                         "CBDCA_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays",
                         "Cell_Survival_Biwas_ENIGMA_BRCA12_Functional_Assays",
                         "Drug_Sensitivity_Biwas_ENIGMA_BRCA12_Functional_Assays",
-                        "HAT+DS_Score_Biwas_ENIGMA_BRCA12_Functional_Assays",
+                        "HAT_DS_Score_Biwas_ENIGMA_BRCA12_Functional_Assays",
                         "Result_Biwas_ENIGMA_BRCA12_Functional_Assays",
                         "BX_ID_ENIGMA_BRCA12_Functional_Assays",
                         "HGVS_cDNA_GnomAD",
