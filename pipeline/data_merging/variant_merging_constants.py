@@ -391,8 +391,6 @@ GNOMAD_V3_SUBPOPULATIONS = ["AFR", "AMR", "ASJ", "EAS", "FIN", "NFE",
                             "OTH", "SAS", "MID", "AMI"]
 
 ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS = {
-              "ID": "ID",
-              "Gene": "Gene",
               "HGVS_Nucleotide": "HGVS_Nucleotide_Variant",
               "Chromosomal_Variant": "Chromosomal_Variant",
               "Result_Findlay": "Result_Findlay",
@@ -408,8 +406,8 @@ ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS = {
               "Olaparib_Bouwman2": "Olaparib_Bouwman2",
               "DRGFP_Bouwman2": "DRGFP_Bouwman2",
               "Result_Bouwman2": "Result_Bouwman2",
-              "Class_Fernandes": "Class_Fernandes_",
-              "Result_Fernandes": "Result_Fernandes_",
+              "Class_Fernandes": "Class_Fernandes",
+              "Result_Fernandes": "Result_Fernandes",
               "Complementation_Mesman": "Complementation_Mesman",
               "HDR_Mesman": "HDR_Mesman",
               "Cisplatin_Mesman": "Cisplatin_Mesman",

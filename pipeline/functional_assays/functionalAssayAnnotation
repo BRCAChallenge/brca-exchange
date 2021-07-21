@@ -1,4 +1,35 @@
-reference_sequence	Reference sequence.
-hgvs_nucleotide	HGVS nucleotide.
-log_rna_depletion	log ratio comparing RNA abundance from the alternative allele compared to the reference allele.  From Findlay et al (PMID: 30209399), Supplemental Table 1, Column AV (mean RNA score).
-functional_enrichment_score	function score of the alternative allele, from Findlay et al (PMID: 30209399), Supplemental Table 1, Column P (function score mean).
+ID	placeholder
+Gene	placeholder
+HGVS_Nucleotide_Variant	placeholder
+Chromosomal_Variant	placeholder
+Result_Findlay	placeholder
+Function_Score_Findlay	placeholder
+RNA_Score_Findlay	placeholder
+RNA_Class_Findlay	placeholder
+Result_Starita	placeholder
+Control_Group_Petitalot	placeholder
+Result_Petitalot	placeholder
+Selection_Bouwman1	placeholder
+Result_Bouwman1	placeholder
+Cisplatin_Bouwman2	placeholder
+Olaparib_Bouwman2	placeholder
+DRGFP_Bouwman2	placeholder
+Result_Bouwman2	placeholder
+Class_Fernandes	placeholder
+Result_Fernandes	placeholder
+Complementation_Mesman	placeholder
+HDR_Mesman	placeholder
+Cisplatin_Mesman	placeholder
+Result_Mesman	placeholder
+HDR_Richardson	placeholder
+Result_Richardson	placeholder
+Discordant?_Ikegami	placeholder
+Result_Ikegami	placeholder
+Olaparib_fClass_Ikegami	placeholder
+Niraparif_fClass_Ikegami	placeholder
+Rucaparib_fClass_Ikegami	placeholder
+CBDCA_fClass_Ikegami	placeholder
+HAT_(Cell_Survival)_Biwas	placeholder
+DS_(Drug_Sensitivity)_Biwas	placeholder
+HAT+DS_Score_Biwas	placeholder
+Result_Biwas	placeholder
