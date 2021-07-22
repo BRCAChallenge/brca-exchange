@@ -178,6 +178,9 @@ class Command(BaseCommand):
         row_dict['HGVS_cDNA'] = row_dict.pop('pyhgvs_cDNA')
         row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
 
+        # truncate fieldnames that are too long for postgres (postgres allows max 63 chars for column names)
+        row_dict['Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays'] = row_dict.pop('Functional_Enrichment_Score_Findlay_ENIGMA_BRCA12_Functional_Assays')
+
         # remove deprecated fields if they're present
         row_dict.pop('Hg36_Start', None)
         row_dict.pop('Hg36_End', None)
@@ -237,6 +240,8 @@ class Command(BaseCommand):
                 source = "exLOVD"
             elif source == "Findlay BRCA1 Ring Function Scores":
                 source = "Findlay_BRCA1_Ring_Function_Scores"
+            elif source == "ENIGMA BRCA12 Functional Assays":
+                source = "ENIGMA_BRCA12_Functional_Assays"
             bx_id_field = "BX_ID_" + source
 
             if not self.is_empty(getattr(variant, bx_id_field)):
