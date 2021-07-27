@@ -88,17 +88,6 @@ def read_coverage_data_v3(path, spark):
                      'over_20', 'over_25', 'over_30', 'over_50', 'over_100')
 
 
-def extract_singleton_array_cols(df, col_names):
-    # precondition
-    for c in col_names:
-        assert df[c].apply(lambda x: len(x) == 1 if x else None).all(), f"column {c} does not contain singletons only"
-
-    for c in col_names:
-        df[c] = df[c].apply(lambda a: a[0] if a else None)
-
-    return df
-
-
 def prepare_variant_data(vcf_paths, boundaries, spark, additional_cols=tuple(constants.additional_cols)):
     spark_df = (read_raw_vcf_data(vcf_paths, spark).
                 withColumn('contigName', sf.col('contigName').astype('int'))
@@ -112,10 +101,7 @@ def prepare_variant_data(vcf_paths, boundaries, spark, additional_cols=tuple(con
     df_var = df_var.rename(columns=lambda c: c.replace('INFO_', ''))
 
     # TODO: need some more explosions
-
-    # TODO: add asserts that elements are unique
-    # df_var = df_var.explode('alternateAlleles')
-
+    # TODO: do later in pipeline?
     df_var = (extract_singleton_array_cols(df_var, ['alternateAlleles', 'popmax'] + constants.faf95_col_names).
               rename(columns={'alternateAlleles ': 'alternateAllele'}))
 
