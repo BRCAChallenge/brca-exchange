@@ -9,8 +9,8 @@ from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as sf
 
-import constants
-import variant_scoring
+import gnomad.variant_scoring.constants as constants
+import gnomad.variant_scoring.variant_scoring as variant_scoring
 from common import config as brca_config
 
 
@@ -88,10 +88,16 @@ def read_coverage_data_v3(path, spark):
                      'over_20', 'over_25', 'over_30', 'over_50', 'over_100')
 
 
-def prepare_variant_data(vcf_paths, boundaries, spark, additional_cols=tuple(constants.additional_cols)):
-    spark_df = (read_raw_vcf_data(vcf_paths, spark).
-                withColumn('contigName', sf.col('contigName').astype('int'))
-                )
+
+def _vcf_preprocessing_v3(spark_df):
+    return (spark_df.where((sf.col('contigName') != "chrX") & (sf.col('contigName') != "chrY")).
+            withColumn('contigName', sf.substring('contigName', len('chr') + 1, 2))
+    )
+
+
+def prepare_variant_data(vcf_paths, preprocessing_fnc, boundaries, spark, additional_cols=tuple(constants.additional_cols)):
+    spark_df_raw = read_raw_vcf_data(vcf_paths, spark)
+    spark_df = preprocessing_fnc(spark_df_raw).withColumn('contigName', sf.col('contigName').astype('int'))
 
     df_var = (spark_df.
               filter(boundaries_predicate_variants(boundaries)).
@@ -99,13 +105,6 @@ def prepare_variant_data(vcf_paths, boundaries, spark, additional_cols=tuple(con
               ).toPandas()
 
     df_var = df_var.rename(columns=lambda c: c.replace('INFO_', ''))
-
-    # TODO: need some more explosions
-    # TODO: do later in pipeline?
-    df_var = (extract_singleton_array_cols(df_var, ['alternateAlleles', 'popmax'] + constants.faf95_col_names).
-              rename(columns={'alternateAlleles ': 'alternateAllele'}))
-
-    df_var = variant_scoring.add_name_col(df_var)
 
     return df_var
 
@@ -121,9 +120,9 @@ def prepare_coverage_data(coverage_path, coverage_reader, boundaries, spark):
 def main():
     # input_dir output_dir spark config
     # TODO
-    input_dir = Path('/TODO')
-    output_dir = Path('/TODO')
-    brca_config_dir = Path('/TODO') / 'workflow' / 'gene_config_brca_only.txt'
+    input_dir = Path('/home/marczim/brca/variant_scoring/new_data')
+    output_dir = Path('/home/marczim/brca/variant_scoring/new_proc2')
+    brca_config_dir = Path('/home/marczim/brca/brca-exchange/pipeline/workflow/gene_config_brca_only.txt')
 
     df_var_v2_path = output_dir / 'df_var_v2.parquet'
     df_var_v3_path = output_dir / 'df_var_v3.parquet'
@@ -136,13 +135,14 @@ def main():
     boundaries37 = {c: (s, e) for _, (c, s, e) in gene_config[['chr', 'start_hg37', 'end_hg37']].iterrows()}
     boundaries38 = {c: (s, e) for _, (c, s, e) in gene_config[['chr', 'start_hg38', 'end_hg38']].iterrows()}
 
-    with get_spark_session(8, 2048, Path('/tmp')) as spark:
+    with get_spark_session(50, 2048, Path('/tmp')) as spark:
         # TODO: keep guards?
         if not df_var_v2_path.exists():
             logging.info("Processing v2 variants")
             df_var_v2 = prepare_variant_data(
                 [input_dir / 'gnomad.exomes.r2.1.1.sites.13.vcf.bgz',
                  input_dir / 'gnomad.exomes.r2.1.1.sites.17.vcf.bgz'],
+                lambda df: df,
                 boundaries37,
                 spark)
 
@@ -153,6 +153,7 @@ def main():
             df_var_v3 = prepare_variant_data(
                 [input_dir / 'gnomad.genomes.v3.1.1.sites.chr13.vcf.bgz',
                  input_dir / 'gnomad.genomes.v3.1.1.sites.chr17.vcf.bgz'],
+                _vcf_preprocessing_v3,
                 boundaries38,
                 spark)
 
