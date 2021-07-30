@@ -179,7 +179,8 @@ class Command(BaseCommand):
         row_dict['HGVS_Protein'] = row_dict.pop('pyhgvs_Protein')
 
         # truncate fieldnames that are too long for postgres (postgres allows max 63 chars for column names)
-        row_dict['Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays'] = row_dict.pop('Functional_Enrichment_Score_Findlay_ENIGMA_BRCA12_Functional_Assays')
+        if 'Functional_Enrichment_Score_Findlay_ENIGMA_BRCA12_Functional_Assays' in row_dict:
+            row_dict['Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays'] = row_dict.pop('Functional_Enrichment_Score_Findlay_ENIGMA_BRCA12_Functional_Assays')
 
         # remove deprecated fields if they're present
         row_dict.pop('Hg36_Start', None)
@@ -230,7 +231,6 @@ class Command(BaseCommand):
         previous_version_of_variant_query = Variant.objects.filter(
             Data_Release_id=self.previous_release_id, Genomic_Coordinate_hg38=variant.Genomic_Coordinate_hg38
         )
-
         for source in sources:
             if source == "Bic":
                 source = "BIC"
@@ -270,6 +270,10 @@ class Command(BaseCommand):
         report['Data_Release_id'] = release_id
         report['Variant'] = variant
         report['Change_Type_id'] = change_types[report.pop('change_type')]
+
+        # satisfy postgres 63 char column name limit
+        if 'Functional_Enrichment_Score_Findlay_ENIGMA_BRCA12_Functional_Assays' in report:
+            report['Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays'] = report.pop('Functional_Enrichment_Score_Findlay_ENIGMA_BRCA12_Functional_Assays')
 
         # Denote percentage in field name, two different fieldnames were used previously so both are handled below
         for oldName in OLD_MAF_ESP_FIELD_NAMES:

@@ -15,7 +15,7 @@ const allSources = {
     "Variant_in_BIC": 1,
     "Variant_in_ESP": 1,
     "Variant_in_exLOVD": 1,
-    "Variant_in_Findlay_BRCA1_Ring_Function_Scores": 1,
+    "Variant_in_ENIGMA_BRCA12_Functional_Assays": 1,
     "Variant_in_GnomAD": 1,
     "Variant_in_GnomADv3": 1
 };
