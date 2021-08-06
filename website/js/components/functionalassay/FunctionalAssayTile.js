@@ -21,10 +21,9 @@ export const impacts = [
 ];
 
 export default class FunctionalAssayTile extends React.Component {
-    generateHeader(author, result) {
+    generateHeader(result) {
         return (
             <div className="func-assay-extras">
-                <span className="func-assay-author" style={{paddingLeft: '10px'}}>{author}</span>
                 <span className="func-assay-result" style={{float: 'right', paddingRight: '10px'}}>Result: {result}</span>
                 <div style={{clear: 'both'}}></div>
             </div>
@@ -113,12 +112,30 @@ export default class FunctionalAssayTile extends React.Component {
                     );
                 });
 
-                const allRows = additionalRows.concat(rows);
+                const resultDescriptionRow = [{key: 'Result Descriptions', value: assay.resultDescription}].map( field => {
+                    let k = field.key;
+                    let v = field.value;
+                    const isEmptyValue = util.isEmptyField(v);
+                    if (isEmptyValue) {
+                        v = '-';
+                    }
+                    return (
+                        <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+                            <KeyInline tableKey={k} noHelpLink={false}
+                                tooltip={this.props.tooltips && this.props.tooltips["assay-" + slugify(k)]}
+                                onClick={(event) => this.props.showHelp(event, "assay-" + k)}
+                            />
+                            <td><span className="row-value">{v}</span></td>
+                        </tr>
+                    );
+                });
+
+                const allRows = additionalRows.concat(rows).concat(resultDescriptionRow);
 
                 if (assay.name === "Findlay") {
                     return ( <CollapsibleSection
-                                fieldName={assay.name}
-                                extraHeaderItems={this.generateHeader(assay.author, result)}
+                                fieldName={assay.author}
+                                extraHeaderItems={this.generateHeader(result)}
                                 twoColumnExtraHeader={true}
                                 defaultVisible={false}
                                 assay={assay}
@@ -147,8 +164,8 @@ export default class FunctionalAssayTile extends React.Component {
                             </CollapsibleSection> );
                 } else {
                     return ( <CollapsibleSection
-                                fieldName={assay.name}
-                                extraHeaderItems={this.generateHeader(assay.author, result)}
+                                fieldName={assay.author}
+                                extraHeaderItems={this.generateHeader(result)}
                                 twoColumnExtraHeader={true}
                                 defaultVisible={false}
                                 assay={assay}
@@ -175,8 +192,8 @@ export default class FunctionalAssayTile extends React.Component {
                 <div className="tile-disclaimer">
                     Assays were selected by the ENIGMA Working Groups as high quality assays that met internal standards for sensitivity and specificity.
                     <ul>
-                        <li>Assays are labelled to indicate whether they capture effect via mRNA in addition to protein (protein & mRNA) or are cDNA-based (Protein only).</li>
-                        <li>Results are as presented in the publications.</li>
+                        <li>Assays are labelled to indicate whether they are cDNA-based (Protein) or capture effect via mRNA in addition to protein (Both).</li>
+                        <li>Results are as presented in the publications. When the result indicates 'Many Provided', that means that the publication provided many sets of results but no overall result.</li>
                         <li>Additional assays may be added in future.</li>
                     </ul>
                 </div>
