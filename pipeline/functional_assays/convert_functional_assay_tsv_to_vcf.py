@@ -5,14 +5,12 @@ Description:
     Takes in a functional assay table and converts it to vcf format.
 """
 
-
-
 import argparse
 import logging
+import hgvs
 from collections import defaultdict
-
-from common import vcf_files_helper
-
+from common.seq_utils import SeqRepoWrapper
+from common import vcf_files_helper, hgvs_utils, variant_utils
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert database table to VCF format.')
@@ -67,12 +65,14 @@ def main():
     fieldIdxDict = defaultdict()
     for index, field in enumerate(headerline):
         fieldIdxDict[field] = index
+    
+    seq_fetcher37 = SeqRepoWrapper(assembly_name=SeqRepoWrapper.ASSEMBLY_NAME_hg37)
 
     # extract info from each line of the flat file
     for line in inputFile:
         line = line.replace('"', '')
         INFO_field = list()
-        parsedLine = line.strip().split('\t')
+        parsedLine = line.strip('\n').strip(' ').split('\t')
         for field in headerline:
             field_index = fieldIdxDict[field]
             field_value = parsedLine[field_index]
@@ -81,15 +81,29 @@ def main():
 
         INFO_field_string = ';'.join(INFO_field)
 
-        ref_seq = parsedLine[fieldIdxDict['reference_sequence']]
-        nuleotide = parsedLine[fieldIdxDict['hgvs_nucleotide']]
-        cdna_hgvs_str = ref_seq + ":" + nuleotide
+        hgvs_wrapper = hgvs_utils.HgvsWrapper().get_instance()
 
-        print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(parsedLine[fieldIdxDict['chr']],
-                                                          parsedLine[fieldIdxDict['pos_hg19']],
+        hp = hgvs.parser.Parser()
+
+        try:
+            parsed_var = hp.parse_hgvs_variant(parsedLine[3])
+        except hgvs.exceptions.HGVSParseError as e:
+            print(e)
+            continue
+        v = variant_utils.VCFVariant.from_hgvs_obj(parsed_var, seq_fetcher37)
+
+        if parsedLine[fieldIdxDict['Gene']] == "BRCA1":
+            ref_seq = 'NM_007294.3'
+        elif parsedLine[fieldIdxDict['Gene']] == "BRCA2":
+            ref_seq = 'NM_000059.3'
+        nucleotide = parsedLine[fieldIdxDict['HGVS_Nucleotide_Variant']]
+        cdna_hgvs_str = ref_seq + ":" + nucleotide
+
+        print('{0}\t{1}\t{2}\t{3}\t{4}\t.\t.\t{5}'.format(v.chr,
+                                                          v.pos,
                                                           cdna_hgvs_str,
-                                                          parsedLine[fieldIdxDict['ref']],
-                                                          parsedLine[fieldIdxDict['alt']],
+                                                          v.ref,
+                                                          v.alt,
                                                           INFO_field_string), file=vcfFile)
 
 

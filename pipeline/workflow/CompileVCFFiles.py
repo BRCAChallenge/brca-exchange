@@ -489,12 +489,12 @@ class CopyEnigmaOutputToOutputDir(DefaultPipelineTask):
 ###############################################
 
 
-class DownloadFindlayBRCA1RingFunctionScoresInputFile(DefaultPipelineTask):
-    findlay_BRCA1_ring_function_scores_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/findlay_BRCA1_ring_function_scores.tsv',
-                                            description='URL to download findlay_BRCA1_ring_function_scores data from')
+class DownloadFunctionalAssaysInputFile(DefaultPipelineTask):
+    findlay_BRCA1_ring_function_scores_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/ENIGMA_BRCA12_FunctionalAssays_2021-07-15_with_function_scores.tsv',
+                                            description='URL to download functional assay data from')
 
     def output(self):
-        return luigi.LocalTarget(self.assays_dir + "/findlay_BRCA1_ring_function_scores.tsv")
+        return luigi.LocalTarget(self.assays_dir + "/ENIGMA_BRCA12_FunctionalAssays_2021-07-15_with_function_scores.tsv")
 
     def run(self):
         data = pipeline_utils.urlopen_with_retry(self.findlay_BRCA1_ring_function_scores_url).read()
@@ -502,42 +502,27 @@ class DownloadFindlayBRCA1RingFunctionScoresInputFile(DefaultPipelineTask):
             f.write(data)
 
 
-@requires(DownloadFindlayBRCA1RingFunctionScoresInputFile)
-class ParseFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
+@requires(DownloadFunctionalAssaysInputFile)
+class ConvertFunctionalAssaysToVCF(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.assays_dir + "/findlay_BRCA1_ring_function_scores.clean.tsv")
+        return luigi.LocalTarget(self.assays_dir + "/ENIGMA_BRCA12_functional_assays_scores.hg19.vcf")
 
     def run(self):
         os.chdir(functional_assays_method_dir)
 
-        args = ["python", "parse_functional_assay_data.py", "-i", self.input().path, "-o",
-                self.output().path]
-
-        pipeline_utils.run_process(args)
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-@requires(ParseFindlayBRCA1RingFunctionScores)
-class ConvertFindlayBRCA1RingFunctionScoresToVCF(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(os.path.join(self.assays_dir, "findlay_BRCA1_ring_function_scores.clean.hg19.vcf"))
-
-    def run(self):
-        os.chdir(functional_assays_method_dir)
-
-        args = ["python", "functional_assays_to_vcf.py", "-v", "-i", self.input().path, "-o",
+        args = ["python", "convert_functional_assay_tsv_to_vcf.py", "-v", "-i", self.input().path, "-o",
                 self.output().path, "-a", "functionalAssayAnnotation",
-                "-l", self.artifacts_dir + "/findlay_BRCA1_ring_function_scores_error_variants.log",
-                "-s", "FindlayBRCA1RingFunctionScores"]
+                "-l", self.artifacts_dir + "/functional_assays_error_variants.log",
+                "-s", "ENIGMABRCA12FunctionalAssaysFunctionScores"]
 
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
-@requires(ConvertFindlayBRCA1RingFunctionScoresToVCF)
-class CrossmapFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
+@requires(ConvertFunctionalAssaysToVCF)
+class CrossmapFunctionalAssays(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.assays_dir, "findlay_BRCA1_ring_function_scores.clean.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.assays_dir, "ENIGMA_BRCA12_functional_assays_scores.hg38.vcf"))
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
@@ -550,10 +535,10 @@ class CrossmapFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
-@requires(CrossmapFindlayBRCA1RingFunctionScores)
-class SortFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
+@requires(CrossmapFunctionalAssays)
+class SortFunctionalAssays(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.assays_dir, "findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.assays_dir, "ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf"))
 
     def run(self):
         args = ["vcf-sort", self.input().path]
@@ -562,10 +547,10 @@ class SortFindlayBRCA1RingFunctionScores(DefaultPipelineTask):
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
-@requires(SortFindlayBRCA1RingFunctionScores)
-class CopyFindlayBRCA1RingFunctionScoresOutputToOutputDir(DefaultPipelineTask):
+@requires(SortFunctionalAssays)
+class CopyFunctionalAssaysOutputToOutputDir(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.cfg.output_dir, "findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.cfg.output_dir, "ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf"))
 
     def run(self):
         copy(self.input().path, self.cfg.output_dir)
@@ -590,7 +575,7 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
         yield CopyEXLOVDOutputToOutputDir()
         yield CopySharedLOVDOutputToOutputDir()
         yield CopyEnigmaOutputToOutputDir()
-        yield CopyFindlayBRCA1RingFunctionScoresOutputToOutputDir()
+        yield CopyFunctionalAssaysOutputToOutputDir()
 
     def output(self):
         return {'merged': luigi.LocalTarget(os.path.join(self.artifacts_dir, "merged.tsv")),

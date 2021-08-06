@@ -301,10 +301,40 @@ Allele_count_genome_GnomADv3	Allele Frequency	#COPY	Total count of observed alte
 Allele_number_genome_GnomADv3	Allele Frequency	#COPY	Total number of total chromosomes studied (for this variant) in genomes
 Allele_frequency_genome_GnomADv3	Allele Frequency	#COPY	"Overall allele frequency (for genomes) according to all studied populations, per gnomAD v3"
 BX_ID_GnomADv3	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"
-HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores	Nomenclature	#SKIP	HGVS nucleotide nomenclature for the variant in the Findlay functional assay	c.-10A>T
-Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores	Evidence	#COPY	Log ratio comparing RNA expression with and without the variant	-0.006252529515
-Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores	Evidence	#COPY	"Functional assay results for variants in critical domains of BRCA1, obtained using saturation genome editing; provided by Starita lab (see Findlay et al. 2018)"	-0.107071247
-BX_ID_Findlay_BRCA1_Ring_Function_Scores	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	152
+HGVS_Nucleotide_ENIGMA_BRCA12_Functional_Assays	Nomenclature	#SKIP	"HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA"
+Chromosomal_Variant_ENIGMA_BRCA12_Functional_Assays	#SKIP	"placeholder"
+Result_Findlay_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Functional_Enrichment_Score_Findlay_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+RNA_Score_Findlay_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+RNA_Class_Findlay_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Result_Starita_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Control_Group_Petitalot_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Result_Petitalot_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Selection_Bouwman1_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Result_Bouwman1_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Cisplatin_Bouwman2_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Olaparib_Bouwman2_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+DRGFP_Bouwman2_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Class_Fernandes_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Result_Fernandes_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+HDR_Mesman_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Cisplatin_Mesman_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Result_Mesman_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+HDR_Richardson_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Result_Richardson_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Result_Ikegami_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Olaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Niraparif_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Rucaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+CBDCA_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Cell_Survival_Biwas_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Drug_Sensitivity_Biwas_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+HAT_DS_Score_Biwas_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+Result_Biwas_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"placeholder"
+BX_ID_ENIGMA_BRCA12_Functional_Assays	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	6981
 Gene_Symbol	Nomenclature	#COPY	HUGO symbol for the gene containing the variant	BRCA1
 Genomic_Coordinate_hg38	Nomenclature	#SKIP	Genomic coordinate of the variant in the hg38 genome build	chr17:43063368:T>C
 Reference_Sequence	Nomenclature	#COPY	transcript identifier used to keep track of different transcripts submitted to databases such as RefSeq; carried over to ClinVar	NM_007294.3

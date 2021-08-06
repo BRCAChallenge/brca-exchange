@@ -312,6 +312,33 @@ i.gnomad-header-row {
     margin-right: 6px;
 }
 
+.protein-header {
+    color: white;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: #5cb85c;
+    padding: 4px 5px;
+    margin-right: 6px;
+}
+
+.both-header {
+    color: white;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: #337ab7;
+    padding: 4px 13px;
+    margin-right: 6px;
+}
+
+.rna-header {
+    color: white;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: #ff8888;
+    padding: 4px 14px;
+    margin-right: 6px;
+}
+
 .mupit-structure img {
     width: 100%;
 }
