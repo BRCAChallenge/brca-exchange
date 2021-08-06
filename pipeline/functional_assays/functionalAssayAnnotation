@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ID	Internal ID of the variant
 Gene	Name of the gene assayed
 HGVS_Nucleotide_Variant	HGVS cDNA string specifying the variant
@@ -34,40 +33,3 @@ HAT_(Cell_Survival)_Biwas	Impact of the variant on cell survival in the HAT medi
 DS_(Drug_Sensitivity)_Biwas	Impact of the variant on drug sensitivity, Biwas et al, 2020
 HAT+DS_Score_Biwas	Overall score reflecting both cell survival and drug sensitivity, Biwas et al, 2020
 Result_Biwas	Authors' interpretation of the functional impact of the variant, Biwas et al, 2020
-=======
-ID	placeholder
-Gene	placeholder
-HGVS_Nucleotide_Variant	placeholder
-Chromosomal_Variant	placeholder
-Result_Findlay	placeholder
-Function_Score_Findlay	placeholder
-RNA_Score_Findlay	placeholder
-RNA_Class_Findlay	placeholder
-Result_Starita	placeholder
-Control_Group_Petitalot	placeholder
-Result_Petitalot	placeholder
-Selection_Bouwman1	placeholder
-Result_Bouwman1	placeholder
-Cisplatin_Bouwman2	placeholder
-Olaparib_Bouwman2	placeholder
-DRGFP_Bouwman2	placeholder
-Result_Bouwman2	placeholder
-Class_Fernandes	placeholder
-Result_Fernandes	placeholder
-Complementation_Mesman	placeholder
-HDR_Mesman	placeholder
-Cisplatin_Mesman	placeholder
-Result_Mesman	placeholder
-HDR_Richardson	placeholder
-Result_Richardson	placeholder
-Discordant?_Ikegami	placeholder
-Result_Ikegami	placeholder
-Olaparib_fClass_Ikegami	placeholder
-Niraparif_fClass_Ikegami	placeholder
-Rucaparib_fClass_Ikegami	placeholder
-CBDCA_fClass_Ikegami	placeholder
-HAT_(Cell_Survival)_Biwas	placeholder
-DS_(Drug_Sensitivity)_Biwas	placeholder
-HAT+DS_Score_Biwas	placeholder
-Result_Biwas	placeholder
->>>>>>> 68015f762ae6d056b5af089c9f5ab27a718cb1ae
