@@ -68,7 +68,7 @@ const FunctionalAssayConstants = [{
     {
         name: "Ikegami",
         loc: "Protein",
-        author: "Ikegami et al",
+        author: "Ikegami et al, 2020",
         publication: "https://pubmed.ncbi.nlm.nih.gov/32444794",
         previousPublications: "",
         resultDescription: "fClass: Functional Class 1, 2, 3, 4, 5"
@@ -76,7 +76,7 @@ const FunctionalAssayConstants = [{
     {
         name: "Biwas",
         loc: "Protein",
-        author: "Biwas et al",
+        author: "Biwas et al, 2020",
         publication: "https://pubmed.ncbi.nlm.nih.gov/33293522",
         previousPublications: "",
         resultDescription: "(F): Functional, (I): Intermediate, (NF): Nonfunctional"

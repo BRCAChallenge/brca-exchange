@@ -67,6 +67,7 @@ def main():
         fieldIdxDict[field] = index
     
     seq_fetcher37 = SeqRepoWrapper(assembly_name=SeqRepoWrapper.ASSEMBLY_NAME_hg37)
+    hgvs_wrapper = hgvs_utils.HgvsWrapper().get_instance()
 
     # extract info from each line of the flat file
     for line in inputFile:
@@ -81,16 +82,13 @@ def main():
 
         INFO_field_string = ';'.join(INFO_field)
 
-        hgvs_wrapper = hgvs_utils.HgvsWrapper().get_instance()
-
-        hp = hgvs.parser.Parser()
-
         try:
-            parsed_var = hp.parse_hgvs_variant(parsedLine[3])
+            var_hgvs = hgvs_wrapper.hgvs_parser.parse(parsedLine[3])
+            var_hgvs_norm = hgvs.normalizer.Normalizer(hgvs_wrapper.hgvs_dp, shuffle_direction=5).normalize(var_hgvs)
+            v = variant_utils.VCFVariant.from_hgvs_obj(var_hgvs_norm, seq_fetcher37)
         except hgvs.exceptions.HGVSParseError as e:
             print(e)
             continue
-        v = variant_utils.VCFVariant.from_hgvs_obj(parsed_var, seq_fetcher37)
 
         if parsedLine[fieldIdxDict['Gene']] == "BRCA1":
             ref_seq = 'NM_007294.3'
