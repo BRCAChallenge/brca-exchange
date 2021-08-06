@@ -73,7 +73,7 @@ Special notes about parameters:
   - Variant_in_BIC
   - Variant_in_ESP
   - Variant_in_exLOVD
-  - Variant_in_Findlay_BRCA1_Ring_Function_Scores
+  - Variant_in_ENIGMA_BRCA12_Functional_Assays
   - Variant_in_GnomAD
   - Variant_in_GnomADv3
 - `exclude[]`: opposite of `include[]`; if the variant has a literal value of False for any of these columns, the variant is excluded from the results. Possible values are the same as for `include[].`
