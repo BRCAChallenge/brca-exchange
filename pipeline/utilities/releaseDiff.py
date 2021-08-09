@@ -351,7 +351,10 @@ class v1ToV2(transformer):
                        "BIC_Identifier": "BIC_Nomenclature",
                        "Pathogenicity_default": "Pathogenicity_expert",
                        "Pathogenicity_research": "Pathogenicity_all",
-                       "Minor_allele_frequency_ESP": "Minor_allele_frequency_percent_ESP"
+                       "Minor_allele_frequency_ESP": "Minor_allele_frequency_percent_ESP",
+                       "HGVS_Nucleotide_Findlay_BRCA1_Ring_Function_Scores": "HGVS_Nucleotide_ENIGMA_BRCA12_Functional_Assays",
+                       "Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores": "Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays",
+                       "Log_RNA_Depletion_Findlay_BRCA1_Ring_Function_Scores": "RNA_Score_Findlay_ENIGMA_BRCA12_Functional_Assays"
                        }
 
 
