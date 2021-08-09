@@ -63,8 +63,8 @@ export default class FunctionalAssayTile extends React.Component {
                     return (
                         <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={title} noHelpLink={false}
-                                tooltip={this.props.tooltips && this.props.tooltips["report-" + slugify(prop)]}
-                                onClick={(event) => this.props.showHelp(event, "report-" + prop)}
+                                tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
+                                onClick={(event) => this.props.showHelp(event, prop)}
                             />
                             <td><span className="row-value">{rowItem}</span></td>
                         </tr>
@@ -104,8 +104,8 @@ export default class FunctionalAssayTile extends React.Component {
                     return (
                         <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={k} noHelpLink={false}
-                                tooltip={this.props.tooltips && this.props.tooltips["assay-" + slugify(k)]}
-                                onClick={(event) => this.props.showHelp(event, "assay-" + k)}
+                                tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
+                                onClick={(event) => this.props.showHelp(event, k)}
                             />
                             <td><span className="row-value">{v}</span></td>
                         </tr>
@@ -122,8 +122,8 @@ export default class FunctionalAssayTile extends React.Component {
                     return (
                         <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={k} noHelpLink={false}
-                                tooltip={this.props.tooltips && this.props.tooltips["assay-" + slugify(k)]}
-                                onClick={(event) => this.props.showHelp(event, "assay-" + k)}
+                                tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
+                                onClick={(event) => this.props.showHelp(event, k)}
                             />
                             <td><span className="row-value">{v}</span></td>
                         </tr>

@@ -928,6 +928,7 @@ var VariantDetail = React.createClass({
                         relayoutGrid={this.relayoutGrid}
                         helpSection="functional-assay-results"
                         showHelp={this.showHelp}
+                        tooltips={this.state.tooltips}
                         variant={variant}
                         innerGroups={innerGroups}
                     />
