@@ -5,11 +5,23 @@ Homologous DNA repair is one of the key functions of *BRCA1* and *BRCA2*, and de
 *PARP inhibitors* are a family of pharmaceutical drugs that inhibit the cell's ability to repair single-strand DNA breaks, a circumstance which eventually leads to double-strand DNA breaks.  Cells which contain pathogenic *BRCA* variants lack the HDR activity necessary to repair these double-strand breaks, leading to cell death.  This makes cells with pathogenic *BRCA* variants sensitive to PARP inhibition.  PARP inhibitors include the drugs Olaparib, Rucaparib, Niraparib and Talazoparib.
 
 ----
+#### General Fields
+
+* #### Author ((Author))
+    Author
+* #### Publication ((Publication))
+    Publication
+* #### Previous Publications ((Previous Publications))
+    Previous Publications
+* #### Result Descriptions ((Result Descriptions))
+    Previous Publications
+
+----
 #### Findlay et al, 2018
 
 This MAVE assay (Multiplexed Assay of Variant Effects) interrogated roughly 3900 *BRCA1* variants, comprising most possible missense variants in the 13 exons that comprise the RING and BRCT domains.  The authors performed a homologous DNA Repair cell survival assay in the human haploid cell line HAP1, and also measured the impact of the variant on RNA production.
 
-* #### Functional Enrichment Score ((Functional_Enrichment_Score_Findlay_ENIGMA_BRCA12_Functional_Assays))
+* #### Functional Enrichment Score ((Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays))
     Score reflecting the impact of the variant on cell survivial
 * #### RNA Score ((RNA_Score_Findlay_ENIGMA_BRCA12_Functional_Assays))
     Score reflecting the impact of the variant on RNA production
