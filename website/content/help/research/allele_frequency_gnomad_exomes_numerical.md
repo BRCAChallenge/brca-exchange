@@ -1,4 +1,4 @@
-The following fields are available under gnomAD 2.1 Exomes, Non-Cancer (Numerical)
+The following fields are available under gnomAD 2.1 Exomes, Non-Cancer (Numerical):
 
 * #### Total Allele frequency ((Allele_frequency_exome_GnomAD))
        Overall allele frequency (for exomes) according to all studied populations, per gnomAD
