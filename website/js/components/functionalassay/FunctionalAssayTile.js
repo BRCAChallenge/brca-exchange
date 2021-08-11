@@ -178,7 +178,7 @@ export default class FunctionalAssayTile extends React.Component {
         });
 
         return (
-            <CollapsibleTile allEmpty={true} {...this.props}>
+            <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <div className="tile-disclaimer">
                     Assays were selected by the ENIGMA Working Groups as high quality assays that met internal standards for sensitivity and specificity.
                     <ul>
