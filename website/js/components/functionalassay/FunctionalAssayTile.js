@@ -36,7 +36,7 @@ export default class FunctionalAssayTile extends React.Component {
         const funcScoreFindlay = parseFloat(this.props.variant.Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays);
 
         let allEmpty = !Object.values(results).some(function(val) {
-            return val !== undefined && val !== "";
+            return !util.isEmptyField(val);
         });
 
         const impactScale = d3.scale.threshold()
@@ -54,8 +54,8 @@ export default class FunctionalAssayTile extends React.Component {
         }
 
         let sections = _.map(FunctionalAssayConstants, (assay) => {
-            let result = results[assay.name];
-            if (result !== undefined && result !== "") {
+            let result = results[assay.name] ? results[assay.name] : "-";
+            if (!util.isEmptyField(result) || !this.props.hideEmptyItems) {
                 const rows = submitters[assay.name].map(({prop, title}) => {
                     const isEmptyValue = util.isEmptyField(this.props.variant[prop]);
                     const rowItem = util.getFormattedFieldByProp(prop, this.props.variant);
