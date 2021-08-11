@@ -1,3 +1,5 @@
+The following fields are available under gnomAD 3.1 Genomes, Non-Cancer (Numerical):
+
 * #### Total Allele frequency ((Allele_frequency_genome_GnomADv3))
        Overall allele frequency (for genomes) according to all studied populations, per gnomAD 3.1
 * #### Popmax Filtering Allele Frequency (95% confidence) ((faf95_popmax_genome_GnomADv3))
