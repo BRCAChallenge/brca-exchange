@@ -43,16 +43,6 @@ export default class FunctionalAssayTile extends React.Component {
             .domain(impacts[1].range)
             .range(impacts);
 
-        if (allEmpty) {
-            return (
-                <CollapsibleTile allEmpty={true} {...this.props}>
-                    <div style={{padding: '10px'}}>
-                    No functional assay data exists for this variant.
-                    </div>
-                </CollapsibleTile>
-            );
-        }
-
         let sections = _.map(FunctionalAssayConstants, (assay) => {
             let result = results[assay.name] ? results[assay.name] : "-";
             if (!util.isEmptyField(result) || !this.props.hideEmptyItems) {
@@ -188,7 +178,7 @@ export default class FunctionalAssayTile extends React.Component {
         });
 
         return (
-            <CollapsibleTile allEmpty={false} {...this.props}>
+            <CollapsibleTile allEmpty={true} {...this.props}>
                 <div className="tile-disclaimer">
                     Assays were selected by the ENIGMA Working Groups as high quality assays that met internal standards for sensitivity and specificity.
                     <ul>
