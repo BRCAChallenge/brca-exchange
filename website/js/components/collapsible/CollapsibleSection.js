@@ -13,10 +13,18 @@ const CollapsibleSection = React.createClass({
         this.props.onFieldToggled(id);
     },
 
-    generateHeader: function(id, fieldName, extraHeaderItems, twoColumnExtraHeader) {
+    generateHeader: function(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay) {
+        if (assay) {
+            let className = `${assay.loc.toLowerCase()}-header`;
+            var assayLoc = (
+                <span className="functional-assay-header"><span className={className}>{assay.loc}</span></span>
+            );
+        }
+
         return (
             <div className={`allele-frequency-header ${this.props.expanded ? 'expanded' : ''}`} onClick={(e) => this.handleToggle(e, id)}>
                 <div className="allele-frequency-cell allele-frequency-label">
+                    {assay ? assayLoc : ''}
                     {
                         this.props.expanded
                             ? <i className="fa fa-caret-down" aria-hidden="true" />
@@ -48,13 +56,14 @@ const CollapsibleSection = React.createClass({
     },
 
     render: function() {
-        const {id, fieldName, hideEmptyItems, extraHeaderItems, twoColumnExtraHeader} = this.props;
+        const {id, fieldName, hideEmptyItems, extraHeaderItems, twoColumnExtraHeader, assay} = this.props;
+
         let allEmpty = false;
 
         return (
             <div className={ allEmpty && hideEmptyItems ? "group-empty" : "" }>
                 <div style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
-                { this.generateHeader(id, fieldName, extraHeaderItems, twoColumnExtraHeader) }
+                { this.generateHeader(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay) }
                 </div>
 
                 <Collapse className={allEmpty ? "group-empty" : ""}

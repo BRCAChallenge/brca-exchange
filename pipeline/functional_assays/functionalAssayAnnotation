@@ -1,4 +1,35 @@
-reference_sequence	Reference sequence.
-hgvs_nucleotide	HGVS nucleotide.
-log_rna_depletion	log ratio comparing RNA abundance from the alternative allele compared to the reference allele.  From Findlay et al (PMID: 30209399), Supplemental Table 1, Column AV (mean RNA score).
-functional_enrichment_score	function score of the alternative allele, from Findlay et al (PMID: 30209399), Supplemental Table 1, Column P (function score mean).
+ID	Internal ID of the variant
+Gene	Name of the gene assayed
+HGVS_Nucleotide_Variant	HGVS cDNA string specifying the variant
+Chromosomal_Variant	Genomic  HGVS string specifying the variant
+Result_Findlay	Overall authors' interpretation of the functional impact of the variant, Findlay et al, 2018
+Function_Score_Findlay	Score reflecting the impact of the variant on cell survivial, Findlay et al, 2018
+RNA_Score_Findlay	Score reflecting the impact of the variant on RNA production, Findlay et al, 2018
+RNA_Class_Findlay	Authors' assessment of the impact of the variant on RNA production, Findlay et al, 2018
+Result_Starita	Authors' interpretation on the functional impact of the variant, Starita et al, 2018
+Control_Group_Petitalot	Indicates whether the variant was part of a control group of either causal or neutral variants, Petitalot et al, 2019
+Result_Petitalot	Authors' interpretation of the functional impact of the variant, Petitalot et al, 2019
+Selection_Bouwman1	Indicates whether the variant was designated as a neutral control, deleterious control, artificial, or VUS: Bouwman et al, 2013
+Result_Bouwman1	Authors' overall interpretation of the functional impact of the variant, Bouwman et al, 2013
+Cisplatin_Bouwman2	Impact of the variant on Cisplatin drug sensitivity, Bouwman et al, 2020
+Olaparib_Bouwman2	Impact of the variant on Olaparib drug sensitivity, Bouwman et al, 2020
+DRGFP_Bouwman2	Impact of the variant in a direct-repeat GFP homologous recombination DNA repair, Bouwman et al, 2020
+Result_Bouwman2	Authors' overall interpretation of the functional impact of the variant, Bouwman et al, 2020
+Class_Fernandes	Authors' interpretation of the functional class of the variant (1-5), Fernandes et al, 2019 
+Result_Fernandes	Authors' interpretation of the overall functional impact of the variant, Fernandes et al, 2019 
+Complementation_Mesman	Indicates whether the variant was able to complement the phenotype induced by loss of endogenous BRCA2, Mesman et al, 2019
+HDR_Mesman	Impact of the variant on homolgous DNA repair, Mesman et al, 2019
+Cisplatin_Mesman	Impact of the variant to Cisplatin drug sensitivity, Mesman et al, 2019
+Result_Mesman	Authors' overall interpretation on the functional impact of the variant, Mesman et al, 2019
+HDR_Richardson	Impact of the variant on homolous DNA repair, Richardson et al, 2021
+Result_Richardson	Authors' interpretation of the functional impact of the variant, Richardson et al, 2021
+Discordant?_Ikegami	Indicates if there was discordance between the functional evidence and clinical classification, Ikegami et al
+Result_Ikegami	Authors' interpretation on the functional impact of the variant, Ikegami et al, 2020
+Olaparib_fClass_Ikegami	Impact of the variant on Olaparib drug sensitivity, Ikegami et al, 2020
+Niraparif_fClass_Ikegami	Impact of the variant on Nirapaif drug sensitivty, Ikegami et al, 2020
+Rucaparib_fClass_Ikegami	Impact of the variant on Rucaparib drug sensitivity, Ikegami et al, 2020
+CBDCA_fClass_Ikegami	Impact of the variant on carboplatin (CBDCA) drug sensitivyt, Ikegami et al, 2020
+HAT_(Cell_Survival)_Biwas	Impact of the variant on cell survival in the HAT medium, Biwas et al, 2020
+DS_(Drug_Sensitivity)_Biwas	Impact of the variant on drug sensitivity, Biwas et al, 2020
+HAT+DS_Score_Biwas	Overall score reflecting both cell survival and drug sensitivity, Biwas et al, 2020
+Result_Biwas	Authors' interpretation of the functional impact of the variant, Biwas et al, 2020

@@ -390,12 +390,42 @@ GNOMAD_V3_FIELDS = {"HGVS_cDNA": "hgvs",
 GNOMAD_V3_SUBPOPULATIONS = ["AFR", "AMR", "ASJ", "EAS", "FIN", "NFE",
                             "OTH", "SAS", "MID", "AMI"]
 
-FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS = {
-               "HGVS_Nucleotide": "hgvs_nucleotide",
-               "Log_RNA_Depletion": "log_rna_depletion",
-               "Functional_Enrichment_Score": "functional_enrichment_score",
-               "BX_ID": "BX_ID"
-               }
+ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS = {
+              "HGVS_Nucleotide": "HGVS_Nucleotide_Variant",
+              "Chromosomal_Variant": "Chromosomal_Variant",
+              "Result_Findlay": "Result_Findlay",
+              "Functional_Enrichment_Score_Findlay": "Function_Score_Findlay",
+              "RNA_Score_Findlay": "RNA_Score_Findlay",
+              "RNA_Class_Findlay": "RNA_Class_Findlay",
+              "Result_Starita": "Result_Starita",
+              "Control_Group_Petitalot": "Control_Group_Petitalot",
+              "Result_Petitalot": "Result_Petitalot",
+              "Selection_Bouwman1": "Selection_Bouwman1",
+              "Result_Bouwman1": "Result_Bouwman1",
+              "Cisplatin_Bouwman2": "Cisplatin_Bouwman2",
+              "Olaparib_Bouwman2": "Olaparib_Bouwman2",
+              "DRGFP_Bouwman2": "DRGFP_Bouwman2",
+              "Result_Bouwman2": "Result_Bouwman2",
+              "Class_Fernandes": "Class_Fernandes",
+              "Result_Fernandes": "Result_Fernandes",
+              "Complementation_Mesman": "Complementation_Mesman",
+              "HDR_Mesman": "HDR_Mesman",
+              "Cisplatin_Mesman": "Cisplatin_Mesman",
+              "Result_Mesman": "Result_Mesman",
+              "HDR_Richardson": "HDR_Richardson",
+              "Result_Richardson": "Result_Richardson",
+              "Discordant_Ikegami": "Discordant?_Ikegami",
+              "Result_Ikegami": "Result_Ikegami",
+              "Olaparib_fClass_Ikegami": "Olaparib_fClass_Ikegami",
+              "Niraparif_fClass_Ikegami": "Niraparif_fClass_Ikegami",
+              "Rucaparib_fClass_Ikegami": "Rucaparib_fClass_Ikegami",
+              "CBDCA_fClass_Ikegami": "CBDCA_fClass_Ikegami",
+              "Cell_Survival_Biwas": "HAT_(Cell_Survival)_Biwas",
+              "Drug_Sensitivity_Biwas": "DS_(Drug_Sensitivity)_Biwas",
+              "HAT_DS_Score_Biwas": "HAT+DS_Score_Biwas",
+              "Result_Biwas": "Result_Biwas",
+              "BX_ID": "BX_ID"
+}
 
 FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ClinVar": CLINVAR_FIELDS,
@@ -406,7 +436,7 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "BIC": BIC_FIELDS,
               "GnomAD": GNOMAD_V2_FIELDS,
               "GnomADv3": GNOMAD_V3_FIELDS,
-              "Findlay_BRCA1_Ring_Function_Scores": FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS}
+              "ENIGMA_BRCA12_Functional_Assays": ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS}
 
 LIST_TYPE_FIELDS = {
     "SCV", # Clinvar, treating it as list, to have the same order as with SCV_Version
@@ -426,6 +456,6 @@ GNOMAD_V2_FILE = "gnomADv2.sorted.hg38.vcf"
 GNOMAD_V3_FILE = "gnomADv3.sorted.hg38.vcf"
 
 # Functional Assays
-FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE = "findlay_BRCA1_ring_function_scores.clean.sorted.hg38.vcf"
+FUNCTIONAL_ASSAYS_SCORES_FILE = "ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf"
 
 VCFVariant = namedtuple("VCFVariant", "chr,pos,ref,alt")

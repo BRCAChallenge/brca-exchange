@@ -431,7 +431,7 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
                    "BIC": BIC_FILE,
                    "GnomAD": GNOMAD_V2_FILE,
                    "GnomADv3": GNOMAD_V3_FILE,
-                   "Findlay_BRCA1_Ring_Function_Scores": FINDLAY_BRCA1_RING_FUNCTION_SCORES_FIELDS_FILE
+                   "ENIGMA_BRCA12_Functional_Assays": FUNCTIONAL_ASSAYS_SCORES_FILE
                    }
     print("\n" + input_dir + ":")
     print("---------------------------------------------------------")

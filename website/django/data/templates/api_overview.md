@@ -73,7 +73,7 @@ Special notes about parameters:
   - Variant_in_BIC
   - Variant_in_ESP
   - Variant_in_exLOVD
-  - Variant_in_Findlay_BRCA1_Ring_Function_Scores
+  - Variant_in_ENIGMA_BRCA12_Functional_Assays
   - Variant_in_GnomAD
   - Variant_in_GnomADv3
 - `exclude[]`: opposite of `include[]`; if the variant has a literal value of False for any of these columns, the variant is excluded from the results. Possible values are the same as for `include[].`
@@ -223,7 +223,7 @@ This endpoint contains a path parameter, `variant_id`, which must be an integer 
 }
 ```
 
-The response is a list of [Report](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/models.py#L350) instances, which are nearly identical to Variant instances, except for a few extra columns indicating the source, authors, date on which the report was generated, and other relevant metadata. As of this writing, the following sources exist in the database: ClinVar, exLOVD, ExAC, ENIGMA, Findlay_BRCA1_Ring_Function_Scores, LOVD, 1000_Genomes, ESP, BIC.
+The response is a list of [Report](https://github.com/BRCAChallenge/brca-exchange/blob/master/website/django/data/models.py#L350) instances, which are nearly identical to Variant instances, except for a few extra columns indicating the source, authors, date on which the report was generated, and other relevant metadata. As of this writing, the following sources exist in the database: ClinVar, exLOVD, ExAC, ENIGMA, ENIGMA_BRCA12_Functional_Assays, LOVD, 1000_Genomes, ESP, BIC.
 
 
 <!-- -------------------------------------------------------------------- -->
