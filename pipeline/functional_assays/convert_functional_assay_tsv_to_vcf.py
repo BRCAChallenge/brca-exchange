@@ -87,7 +87,8 @@ def main():
             var_hgvs_norm = hgvs.normalizer.Normalizer(hgvs_wrapper.hgvs_dp, shuffle_direction=5).normalize(var_hgvs)
             v = variant_utils.VCFVariant.from_hgvs_obj(var_hgvs_norm, seq_fetcher37)
         except hgvs.exceptions.HGVSParseError as e:
-            print(e)
+            logging.warning(f'Request for variant {parsedLine[3]} failed')
+            logging.warning(f'Error message: {e}')
             continue
 
         if parsedLine[fieldIdxDict['Gene']] == "BRCA1":
