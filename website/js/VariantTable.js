@@ -241,8 +241,94 @@ const researchModeGroups = [
     },
 
     {groupTitle: 'Functional Assay Results', internalGroupName: 'FunctionalAssayResults',
-        hideFromColumnSelection: true,
-        innerCols: []
+        innerGroups: [
+            {
+                source: "ENIGMA BRCA12 Functional Assays",
+                data: [
+                    {title: 'HGVS Nucleotide', prop: 'HGVS_Nucleotide_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Chromosomal Variant', prop: 'Chromosomal_Variant_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Result Findlay', prop: 'Result_Findlay_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Functional Enrichment Findlay', prop: 'Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'RNA Score Findlay', prop: 'RNA_Score_Findlay_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'RNA Class Findlay', prop: 'RNA_Class_Findlay_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Result Starita', prop: 'Result_Starita_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Control Group Petitalot', prop: 'Control_Group_Petitalot_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Result Petitalot', prop: 'Result_Petitalot_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Selection Bouwman1', prop: 'Selection_Bouwman1_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Result Bouwman1', prop: 'Result_Bouwman1_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Cisplatin Bouwman2', prop: 'Cisplatin_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Olaparib Bouwman2', prop: 'Olaparib_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'DRGFP Bouwman2', prop: 'DRGFP_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Result Bouwman2', prop: 'Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Class Fernandes', prop: 'Class_Fernandes_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Result Fernandes', prop: 'Result_Fernandes_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Complementation Mesman', prop: 'Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'HDR Mesman', prop: 'HDR_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Cisplatin Mesman', prop: 'Cisplatin_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Result Mesman', prop: 'Result_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'HDR Richardson', prop: 'HDR_Richardson_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Result Richardson', prop: 'Result_Richardson_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Discordant Ikegami', prop: 'Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Result Ikegami', prop: 'Result_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Olaparib fClass Ikegami', prop: 'Olaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Niraparif fClass Ikegami', prop: 'Niraparif_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Rucaparib fClass Ikegami', prop: 'Rucaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'CBDCA fClass Ikegami', prop: 'CBDCA_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Cell Survival Biwas', prop: 'Cell_Survival_Biwas_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Drug Sensitivity Biwas', prop: 'Drug_Sensitivity_Biwas_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'HAT+DS Score Biwas', prop: 'HAT_DS_Score_Biwas_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    {title: 'Result Biwas', prop: 'Result_Biwas_ENIGMA_BRCA12_Functional_Assays', core: true}
+                ],
+                submitters: [{
+                    Biwas: [
+                        {title: 'Cell Survival', prop: 'Cell_Survival_Biwas_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Drug Sensitivity', prop: 'Drug_Sensitivity_Biwas_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'HAT + DS Score', prop: 'HAT_DS_Score_Biwas_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Result', prop: 'Result_Biwas_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    ],
+                    Bouwman1: [
+                        {title: 'Selection', prop: 'Selection_Bouwman1_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Result', prop: 'Result_Bouwman1_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    ],
+                    Bouwman2: [
+                        {title: 'Cisplatin', prop: 'Cisplatin_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Olaparib', prop: 'Olaparib_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'DRGFP', prop: 'DRGFP_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Result', prop: 'Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    ],
+                    Fernandes: [
+                        {title: 'Class', prop: 'Class_Fernandes_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Result', prop: 'Result_Fernandes_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    ],
+                    Findlay: [
+                        {title: 'Result', prop: 'Result_Findlay_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Functional Enrichment Score', prop: 'Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'RNA Score', prop: 'RNA_Score_Findlay_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'RNA Class', prop: 'RNA_Class_Findlay_ENIGMA_BRCA12_Functional_Assays', core: true}
+                    ],
+                    Ikegami: [
+                        {title: 'Discordant', prop: 'Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    ],
+                    Mesman: [
+                        {title: 'Complementation', prop: 'Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'HDR', prop: 'HDR_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Cisplatin', prop: 'Cisplatin_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Result', prop: 'Result_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    ],
+                    Petitalot: [
+                        {title: 'Control Group', prop: 'Control_Group_Petitalot_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Result', prop: 'Result_Petitalot_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    ],
+                    Richardson: [
+                        {title: 'HDR', prop: 'HDR_Richardson_ENIGMA_BRCA12_Functional_Assays', core: true},
+                        {title: 'Result', prop: 'Result_Richardson_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    ],
+                    Starita: [
+                        {title: 'Result', prop: 'Result_Starita_ENIGMA_BRCA12_Functional_Assays', core: true},
+                    ]
+                }]
+            }
+        ]
     },
 
     {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure',
@@ -437,7 +523,40 @@ const researchModeColumns = [
     {title: 'Protein-level Estimation', prop: 'proteinPrior'},
     {title: 'Donor Impact', prop: 'refDonorPrior'},
     {title: 'De Novo Donor', prop: 'deNovoDonorPrior'},
-    {title: 'Acceptor Impact', prop: 'refAccPrior'}
+    {title: 'Acceptor Impact', prop: 'refAccPrior'},
+    {title: 'HGVS Nucleotide', prop: 'HGVS_Nucleotide_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Chromosomal Variant', prop: 'Chromosomal_Variant_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result Findlay', prop: 'Result_Findlay_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Functional Enrichment Findlay', prop: 'Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'RNA Score Findlay', prop: 'RNA_Score_Findlay_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'RNA Class Findlay', prop: 'RNA_Class_Findlay_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result Starita', prop: 'Result_Starita_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Control Group Petitalot', prop: 'Control_Group_Petitalot_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result Petitalot', prop: 'Result_Petitalot_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Selection Bouwman1', prop: 'Selection_Bouwman1_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result Bouwman1', prop: 'Result_Bouwman1_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Cisplatin Bouwman2', prop: 'Cisplatin_Bouwman2_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Olaparib Bouwman2', prop: 'Olaparib_Bouwman2_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'DRGFP Bouwman2', prop: 'DRGFP_Bouwman2_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result Bouwman2', prop: 'Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Class Fernandes', prop: 'Class_Fernandes_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result Fernandes', prop: 'Result_Fernandes_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Complementation Mesman', prop: 'Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'HDR Mesman', prop: 'HDR_Mesman_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Cisplatin Mesman', prop: 'Cisplatin_Mesman_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result Mesman', prop: 'Result_Mesman_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'HDR Richardson', prop: 'HDR_Richardson_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result Richardson', prop: 'Result_Richardson_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Discordant Ikegami', prop: 'Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result Ikegami', prop: 'Result_Ikegami_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Olaparib fClass Ikegami', prop: 'Olaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Niraparif fClass Ikegami', prop: 'Niraparif_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Rucaparib fClass Ikegami', prop: 'Rucaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'CBDCA fClass Ikegami', prop: 'CBDCA_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Cell Survival Biwas', prop: 'Cell_Survival_Biwas_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Drug Sensitivity Biwas', prop: 'Drug_Sensitivity_Biwas_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'HAT+DS Score Biwas', prop: 'HAT_DS_Score_Biwas_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result Biwas', prop: 'Result_Biwas_ENIGMA_BRCA12_Functional_Assays'}
 ];
 
 
@@ -629,8 +748,8 @@ var ResearchVariantTableSupplier = function (Component) {
             let source = name.substring(11).replace(/_/g, " ");
             if (source.toLowerCase() === "exlovd") {
                 source = "ExUV";
-            } else if (source.toLowerCase() === "findlay_brca1_ring_function_scores") {
-                source = "Findlay";
+            } else if (source.toLowerCase() === "enigma_brca12_functional_assays") {
+                source = "ENIGMA BRCA12 Functional Assays";
             } else if (source.toLowerCase() === "gnomad") {
                 source = "gnomAD 2.1 Exomes";
             } else if (source.toLowerCase() === "gnomadv3") {

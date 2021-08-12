@@ -259,8 +259,8 @@ const helpContentResearch = [
                 contents: require("../content/help/research/functional-assay-disclaimer.md"),
                 list: [
                     {
-                        name: "Findlay Function Scores",
-                        contents: require("../content/help/research/findlay-function-scores.md")
+                        name: "Functional Assay Scores",
+                        contents: require("../content/help/research/functional-assays.md")
                     },
                 ]
             },

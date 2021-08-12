@@ -904,17 +904,33 @@ var VariantDetail = React.createClass({
             }
 
             if (groupTitle === "Functional Assay Results") {
+                const results = {
+                    Biwas: variant.Result_Biwas_ENIGMA_BRCA12_Functional_Assays,
+                    Bouwman1: variant.Result_Bouwman1_ENIGMA_BRCA12_Functional_Assays,
+                    Bouwman2: variant.Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays,
+                    Fernandes: variant.Result_Fernandes_ENIGMA_BRCA12_Functional_Assays,
+                    Findlay: variant.Result_Findlay_ENIGMA_BRCA12_Functional_Assays,
+                    Ikegami: variant.Result_Ikegami_ENIGMA_BRCA12_Functional_Assays,
+                    Mesman: variant.Result_Mesman_ENIGMA_BRCA12_Functional_Assays,
+                    Petitalot: variant.Result_Petitalot_ENIGMA_BRCA12_Functional_Assays,
+                    Richardson: variant.Result_Richardson_ENIGMA_BRCA12_Functional_Assays,
+                    Starita: variant.Result_Starita_ENIGMA_BRCA12_Functional_Assays
+                };
+
                 return (
                     <FunctionalAssayTile
                         key="source-reports-tile"
                         groupTitle='functional-assay-tile'
-                        score={variant.Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores}
+                        results={results}
                         displayTitle="Functional Assay Results"
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         hideEmptyItems={this.state.hideEmptyItems}
                         relayoutGrid={this.relayoutGrid}
                         helpSection="functional-assay-results"
                         showHelp={this.showHelp}
+                        tooltips={this.state.tooltips}
+                        variant={variant}
+                        innerGroups={innerGroups}
                     />
                 );
             }

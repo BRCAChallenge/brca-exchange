@@ -21,8 +21,8 @@
 ./release/artifacts/ExAC.vcf
 ./release/artifacts/exLOVDready.vcf
 ./release/artifacts/exLOVD.vcf
-./release/artifacts/Findlay_BRCA1_Ring_Function_Scoresready.vcf
-./release/artifacts/Findlay_BRCA1_Ring_Function_Scores.vcf
+./release/artifacts/ENIGMA_BRCA12_Functional_Assaysready.vcf
+./release/artifacts/ENIGMA_BRCA12_Functional_Assays.vcf
 ./release/artifacts/GnomADready.vcf
 ./release/artifacts/GnomAD.vcf
 ./release/artifacts/GnomADv3ready.vcf
@@ -36,7 +36,8 @@
 ./release/artifacts/rightESP
 ./release/artifacts/rightExAC
 ./release/artifacts/rightexLOVD
-./release/artifacts/rightFindlay_BRCA1_Ring_Function_Scores
+./release/artifacts/rightENIGMA_BRCA12_Functional_Assays
+./release/artifacts/
 ./release/artifacts/rightGnomAD
 ./release/artifacts/rightGnomADv3
 ./release/artifacts/rightLOVD
