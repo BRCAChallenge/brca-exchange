@@ -134,7 +134,7 @@ const AlleleFrequencyField = React.createClass({
                     <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={"row-value" }>{rowItem}</span></td>
                 </tr>
             );
-        });
+        }, this);
         const allEmpty = rowsEmpty >= data.length;
         return [rows, allEmpty];
     },
