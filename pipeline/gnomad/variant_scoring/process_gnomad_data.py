@@ -4,13 +4,13 @@ import operator
 import shutil
 from pathlib import Path
 
+import click
 import glow
 from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as sf
 
 import gnomad.variant_scoring.constants as constants
-import gnomad.variant_scoring.variant_scoring as variant_scoring
 from common import config as brca_config
 
 
@@ -54,7 +54,6 @@ def read_raw_vcf_data(input_paths, spark):
 
 
 def boundaries_predicate_variants(boundaries):
-    # TODO: verify boundary conditions!! (analoguous to brca pipeline)
     chrom_predicate = functools.reduce(operator.or_,
                                        (((sf.col('contigName') == chrom) & (bound[0] <= sf.col('start')) & (
                                                sf.col('end') <= bound[1])) for (chrom, bound) in boundaries.items()))
@@ -62,7 +61,6 @@ def boundaries_predicate_variants(boundaries):
     return chrom_predicate
 
 
-# TODO: unify with variants predicate?
 def boundaries_predicate_coverage(boundaries):
     return functools.reduce(operator.or_,
                             (((sf.col('chrom') == chrom) &
@@ -117,26 +115,28 @@ def prepare_coverage_data(coverage_path, coverage_reader, boundaries, spark):
     return df_cov
 
 
-def main():
-    # input_dir output_dir spark config
-    # TODO
-    input_dir = Path('/home/marczim/brca/variant_scoring/new_data')
-    output_dir = Path('/home/marczim/brca/variant_scoring/new_proc2')
-    brca_config_dir = Path('/home/marczim/brca/brca-exchange/pipeline/workflow/gene_config_brca_only.txt')
+@click.command()
+@click.argument('input_dir', type=click.Path(readable=True))
+@click.argument('output_dir', type=click.Path(writable=True))
+@click.option('--gene-config', type=click.Path(readable=True))
+@click.option('--cores', type=int)
+@click.option('--mem-per-core-mb', type=int)
+def main(input_dir, output_dir, gene_config_path, cores, mem_per_core_mb):
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir)
 
     df_var_v2_path = output_dir / 'df_var_v2.parquet'
     df_var_v3_path = output_dir / 'df_var_v3.parquet'
 
     df_cov_v2_path = output_dir / 'df_cov_v2.parquet'
     df_cov_v3_path = output_dir / 'df_cov_v3.parquet'
-    gene_config = brca_config.load_config(brca_config_dir)
 
-    # TODO: streamline!
+    gene_config = brca_config.load_config(Path(gene_config_path))
+
     boundaries37 = {c: (s, e) for _, (c, s, e) in gene_config[['chr', 'start_hg37', 'end_hg37']].iterrows()}
     boundaries38 = {c: (s, e) for _, (c, s, e) in gene_config[['chr', 'start_hg38', 'end_hg38']].iterrows()}
 
-    with get_spark_session(50, 2048, Path('/tmp')) as spark:
-        # TODO: keep guards?
+    with get_spark_session(cores, mem_per_core_mb, Path('/tmp')) as spark:
         if not df_var_v2_path.exists():
             logging.info("Processing v2 variants")
             df_var_v2 = prepare_variant_data(
