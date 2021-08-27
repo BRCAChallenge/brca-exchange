@@ -23,7 +23,7 @@ def var_name_to_obj(v):
 csep = '-'
 def add_name_col(dfx: pd.DataFrame):
     dfx['var_name'] = (dfx['contigName'].apply(str) + csep +
-                       (dfx['start'] + 1).apply(str) +  # used rs* variant identifiers at https://gnomad.broadinstitute.org/ to verify names correspond
+                       (dfx['start']).apply(str) +
                        csep + dfx['referenceAllele'] + csep + dfx['alternateAlleles'])
     return dfx
 
@@ -127,7 +127,6 @@ def process_v2(df_var2, df_cov2, read_depth_thresh, resource_dir):
 
     assert len(agg_v2) == len(vars_gnomad2_hg38) + len(failed_entries)
 
-    # TODO: move out and generalize
     failed_keys = [var_obj_to_name(v) for v in failed_entries]
     failed_indices = set(agg_v2[agg_v2['var_name'].isin(failed_keys)].index)
     all_indices = set(agg_v2.index)
@@ -152,7 +151,7 @@ def process_v3(df_var3, df_cov3, read_depth_thresh):
     return agg_v3
 
 
-def determine_evidence_code(r):
+def determine_evidence_code_per_variant(r):
     if not r['sufficient_read_depth']:
         return 'fail_insufficient_read_depth'
 
@@ -170,20 +169,48 @@ def determine_evidence_code(r):
         return 'code_missing'
 
     if r['is_snv']:
-        return 'pm2_supporting'  # TODO: correct?
+        return 'pm2_supporting'
 
     return 'need_review'
+
+
+def add_final_code_column(df):
+    def set_final_code(dfg):
+        if len(dfg) == 1:
+            return dfg['evidence_code'].iloc[0]
+        elif len(dfg) == 2:
+            # data from v2 and v3
+            c1 = dfg['evidence_code'].iloc[0]
+            c2 = dfg['evidence_code'].iloc[1]
+
+            if c1 == 'code_missing':
+                return c2
+            if c2 == 'code_missing':
+                return c1
+
+            if c1 == c2:
+                return c1
+            else:
+                return "contradictory_results"
+
+        raise ValueError("some duplicate variants per source?")
+
+    per_variant_code = df.groupby('var_name').apply(set_final_code)
+
+    return df.merge(pd.DataFrame({'final_code': per_variant_code}).reset_index(), how='left')
 
 
 def extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, resource_dir):
     agg_v2 = process_v2(df_var2, df_cov2, read_depth_thresh, resource_dir)
     agg_v3 = process_v3(df_var3, df_cov3, read_depth_thresh)
 
-    df_overall = pd.concat([agg_v2, agg_v3]).sort_values('var_name').reset_index(drop=True)
+    df_overall = pd.concat([agg_v2, agg_v3]).reset_index(drop=True)
 
-    df_overall['evidence_code'] = df_overall.apply(determine_evidence_code, axis=1)
+    df_overall['evidence_code'] = df_overall.apply(determine_evidence_code_per_variant, axis=1)
 
-    return df_overall
+    df_overall = add_final_code_column(df_overall)
+
+    return df_overall.sort_values('var_name')
 
 
 @click.command()
@@ -194,13 +221,13 @@ def main(data_dir, output_path, resource_dir):
     data_dir = Path(data_dir)
     df_cov2 = pd.read_parquet(data_dir / 'df_cov_v2.parquet')
     df_cov3 = pd.read_parquet(data_dir / 'df_cov_v3.parquet')
+
     df_var2 = pd.read_parquet(data_dir / 'df_var_v2.parquet')
     df_var3 = pd.read_parquet(data_dir / 'df_var_v3.parquet')
 
-    read_depth_thresh = 30 # TODO parametrize
+    read_depth_thresh = 30
 
     df = extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, Path(resource_dir))
-
 
     df.to_parquet(output_path)
 
