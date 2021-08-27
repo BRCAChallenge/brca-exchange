@@ -100,7 +100,9 @@ def prepare_variant_data(vcf_paths, preprocessing_fnc, boundaries, spark, additi
 
     df_var = (spark_df.
               filter(boundaries_predicate_variants(boundaries)).
-              select(constants.vcf_mandatory_cols + list(additional_cols))
+              select(constants.vcf_mandatory_cols + list(additional_cols)).
+              withColumn('start', sf.col('start') + 1). # glow uses 0-based coordinates https://glow.readthedocs.io/en/latest/etl/variant-data.html#vcf
+              withColumn('end', sf.col('end') + 1) 
               ).toPandas()
 
     df_var = df_var.rename(columns=lambda c: c.replace('INFO_', ''))
@@ -126,6 +128,8 @@ def main(input_dir, output_dir, gene_config_path, cores, mem_per_core_mb):
     input_dir = Path(input_dir)
     output_dir = Path(output_dir)
 
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
     df_var_v2_path = output_dir / 'df_var_v2.parquet'
     df_var_v3_path = output_dir / 'df_var_v3.parquet'
 
