@@ -106,9 +106,8 @@ def convert_to_hg38(vars: Iterable[VCFVariant], chain_file, ref_file, resource_d
         f.write('\n'.join(lst))
 
     vcf_tmp_out = tempfile.mktemp('.vcf')
-    print(vcf_tmp_out)
-    # TODO: remove
-    args = ["/Users/marc/software/anaconda/envs/brca-py3/bin/CrossMap.py", "vcf",
+    
+    args = ["CrossMap.py", "vcf",
             chain_file,
             vcf_tmp,
             ref_file,

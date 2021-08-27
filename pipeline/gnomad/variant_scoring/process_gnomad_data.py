@@ -22,9 +22,10 @@ def get_spark_session(cores, mb_per_core, spark_tmp_dir):
     spark_cfg = (SparkConf().set("spark.driver.memory", "{}m".format(driver_mem)).
                  set("spark.executor.memory", "{}m".format(mb_per_core)).
                  set("spark.master", "local[{}]".format(cores)).
-                 set("spark.sql.execution.arrow.enabled", str(True)).
+                 set("spark.sql.execution.arrow.pyspark.enabled", str(True)).
                  set("spark.jars.packages", 'io.projectglow:glow-spark3_2.12:1.0.1').
                  set("spark.hadoop.io.compression.codecs", "io.projectglow.sql.util.BGZFCodec").
+                 set("spark.jars.ivy", "/tmp/.ivy2").
                  set("spark.local.dir", str(spark_tmp_dir))
                  )
 
@@ -118,7 +119,7 @@ def prepare_coverage_data(coverage_path, coverage_reader, boundaries, spark):
 @click.command()
 @click.argument('input_dir', type=click.Path(readable=True))
 @click.argument('output_dir', type=click.Path(writable=True))
-@click.option('--gene-config', type=click.Path(readable=True))
+@click.option('--gene-config-path', type=click.Path(readable=True))
 @click.option('--cores', type=int)
 @click.option('--mem-per-core-mb', type=int)
 def main(input_dir, output_dir, gene_config_path, cores, mem_per_core_mb):
