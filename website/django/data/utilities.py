@@ -165,6 +165,23 @@ def update_mupit_structure_for_existing_variants():
             time.sleep(0.1)
 
 
+def update_findlay_functional_assays():
+    variants_to_update = Variant.objects.exclude(
+                            Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores=''
+                         ).exclude(
+                            Functional_Enrichment_Score_Findlay_BRCA1_Ring_Function_Scores='-'
+                         )
+    for v in variants_to_update:
+        gc = v.Genomic_Coordinate_hg38
+        cv = CurrentVariant.objects.get(Genomic_Coordinate_hg38=gc)
+        v.HGVS_Nucleotide_ENIGMA_BRCA12_Functional_Assays = cv.HGVS_Nucleotide_ENIGMA_BRCA12_Functional_Assays
+        v.Result_Findlay_ENIGMA_BRCA12_Functional_Assays = cv.Result_Findlay_ENIGMA_BRCA12_Functional_Assays
+        v.Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays = cv.Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays
+        v.RNA_Score_Findlay_ENIGMA_BRCA12_Functional_Assays = cv.RNA_Score_Findlay_ENIGMA_BRCA12_Functional_Assays
+        v.RNA_Class_Findlay_ENIGMA_BRCA12_Functional_Assays = cv.RNA_Class_Findlay_ENIGMA_BRCA12_Functional_Assays
+        v.save()
+
+
 class Benchmark(object):
     def __init__(self,name):
         self.name = name
