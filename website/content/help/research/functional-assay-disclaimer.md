@@ -4,10 +4,10 @@ The assays in the Functional Assay Results tile were selected by the ENIGMA work
 For each publication selected, we present the following information in the header of the sub-tile, as key information to be communicated whether or not the tile is collapsed:
 
 * The authors' name and the publication year
-* The **Result** field, indicating the authors' overall interpretation of the functional impact of the variant, given all experiments performed, and as published by the authors.  If the Result is ''Many Provided'', the authors have provided many different sets of results, but no overall interpretation
+* The **Report** field, indicating the authors' report or overall interpretation of the functional impact of the variant, given all experiments performed, and as published by the authors.  If the Report is ''Many Provided'', the authors have provided many different sets of results, but no overall interpretation
 
 In the body of the tile, we present those fields and others:
-* The **Result Descriptions** field, which summarizes the possible values for the Result field
+* The **Report Descriptions** field, which summarizes the possible values for the Report field
 * The authors' previous publications, if any
 * The results of each individual assay published in the paper
 * A link to the publication
