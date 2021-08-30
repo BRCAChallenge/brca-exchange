@@ -24,7 +24,7 @@ export default class FunctionalAssayTile extends React.Component {
     generateHeader(result) {
         return (
             <div className="func-assay-extras">
-                <span className="func-assay-result" style={{float: 'right', paddingRight: '10px'}}>Result: {result}</span>
+                <span className="func-assay-result" style={{float: 'right', paddingRight: '10px'}}>Report: {result}</span>
                 <div style={{clear: 'both'}}></div>
             </div>
         );
@@ -102,7 +102,7 @@ export default class FunctionalAssayTile extends React.Component {
                     );
                 });
 
-                const resultDescriptionRow = [{key: 'Result Descriptions', value: assay.resultDescription}].map( field => {
+                const resultDescriptionRow = [{key: 'Report Descriptions', value: assay.resultDescription}].map( field => {
                     let k = field.key;
                     let v = field.value;
                     const isEmptyValue = util.isEmptyField(v);
@@ -183,7 +183,7 @@ export default class FunctionalAssayTile extends React.Component {
                     Assays were selected by the ENIGMA Working Groups as high quality assays that met internal standards for sensitivity and specificity.
                     <ul>
                         <li>Assays are labelled to indicate whether they are cDNA-based (Protein) or capture effect via mRNA in addition to protein (Both).</li>
-                        <li>Results are as presented in the publications. When the result indicates 'Many Provided', that means that the publication provided many sets of results but no overall result.</li>
+                        <li>Reports are as presented in the publications. When the report indicates 'Many Provided', that means that the publication provided many sets of reports but no overall report.</li>
                         <li>Additional assays may be added in future.</li>
                     </ul>
                 </div>
