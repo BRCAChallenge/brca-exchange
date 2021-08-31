@@ -1,10 +1,14 @@
-Many BRCA functional assays interrogate the impact of the variant on *homologous DNA repair (HDR)* or on drug sensitivity.
+Functional assays are laboratory experiments that interrogate the impact of the variant on some aspect of BRCA protein function or abundance.
 
-Homologous DNA repair is one of the key functions of *BRCA1* and *BRCA2*, and describes the cell's ability to repair double-strand DNA breaks under certain circumstances.  Many HDR assays are *cell survival* assays; HDR is essential to the life of the cell, so when the cell is subjected to mutational processes to incur DNA damage, cell life or death is one indication of HDR activity.
+One of the most important functions of the BRCA1 and BRCA2 proteins is *Homologous DNA Repair (HDR)*, and HDR is the focus of many BRCA functional assays.  HDR is a molecular DNA repair process that enables the cell  to repair double-strand DNA breaks under certain circumstances.   Loss of HDR activity leads to an accumulation of DNA damage, which in turn can lead to cancer in humans and early cell death in the laboratory.  
 
-*PARP inhibitors* are a family of pharmaceutical drugs that inhibit the cell's ability to repair single-strand DNA breaks, a circumstance which eventually leads to double-strand DNA breaks.  Cells which contain pathogenic *BRCA* variants lack the HDR activity necessary to repair these double-strand breaks, leading to cell death.  This makes cells with pathogenic *BRCA* variants sensitive to PARP inhibition.  PARP inhibitors include the drugs Olaparib, Rucaparib, Niraparib and Talazoparib.
+*Cell survival* assays measure HDR activity by subjecting tissue with a given genetic variant to mutational processes to incur DNA damage, and measuring the rate of survival of the cells in that tissue, with a greater rate of cell death suggesting a harmful variant with greater impact.
 
-For each functional assay publication, we present a set of general fields that are common to all variants in the publication (Author, Publication, Previous Publications, and Result Descriptions) as well as a set of fields that detail the results for each variant (this includes the Results field with the authors' overall interpretation, and additiional fields with specific results depending on the publication). We detail these fields below.  For conciseness, we list the general fields just once.
+*Drug sensitivity* assays measure HDR activity by exposing the cell to PARP inhibitors are a family of pharmaceutical drugs that inhibit the cell’s ability to repair single-strand DNA breaks.  These single-stranded DNA breaks lead to double-stranded DNA breaks, which lead to early cell death if not repaired.  For these reasons, the presence of harmful BRCA variants makes tissue sensitive to PARP inhibition, leading to early cell death.  PARP inhibitors include the drugs Olaparib, Rucaparib, Niraparib and Talazoparib.
+
+The cellular processes that impact BRCA protein abundance often impact *RNA production*, or the abundance of BRCA mRNA.  Harmful variants can reduce the abundance of BRCA mRNA by impacting cellular processes including transcription, mRNA splicing and others.  When a variant impacts the abundance of BRCA RNA, that will impact the abundance of BRCA protein, and reduce the overall BRCA functional activity.  
+
+For each functional assay publication, we present a set of general fields that are common to all variants in the publication (**Author**, **Publication**, **Previous Publications**, and **Report Descriptions**) as well as a set of fields that detail the reported experimental results on each each variant (this includes the **Reports** field with the authors’ report on overall functional impact, and additional fields reporting on specific experiments depending on the publication). We detail these fields below. For conciseness, we list the general fields just once.
 
 ----
 #### General Fields
@@ -16,34 +20,34 @@ These fields are included for each functional assay publication, and are constan
 * #### Publication ((Publication))
     PubMed ID and hyperlink to the publication in PubMed
 * #### Previous Publications ((Previous Publications))
-    This field lists any previous publications by the same authors.  In general, these previous publications may provide foundational results that the current publication built on, with the current publication superseding earlier publications.
+    This field lists any previous publications by the same authors. In general, these previous publications may provide foundational results that the current publication built on, with the current publication superseding earlier publications.
 * #### Report Descriptions ((Report Descriptions))
-    This field describes the content of the authors' report of the variant by presenting the set of values used by the author.  In several cases, this includes a brief description of each value. 
+    This field describes the content of the Report field by presenting the set of possible values.
 
 ----
 #### Findlay et al, 2018
 
-This MAVE assay (Multiplexed Assay of Variant Effects) interrogated roughly 3900 *BRCA1* variants, comprising most possible missense variants in the 13 exons that comprise the RING and BRCT domains.  The authors performed a homologous DNA Repair cell survival assay in the human haploid cell line HAP1, and also measured the impact of the variant on RNA production.
+This MAVE assay (Multiplexed Assay of Variant Effects) interrogated roughly 3900 *BRCA1* variants, comprising most possible missense variants in the 13 exons that comprise the RING and BRCT protein domains. The authors measured the impact of the variants on cell survival and RNA production.
 
 * #### Functional Enrichment Score ((Functional_Enrichment_Findlay_ENIGMA_BRCA12_Functional_Assays))
-    Score reflecting the impact of the variant on cell survivial
+    Numerical score reflecting the impact of the variant on cell survivial
 * #### RNA Score ((RNA_Score_Findlay_ENIGMA_BRCA12_Functional_Assays))
-    Score reflecting the impact of the variant on RNA production
+    Numerical score reflecting the impact of the variant on RNA production
 * #### RNA Class ((RNA_Class_Findlay_ENIGMA_BRCA12_Functional_Assays))
-    Authors' assessment of the impact of the variant on RNA production
+    Authors' qualitative assessment of the impact of the variant on RNA production
 * #### Report ((Result_Findlay_ENIGMA_BRCA12_Functional_Assays))
-    Authors' report on the functional impact of the variant, based largely on the functional enrichment score.
+    Authors’ reported interpretation of the functional impact of the variant.
 ----
 #### Starita et al, 2018
 
-In this publication, the authors performed a multiplex reporter assay to assess the impact of 1056 *BRCA1* variants on homologous DNA repair, using a human cell line. 
+In this publication, the authors performed a multiplex reporter assay to assess the impact of 1056 *BRCA1* variants on homologous DNA repair.
 
 * #### Report ((Result_Starita_ENIGMA_BRCA12_Functional_Assays))
     Authors' report on the functional impact of the variant given the results of the reporter assay
 ----
 #### Petitalot et al, 2019
 
-In this paper, the authors assessed the impact of 78 *BRCA1* variants on homology-detected DNA repair, cellular localization, protein stability and peptide binding, using a human cell line.
+In this paper, the authors assessed the impact of 78 *BRCA1* variants on homology-detected DNA repair, cellular localization, protein stability and peptide binding.
 
 * #### Control Group ((Control_Group_Petitalot_ENIGMA_BRCA12_Functional_Assays))
     Indicates whether the variant was part of a control group of either causal or neutral variants
@@ -52,12 +56,13 @@ In this paper, the authors assessed the impact of 78 *BRCA1* variants on homolog
 ----
 #### Bouwman et al, 2013
 
-In this publication, the authors tested the imapct of 86 *BRCA1* variants on cell proliferation and drug sensitivy, in mouse embryonic stem cells.
+In this publication, the authors tested the impact of 86 *BRCA1* variants on cell proliferation and drug sensitivity.
+
 
 * #### Selection ((Selection_Bouwman1_ENIGMA_BRCA12_Functional_Assays))
     Indicates whether the variant was designated as a neutral control, deleterious control, artificial, or VUS
 * #### Report ((Result_Bouwman1_ENIGMA_BRCA12_Functional_Assays))
-    Authors' report on the functional impact of the variant, taking into consideration both the cell proliferation and drug sensitivity experiments.
+    Authors’ overall interpretation of the functional impact of the variant, taking into consideration both the cell proliferation and drug sensitivity experiments.
 ----
 #### Bouwman et al, 2020
 
@@ -84,10 +89,10 @@ The authors of this paper assessed 99 *BRCA1* variants on their impact on transc
 
 #### Mesman et al, 2019
 
-The authors evaluated 79 *BRCA2* variants on their impact on homologous HDA repair and drug sensitivy in mouse embryonic stem cells
+The authors evaluated 79 *BRCA2* variants on their impact on homologous DNA repair and drug sensitivity.
 
 * #### Complementation ((Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays))
-    Indicates whether the variant was able to complement the phenotype induced by loss of endogenous BRCA2
+    Indicates whether the variant was able to complement the phenotype induced by loss of endogenous *BRCA2*
 * #### HDR ((HDR_Mesman_ENIGMA_BRCA12_Functional_Assays))
     Impact of the variant on homolgous DNA repair
 * #### Cisplatin ((Cisplatin_Mesman_ENIGMA_BRCA12_Functional_Assays))
@@ -108,10 +113,10 @@ In this publication, the authors evaluated the impact of 252 variants in the *BR
 
 #### Ikegami et al, 2020
 
-In this publication, the authors evaluated the impact of 239 *BRCA2* variants on homology-directed DNA repair and drug sensitity, in a human cell line.
+In this publication, the authors evaluated the impact of 239 *BRCA2* variants on homology-directed DNA repair and drug sensitivity.
 
 * #### Discordant ((Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays))
-    Indicates if there was discordance between the functional evidence and clinical classification
+    Indicates if the functional evidence on the variant was discordant with its clinical classification
 * #### Olaparib ((Olaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays))
     Impact of the variant on Olaparib drug sensitivity
 * #### Niraparif ((Niraparif_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays))
@@ -125,7 +130,7 @@ In this publication, the authors evaluated the impact of 239 *BRCA2* variants on
 ----
 #### Biwas et al, 2020
 
-In this paper, the authors characterized the impact of 88 *BRCA2* variants on cell survival and drug sensitivty, in mouse embryonic stem cells
+In this paper, the authors characterized the impact of 88 *BRCA2* variants on cell survival and drug sensitivity.
 
 * #### Cell Survival ((Cell_Survival_Biwas_ENIGMA_BRCA12_Functional_Assays))
     Impact of the variant on cell survival in the HAT medium
@@ -135,4 +140,3 @@ In this paper, the authors characterized the impact of 88 *BRCA2* variants on ce
     Numeric score reflecting both cell survival and drug sensitivity analyzed together
 * #### Report ((Result_Biwas_ENIGMA_BRCA12_Functional_Assays))
     Authors' qualitative interpretation of the functional impact of the variant, given the numeric score
-
