@@ -182,8 +182,8 @@ export default class FunctionalAssayTile extends React.Component {
                 <div className="tile-disclaimer">
                     Assays were selected by the ENIGMA Working Groups as high quality assays that met internal standards for sensitivity and specificity.
                     <ul>
-                        <li>Harmful genetic variation can impact RNA production and/or protein function or abundance.  Assays labeled with a <b>P</b> measure the impact of genetic variation at the protein level. Assays labeled with a <b>R/P</b> measure impact at both the RNA and protein level.</li>
-                        <li><i>Reports</i>, or the authors’ interpretation of the functional impact of each variant, are as presented as they appear in the publications.  A report of ‘Many Provided’  means that the authors performed many experiments but provided no overall report of functional impact.</li>
+                        <li>Harmful genetic variation can impact RNA production and/or protein function or abundance. Assays labeled with a <b>P</b> measure the impact of genetic variation at the protein level. Assays labeled with a <b>R/P</b> measure impact at both the RNA and protein level.</li>
+                        <li><i>Reports</i>, or the authors’ interpretation of the functional impact of each variant, are presented as they appear in the publications. A report of ‘Many Provided’ means that the authors performed many experiments but provided no overall report of functional impact.</li>
                         <li>Additional assays may be added in the future.</li>
                     </ul>
                 </div>
