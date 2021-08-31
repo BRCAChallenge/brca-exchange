@@ -8,7 +8,8 @@ For each publication selected, we present the following information in the heade
 
 In the body of the tile, we present those fields and others:
 * The **Report Descriptions** field, which summarizes the possible values for the Report field
-* The authors' previous publications, if any
+* The **Publication** field, which provides a link to the publication
+* The **Previous Publications** field, which lists the authors' previous publications, if any
 * The results of each individual assay published in the paper
 * A link to the publication
 
