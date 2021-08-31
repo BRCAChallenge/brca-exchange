@@ -14,10 +14,18 @@ const CollapsibleSection = React.createClass({
     },
 
     generateHeader: function(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay) {
+        let loc;
         if (assay) {
             let className = `${assay.loc.toLowerCase()}-header`;
+            if (assay.loc === "Protein") {
+                loc = "P";
+            } else if (assay.loc === "Both") {
+                loc = "R/P";
+            } else if (assay.loc === "RNA") {
+                loc = "R";
+            }
             var assayLoc = (
-                <span className="functional-assay-header"><span className={className}>{assay.loc}</span></span>
+                <span className="functional-assay-header"><span className={className}>{loc}</span></span>
             );
         }
 
