@@ -317,7 +317,7 @@ i.gnomad-header-row {
     border: 1px solid black;
     border-radius: 4px;
     background: #5cb85c;
-    padding: 4px 5px;
+    padding: 4px 13px;
     margin-right: 6px;
 }
 
@@ -326,7 +326,7 @@ i.gnomad-header-row {
     border: 1px solid black;
     border-radius: 4px;
     background: #337ab7;
-    padding: 4px 13px;
+    padding: 4px 5px;
     margin-right: 6px;
 }
 
@@ -335,7 +335,7 @@ i.gnomad-header-row {
     border: 1px solid black;
     border-radius: 4px;
     background: #ff8888;
-    padding: 4px 14px;
+    padding: 4px 13px;
     margin-right: 6px;
 }
 

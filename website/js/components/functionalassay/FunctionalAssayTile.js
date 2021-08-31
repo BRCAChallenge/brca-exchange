@@ -182,16 +182,16 @@ export default class FunctionalAssayTile extends React.Component {
                 <div className="tile-disclaimer">
                     Assays were selected by the ENIGMA Working Groups as high quality assays that met internal standards for sensitivity and specificity.
                     <ul>
-                        <li>Assays are labelled to indicate whether they are cDNA-based (Protein) or capture effect via mRNA in addition to protein (Both).</li>
-                        <li>Reports are as presented in the publications. When the report indicates 'Many Provided', that means that the publication provided many sets of reports but no overall report.</li>
-                        <li>Additional assays may be added in future.</li>
+                        <li>Harmful genetic variation can impact RNA production and/or protein function or abundance. Assays labeled with a <b>P</b> measure the impact of genetic variation at the protein level. Assays labeled with a <b>R/P</b> measure impact at both the RNA and protein level.</li>
+                        <li><i>Reports</i>, or the authors’ interpretation of the functional impact of each variant, are presented as they appear in the publications. A report of ‘Many Provided’ means that the authors performed many experiments but provided no overall report of functional impact.</li>
+                        <li>Additional assays may be added in the future.</li>
                     </ul>
                 </div>
                 <Table style={{paddingBottom: 0, marginBottom: 0}}>
                     <tbody>
                         <tr>
                             <td style={{verticalAlign: 'middle', width: '25%', fontWeight: 'bold', textAlign: 'center'}}>Disclaimer</td>
-                            <td style={{verticalAlign: 'middle'}}>Results reflect laboratory models of genetic variation and disease and should not be used as a proxy for clinical variant interpretations.</td>
+                            <td style={{verticalAlign: 'middle'}}>Functional assay results reflect laboratory models of genetic variation and disease and should not be used as a proxy for clinical variant interpretations.</td>
                         </tr>
                     </tbody>
                 </Table>
