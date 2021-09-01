@@ -448,6 +448,10 @@ def apply_search(query, search_term, quotes='', release=None):
     search_term = remove_disallowed_chars(search_term)
     clinvar_accession = False
 
+    # Accept search by ClinGen Allele Registry id (CA_ID)
+    if search_term.startswith('ca'):
+        return query.filter(Q(CA_ID__icontains=search_term)), 0
+
     # Accept search by ga4gh VR id
     if search_term.startswith('ga4gh'):
         return query.filter(Q(VR_ID__icontains=search_term)), 0
