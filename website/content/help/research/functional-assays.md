@@ -81,8 +81,6 @@ In this work, the authors tested the impact of 238 *BRCA1* variants on homologou
 
 The authors of this paper assessed 99 *BRCA1* variants on their impact on transcriptional activation in a yeast reporter system.
 
-* #### Class ((Class_Fernandes_ENIGMA_BRCA12_Functional_Assays))
-    Authors' interpretation of the functional class of the variant (1-5)
 * #### Report ((Result_Fernandes_ENIGMA_BRCA12_Functional_Assays))
     Authors' report on the overall functional impact of the variant given the results of the yeast reporter system.
 ----

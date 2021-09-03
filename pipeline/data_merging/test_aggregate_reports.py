@@ -99,7 +99,6 @@ class TestStringMethods(unittest.TestCase):
                         "Olaparib_Bouwman2_ENIGMA_BRCA12_Functional_Assays",
                         "DRGFP_Bouwman2_ENIGMA_BRCA12_Functional_Assays",
                         "Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays",
-                        "Class_Fernandes_ENIGMA_BRCA12_Functional_Assays",
                         "Result_Fernandes_ENIGMA_BRCA12_Functional_Assays",
                         "Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays",
                         "HDR_Mesman_ENIGMA_BRCA12_Functional_Assays",

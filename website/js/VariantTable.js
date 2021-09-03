@@ -536,7 +536,6 @@ const researchModeColumns = [
     {title: 'Olaparib Bouwman2', prop: 'Olaparib_Bouwman2_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'DRGFP Bouwman2', prop: 'DRGFP_Bouwman2_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Report Bouwman2', prop: 'Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays'},
-    {title: 'Class Fernandes', prop: 'Class_Fernandes_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Report Fernandes', prop: 'Result_Fernandes_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Complementation Mesman', prop: 'Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'HDR Mesman', prop: 'HDR_Mesman_ENIGMA_BRCA12_Functional_Assays'},
