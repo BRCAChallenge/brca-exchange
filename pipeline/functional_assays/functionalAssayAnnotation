@@ -15,7 +15,6 @@ Cisplatin_Bouwman2	Impact of the variant on Cisplatin drug sensitivity, Bouwman 
 Olaparib_Bouwman2	Impact of the variant on Olaparib drug sensitivity, Bouwman et al, 2020
 DRGFP_Bouwman2	Impact of the variant in a direct-repeat GFP homologous recombination DNA repair, Bouwman et al, 2020
 Result_Bouwman2	Authors' overall interpretation of the functional impact of the variant, Bouwman et al, 2020
-Class_Fernandes	Authors' interpretation of the functional class of the variant (1-5), Fernandes et al, 2019 
 Result_Fernandes	Authors' interpretation of the overall functional impact of the variant, Fernandes et al, 2019 
 Complementation_Mesman	Indicates whether the variant was able to complement the phenotype induced by loss of endogenous BRCA2, Mesman et al, 2019
 HDR_Mesman	Impact of the variant on homolgous DNA repair, Mesman et al, 2019
@@ -23,7 +22,6 @@ Cisplatin_Mesman	Impact of the variant to Cisplatin drug sensitivity, Mesman et 
 Result_Mesman	Authors' overall interpretation on the functional impact of the variant, Mesman et al, 2019
 HDR_Richardson	Impact of the variant on homolous DNA repair, Richardson et al, 2021
 Result_Richardson	Authors' interpretation of the functional impact of the variant, Richardson et al, 2021
-Discordant?_Ikegami	Indicates if there was discordance between the functional evidence and clinical classification, Ikegami et al
 Result_Ikegami	Authors' interpretation on the functional impact of the variant, Ikegami et al, 2020
 Olaparib_fClass_Ikegami	Impact of the variant on Olaparib drug sensitivity, Ikegami et al, 2020
 Niraparif_fClass_Ikegami	Impact of the variant on Nirapaif drug sensitivty, Ikegami et al, 2020

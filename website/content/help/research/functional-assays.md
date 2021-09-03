@@ -115,8 +115,6 @@ In this publication, the authors evaluated the impact of 252 variants in the *BR
 
 In this publication, the authors evaluated the impact of 239 *BRCA2* variants on homology-directed DNA repair and drug sensitivity.
 
-* #### Discordant ((Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays))
-    Indicates if the functional evidence on the variant was discordant with its clinical classification
 * #### Olaparib ((Olaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays))
     Impact of the variant on Olaparib drug sensitivity
 * #### Niraparif ((Niraparif_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays))

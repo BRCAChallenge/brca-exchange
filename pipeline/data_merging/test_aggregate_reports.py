@@ -107,7 +107,6 @@ class TestStringMethods(unittest.TestCase):
                         "Result_Mesman_ENIGMA_BRCA12_Functional_Assays",
                         "HDR_Richardson_ENIGMA_BRCA12_Functional_Assays",
                         "Result_Richardson_ENIGMA_BRCA12_Functional_Assays",
-                        "Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays",
                         "Result_Ikegami_ENIGMA_BRCA12_Functional_Assays",
                         "Olaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays",
                         "Niraparif_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays",

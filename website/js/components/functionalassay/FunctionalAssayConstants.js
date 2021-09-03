@@ -47,7 +47,7 @@ const FunctionalAssayConstants = [{
         author: "Fernandes et al, 2019",
         publication: "https://pubmed.ncbi.nlm.nih.gov/30765603",
         previousPublications: "PMID:11157798,PMID:12496476,PMID:15172985,PMID:15689452,PMID:17020472,PMID:17308087,PMID:17311832,PMID:18285836,PMID:18992264,PMID:20516115,PMID:21447777,PMID:23613828,PMID:24845084,PMID:28781887",
-        resultDescription: "Not Pathogenic, Likely Not Pathogenic, Uncertain, Likely Pathogenic, Pathogenic"
+        resultDescription: "fClass: Functional Class 1, 2, 3, 4, 5"
     },
     {
         name: "Mesman",
