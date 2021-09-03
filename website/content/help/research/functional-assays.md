@@ -81,8 +81,6 @@ In this work, the authors tested the impact of 238 *BRCA1* variants on homologou
 
 The authors of this paper assessed 99 *BRCA1* variants on their impact on transcriptional activation in a yeast reporter system.
 
-* #### Class ((Class_Fernandes_ENIGMA_BRCA12_Functional_Assays))
-    Authors' interpretation of the functional class of the variant (1-5)
 * #### Report ((Result_Fernandes_ENIGMA_BRCA12_Functional_Assays))
     Authors' report on the overall functional impact of the variant given the results of the yeast reporter system.
 ----
@@ -115,8 +113,6 @@ In this publication, the authors evaluated the impact of 252 variants in the *BR
 
 In this publication, the authors evaluated the impact of 239 *BRCA2* variants on homology-directed DNA repair and drug sensitivity.
 
-* #### Discordant ((Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays))
-    Indicates if the functional evidence on the variant was discordant with its clinical classification
 * #### Olaparib ((Olaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays))
     Impact of the variant on Olaparib drug sensitivity
 * #### Niraparif ((Niraparif_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays))
