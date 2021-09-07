@@ -4,9 +4,9 @@ One of the most important functions of the BRCA1 and BRCA2 proteins is *Homologo
 
 *Cell survival* assays measure HDR activity by subjecting tissue with a given genetic variant to mutational processes to incur DNA damage, and measuring the rate of survival of the cells in that tissue, with a greater rate of cell death suggesting a harmful variant with greater impact.
 
-*Drug sensitivity* assays measure HDR activity by exposing the cell to PARP inhibitors are a family of pharmaceutical drugs that inhibit the cell’s ability to repair single-strand DNA breaks.  These single-stranded DNA breaks lead to double-stranded DNA breaks, which lead to early cell death if not repaired.  For these reasons, the presence of harmful BRCA variants makes tissue sensitive to PARP inhibition, leading to early cell death.  PARP inhibitors include the drugs Olaparib, Rucaparib, Niraparib and Talazoparib.
+*Drug sensitivity* assays measure HDR activity by exposing the cell to PARP inhibitors are a family of pharmaceutical drugs that inhibit the cell’s ability to repair single-strand DNA breaks.  These single-stranded DNA breaks lead to double-stranded DNA breaks, which lead to early cell death if not repaired.  For these reasons, the presence of harmful BRCA variants makes tissue sensitive to PARP inhibition, leading to early cell death.  PARP inhibitors include the drugs Cisplatin, Olaparib, Rucaparib, Niraparib and Talazoparib.
 
-The cellular processes that impact BRCA protein abundance often impact *RNA production*, or the abundance of BRCA mRNA.  Harmful variants can reduce the abundance of BRCA mRNA by impacting cellular processes including transcription, mRNA splicing and others.  When a variant impacts the abundance of BRCA RNA, that will impact the abundance of BRCA protein, and reduce the overall BRCA functional activity.  
+Some variants have primary impact at the mRNA level, including transcription, translation, or (more commonly) mRNA splicing.  Reduced BRCA RNA levels are observed for variants that reduce transcription, or lead to out-of-frame transcripts that are subject to nonsense mediated decay. 
 
 For each functional assay publication, we present a set of general fields that are common to all variants in the publication (**Author**, **Publication**, **Previous Publications**, and **Report Descriptions**) as well as a set of fields that detail the reported experimental results on each each variant (this includes the **Reports** field with the authors’ report on overall functional impact, and additional fields reporting on specific experiments depending on the publication). We detail these fields below. For conciseness, we list the general fields just once.
 
@@ -82,7 +82,7 @@ In this work, the authors tested the impact of 238 *BRCA1* variants on homologou
 The authors of this paper assessed 99 *BRCA1* variants on their impact on transcriptional activation in a yeast reporter system.
 
 * #### Report ((Result_Fernandes_ENIGMA_BRCA12_Functional_Assays))
-    Authors' report on the overall functional impact of the variant given the results of the yeast reporter system.
+    Authors’ interpretation of the functional class of the variant (1-5), with 1 indicating no evidence of functional impact and 5 indicating strong evidence of functional impact.
 ----
 
 #### Mesman et al, 2019
