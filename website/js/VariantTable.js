@@ -260,7 +260,6 @@ const researchModeGroups = [
                     {title: 'Olaparib Bouwman2', prop: 'Olaparib_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
                     {title: 'DRGFP Bouwman2', prop: 'DRGFP_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
                     {title: 'Report Bouwman2', prop: 'Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
-                    {title: 'Class Fernandes', prop: 'Class_Fernandes_ENIGMA_BRCA12_Functional_Assays', core: true},
                     {title: 'Report Fernandes', prop: 'Result_Fernandes_ENIGMA_BRCA12_Functional_Assays', core: true},
                     {title: 'Complementation Mesman', prop: 'Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
                     {title: 'HDR Mesman', prop: 'HDR_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
@@ -268,7 +267,6 @@ const researchModeGroups = [
                     {title: 'Report Mesman', prop: 'Result_Mesman_ENIGMA_BRCA12_Functional_Assays', core: true},
                     {title: 'HDR Richardson', prop: 'HDR_Richardson_ENIGMA_BRCA12_Functional_Assays', core: true},
                     {title: 'Report Richardson', prop: 'Result_Richardson_ENIGMA_BRCA12_Functional_Assays', core: true},
-                    {title: 'Discordant Ikegami', prop: 'Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
                     {title: 'Report Ikegami', prop: 'Result_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
                     {title: 'Olaparib fClass Ikegami', prop: 'Olaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
                     {title: 'Niraparif fClass Ikegami', prop: 'Niraparif_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
@@ -297,7 +295,6 @@ const researchModeGroups = [
                         {title: 'Report', prop: 'Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays', core: true},
                     ],
                     Fernandes: [
-                        {title: 'Class', prop: 'Class_Fernandes_ENIGMA_BRCA12_Functional_Assays', core: true},
                         {title: 'Report', prop: 'Result_Fernandes_ENIGMA_BRCA12_Functional_Assays', core: true},
                     ],
                     Findlay: [
@@ -307,7 +304,6 @@ const researchModeGroups = [
                         {title: 'RNA Class', prop: 'RNA_Class_Findlay_ENIGMA_BRCA12_Functional_Assays', core: true}
                     ],
                     Ikegami: [
-                        {title: 'Discordant', prop: 'Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
                         {title: 'Report', prop: 'Result_Ikegami_ENIGMA_BRCA12_Functional_Assays', core: true},
                     ],
                     Mesman: [
@@ -540,7 +536,6 @@ const researchModeColumns = [
     {title: 'Olaparib Bouwman2', prop: 'Olaparib_Bouwman2_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'DRGFP Bouwman2', prop: 'DRGFP_Bouwman2_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Report Bouwman2', prop: 'Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays'},
-    {title: 'Class Fernandes', prop: 'Class_Fernandes_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Report Fernandes', prop: 'Result_Fernandes_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Complementation Mesman', prop: 'Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'HDR Mesman', prop: 'HDR_Mesman_ENIGMA_BRCA12_Functional_Assays'},
@@ -548,7 +543,6 @@ const researchModeColumns = [
     {title: 'Report Mesman', prop: 'Result_Mesman_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'HDR Richardson', prop: 'HDR_Richardson_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Report Richardson', prop: 'Result_Richardson_ENIGMA_BRCA12_Functional_Assays'},
-    {title: 'Discordant Ikegami', prop: 'Discordant_Ikegami_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Report Ikegami', prop: 'Result_Ikegami_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Olaparib fClass Ikegami', prop: 'Olaparib_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Niraparif fClass Ikegami', prop: 'Niraparif_fClass_Ikegami_ENIGMA_BRCA12_Functional_Assays'},

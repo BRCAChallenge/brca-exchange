@@ -129,7 +129,7 @@ var NavBarNew = React.createClass({
                                     Facts & Stats
                                 </NavLink>
                                 <NavLink onClick={this.close} to='/releases'>
-                                    Previous Data Releases
+                                    Data Releases
                                 </NavLink>
                                 <NavLink onClick={this.close} to='/about/api'>
                                     Webservices for API Data Access
