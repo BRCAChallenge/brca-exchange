@@ -89,7 +89,7 @@ The authors of this paper assessed 99 *BRCA1* variants on their impact on transc
 The authors evaluated 79 *BRCA2* variants on their impact on homology-directed DNA repair and drug sensitivity.
 
 * #### Complementation ((Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays))
-     	Indicates whether the variant was able to complement the cell lethal phenotype induced by loss of endogenous mouse *Brca2*
+    Indicates whether the variant was able to complement the cell lethal phenotype induced by loss of endogenous mouse *Brca2*
 * #### HDR ((HDR_Mesman_ENIGMA_BRCA12_Functional_Assays))
     Impact of the variant on homology-directed DNA repair
 * #### Cisplatin ((Cisplatin_Mesman_ENIGMA_BRCA12_Functional_Assays))
