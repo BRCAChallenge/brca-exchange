@@ -180,10 +180,10 @@ export default class FunctionalAssayTile extends React.Component {
         return (
             <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <div className="tile-disclaimer">
-                    Assays were selected by the ENIGMA Working Groups as high quality assays that met internal standards for sensitivity and specificity.
+                    Assays were selected by the ENIGMA consortium as high quality assays that met internal standards permitting estimation of sensitivity and specificity (see <a href="https://pubmed.ncbi.nlm.nih.gov/31131967/" target='_blank'>Parsons 2019</a>).
                     <ul>
-                        <li>Harmful genetic variation can impact RNA production and/or protein function or abundance. Assays labeled with a <b>P</b> measure the impact of genetic variation at the protein level. Assays labeled with a <b>R/P</b> measure impact at both the RNA and protein level.</li>
-                        <li><i>Reports</i>, or the authors’ interpretation of the functional impact of each variant, are presented as they appear in the publications. A report of ‘Many Provided’ means that the authors performed many experiments but provided no overall report of functional impact.</li>
+                        <li>Genetic variation can impact RNA transcripts and/or protein function or abundance. Assays labeled with a <b>P</b> measure the impact of genetic variation at the protein level. Assays labeled with a <b>R/P</b> measure impact at both the RNA and protein level.</li>
+                        <li><b>Reports</b>, or the authors’ interpretation of the functional impact of each variant, are presented as they appear in the publications. A report of ‘Many Provided’ means that the authors performed more than one assay for each variant but provided no overall report of functional.</li>
                         <li>Additional assays may be added in the future.</li>
                     </ul>
                 </div>
@@ -191,7 +191,7 @@ export default class FunctionalAssayTile extends React.Component {
                     <tbody>
                         <tr>
                             <td style={{verticalAlign: 'middle', width: '25%', fontWeight: 'bold', textAlign: 'center'}}>Disclaimer</td>
-                            <td style={{verticalAlign: 'middle'}}>Functional assay results reflect laboratory models of genetic variation and disease and should not be used as a proxy for clinical variant interpretations.</td>
+                            <td style={{verticalAlign: 'middle'}}>Functional assay data reflect laboratory models of disease, and should not be used as a substitute for clinical variant interpretation.  Further, please note that irrespective of the authors’ terms to reflect impact on function, the results presented <b>do not reflect a final variant classification</b>.</td>
                         </tr>
                     </tbody>
                 </Table>
