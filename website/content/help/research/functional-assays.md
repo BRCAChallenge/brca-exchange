@@ -1,7 +1,5 @@
 #### Functional Assay Scores
 
-Functional assays are laboratory experiments that interrogate the impact of the variant on some aspect of BRCA protein function or abundance.
-
 Functional assays are laboratory experiments that interrogate the impact of the variant on aspects of BRCA protein function or abundance.  To assess the functional effects of variants in *BRCA1* and *BRCA2*, assays have been developed to study the impact of the variant on experimental measurements that have been shown to have a high correlation with genetic and clinical data, including cell proliferation, cell survival, drug sensitivity and *Homology-Directed DNA Repair (HDR)*.
 
 HDR, also called *homologous recombination (HR) mediated repair (HRR)*, is the major DNA repair pathway for error-free repair of DNA double-stranded breaks. The *BRCA1* and *BRCA2* proteins play a crucial role in in this pathway. A deficiency in HR has a severe impact on cell survival and leads to enhanced sensitivity to specific DNA damaging agents, including cisplatin or Poly (ADP-Ribose) polymerase (PARP).
