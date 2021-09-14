@@ -1,26 +1,24 @@
+#### Functional Assay Scores
+
 Functional assays are laboratory experiments that interrogate the impact of the variant on some aspect of BRCA protein function or abundance.
 
-One of the most important functions of the BRCA1 and BRCA2 proteins is *Homologous DNA Repair (HDR)*, and HDR is the focus of many BRCA functional assays.  HDR is a molecular DNA repair process that enables the cell  to repair double-strand DNA breaks under certain circumstances.   Loss of HDR activity leads to an accumulation of DNA damage, which in turn can lead to cancer in humans and early cell death in the laboratory.  
+Functional assays are laboratory experiments that interrogate the impact of the variant on aspects of BRCA protein function or abundance.  To assess the functional effects of variants in *BRCA1* and *BRCA2*, assays have been developed to study the impact of the variant on experimental measurements that have been shown to have a high correlation with genetic and clinical data, including cell proliferation, cell survival, drug sensitivity and *Homology-Directed DNA Repair (HDR)*.
 
-*Cell survival* assays measure HDR activity by subjecting tissue with a given genetic variant to mutational processes to incur DNA damage, and measuring the rate of survival of the cells in that tissue, with a greater rate of cell death suggesting a harmful variant with greater impact.
-
-*Drug sensitivity* assays measure HDR activity by exposing the cell to PARP inhibitors are a family of pharmaceutical drugs that inhibit the cell’s ability to repair single-strand DNA breaks.  These single-stranded DNA breaks lead to double-stranded DNA breaks, which lead to early cell death if not repaired.  For these reasons, the presence of harmful BRCA variants makes tissue sensitive to PARP inhibition, leading to early cell death.  PARP inhibitors include the drugs Cisplatin, Olaparib, Rucaparib, Niraparib and Talazoparib.
-
-Some variants have primary impact at the mRNA level, including transcription, translation, or (more commonly) mRNA splicing.  Reduced BRCA RNA levels are observed for variants that reduce transcription, or lead to out-of-frame transcripts that are subject to nonsense mediated decay. 
+HDR, also called *homologous recombination (HR) mediated repair (HRR)*, is the major DNA repair pathway for error-free repair of DNA double-stranded breaks. The *BRCA1* and *BRCA2* proteins play a crucial role in in this pathway. A deficiency in HR has a severe impact on cell survival and leads to enhanced sensitivity to specific DNA damaging agents, including cisplatin or Poly (ADP-Ribose) polymerase (PARP).
 
 For each functional assay publication, we present a set of general fields that are common to all variants in the publication (**Author**, **Publication**, **Previous Publications**, and **Report Descriptions**) as well as a set of fields that detail the reported experimental results on each each variant (this includes the **Reports** field with the authors’ report on overall functional impact, and additional fields reporting on specific experiments depending on the publication). We detail these fields below. For conciseness, we list the general fields just once.
 
 ----
 #### General Fields
 
-These fields are included for each functional assay publication, and are constant across all variants in the publication.
+These fields are included for each publication, and are constant across all variants in the publication.
 
 * #### Author ((Author))
     The lead author of the publication and the publication year.  This identifies the publication in a human-readable format.
 * #### Publication ((Publication))
     PubMed ID and hyperlink to the publication in PubMed
 * #### Previous Publications ((Previous Publications))
-    This field lists any previous publications by the same authors. In general, these previous publications may provide foundational results that the current publication built on, with the current publication superseding earlier publications.
+    This field lists any previous publications by the same lead or senior author. In general, these previous publications may provide foundational results that the current publication built on, with the current publication superseding earlier publications.
 * #### Report Descriptions ((Report Descriptions))
     This field describes the content of the Report field by presenting the set of possible values.
 
@@ -60,43 +58,44 @@ In this publication, the authors tested the impact of 86 *BRCA1* variants on cel
 
 
 * #### Selection ((Selection_Bouwman1_ENIGMA_BRCA12_Functional_Assays))
-    Indicates whether the variant was designated as a neutral control, deleterious control, artificial, or VUS
+    Indicates whether the variant was designated as a neutral control, deleterious control, artificial variant, or VUS
 * #### Report ((Result_Bouwman1_ENIGMA_BRCA12_Functional_Assays))
     Authors’ overall interpretation of the functional impact of the variant, taking into consideration both the cell proliferation and drug sensitivity experiments.
 ----
 #### Bouwman et al, 2020
 
-In this work, the authors tested the impact of 238 *BRCA1* variants on homologous DNA repair and drug sensitivity.
+In this work, the authors tested the impact of 238 *BRCA1* variants on homologous recombination repair (HRR) and drug sensitivity.
 
 * #### Cisplatin ((Cisplatin_Bouwman2_ENIGMA_BRCA12_Functional_Assays))
     Impact of the variant on Cisplatin drug sensitivity
 * #### Olaparib ((Olaparib_Bouwman2_ENIGMA_BRCA12_Functional_Assays))
-    Impact of the variant on Olaparib drug sensitivity
+    Impact of the variant on Olaparib (PARP inhibitor) drug sensitivity
 * #### DRGFP ((DRGFP_Bouwman2_ENIGMA_BRCA12_Functional_Assays))
-    Impact of the variant in a direct-repeat GFP homologous recombination DNA repair
+     	Impact of the variant on homologous recombination repair measured in a direct-repeat GFP (DR-GFP) assay 
 * #### Report ((Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays))
-    In this publication, the authors did not report an overall interpretation of the functional impact of the variants, but presented many sets of assay results which each offer one measurement of functional impact.
+    In this publication, the authors did not present an overall interpretation of the functional impact per variant, but presented the functional impact per variant per assay.
+    
 ----
 #### Fernandes et al, 2019
 
-The authors of this paper assessed 99 *BRCA1* variants on their impact on transcriptional activation in a yeast reporter system.
+The authors of this paper assessed 99 *BRCA1* variants on their impact on transcriptional activation.
 
 * #### Report ((Result_Fernandes_ENIGMA_BRCA12_Functional_Assays))
-    Authors’ interpretation of the functional class of the variant (1-5), with 1 indicating no evidence of functional impact and 5 indicating strong evidence of functional impact.
+    Authors’ interpretation of the functional class of the variant using VarCall ([Iversen et al. 2011](https://pubmed.ncbi.nlm.nih.gov/21447777/)) (1-5)
 ----
 
 #### Mesman et al, 2019
 
-The authors evaluated 79 *BRCA2* variants on their impact on homologous DNA repair and drug sensitivity.
+The authors evaluated 79 *BRCA2* variants on their impact on homology-directed DNA repair and drug sensitivity.
 
 * #### Complementation ((Complementation_Mesman_ENIGMA_BRCA12_Functional_Assays))
-    Indicates whether the variant was able to complement the phenotype induced by loss of endogenous *BRCA2*
+     	Indicates whether the variant was able to complement the cell lethal phenotype induced by loss of endogenous mouse *Brca2*
 * #### HDR ((HDR_Mesman_ENIGMA_BRCA12_Functional_Assays))
-    Impact of the variant on homolgous DNA repair
+    Impact of the variant on homology-directed DNA repair
 * #### Cisplatin ((Cisplatin_Mesman_ENIGMA_BRCA12_Functional_Assays))
     Impact of the variant to Cisplatin drug sensitivity
 * #### Report ((Result_Mesman_ENIGMA_BRCA12_Functional_Assays))
-    Authors' report on the functional impact of the variant, considering both homologous DNA repair and drug sensitivity
+    Authors’ overall interpretation on the functional impact of the variant, considering complementation and homology directed repair
 ----
 
 #### Richardson et al, 2021
