@@ -69,7 +69,7 @@ In this work, the authors tested the impact of 238 *BRCA1* variants on homologou
 * #### Olaparib ((Olaparib_Bouwman2_ENIGMA_BRCA12_Functional_Assays))
     Impact of the variant on Olaparib (PARP inhibitor) drug sensitivity
 * #### DRGFP ((DRGFP_Bouwman2_ENIGMA_BRCA12_Functional_Assays))
-     	Impact of the variant on homologous recombination repair measured in a direct-repeat GFP (DR-GFP) assay 
+     Impact of the variant on homologous recombination repair measured in a direct-repeat GFP (DR-GFP) assay 
 * #### Report ((Result_Bouwman2_ENIGMA_BRCA12_Functional_Assays))
     In this publication, the authors did not present an overall interpretation of the functional impact per variant, but presented the functional impact per variant per assay.
     
