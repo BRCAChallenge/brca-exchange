@@ -180,10 +180,10 @@ export default class FunctionalAssayTile extends React.Component {
         return (
             <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <div className="tile-disclaimer">
-                    Assays were selected by the ENIGMA consortium as high quality assays that met internal standards permitting estimation of sensitivity and specificity (see <a href="https://pubmed.ncbi.nlm.nih.gov/31131967/" target='_blank'>Parsons 2019</a>).
+                    Assays were selected by the ENIGMA consortium as high quality assays that met internal standards permitting estimation of sensitivity and specificity, using approaches as described in <a href="https://pubmed.ncbi.nlm.nih.gov/31131967/" target='_blank'>Parsons 2019</a>.
                     <ul>
                         <li>Genetic variation can impact RNA transcripts and/or protein function or abundance. Assays labeled with a <b>P</b> measure the impact of genetic variation at the protein level. Assays labeled with a <b>R/P</b> measure impact at both the RNA and protein level.</li>
-                        <li><b>Reports</b>, or the authors’ interpretation of the functional impact of each variant, are presented as they appear in the publications. A report of ‘Many Provided’ means that the authors performed more than one assay for each variant but provided no overall report of functional.</li>
+                        <li><b>Reports</b>, or the authors’ interpretation of the functional impact of each variant, are presented as they appear in the publications. A report of ‘Many Provided’ means that the authors performed more than one assay for each variant but provided no overall report of functional impact.</li>
                         <li>Additional assays may be added in the future.</li>
                     </ul>
                 </div>
