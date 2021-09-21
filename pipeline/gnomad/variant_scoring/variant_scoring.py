@@ -233,6 +233,12 @@ def add_normalization_cols(df, strand_dict, processes=2):
                                                                 'var_name_left', False,
                                                                 strand_dict), processes)
 
+    def _convert_to_name(converted):
+        return converted.apply(lambda h: var_obj_to_name(variant_utils.VCFVariant.from_hgvs_obj(h)))
+
+    df['var_name_right'] = _convert_to_name(df['var_name_right'])
+    df['var_name_left'] = _convert_to_name(df['var_name_left'])
+
     return df.drop(columns=[TMP_HGVS_HG38, TMP_VAR_OBJ_FIELD, TMP_GENE_SYMBOL])
 
 
@@ -252,7 +258,7 @@ def main(data_dir, output_path, resource_dir, gene_config_path):
 
     read_depth_thresh = 30
 
-    df = extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, Path(resource_dir)).head(200)
+    df = extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, Path(resource_dir))
 
     strand_dict = { int(r['chr']) : r[config.STRAND_COL] for _, r in cfg_df.iterrows() }
     df = add_normalization_cols(df, strand_dict)
