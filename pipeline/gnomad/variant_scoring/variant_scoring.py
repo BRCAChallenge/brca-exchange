@@ -9,7 +9,8 @@ import numpy as np
 import pandas as pd
 
 import gnomad.variant_scoring.constants as cnts
-from common import variant_utils
+from common import config, hgvs_utils, variant_utils, utils
+from data_merging.brca_pseudonym_generator import _normalize_genomic_fnc
 
 
 def var_obj_to_name(v):
@@ -213,12 +214,36 @@ def extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_
     return df_overall.sort_values('var_name')
 
 
+def add_normalization_cols(df, strand_dict, processes=2):
+    TMP_HGVS_HG38 = 'tmp_hgvs_hg38'
+    TMP_VAR_OBJ_FIELD = 'tmp_var_obj'
+    TMP_GENE_SYMBOL = 'Gene_Symbol'
+
+    hgvs_proc = hgvs_utils.HgvsWrapper()
+
+    df[TMP_GENE_SYMBOL] = df['contigName']
+    df[TMP_VAR_OBJ_FIELD] = df['var_name'].apply(lambda v: var_name_to_obj(v))
+    df[TMP_HGVS_HG38] = df[TMP_VAR_OBJ_FIELD].apply(
+        lambda v: v.to_hgvs_obj(hgvs_proc.contig_maps[hgvs_utils.HgvsWrapper.GRCh38_Assem]))
+
+    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38,
+                                                                'var_name_right', True,
+                                                                strand_dict), processes)
+    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38,
+                                                                'var_name_left', False,
+                                                                strand_dict), processes)
+
+    return df.drop(columns=[TMP_HGVS_HG38, TMP_VAR_OBJ_FIELD, TMP_GENE_SYMBOL])
+
+
 @click.command()
 @click.argument('data_dir', type=click.Path(readable=True))
 @click.argument('output_path', type=click.Path(writable=True))
 @click.option('--resource-dir', type=click.Path(readable=True), help="resource dir for lift over (same as for the main pipeline)")
-def main(data_dir, output_path, resource_dir):
+@click.option('--gene-config-path', type=click.Path(readable=True))
+def main(data_dir, output_path, resource_dir, gene_config_path):
     data_dir = Path(data_dir)
+    cfg_df = config.load_config(gene_config_path)
     df_cov2 = pd.read_parquet(data_dir / 'df_cov_v2.parquet')
     df_cov3 = pd.read_parquet(data_dir / 'df_cov_v3.parquet')
 
@@ -227,7 +252,10 @@ def main(data_dir, output_path, resource_dir):
 
     read_depth_thresh = 30
 
-    df = extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, Path(resource_dir))
+    df = extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, Path(resource_dir)).head(200)
+
+    strand_dict = { int(r['chr']) : r[config.STRAND_COL] for _, r in cfg_df.iterrows() }
+    df = add_normalization_cols(df, strand_dict)
 
     df.to_parquet(output_path)
 
