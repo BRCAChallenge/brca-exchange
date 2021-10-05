@@ -15,6 +15,9 @@ from common import config as brca_config
 
 
 def get_spark_session(cores, mb_per_core, spark_tmp_dir):
+    """
+    getting a spark instance with glow enabled
+    """
     spark_tmp_dir.mkdir(exist_ok=True, parents=True)
 
     driver_mem = cores * mb_per_core + 2000  # + overhead
@@ -55,6 +58,7 @@ def read_raw_vcf_data(input_paths, spark):
 
 
 def boundaries_predicate_variants(boundaries):
+    """filter all records within gene boundaries of the variant data"""
     chrom_predicate = functools.reduce(operator.or_,
                                        (((sf.col('contigName') == chrom) & (bound[0] <= sf.col('start')) & (
                                                sf.col('end') <= bound[1])) for (chrom, bound) in boundaries.items()))
@@ -63,6 +67,7 @@ def boundaries_predicate_variants(boundaries):
 
 
 def boundaries_predicate_coverage(boundaries):
+    """filter all records within gene boundaries in the variant data"""
     return functools.reduce(operator.or_,
                             (((sf.col('chrom') == chrom) &
                               (bound[0] <= sf.col('pos')) &
@@ -75,6 +80,7 @@ def read_coverage_data_v2(path, spark):
 
 
 def read_coverage_data_v3(path, spark):
+    # doing some renaming and casting, as the column names and types changed for coverage data from v2 to v3
     return (read_raw_coverage_data(str(path), spark).
             withColumnRenamed('median_approx', 'median').
             withColumn('chrom', sf.split('locus', ':').getItem(0)).
@@ -89,6 +95,7 @@ def read_coverage_data_v3(path, spark):
 
 
 def _vcf_preprocessing_v3(spark_df):
+    # excluding X and Y chromosome, s.t. the chrom column can be cast to integer
     return (spark_df.where((sf.col('contigName') != "chrX") & (sf.col('contigName') != "chrY")).
             withColumn('contigName', sf.substring('contigName', len('chr') + 1, 2))
     )
@@ -102,7 +109,7 @@ def prepare_variant_data(vcf_paths, preprocessing_fnc, boundaries, spark, additi
               filter(boundaries_predicate_variants(boundaries)).
               select(constants.vcf_mandatory_cols + list(additional_cols)).
               withColumn('start', sf.col('start') + 1). # glow uses 0-based coordinates https://glow.readthedocs.io/en/latest/etl/variant-data.html#vcf
-              withColumn('end', sf.col('end') + 1) 
+              withColumn('end', sf.col('end') + 1)
               ).toPandas()
 
     df_var = df_var.rename(columns=lambda c: c.replace('INFO_', ''))
@@ -129,7 +136,7 @@ def main(input_dir, output_dir, gene_config_path, cores, mem_per_core_mb):
     output_dir = Path(output_dir)
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     df_var_v2_path = output_dir / 'df_var_v2.parquet'
     df_var_v3_path = output_dir / 'df_var_v3.parquet'
 
@@ -164,14 +171,14 @@ def main(input_dir, output_dir, gene_config_path, cores, mem_per_core_mb):
 
             df_var_v3.to_parquet(df_var_v3_path)
 
-        logging.info("Processing v2 coverage summaries")
-
         if not df_cov_v2_path.exists():
+            logging.info("Processing v2 coverage summaries")
             df_cov_v2 = prepare_coverage_data(input_dir / 'gnomad.exomes.coverage.summary.tsv.bgz',
                                               read_coverage_data_v2, boundaries37, spark)
             df_cov_v2.to_parquet(df_cov_v2_path)
 
         if not df_cov_v3_path.exists():
+            logging.info("Processing v3 coverage summaries")
             df_cov_v3 = prepare_coverage_data(input_dir / 'gnomad.genomes.r3.0.1.coverage.summary.tsv.bgz',
                                               read_coverage_data_v3, boundaries38, spark)
             df_cov_v3.to_parquet(df_cov_v3_path)

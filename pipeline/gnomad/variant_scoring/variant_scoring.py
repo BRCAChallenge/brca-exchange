@@ -180,7 +180,7 @@ def add_final_code_column(df):
 
     def is_both_sources(dfg):
         return len(dfg) > 1
-    
+
     def set_final_code(dfg):
         if len(dfg) == 1:
             return dfg['evidence_code'].iloc[0]
@@ -191,14 +191,14 @@ def add_final_code_column(df):
 
             c1_successful = c1 in success_codes
             c2_successful = c2 in success_codes
-            
+
             if c2_successful and not c1_successful:
                 return c2
             if c1_successful and not c2_successful:
                 return c1
             if not c1_successful and not c2_successful:
                 return "fail_both"
-            
+
             if c1 == c2:
                 return c1
             else:
@@ -208,7 +208,7 @@ def add_final_code_column(df):
 
     v2_and_v3 = df.groupby('var_name').apply(is_both_sources)
     per_variant_code = df.groupby('var_name').apply(set_final_code)
-    
+
     return df.merge(pd.DataFrame({'in_v2_and_v3' : v2_and_v3, 'final_code': per_variant_code}).reset_index(), how='left')
 
 
@@ -218,8 +218,8 @@ def extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_
 
     df_overall = pd.concat([agg_v2, agg_v3]).reset_index(drop=True)
 
+    # running the actual scoring algorithm and the combined data
     df_overall['evidence_code'] = df_overall.apply(determine_evidence_code_per_variant, axis=1)
-
     df_overall = add_final_code_column(df_overall)
 
     return df_overall.sort_values('var_name')
@@ -271,6 +271,7 @@ def main(data_dir, output_path, resource_dir, gene_config_path):
 
     df = extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, Path(resource_dir))
 
+    # add var_name columns with different normalization to join data with other sources (e.g. brca exchange output data)
     strand_dict = { int(r['chr']) : r[config.STRAND_COL] for _, r in cfg_df.iterrows() }
     df = add_normalization_cols(df, strand_dict)
 
