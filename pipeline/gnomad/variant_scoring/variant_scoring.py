@@ -176,19 +176,29 @@ def determine_evidence_code_per_variant(r):
 
 
 def add_final_code_column(df):
+    success_codes = set(['BA1', 'BS1', 'pm2_supporting'])
+
+    def is_both_sources(dfg):
+        return len(dfg) > 1
+    
     def set_final_code(dfg):
         if len(dfg) == 1:
             return dfg['evidence_code'].iloc[0]
         elif len(dfg) == 2:
-            # data from v2 and v3
+            # we have data from both v2 and v3
             c1 = dfg['evidence_code'].iloc[0]
             c2 = dfg['evidence_code'].iloc[1]
 
-            if c1 == 'code_missing':
+            c1_successful = c1 in success_codes
+            c2_successful = c2 in success_codes
+            
+            if c2_successful and not c1_successful:
                 return c2
-            if c2 == 'code_missing':
+            if c1_successful and not c2_successful:
                 return c1
-
+            if not c1_successful and not c2_successful:
+                return "fail_both"
+            
             if c1 == c2:
                 return c1
             else:
@@ -196,9 +206,10 @@ def add_final_code_column(df):
 
         raise ValueError("some duplicate variants per source?")
 
+    v2_and_v3 = df.groupby('var_name').apply(is_both_sources)
     per_variant_code = df.groupby('var_name').apply(set_final_code)
-
-    return df.merge(pd.DataFrame({'final_code': per_variant_code}).reset_index(), how='left')
+    
+    return df.merge(pd.DataFrame({'in_v2_and_v3' : v2_and_v3, 'final_code': per_variant_code}).reset_index(), how='left')
 
 
 def extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, resource_dir):
