@@ -177,7 +177,9 @@ def determine_evidence_code_per_variant(r):
 
 def add_final_code_column(df):
     success_codes = set(['BA1', 'BS1', 'pm2_supporting'])
-
+    dq_failure_codes = set(['fail_insufficient_read_depth', 'fail_vcf_filter_flag', 'need_review'])
+    CODE_MISSING = 'code_missing'
+    
     def is_both_sources(dfg):
         return len(dfg) > 1
 
@@ -189,16 +191,25 @@ def add_final_code_column(df):
             c1 = dfg['evidence_code'].iloc[0]
             c2 = dfg['evidence_code'].iloc[1]
 
-            c1_successful = c1 in success_codes
-            c2_successful = c2 in success_codes
-
-            if c2_successful and not c1_successful:
-                return c2
-            if c1_successful and not c2_successful:
-                return c1
-            if not c1_successful and not c2_successful:
+            if (c1 in dq_failure_codes and c2 == CODE_MISSING) or (c2 in dq_failure_codes and c1 == CODE_MISSING):
+                return CODE_MISSING
+            
+            if c1 in dq_failure_codes and c2 in dq_failure_codes:
                 return "fail_both"
+            
+            if (c1 == 'pm2_supporting' and c2 == CODE_MISSING) or (c2 == 'pm2_supporting' and c1 == CODE_MISSING):
+                return CODE_MISSING
 
+            if c1 == CODE_MISSING and c2 == CODE_MISSING:
+                return CODE_MISSING
+            
+            if c2 in success_codes and c1 not in success_codes:
+                return c2
+            if c1 in success_codes and c2 not in success_codes:
+                return c1
+
+            assert c1 in success_codes and c2 in success_codes
+            
             if c1 == c2:
                 return c1
             else:
