@@ -106,14 +106,14 @@ def convert_to_hg38(vars: Iterable[VCFVariant], chain_file, ref_file, resource_d
         f.write('\n'.join(lst))
 
     vcf_tmp_out = tempfile.mktemp('.vcf')
-    
+
     args = ["CrossMap.py", "vcf",
             chain_file,
             vcf_tmp,
             ref_file,
             vcf_tmp_out]
 
-    logging.info("Running CrossMap.py to convert to hg19")
+    logging.info("Running CrossMap.py to convert to hg38")
     sp = subprocess.Popen(args)
     out, err = sp.communicate()
     if out:
@@ -129,8 +129,3 @@ def convert_to_hg38(vars: Iterable[VCFVariant], chain_file, ref_file, resource_d
                 [VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_failed_lines]])
     else:
         return ([VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_lines]], [])
-
-
-
-#conv, failed_entries = convert_to_hg38(orig_vars_v2, chain_file, ref_file)
-#assert len(failed_entries) == 0
