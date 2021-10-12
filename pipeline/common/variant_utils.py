@@ -5,6 +5,13 @@ import hgvs
 from common import seq_utils
 from bioutils.sequences import reverse_complement
 
+from typing import Iterable
+from pathlib import Path
+import tempfile
+import subprocess
+import logging
+import os
+
 class VCFVariant(namedtuple("VCFVariant", "chr,pos,ref,alt")):
     __slots__ = ()
 
@@ -85,3 +92,40 @@ class VCFVariant(namedtuple("VCFVariant", "chr,pos,ref,alt")):
                 alt = reverse_complement(ref)
 
         return VCFVariant(int(chr), int(pos), ref, alt)
+
+
+def convert_to_hg38(vars: Iterable[VCFVariant], chain_file, ref_file, resource_dir):
+    def pseudo_vcf_entry(v):
+        entries = [v.chr, v.pos, '.', v.ref, v.alt, '', '', '']
+        return '\t'.join([str(s) for s in entries])
+
+    lst = [pseudo_vcf_entry(v) for v in vars]
+
+    vcf_tmp = tempfile.mktemp('.vcf')
+    with open(vcf_tmp, 'w') as f:
+        f.write('\n'.join(lst))
+
+    vcf_tmp_out = tempfile.mktemp('.vcf')
+
+    args = ["CrossMap.py", "vcf",
+            chain_file,
+            vcf_tmp,
+            ref_file,
+            vcf_tmp_out]
+
+    logging.info("Running CrossMap.py to convert to hg38")
+    sp = subprocess.Popen(args)
+    out, err = sp.communicate()
+    if out:
+        logging.info("standard output of subprocess: {}".format(out))
+    if err:
+        logging.info("standard output of subprocess: {}".format(err))
+
+    vcf_out_lines = open(vcf_tmp_out, 'r').readlines()
+
+    if os.path.exists(vcf_tmp_out + '.unmap'):
+        vcf_out_failed_lines = open(vcf_tmp_out + '.unmap', 'r').readlines()
+        return ([VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_lines]],
+                [VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_failed_lines]])
+    else:
+        return ([VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_lines]], [])

@@ -32,7 +32,7 @@ def build_interval_trees_by_chr(chr_intervals, interval_tuple_builder):
             r in regs]
 
         d[c] = IntervalTree.from_tuples(
-            interval_tuples)
+                interval_tuples)
 
     return d
 
