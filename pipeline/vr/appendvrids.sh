@@ -1,10 +1,9 @@
 #!/bin/bash
 
-ARTIFACT_DIR="$1"
-INPUT_FILE="$2"
-OUTPUT_FILE="$3"
-IMAGE_NAME="${4:-brcachallenge/append-vr-ids:0.1}"
-SEQ_REPO_DIR="${5:-/usr/local/share/seqrepo}"
+INPUT_DIR="$1"
+OUTPUT_FILE="$2"
+IMAGE_NAME="${3:-brcachallenge/append-vr-ids:0.1}"
+SEQ_REPO_DIR="${4:-/usr/local/share/seqrepo}"
 
 # --- pre-step: build vr image (caching will make this fast if it was already built)
 docker build -t "${IMAGE_NAME}" .
@@ -28,8 +27,9 @@ docker run --rm -d \
 docker run --rm \
   --name append-vr-ids \
   --network=host \
-  -v "${ARTIFACT_DIR}":/artifacts \
+  -v "${INPUT_DIR}":/output \
   -e UTA_DB_URL \
   "${IMAGE_NAME}" \
-  -i "/artifacts/${INPUT_FILE}" \
-  -o "/artifacts/${OUTPUT_FILE}"
+  -i "/output" \
+  -a "/output/release/artifacts" \
+  -o "/output/release/artifacts/${OUTPUT_FILE}"

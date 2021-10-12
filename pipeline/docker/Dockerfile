@@ -29,6 +29,7 @@ WORKDIR /opt
 
 COPY pipeline/requirements.txt .
 COPY test-requirements.txt .
+COPY pipeline/vr/requirements.txt ./vr-requirements.txt
 
 # pip 20.3+ uses strict dependency resolver that causes biocommons/bioutils and hgvs/ipython errors
 RUN pip install pip==20.2
@@ -37,7 +38,7 @@ RUN pip install pip==20.2
 RUN pip install $(grep numpy requirements.txt)
 
 RUN pip install $(grep -i cython requirements.txt)
-RUN pip install -r requirements.txt -r test-requirements.txt
+RUN pip install -r requirements.txt -r test-requirements.txt -r vr-requirements.txt
 
 # install vcf tools
 RUN wget https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz
