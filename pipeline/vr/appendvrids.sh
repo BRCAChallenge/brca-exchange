@@ -2,7 +2,7 @@
 
 INPUT_DIR="$1"
 OUTPUT_FILE="$2"
-IMAGE_NAME="${3:-brcachallenge/append-vr-ids:0.1}"
+IMAGE_NAME="${3:-brcachallenge/append-vr-ids:0.3}"
 SEQ_REPO_DIR="${4:-/usr/local/share/seqrepo}"
 
 # --- pre-step: build vr image (caching will make this fast if it was already built)
