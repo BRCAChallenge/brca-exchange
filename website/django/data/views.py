@@ -199,7 +199,7 @@ def sitemap(request):
 
 
 def variant_reports(request, variant_id):
-    variant_id = variant_id.lower().strip()
+    variant_id = str(variant_id).lower().strip()
     variant_id = remove_disallowed_chars(variant_id)
 
     # Accept search by ClinGen Allele Registry id (CA_ID)
