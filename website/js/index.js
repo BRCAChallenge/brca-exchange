@@ -643,7 +643,7 @@ var VariantDetail = React.createClass({
         if (!prevState.data && this.state.data) {
             const data = this.state.data;
             const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
-            const variant = data[variantVersionIdx];
+            const variant = data[variantVersionIdx] || data[0];
 
             document.title = `${variant['HGVS_cDNA'].split(":")[1]} (${variant['Gene_Symbol']}) - BRCA Exchange`;
         }
@@ -814,7 +814,7 @@ var VariantDetail = React.createClass({
         }
 
         const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
-        const variant = data[variantVersionIdx];
+        const variant = data[variantVersionIdx] || data[0];
         const release = variant["Data_Release"];
         let cols, groups;
 

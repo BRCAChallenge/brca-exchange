@@ -92,9 +92,20 @@ def variant_counts(request):
 
 
 def variant(request):
-    variant_id = int(request.GET.get('variant_id'))
+    variant_id = request.GET.get('variant_id')
 
-    variant = Variant.objects.get(id=variant_id)
+    variant_id = variant_id.lower().strip()
+    variant_id = remove_disallowed_chars(variant_id)
+
+    # Accept search by ClinGen Allele Registry id (CA_ID)
+    if variant_id.startswith('ca'):
+        query = CurrentVariant.objects
+        variant = query.filter(Q(CA_ID__icontains=variant_id))[0]
+
+    else:
+        variant_id = int(variant_id)
+        variant = Variant.objects.get(id=variant_id)
+
     key = variant.Genomic_Coordinate_hg38
     query = Variant.objects.filter(Genomic_Coordinate_hg38=key)\
         .order_by('-Data_Release_id')\
@@ -188,7 +199,20 @@ def sitemap(request):
 
 
 def variant_reports(request, variant_id):
-    variant_id = int(variant_id)
+    variant_id = variant_id.lower().strip()
+    variant_id = remove_disallowed_chars(variant_id)
+
+    # Accept search by ClinGen Allele Registry id (CA_ID)
+    if variant_id.startswith('ca'):
+        query = CurrentVariant.objects
+        current_variant = query.filter(Q(CA_ID__icontains=variant_id))[0]
+        key = current_variant.Genomic_Coordinate_hg38
+        variant_id = Variant.objects.filter(Genomic_Coordinate_hg38=key)\
+            .order_by('-Data_Release_id')[0].id
+
+    else:
+        variant_id = int(variant_id)
+
     change_types_map = {x['name']:x['id'] for x in list(ChangeType.objects.values())}
     query = Report.objects.filter(Variant_id=variant_id).exclude(Change_Type_id=change_types_map['deleted'])
     report_versions = []
