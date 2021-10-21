@@ -94,13 +94,22 @@ def variant_counts(request):
 def variant(request):
     variant_id = request.GET.get('variant_id')
 
-    variant_id = variant_id.lower().strip()
-    variant_id = remove_disallowed_chars(variant_id)
+    variant_id_clean = variant_id.lower().strip()
+    variant_id_clean = remove_disallowed_chars(variant_id_clean)
 
     # Accept search by ClinGen Allele Registry id (CA_ID)
-    if variant_id.startswith('ca'):
+    if variant_id_clean.startswith('ca'):
         query = CurrentVariant.objects
-        variant = query.filter(Q(CA_ID__icontains=variant_id))[0]
+        variant = query.filter(Q(CA_ID__icontains=variant_id_clean))
+
+        if len(variant) != 1:
+            response = JsonResponse({
+                "redirect": True,
+                "data": variant_id
+            })
+            return response
+        else:
+            variant = variant[0]
 
     else:
         variant_id = int(variant_id)

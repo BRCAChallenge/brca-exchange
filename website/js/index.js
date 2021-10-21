@@ -588,7 +588,11 @@ var VariantDetail = React.createClass({
     componentWillMount: function () {
         backend.variant(this.props.params.id).subscribe(
             resp => {
-                this.setState({data: resp.data, error: null});
+                if (resp.hasOwnProperty('redirect') && resp.redirect === true) {
+                    this.transitionTo('/variants', null, {search: resp.data})
+                } else {
+                    this.setState({data: resp.data, error: null});
+                }
             },
             () => { this.setState({error: 'Problem connecting to server'}); }
         );
