@@ -405,6 +405,8 @@ def apply_sources(query, include, exclude):
     # if there are multiple sources given then OR them:
     # the row must match in at least one column
     if len(include) > 0:
+        if include == ['all']:
+            include = [f.name for f in Variant._meta.get_fields() if (f.name.startswith("Variant_in_") and f.name != "Variant_in_Findlay_BRCA1_Ring_Function_Scores")]
         include_list = (Q(**{column: True}) for column in include)
         query = query.filter(reduce(__or__, include_list))
     else:
