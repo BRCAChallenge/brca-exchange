@@ -589,7 +589,7 @@ var VariantDetail = React.createClass({
         backend.variant(this.props.params.id).subscribe(
             resp => {
                 if (resp.hasOwnProperty('redirect') && resp.redirect === true) {
-                    this.transitionTo('/variants', null, {search: resp.data})
+                    this.transitionTo('/variants', null, {search: resp.data});
                 } else {
                     this.setState({data: resp.data, error: null});
                 }

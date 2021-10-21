@@ -203,6 +203,20 @@ class VariantTestCase(TestCase):
         response_data = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_data["count"], 0)
 
+    def test_include_set_to_all(self):
+        """Tests include query param set to 'all'"""
+        request = self.factory.get(
+            '/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num=0&search_term=&include=all')
+        response = index(request)
+
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(response_data["count"], 1)
+        response_variant = response_data["data"][0]
+        self.assertEqual(response_variant["Genomic_Coordinate_hg38"], self.existing_variant.Genomic_Coordinate_hg38)
+
     def test_request_with_release_number(self):
         '''Tests that the correct objects are used when release number is specified'''
         #create a new variant with specific release ID
