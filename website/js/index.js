@@ -588,7 +588,11 @@ var VariantDetail = React.createClass({
     componentWillMount: function () {
         backend.variant(this.props.params.id).subscribe(
             resp => {
-                this.setState({data: resp.data, error: null});
+                if (resp.hasOwnProperty('redirect') && resp.redirect === true) {
+                    this.transitionTo('/variants', null, {search: resp.data});
+                } else {
+                    this.setState({data: resp.data, error: null});
+                }
             },
             () => { this.setState({error: 'Problem connecting to server'}); }
         );
@@ -643,7 +647,7 @@ var VariantDetail = React.createClass({
         if (!prevState.data && this.state.data) {
             const data = this.state.data;
             const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
-            const variant = data[variantVersionIdx];
+            const variant = data[variantVersionIdx] || data[0];
 
             document.title = `${variant['HGVS_cDNA'].split(":")[1]} (${variant['Gene_Symbol']}) - BRCA Exchange`;
         }
@@ -814,7 +818,7 @@ var VariantDetail = React.createClass({
         }
 
         const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
-        const variant = data[variantVersionIdx];
+        const variant = data[variantVersionIdx] || data[0];
         const release = variant["Data_Release"];
         let cols, groups;
 

@@ -42,7 +42,7 @@ Search endpoint; returns variants based on ordering and filtering criteria.
 | page_num       | Index of the current page                                                                | 0       |
 | search_term    | String to search for in column values; unused if None                                    | None    |
 | format         | 'csv', 'tsv', or 'json' (server error if None)                                           | None*   |
-| include[]      | Sources to include in results (OR'd); no results if None                                 | None*   |
+| include[]      | Sources to include in results (OR'd); no results if None, may be set to 'all'            | None*   |
 | exclude[]      | Sources to exclude from results (OR'd)                                                   | None    |
 | filter[]       | Columns to filter according to the values in `filterValues`                              | None    |
 | filterValue[]  | Values which must occur in the columns specified in `filter`                             | None    |
@@ -76,6 +76,7 @@ Special notes about parameters:
   - Variant_in_ENIGMA_BRCA12_Functional_Assays
   - Variant_in_GnomAD
   - Variant_in_GnomADv3
+  - all
 - `exclude[]`: opposite of `include[]`; if the variant has a literal value of False for any of these columns, the variant is excluded from the results. Possible values are the same as for `include[].`
 - `change_types[]`: if `release` is specified, variants with the types of changes specified in this array parameter will be included in the results. Possible for this parameter are:
   - new
