@@ -143,9 +143,9 @@ var NavBarNew = React.createClass({
                                 <NavLink onClick={this.close} to='/whydonate'>
                                     Donate
                                 </NavLink>
-                                <NavLink onClick={this.close} to='/blog'>
-                                    Blog
-                                </NavLink>
+                                <li>
+                                    <a href="https://brcaexchange.org/blog">Blog</a>
+                                </li>
                             </NavDropdown>
                         </Nav>
                     </Navbar.Collapse>
