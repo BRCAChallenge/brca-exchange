@@ -23,6 +23,7 @@ priors_method_dir = os.path.abspath('../splicing')
 priors_filter_method_dir = os.path.abspath('../splicingfilter')
 utilities_method_dir = os.path.abspath('../utilities')
 vr_method_dir = os.path.abspath('../vr')
+splice_ai_method_dir = os.path.abspath('../splice_ai')
 
 field_metadata_path = os.path.abspath(os.path.join('..', 'field_metadata.tsv'))
 field_metadata_path_additional = os.path.abspath(os.path.join('..', 'field_metadata_additional_fields_variant_output_file.tsv'))

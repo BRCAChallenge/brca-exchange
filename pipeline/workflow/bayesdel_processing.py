@@ -68,6 +68,25 @@ class VictorAnnotations(DefaultPipelineTask):
 
 
 @requires(VictorAnnotations)
+class GenerateSpliceAIData(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_splice_ai.vcf"))
+
+    def run(self):
+        os.chdir(data_merging_method_dir)
+
+        args = ["bash", "spliceai", "-I", self.input().path, "-O", self.output().path,
+                "-R", "genome.fa", "-A", "grch38"]
+
+        pipeline_utils.run_process(args)
+
+        # we shouldn't be gaining or losing any variants
+        pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
+            self.input().path,
+            self.output().path)
+
+
+@requires(GenerateSpliceAIData)
 class AddBayesdelScores(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'built_with_bayesdel.tsv'))
