@@ -9,4 +9,4 @@ pygr==0.8.2
 pyparsing==2.4.7
 pytest==7.0.0
 requests==2.20.0
-zipp==1.0.0 # https://github.com/jaraco/zipp/issues/28
+zipp==3.7.0
