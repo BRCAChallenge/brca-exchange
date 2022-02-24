@@ -17,6 +17,7 @@
 ./release/artifacts/exLOVD_BRCA2_error_variants.txt
 ./release/artifacts/get_ca_id.log
 ./release/artifacts/LOVD_error_variants.txt
+./release/artifacts/LOVD_bracket_variants.tsv
 ./release/artifacts/merged.tsv
 ./release/artifacts/missing_reports.log
 ./release/artifacts/reports.tsv
