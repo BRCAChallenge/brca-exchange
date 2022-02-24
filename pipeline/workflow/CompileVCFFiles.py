@@ -310,7 +310,7 @@ class NormalizeLOVDSubmissions(DefaultPipelineTask):
         args = ["python", "normalizeLOVDSubmissions.py", "-i",
                 self.input().path, "-o",
                 self.output().path, "-b",
-                f"{self.artifacts_dir}/LOVD_bracket_variants.txt",]
+                f"{self.artifacts_dir}/LOVD_bracket_variants.tsv"]
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
 
