@@ -10,11 +10,14 @@ import argparse
 import pandas as pd
 import numpy as np
 
+# see https://stackoverflow.com/questions/20625582/how-to-deal-with-settingwithcopywarning-in-pandas
+pd.options.mode.chained_assignment = None  # default='warn'
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', help='Input LOVD file for ammendment.')
-    parser.add_argument('-o', '--output', help='Ouput txt file result.')
+    parser.add_argument('-o', '--output', help='Output txt file result.')
+    parser.add_argument('-b', '--bracket', help='Bracket variant txt file result.')
     options = parser.parse_args()
     return options
 
@@ -32,9 +35,17 @@ def main():
     options = parse_args()
     f_in = options.input
     f_out = options.output
+    bracket_out = options.bracket
 
     f_in_data_frame = pd.read_csv(f_in, sep="\t")
-    f_out_data_frame = add_submission_ids(f_in_data_frame)
+
+    # output variants with {} for review
+    f_in_data_frame[f_in_data_frame["cDNA"].str.contains("{")==True].to_csv(bracket_out, sep='\t', index=False)
+
+    # remove variants with {} from usable output because downstream hgvs parser can't handle them
+    combed_f_in_data_frame = f_in_data_frame[f_in_data_frame["cDNA"].str.contains("{")==False]
+
+    f_out_data_frame = add_submission_ids(combed_f_in_data_frame)
 
     f_out_data_frame.to_csv(f_out, sep='\t', index=False)
 
