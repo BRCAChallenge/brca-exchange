@@ -26,6 +26,19 @@ class ConvertBuiltToVCF(DefaultPipelineTask):
 
 
 @requires(ConvertBuiltToVCF)
+class GatherSpliceAIData(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(Path(self.cfg.output_dir)/'release'/'artifacts'/'bayesdel_with_spliceai_data.vcf')
+
+    def run(self):
+        brca_resources_dir = self.cfg.resources_dir
+
+        args = ["spliceai", "-I", self.input.path(), "-O" self.output.path(), "-R", brca_resources_dir + "/hg38.fa", "-A", "grch38"]
+
+        pipeline_utils.run_process(args)
+
+
+@requires(ConvertBuiltToVCF)
 class VictorAnnotations(DefaultPipelineTask):
     def output(self):
         wdir = Path(self.cfg.output_dir) / 'release' / 'artifacts' / 'victor_wdir'
@@ -45,7 +58,7 @@ class VictorAnnotations(DefaultPipelineTask):
 
         # Even though we are running a docker container (victor) from within a docker container (BE pipeline), we need to
         # do the file mapping with respect to the host file system not the file system from the BE pipeline container
-        vcf_host = Path(self.cfg.output_dir_host) / 'release' / 'artifacts' / 'bayesdel.vcf'
+        vcf_host = Path(self.cfg.output_dir_host) / 'release' / 'artifacts' / 'bayesdel_with_spliceai_data.vcf'
         wdir_host = Path(self.cfg.output_dir_host) / 'release' / 'artifacts' / 'victor_wdir'
 
         args = ["bash", "bayesdel/run_annotation_docker.sh",
