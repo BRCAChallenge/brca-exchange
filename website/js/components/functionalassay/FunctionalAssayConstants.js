@@ -55,7 +55,7 @@ const FunctionalAssayConstants = [{
         author: "Mesman et al, 2019",
         publication: "https://pubmed.ncbi.nlm.nih.gov/29988080",
         previousPublications: "PMID:2514691",
-        resultDescription: "1/2, 3, 4/5"
+        resultDescription: "Functional, Intermediate function, Loss of function"
     },
     {
         name: "Richardson",
