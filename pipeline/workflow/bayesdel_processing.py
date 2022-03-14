@@ -26,14 +26,15 @@ class ConvertBuiltToVCF(DefaultPipelineTask):
 
 
 @requires(ConvertBuiltToVCF)
-class GatherSpliceAIData(DefaultPipelineTask):
+class GenerateSpliceAIData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(Path(self.cfg.output_dir)/'release'/'artifacts'/'bayesdel_with_spliceai_data.vcf')
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, "variants_with_splice_ai.vcf"))
 
     def run(self):
-        brca_resources_dir = self.cfg.resources_dir
+        os.chdir(data_merging_method_dir)
 
-        args = ["spliceai", "-I", self.input.path(), "-O" self.output.path(), "-R", brca_resources_dir + "/hg38.fa", "-A", "grch38"]
+        args = ["bash", "spliceai", "-I", self.input().path, "-O", self.output().path,
+                "-R", brca_resources_dir + "/hg38.fa", "-A", "grch38"]
 
         pipeline_utils.run_process(args)
 
@@ -79,24 +80,6 @@ class VictorAnnotations(DefaultPipelineTask):
 
         print(f"Wrote log to {log_file}")
 
-
-@requires(VictorAnnotations)
-class GenerateSpliceAIData(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_splice_ai.vcf"))
-
-    def run(self):
-        os.chdir(data_merging_method_dir)
-
-        args = ["bash", "spliceai", "-I", self.input().path, "-O", self.output().path,
-                "-R", "genome.fa", "-A", "grch38"]
-
-        pipeline_utils.run_process(args)
-
-        # we shouldn't be gaining or losing any variants
-        pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
-            self.input().path,
-            self.output().path)
 
 
 @requires(GenerateSpliceAIData)
