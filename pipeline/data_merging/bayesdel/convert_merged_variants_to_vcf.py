@@ -28,7 +28,6 @@ def convert_merged_to_vcf(path, vcf_path):
     with open(vcf_path, 'w') as f:
         header = '##fileformat=VCFv4.0\n##source=brcaexchange\n##reference=GRCh38\n'
         f.write(header)
-        f.write("#CHROM POS ID REF ALT QUAL FILTER INFO\n".replace(' ', '\t'))
         f.write(("##contig=<ID=1,length=249250621>"
                  "\n##contig=<ID=2,length=243199373>"
                  "\n##contig=<ID=3,length=198022430>"
@@ -50,7 +49,8 @@ def convert_merged_to_vcf(path, vcf_path):
                  "\n##contig=<ID=19,length=59128983>"
                  "\n##contig=<ID=20,length=63025520>"
                  "\n##contig=<ID=21,length=48129895>"
-                 "\n##contig=<ID=22,length=51304566>"))
+                 "\n##contig=<ID=22,length=51304566>\n"))
+        f.write("#CHROM POS ID REF ALT QUAL FILTER INFO\n".replace(' ', '\t'))
 
     (df_vcf.sort_values(['CHROM', 'POS']).
             to_csv(vcf_path, sep='\t', mode='a', index=False, header=None))

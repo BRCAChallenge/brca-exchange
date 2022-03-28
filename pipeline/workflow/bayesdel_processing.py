@@ -31,9 +31,10 @@ class GenerateSpliceAIData(DefaultPipelineTask):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "variants_with_splice_ai.vcf"))
 
     def run(self):
+        brca_resources_dir = self.cfg.resources_dir
         os.chdir(data_merging_method_dir)
 
-        args = ["bash", "spliceai", "-I", self.input().path, "-O", self.output().path,
+        args = ["spliceai", "-I", self.input().path, "-O", self.output().path,
                 "-R", brca_resources_dir + "/hg38.fa", "-A", "grch38"]
 
         pipeline_utils.run_process(args)
