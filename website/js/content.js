@@ -290,11 +290,7 @@ const helpContentResearch = [
             {
                 name: "How do I Download Variant Data?",
                 contents: require("../content/help/research/downloading-variant-data.md")
-            },
-            {
-                name: "What are Lollipop Plots?",
-                contents: require("../content/help/research/lollipop-plots.md")
-            },
+            }
         ]
     },
     {
