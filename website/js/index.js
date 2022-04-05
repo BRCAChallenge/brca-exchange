@@ -444,7 +444,6 @@ var Database = React.createClass({
 					initialState={params}
 					{...params}
 					fetch={backend.data}
-					fetchLollipop={backend.lollipopData}
 					url={backend.url}
 					onChange={s => this.urlq.onNext(s)}
 					onToggleMode={this}
@@ -464,7 +463,6 @@ var Database = React.createClass({
 					initialState={params}
 					{...params}
 					fetch={backend.data}
-					fetchLollipop={backend.lollipopData}
 					url={backend.url}
 					onChange={s => this.urlq.onNext(s)}
 					onToggleMode={this}

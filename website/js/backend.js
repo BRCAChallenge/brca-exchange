@@ -105,13 +105,6 @@ function userLocations(search, roles) {
     return Rx.DOM.get(url).map(xhr => JSON.parse(xhr.responseText));
 }
 
-function lollipopData(opts) {
-    opts.pageLength = 0;
-    opts.format = 'json';
-    opts.column = ['id', 'Genomic_Coordinate_hg38', 'Pathogenicity_expert', 'Allele_Frequency'];
-    return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
-}
-
 module.exports = {
     data,
     variant,
@@ -122,7 +115,6 @@ module.exports = {
     release,
     users,
     userLocations,
-    lollipopData,
     url,
     trimSearchTerm
 };
