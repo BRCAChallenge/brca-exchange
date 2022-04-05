@@ -22,7 +22,6 @@ var pluralize = (n, s) => n === 1 ? s : s + 's';
 
 var merge = (...args) => _.extend({}, ...args);
 
-var Lollipop = require('./d3Lollipop');
 
 function setPages({data, count, deletedCount, synonyms, releaseName}, pageLength) { //eslint-disable-line camelcase
     return {
@@ -84,7 +83,6 @@ var DataTable = React.createClass({
         return (
             this.state.filtersOpen !== nextState.filtersOpen ||
             this.state.columnSelectorsOpen !== nextState.columnSelectorsOpen ||
-            this.state.lollipopOpen !== nextState.lollipopOpen ||
             this.state.page !== nextState.page ||
             this.state.count !== nextState.count ||
             this.state.pageLength !== nextState.pageLength ||
@@ -119,7 +117,6 @@ var DataTable = React.createClass({
         }
         return mergeState({
             data: [],
-            lollipopOpen: false,
             filtersOpen: false,
             filterValues: filterValues,
             columnSelectorsOpen: false,
@@ -176,15 +173,6 @@ var DataTable = React.createClass({
             exclude: _.keys(_.pick(sourceSelection, v => v === -1)),
             filterValues}, hgvs.filters(search, filterValues)));
     },
-    lollipopOpts: function () {
-        var {search, filterValues, sourceSelection} = this.state;
-        return merge({
-            search,
-            include: _.keys(_.pick(sourceSelection, v => v === 1)),
-            exclude: _.keys(_.pick(sourceSelection, v => v === -1)),
-            filterValues
-        }, hgvs.filters(search, filterValues));
-    },
     fetch: function (state) {
         var {pageLength, search, page, sortBy,
             filterValues, columnSelection, sourceSelection,
@@ -210,9 +198,6 @@ var DataTable = React.createClass({
         var newState = mergeState(this.state, opts);
         this.setState(newState);
         this.props.onChange(newState);
-    },
-    toggleLollipop: function () {
-        this.setState({lollipopOpen: !this.state.lollipopOpen});
     },
     toggleFilters: function () {
         this.setState({filtersOpen: !this.state.filtersOpen});
@@ -259,9 +244,9 @@ var DataTable = React.createClass({
         }
     },
     render: function () {
-        var {release, changeTypes, filterValues, filtersOpen, columnSelectorsOpen, lollipopOpen, search, data, columnSelection,
+        var {release, changeTypes, filterValues, filtersOpen, columnSelectorsOpen, search, data, columnSelection,
             page, totalPages, count, synonyms, error} = this.state;
-        var {columns, filterColumns, className, columnSelectors, filters, downloadButton, lollipopButton, mode} = this.props;
+        var {columns, filterColumns, className, columnSelectors, filters, downloadButton, mode} = this.props;
         var renderColumns = _.filter(columns, c => columnSelection[c.prop]);
         var filterFormEls = _.map(filterColumns, ({name, prop, values}) =>
             <SelectField onChange={v => this.setFilters({[prop]: filterAny(v)})}
@@ -304,7 +289,6 @@ var DataTable = React.createClass({
                         <Button className="btn-default rgt-buffer"
                                 onClick={this.restoreDefaults}>Restore Defaults
                         </Button>
-                        {lollipopButton(this.toggleLollipop, lollipopOpen)}
                     </Col>
                 </Row>
                 <Row id="filters">
@@ -313,12 +297,6 @@ var DataTable = React.createClass({
                         {columnSelectorsOpen && mode === "research_mode" && <div className='form-inline'>
                             {columnSelectors}
                         </div>}
-                    </Col>
-                </Row>
-                <Row id="lollipop-chart">
-                    <Col sm={12}>
-                        {lollipopOpen && this.state.windowWidth > 991 &&
-                        <Lollipop fetch={this.props.fetchLollipop} opts={this.lollipopOpts()} onHeaderClick={this.props.onHeaderClick} onRowClick={this.props.onRowClick}/> }
                     </Col>
                 </Row>
                 <Row id="download" className="btm-buffer">

@@ -781,10 +781,6 @@ var ResearchVariantTableSupplier = function (Component) {
         getDownloadButton: function (callback) {
             return <Button className="btn-default rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
         },
-        getLollipopButton: function (callback, isOpen) {
-            return (<Button id="lollipop-chart-toggle" className="btn-default rgt-buffer"
-                           onClick={callback}>{(isOpen ? 'Hide' : 'Show' ) + ' Lollipop Chart'}</Button>);
-        },
         getColumns: function () {
             return researchModeColumns;
         },
@@ -816,7 +812,6 @@ var ResearchVariantTableSupplier = function (Component) {
                     sourceSelection={this.state.sourceSelection}
                     columnSelection={this.state.columnSelection}
                     downloadButton={this.getDownloadButton}
-                    lollipopButton={this.getLollipopButton}
                     changeInProgress={this.state.changeInProgress}/>
             );
         }
@@ -846,8 +841,7 @@ var VariantTableSupplier = function (Component) {
                     columnSelection={expertColumns}
                     sourceSelection={sourceSelection}
                     expertVariantTableRestoreDefaults={this.expertVariantTableRestoreDefaults}
-                    downloadButton={()=> null}
-                    lollipopButton={()=> null}/>
+                    downloadButton={()=> null}/>
             );
         }
     });
