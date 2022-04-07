@@ -2,7 +2,6 @@ import io
 import os
 import click
 import pandas as pd
-import pdb
 
 coord_col = 'genomics_coord'
 
@@ -67,8 +66,6 @@ def main(vcf, built_tsv, output):
     df = pd.read_csv(built_tsv, sep='\t', keep_default_na=False)
 
     df_merged = df.merge(df_spliceai, left_on='Genomic_Coordinate_hg38', right_on=coord_col, how='left')
-
-    pdb.set_trace()
 
     # drop join key and write
     (df_merged.drop(columns=[coord_col]).

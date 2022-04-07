@@ -40,6 +40,20 @@ class GenerateSpliceAIData(DefaultPipelineTask):
         pipeline_utils.run_process(args)
 
 
+@requires(GenerateSpliceAIData)
+class AddSpliceAI(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'built_with_spliceai.tsv'))
+
+    def run(self):
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "splice_ai/add_splice_scores_to_built_file.py", "--vcf", self.input().path,
+                '--built-tsv', ConvertBuiltToVCF().input().path, '--output', self.output().path]
+
+        pipeline_utils.run_process(args)
+
+
 @requires(ConvertBuiltToVCF)
 class VictorAnnotations(DefaultPipelineTask):
     def output(self):
@@ -83,7 +97,7 @@ class VictorAnnotations(DefaultPipelineTask):
 
 
 
-@requires(GenerateSpliceAIData)
+@requires(VictorAnnotations)
 class AddBayesdelScores(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'built_with_bayesdel.tsv'))
@@ -92,7 +106,9 @@ class AddBayesdelScores(DefaultPipelineTask):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "bayesdel/add_bayesdel_scores_to_built_file.py", '--output', self.output().path,
-                '--built-tsv', ConvertBuiltToVCF().input().path] + \
+                '--built-tsv', AddSpliceAI().output().path] + \
                 [ p.path for p in self.input()['paths']]
 
         pipeline_utils.run_process(args)
+
+
