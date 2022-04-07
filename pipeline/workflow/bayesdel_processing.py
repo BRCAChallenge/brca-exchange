@@ -54,7 +54,7 @@ class AddSpliceAI(DefaultPipelineTask):
         pipeline_utils.run_process(args)
 
 
-@requires(ConvertBuiltToVCF)
+@requires(AddSpliceAI)
 class VictorAnnotations(DefaultPipelineTask):
     def output(self):
         wdir = Path(self.cfg.output_dir) / 'release' / 'artifacts' / 'victor_wdir'
