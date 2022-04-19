@@ -74,7 +74,7 @@ class VictorAnnotations(DefaultPipelineTask):
 
         # Even though we are running a docker container (victor) from within a docker container (BE pipeline), we need to
         # do the file mapping with respect to the host file system not the file system from the BE pipeline container
-        vcf_host = Path(self.cfg.output_dir_host) / 'release' / 'artifacts' / 'bayesdel_with_spliceai_data.vcf'
+        vcf_host = Path(self.cfg.output_dir_host) / 'release' / 'artifacts' / 'bayesdel.vcf'
         wdir_host = Path(self.cfg.output_dir_host) / 'release' / 'artifacts' / 'victor_wdir'
 
         args = ["bash", "bayesdel/run_annotation_docker.sh",
