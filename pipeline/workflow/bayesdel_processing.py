@@ -46,8 +46,6 @@ class AddSpliceAI(DefaultPipelineTask):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'built_with_spliceai.tsv'))
 
     def run(self):
-        os.chdir(data_merging_method_dir)
-
         args = ["python", "splice_ai/add_splice_scores_to_built_file.py", "--vcf", self.input().path,
                 '--built-tsv', ConvertBuiltToVCF().input().path, '--output', self.output().path]
 
