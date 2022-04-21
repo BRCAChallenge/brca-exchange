@@ -149,8 +149,13 @@ def determine_evidence_code_per_variant(r):
     if isinstance(pop, str):
         relevant_ac = r["AC_" + pop]
     else:
-        relevant_ac = np.nan
-    BA1_or_BS1 = faf > 0.0001
+        relevant_ac = 0
+        for this_pop in cnts.pop_name:
+            pop_ac = r["AC_" + this_pop.lower()]
+            if pop_ac > relevant_ac:
+                relevant_ac = pop_ac
+                
+    BA1_or_BS1 = faf > 0.00002
 
     # read depth threshold is 20 for BA1 and BS1
     if BA1_or_BS1 is True and (read_depth < 20):
@@ -167,28 +172,28 @@ def determine_evidence_code_per_variant(r):
     if faf > 0.0001:
         return 'BS1'
 
-    if faf > 0 and (faf < 0.0001):
-        return 'code_missing_faf>0_faf<.001'
+    if faf > 0.00002:
+        return 'BS1_Supporting'
 
-    if not np.isnan(faf):
-        return 'code_missing_faf_isnan'
-
-    if faf == 0:
+    if (np.isnan(faf)) or (faf < 0.00002):
         if relevant_ac > 0:
-            return 'need_review_faf==0_rel_ac>0'
+            return('code_missing')
         else:
-            return 'pm2_supporting_faf==0_rel_ac==0'
-
-    if r['is_snv'] and (faf == 0) and (relevant_ac == 0 or np.isnan(relevant_ac)):
-        return 'pm2_supporting_snv_faf==0_rel_ac==0_or_rel_ac_isnan'
+            if r['is_snv']:
+                return('PM2_supporting')
+            else:
+                return('code_missing')
 
     return 'need_review'
 
 
 def add_final_code_column(df):
-    success_codes = set(['BA1', 'BS1', 'pm2_supporting'])
+    benign_codes = ['BA1', 'BS1', 'BS1_Supporting']
+    pathogenicity_codes = ['PM2_supporting']
+    intermediate_codes = [ 'code_missing' ]
+    ordered_success_codes = benign_codes + intermediate_codes + pathogenicity_codes
+    success_codes = set(ordered_success_codes)
     dq_failure_codes = set(['fail_insufficient_read_depth', 'fail_vcf_filter_flag', 'need_review'])
-    CODE_MISSING = 'code_missing'
     
     def is_both_sources(dfg):
         return len(dfg) > 1
@@ -200,30 +205,27 @@ def add_final_code_column(df):
             # we have data from both v2 and v3
             c1 = dfg['evidence_code'].iloc[0]
             c2 = dfg['evidence_code'].iloc[1]
-
-            if (c1 in dq_failure_codes and c2 == CODE_MISSING) or (c2 in dq_failure_codes and c1 == CODE_MISSING):
-                return CODE_MISSING
-            
+            # if both codes are failure codes, return 'fail_both'.
+            # if one of the codes is a success code, return that code.
             if c1 in dq_failure_codes and c2 in dq_failure_codes:
                 return "fail_both"
-            
-            if (c1 == 'pm2_supporting' and c2 == CODE_MISSING) or (c2 == 'pm2_supporting' and c1 == CODE_MISSING):
-                return CODE_MISSING
-
-            if c1 == CODE_MISSING and c2 == CODE_MISSING:
-                return CODE_MISSING
-            
-            if c2 in success_codes and c1 not in success_codes:
+            if (c1 in dq_failure_codes) and (c2 not in dq_failure_codes):
                 return c2
-            if c1 in success_codes and c2 not in success_codes:
+            if (c2 in dq_failure_codes) and (c1 not in dq_failure_codes):
                 return c1
-
-            # assert c1 in success_codes and c2 in success_codes
-            
+            assert(c1 in success_codes and c2 in success_codes)
             if c1 == c2:
                 return c1
             else:
-                return "contradictory_results"
+                # if one code indicates a pathogenic effect and the other indicates a benign
+                # effect, that is a contradiction.
+                # Otherwise, if both codes are consistent, return the stronger code.
+                if (c1 in pathogenicity_codes and c2 in benign_codes) or (c1 in benign_codes and c2 in pathogenicity_codes):
+                    return "contradictory_results"
+                if ordered_success_codes.index(c1) < ordered_success_codes.index(c2):
+                    return c1
+                else:
+                    return c2
 
         raise ValueError("some duplicate variants per source?")
 
