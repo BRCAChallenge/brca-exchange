@@ -30,14 +30,6 @@ module.exports = {
 		  }
 		],
 		loaders: [
-			// The next three are required for muts-needle-plot.
-			{ test: /d3-svg-legend/, loader: "imports?d3=d3" },
-			{ test: /muts-needle-plot/, loader: "imports?_=underscore" },
-			// The d3-tip AMD loader does not populate d3.tip, which is expected
-			// by muts-needle-plot. So, we disable it here. The CommonJS loader
-			// will populate d3.tip.
-			{ test: /d3-tip/, loader: "imports?define=>false" },
-
 			{ test: /rx-dom/, loader: "imports?define=>false" },
 			{ test: /\.css$/, loader: "style!css" },
 			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader?optional=es7.objectRestSpread,optional=runtime,cacheDirectory=true'},

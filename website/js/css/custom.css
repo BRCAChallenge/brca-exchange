@@ -817,14 +817,6 @@ html {
     }
 }
 
-
-/* Hide lollipop chart toggle if screen is too small to display chart */
-@media only screen and (max-width: 991px) {
-    #lollipop-chart-toggle {
-        display: none;
-    }
-}
-
 .checkbox input[type="checkbox"] {
     margin-right: 0.4em;
 }
@@ -1743,4 +1735,77 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     a[href]:after {
         content: none
     }
+}
+
+
+/**************************************************************/
+/**********      d3 customizations        *********************/
+/**************************************************************/
+
+
+/* figure legend */
+.breakLabels.nomuts {
+    font-weight: normal;
+    opacity: 0.3;
+}
+
+.noshow {
+    opacity: 0.0;
+}
+
+.noshowLegend {
+    opacity: 0.3;
+}
+
+.regionGroup:hover > text {
+    fill: black;
+    font-weight: bold;
+    opacity: 1;
+}
+
+.regionGroup:hover > rect {
+    stroke-width: 4;
+}
+
+.repeatedName.noshow {
+    fill: black;
+    opacity: 0;
+}
+
+.d3-tip {
+    line-height: 1;
+    font-size: 11px;
+    color: black;
+    font-weight: bold;
+    padding: 10px;
+    background: rgba(240, 240, 240, 0.8);
+    border-width: 1px;
+    border-color: rgba(190, 190, 190, 1); 
+    border-radius: 6px;
+}
+
+.d3-tip-selection {
+    font-size: 12px;
+    text-align: center;
+    stroke: black;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.6);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
 }
