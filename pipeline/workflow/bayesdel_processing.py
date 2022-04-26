@@ -6,7 +6,7 @@ import luigi
 from luigi.util import requires
 
 import workflow.pipeline_utils as pipeline_utils
-from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_dir
+from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_dir, splice_ai_method_dir
 
 
 class ConvertBuiltToVCF(DefaultPipelineTask):
@@ -46,7 +46,9 @@ class AddSpliceAI(DefaultPipelineTask):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'built_with_spliceai.tsv'))
 
     def run(self):
-        args = ["python", "splice_ai/add_splice_scores_to_built_file.py", "--vcf", self.input().path,
+        os.chdir(splice_ai_method_dir)
+
+        args = ["python", "add_splice_scores_to_built_file.py", "--vcf", self.input().path,
                 '--built-tsv', ConvertBuiltToVCF().input().path, '--output', self.output().path]
 
         pipeline_utils.run_process(args)

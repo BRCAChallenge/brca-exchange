@@ -3,7 +3,9 @@ import os
 import click
 import pandas as pd
 
+
 coord_col = 'genomics_coord'
+result_col = 'result_spliceai'
 
 VCF_INFO_COL = 7
 SPLICE_COLS = []
@@ -37,13 +39,13 @@ def spliceai_results_as_df(vcf):
 
     # processing VCF INFO col, generate a dict variable_name -> value out of the info field for every record
     info_dict = spliceai_vcf_df.iloc[:, VCF_INFO_COL].str.split('|')
-    # .apply(lambda l: {s.split('=')[0] : '='.join(s.split('=')[1:]) for s in l})
 
     # generating dataframe out of dict, one column per variable
     df_spliceai_props = pd.DataFrame.from_records(info_dict.values, index=info_dict.index)
 
     # update columns names
-    df_spliceai_props.columns = SPLICE_COLS
+    splice_cols_with_suffix = [col + '_spliceAI' for col in SPLICE_COLS]
+    df_spliceai_props.columns = splice_cols_with_suffix
 
     # join back to vcf dataframe
     df_ret = spliceai_vcf_df.merge(df_spliceai_props, how='inner', left_index=True, right_index=True)
@@ -53,8 +55,11 @@ def spliceai_results_as_df(vcf):
         str) + ':' + df_ret.iloc[:, 3].astype(
         str) + ">" + df_ret.iloc[:, 4].astype(str)
 
+    # calculate result, which is the maximum of the 4 scores
+    df_ret[result_col] = df_ret[['DS_AG_spliceAI','DS_AL_spliceAI','DS_DG_spliceAI','DS_DL_spliceAI']].max(axis=1)
+
     # dropping VCF columns, leaving columns for variable of interest + join field
-    return df_ret.drop(columns=['CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO'])
+    return df_ret.drop(columns=['CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO','ALLELE_spliceAI','SYMBOL_spliceAI'])
 
 
 @click.command()

@@ -5,8 +5,10 @@
 ./release/artifacts/bayesdel.vcf
 ./release/artifacts/BICready.vcf
 ./release/artifacts/BIC.vcf
+./release/artifacts/variants_with_splice_ai.vcf
 ./release/artifacts/built.tsv
 ./release/artifacts/built_with_bayesdel.tsv
+./release/artifacts/built_with_spliceai.tsv
 ./release/artifacts/built_with_ca_ids.tsv
 ./release/artifacts/built_with_mupit.tsv
 ./release/artifacts/built_with_priors_clean.tsv
