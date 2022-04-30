@@ -7,12 +7,12 @@ The Computational Prediction tile contains the results of machine learning metho
 For each computational predictor, we present a set of general fields that are common to all variants (**Method**, **Description**, **Publication**) as well as fields that are specific to each prediction method.
 
 ----
-#### Variant Type
+#### Variant Type ((varType))
 
 Indicates the type of impact that the variant has on the reference sequence: a substition, insertion, deletion, or a change that's more complex.
 
 ----
-#### Variant Location
+#### Variant Location ((varLoc))
 
 Indicates which clinically-important functional domain the variant overlaps, if any.  If the variant does not overlap a clinically-important domain, then estimates of the impact of the variant on the protein function are not relevant.
 
