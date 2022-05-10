@@ -183,23 +183,22 @@ const researchModeGroups = [
         {
             source: "BayesDel",
             data: [
-                {title: 'Result', prop: 'BayesDel_nsfp33a_noAF', core: true},
+                {title: 'Result BayesDel', prop: 'BayesDel_nsfp33a_noAF', core: true},
             ]
         },
         {
             source: "SpliceAI",
             data: [
-                {title: 'Result', prop: 'result_spliceai', core: true},
-                {title: 'DS_AG_spliceAI', prop: 'DS_AG_spliceAI', core: true},
-                {title: 'DS_AL_spliceAI', prop: 'DS_AL_spliceAI', core: true},
-                {title: 'DS_DG_spliceAI', prop: 'DS_DG_spliceAI', core: true},
-                {title: 'DS_DL_spliceAI', prop: 'DS_DL_spliceAI', core: true},
-                {title: 'DP_AG_spliceAI', prop: 'DP_AG_spliceAI', core: true},
-                {title: 'DP_AL_spliceAI', prop: 'DP_AL_spliceAI', core: true},
-                {title: 'DP_DG_spliceAI', prop: 'DP_DG_spliceAI', core: true},
-                {title: 'DP_DL_spliceAI', prop: 'DP_DL_spliceAI', core: true}
+                {title: 'Result SpliceAI', prop: 'result_spliceai', core: true},
+                {title: 'Delta Score Acceptor Gain SpliceAI', prop: 'DS_AG_spliceAI', core: true},
+                {title: 'Delta Score Acceptor Loss SpliceAI', prop: 'DS_AL_spliceAI', core: true},
+                {title: 'Delta Score Donor Gain SpliceAI', prop: 'DS_DG_spliceAI', core: true},
+                {title: 'Delta Score Donor Loss SpliceAI', prop: 'DS_DL_spliceAI', core: true},
+                {title: 'Delta Position Acceptor Gain SpliceAI', prop: 'DP_AG_spliceAI', core: true},
+                {title: 'Delta Position Acceptor Loss SpliceAI', prop: 'DP_AL_spliceAI', core: true},
+                {title: 'Delta Position Donor Gain SpliceAI', prop: 'DP_DG_spliceAI', core: true},
+                {title: 'Delta Position Donor Loss SpliceAI', prop: 'DP_DL_spliceAI', core: true}
             ]
-
         },
     ]},
 
@@ -575,7 +574,22 @@ const researchModeColumns = [
     {title: 'Cell Survival Biwas', prop: 'Cell_Survival_Biwas_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'Drug Sensitivity Biwas', prop: 'Drug_Sensitivity_Biwas_ENIGMA_BRCA12_Functional_Assays'},
     {title: 'HAT+DS Score Biwas', prop: 'HAT_DS_Score_Biwas_ENIGMA_BRCA12_Functional_Assays'},
-    {title: 'Report Biwas', prop: 'Result_Biwas_ENIGMA_BRCA12_Functional_Assays'}
+    {title: 'Report Biwas', prop: 'Result_Biwas_ENIGMA_BRCA12_Functional_Assays'},
+    {title: 'Result BayesDel', prop: 'BayesDel_nsfp33a_noAF'},
+    {title: 'Result SpliceAI', prop: 'result_spliceai'},
+    {title: 'Delta Score Acceptor Gain SpliceAI', prop: 'DS_AG_spliceAI'},
+    {title: 'Delta Score Acceptor Loss SpliceAI', prop: 'DS_AL_spliceAI'},
+    {title: 'Delta Score Donor Gain SpliceAI', prop: 'DS_DG_spliceAI'},
+    {title: 'Delta Score Donor Loss SpliceAI', prop: 'DS_DL_spliceAI'},
+    {title: 'Delta Position Acceptor Gain SpliceAI', prop: 'DP_AG_spliceAI'},
+    {title: 'Delta Position Acceptor Loss SpliceAI', prop: 'DP_AL_spliceAI'},
+    {title: 'Delta Position Donor Gain SpliceAI', prop: 'DP_DG_spliceAI'},
+    {title: 'Delta Position Donor Loss SpliceAI', prop: 'DP_DL_spliceAI'}
+
+
+
+
+
 ];
 
 

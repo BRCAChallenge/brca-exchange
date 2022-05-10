@@ -40,7 +40,7 @@ export default class ComputationalPredictionTile extends React.Component {
             }
 
             let groupData = innerGroups.filter(obj => {return obj.source === group;})[0].data;
-            let result = variant[groupData.filter(obj => {return obj.title === 'Result';})[0].prop];
+            let result = variant[groupData.filter(obj => {return obj.title.includes('Result');})[0].prop];
             if (util.isEmptyField(result)) {
                 result = '-';
             } else {
