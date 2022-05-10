@@ -179,6 +179,30 @@ const researchModeGroups = [
         {title: 'Allele Origin', prop: 'Germline_or_Somatic_BIC'},
     ]},
 
+    {groupTitle: 'Computational Predictions', internalGroupName: 'Computational Predictions', innerGroups: [
+        {
+            source: "BayesDel",
+            data: [
+                {title: 'Result', prop: 'BayesDel_nsfp33a_noAF', core: true},
+            ]
+        },
+        {
+            source: "SpliceAI",
+            data: [
+                {title: 'Result', prop: 'result_spliceai', core: true},
+                {title: 'DS_AG_spliceAI', prop: 'DS_AG_spliceAI', core: true},
+                {title: 'DS_AL_spliceAI', prop: 'DS_AL_spliceAI', core: true},
+                {title: 'DS_DG_spliceAI', prop: 'DS_DG_spliceAI', core: true},
+                {title: 'DS_DL_spliceAI', prop: 'DS_DL_spliceAI', core: true},
+                {title: 'DP_AG_spliceAI', prop: 'DP_AG_spliceAI', core: true},
+                {title: 'DP_AL_spliceAI', prop: 'DP_AL_spliceAI', core: true},
+                {title: 'DP_DG_spliceAI', prop: 'DP_DG_spliceAI', core: true},
+                {title: 'DP_DL_spliceAI', prop: 'DP_DL_spliceAI', core: true}
+            ]
+
+        },
+    ]},
+
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', alleleFrequencies: true,
         innerGroups: [
             {

@@ -13,8 +13,9 @@ const CollapsibleSection = React.createClass({
         this.props.onFieldToggled(id);
     },
 
-    generateHeader: function(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay) {
+    generateHeader: function(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction) {
         let loc;
+        let caret;
         if (assay) {
             let className = `${assay.loc.toLowerCase()}-header`;
             if (assay.loc === "Protein") {
@@ -29,15 +30,30 @@ const CollapsibleSection = React.createClass({
             );
         }
 
+        if (computationalPrediction) {
+            if (fieldName === "varType") {
+                fieldName = "Variant Type";
+                caret = '';
+            } else if (fieldName === "varLoc") {
+                fieldName = "Variant Location";
+                caret = '';
+            } else {
+                caret = ( this.props.expanded
+                            ? <i className="fa fa-caret-down" aria-hidden="true" />
+                            : <i className="fa fa-caret-right" aria-hidden="true" /> );
+            }
+            fieldName = 'Method: ' + fieldName;
+        } else {
+            caret = ( this.props.expanded
+                            ? <i className="fa fa-caret-down" aria-hidden="true" />
+                            : <i className="fa fa-caret-right" aria-hidden="true" /> );
+        }
+
         return (
-            <div className={`allele-frequency-header ${this.props.expanded ? 'expanded' : ''}`} onClick={(e) => this.handleToggle(e, id)}>
+            <div className={`allele-frequency-header ${this.props.expanded ? 'expanded' : ''}`} onClick={(e) => caret !== '' && this.handleToggle(e, id)}>
                 <div className="allele-frequency-cell allele-frequency-label">
                     {assay ? assayLoc : ''}
-                    {
-                        this.props.expanded
-                            ? <i className="fa fa-caret-down" aria-hidden="true" />
-                            : <i className="fa fa-caret-right" aria-hidden="true" />
-                    }
+                    {caret}
                     &nbsp;
                     <span>{fieldName}</span>
                 </div>
@@ -64,14 +80,14 @@ const CollapsibleSection = React.createClass({
     },
 
     render: function() {
-        const {id, fieldName, hideEmptyItems, extraHeaderItems, twoColumnExtraHeader, assay} = this.props;
+        const {id, fieldName, hideEmptyItems, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction} = this.props;
 
         let allEmpty = false;
 
         return (
             <div className={ allEmpty && hideEmptyItems ? "group-empty" : "" }>
                 <div style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
-                { this.generateHeader(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay) }
+                { this.generateHeader(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction) }
                 </div>
 
                 <Collapse className={allEmpty ? "group-empty" : ""}

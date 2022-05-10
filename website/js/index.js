@@ -8,6 +8,7 @@ import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
 import LiteratureTable from "./components/LiteratureTable";
 import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
 import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
+import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
 import MupitStructure from './MupitStructure';
 
 // shims for older browsers
@@ -930,6 +931,24 @@ var VariantDetail = React.createClass({
                         hideEmptyItems={this.state.hideEmptyItems}
                         relayoutGrid={this.relayoutGrid}
                         helpSection="functional-assay-results"
+                        showHelp={this.showHelp}
+                        tooltips={this.state.tooltips}
+                        variant={variant}
+                        innerGroups={innerGroups}
+                    />
+                );
+            }
+
+            if (groupTitle === "Computational Predictions") {
+                return (
+                    <ComputationalPredictionTile
+                        key="source-reports-tile"
+                        groupTitle='functional-assay-tile'
+                        displayTitle="Computational Predictions"
+                        onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        hideEmptyItems={this.state.hideEmptyItems}
+                        relayoutGrid={this.relayoutGrid}
+                        helpSection="computational-predictions"
                         showHelp={this.showHelp}
                         tooltips={this.state.tooltips}
                         variant={variant}
