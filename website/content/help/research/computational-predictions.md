@@ -47,42 +47,33 @@ For any given variant, SpliceAI first estimates the probability that the *wild t
 The largest of SpliceAI's four delta scores (representing the gain/loss of a donor/acceptor splice site) is widely used as an overall estimate of the probability that the variant will impact pre-mRNA splicing.
 
 * #### Delta Score Donor Loss ((DS_DL_spliceAI))
-
-The Delta Score Donor Loss indicates the likelihood that the variant will impact splicing by weakening or removing an existing donor splice site, an exon/intron border.
+    The Delta Score Donor Loss indicates the likelihood that the variant will impact splicing by weakening or removing an existing donor splice site, an exon/intron border.
 
 * #### Delta Score Acceptor Loss ((DS_AL_spliceAI))
-
-The Delta Score Acceptor Loss indicates the likelihood that the variant will impact splicing by weakening or removing an existing acceptor splice site, an intron/exon border.
+    The Delta Score Acceptor Loss indicates the likelihood that the variant will impact splicing by weakening or removing an existing acceptor splice site, an intron/exon border.
 
 * #### Delta Score Donor Gain ((DS_DG_spliceAI))
-
-The Delta Score Donor Gain indicates the likelihood that the variant will impact splicing by introducing a new donor splice site, an exon/intron border.
+    The Delta Score Donor Gain indicates the likelihood that the variant will impact splicing by introducing a new donor splice site, an exon/intron border.
 
 * #### Delta Score Acceptor Gain ((DS_AG_spliceAI))
-
-The Delta Score Acceptor Gain indicates the likelihood that the variant will impact splicing by introducing a new acceptor splice site, an intron/exon border.
+    The Delta Score Acceptor Gain indicates the likelihood that the variant will impact splicing by introducing a new acceptor splice site, an intron/exon border.
 
 * #### Delta Position Donor Loss ((DP_DL_spliceAI))
-
-For variants predicted to weaken or remove an existing donor splice site, the delta position donor loss indicates the number of nucleotides in the pre-mRNA transcript between the variant and the donor splice site in question.  Negative values indicate transcript positions downstream of the variant, and positive values indicate transcript positions upstream of the variant.
+    For variants predicted to weaken or remove an existing donor splice site, the delta position donor loss indicates the number of nucleotides in the pre-mRNA transcript between the variant and the donor splice site in question.  Negative values indicate transcript positions downstream of the variant, and positive values indicate transcript positions upstream of the variant.
 
 * #### Delta Position Acceptor Loss ((DP_AL_spliceAI))
-
-For variants predicted to weaken or remove an existing acceptor splice site, the Delta Position Acceptor Loss indicates the number of nucleotides in the pre-mRNA transcript between the variant and the acceptor splice site in question.  Negative values indicate transcript positions downstream of the variant, and positive values indicate transcript positions upstream of the variant.
+    For variants predicted to weaken or remove an existing acceptor splice site, the Delta Position Acceptor Loss indicates the number of nucleotides in the pre-mRNA transcript between the variant and the acceptor splice site in question.  Negative values indicate transcript positions downstream of the variant, and positive values indicate transcript positions upstream of the variant.
 
 
 * #### Delta Position Donor Gain ((DP_DG_spliceAI))
-
-For variants predicted to create a new donor splice site, the Delta Position Donor Gain indicates the number of nucleotides in the pre-mRNA transcript between the variant and this new donor splice site.  Negative values indicate transcript positions downstream of the variant, and positive values indicate transcript positions upstream of the variant.
+    For variants predicted to create a new donor splice site, the Delta Position Donor Gain indicates the number of nucleotides in the pre-mRNA transcript between the variant and this new donor splice site.  Negative values indicate transcript positions downstream of the variant, and positive values indicate transcript positions upstream of the variant.
 
 
 * #### Delta Position Acceptor Gain ((DP_AG_spliceAI))
-
-For variants predicted to create a new acceptor splice site, the Delta Position Acceptor Gain indicates the number of nucleotides in the pre-mRNA transcript between the variant and this new acceptor splice site.  Negative values indicate transcript positions downstream of the variant, and positive values indicate transcript positions upstream of the variant.
+    For variants predicted to create a new acceptor splice site, the Delta Position Acceptor Gain indicates the number of nucleotides in the pre-mRNA transcript between the variant and this new acceptor splice site.  Negative values indicate transcript positions downstream of the variant, and positive values indicate transcript positions upstream of the variant.
 
 * #### Result ((result_spliceai))
-
-The largest of the four delta scores (Delta Score Donor Loss, Delta Score Acceptor Loss, Delta Score Donor Gain, Delta Score Acceptor Gain) represents an overall estimate of the overall likelihood that the variant will impact pre-mRNA splicing.
+    The largest of the four delta scores (Delta Score Donor Loss, Delta Score Acceptor Loss, Delta Score Donor Gain, Delta Score Acceptor Gain) represents an overall estimate of the overall likelihood that the variant will impact pre-mRNA splicing.
 
 
 ----
@@ -93,5 +84,4 @@ BayesDel is a machine learning method that predicts the impact of the variant on
 In *BRCA1* and *BRCA2*, variants that fall outside clinically-important functional domains are rarely pathogenic, even if they are predicted to alter protein function.  This is because these protein regions are unstructured, and any changes to the protein sequence in these regions has little effect on protein function.  For this reason, BayesDel predictions are not relevant outside clinically-important domains.
 
 * #### Result ((BayesDel_nsfp33a_noAF))
-
-The result of BayesDel is a numeric score, where negative scores suggest no functional impact, positive scores suggest possible functional impact, and larger positive scores predict functional impact wiht a greater likelihood.
+    The result of BayesDel is a numeric score, where negative scores suggest no functional impact, positive scores suggest possible functional impact, and larger positive scores predict functional impact wiht a greater likelihood.

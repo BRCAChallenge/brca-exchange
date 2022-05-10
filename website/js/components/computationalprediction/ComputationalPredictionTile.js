@@ -7,6 +7,7 @@ import CollapsibleTile from "../collapsible/CollapsibleTile";
 import CollapsibleSection from "../collapsible/CollapsibleSection";
 import {Table} from "react-bootstrap";
 const util = require('../../util');
+const slugify = require('../../slugify');
 const ComputationalPredictionConstants = require("./ComputationalPredictionConstants");
 var KeyInline = require('../KeyInline');
 
@@ -49,10 +50,10 @@ export default class ComputationalPredictionTile extends React.Component {
                 const rows = groupData.map(({prop, title}) => {
                     const isEmptyValue = util.isEmptyField(this.props.variant[prop]);
                     const rowItem = util.getFormattedFieldByProp(prop, this.props.variant);
-
                     return (
                         <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={title} noHelpLink={false}
+                                tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
                                 onClick={(event) => this.props.showHelp(event, prop)}
                             />
                             <td><span className="row-value">{rowItem}</span></td>
@@ -73,6 +74,7 @@ export default class ComputationalPredictionTile extends React.Component {
                             additionalRows.push(
                                 <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                                     <KeyInline tableKey={k} noHelpLink={false}
+                                        tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
                                         onClick={(event) => this.props.showHelp(event, k)}
                                     />
                                     <td><span><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${v}`} target='_blank'>PMID: {v}</a></span></td>
@@ -83,6 +85,7 @@ export default class ComputationalPredictionTile extends React.Component {
                     additionalRows.push(
                         <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={k} noHelpLink={false}
+                                tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
                                 onClick={(event) => this.props.showHelp(event, k)}
                             />
                             <td><span className="row-value">{v}</span></td>

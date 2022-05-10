@@ -265,6 +265,17 @@ const helpContentResearch = [
                 ]
             },
             {
+                name: "What sources are available in the Computational Predictions tile?",
+                id: "computational-predictions",
+                contents: require("../content/help/research/computational-predictions.md"),
+                list: [
+                    {
+                        name: "Computational Predictions",
+                        contents: require("../content/help/research/computational-predictions.md")
+                    },
+                ]
+            },
+            {
                 name: "What are In Silico Prior Probabilities of Pathogenicity?",
                 id: "in-silico-prior-probabilities-of-pathogenicity",
                 contents: require("../content/help/research/insilico/insilico-pred.md")
