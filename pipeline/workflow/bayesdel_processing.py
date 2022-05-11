@@ -6,7 +6,7 @@ import luigi
 from luigi.util import requires
 
 import workflow.pipeline_utils as pipeline_utils
-from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_dir
+from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_dir, splice_ai_method_dir
 
 
 class ConvertBuiltToVCF(DefaultPipelineTask):
@@ -26,6 +26,35 @@ class ConvertBuiltToVCF(DefaultPipelineTask):
 
 
 @requires(ConvertBuiltToVCF)
+class GenerateSpliceAIData(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, "variants_with_splice_ai.vcf"))
+
+    def run(self):
+        brca_resources_dir = self.cfg.resources_dir
+        os.chdir(data_merging_method_dir)
+
+        args = ["spliceai", "-I", self.input().path, "-O", self.output().path,
+                "-R", brca_resources_dir + "/hg38.fa", "-A", "grch38"]
+
+        pipeline_utils.run_process(args)
+
+
+@requires(GenerateSpliceAIData)
+class AddSpliceAI(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'built_with_spliceai.tsv'))
+
+    def run(self):
+        os.chdir(splice_ai_method_dir)
+
+        args = ["python", "add_splice_scores_to_built_file.py", "--vcf", self.input().path,
+                '--built-tsv', ConvertBuiltToVCF().input().path, '--output', self.output().path]
+
+        pipeline_utils.run_process(args)
+
+
+@requires(AddSpliceAI)
 class VictorAnnotations(DefaultPipelineTask):
     def output(self):
         wdir = Path(self.cfg.output_dir) / 'release' / 'artifacts' / 'victor_wdir'
@@ -67,6 +96,7 @@ class VictorAnnotations(DefaultPipelineTask):
         print(f"Wrote log to {log_file}")
 
 
+
 @requires(VictorAnnotations)
 class AddBayesdelScores(DefaultPipelineTask):
     def output(self):
@@ -76,7 +106,9 @@ class AddBayesdelScores(DefaultPipelineTask):
         os.chdir(data_merging_method_dir)
 
         args = ["python", "bayesdel/add_bayesdel_scores_to_built_file.py", '--output', self.output().path,
-                '--built-tsv', ConvertBuiltToVCF().input().path] + \
+                '--built-tsv', AddSpliceAI().output().path] + \
                 [ p.path for p in self.input()['paths']]
 
         pipeline_utils.run_process(args)
+
+

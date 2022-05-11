@@ -16,7 +16,7 @@ luigi.auto_namespace(scope=__name__)
 from workflow import bayesdel_processing, esp_processing, gnomad_processing, pipeline_common, pipeline_utils
 from workflow.pipeline_common import DefaultPipelineTask, clinvar_method_dir, lovd_method_dir, \
     functional_assays_method_dir, data_merging_method_dir, priors_method_dir, priors_filter_method_dir, \
-    utilities_method_dir, vr_method_dir, field_metadata_path, field_metadata_path_additional
+    utilities_method_dir, vr_method_dir, splice_ai_method_dir, field_metadata_path, field_metadata_path_additional
 
 from common import utils
 from data_merging import generate_variants_output_file

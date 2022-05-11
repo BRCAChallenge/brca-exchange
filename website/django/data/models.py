@@ -496,6 +496,15 @@ class Variant(models.Model):
     VR_ID = models.TextField(null=True)
     Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
     CA_ID = models.TextField(null=True)
+    DS_AG_spliceAI = models.TextField(null=True)
+    DS_AL_spliceAI = models.TextField(null=True)
+    DS_DG_spliceAI = models.TextField(null=True)
+    DS_DL_spliceAI = models.TextField(null=True)
+    DP_AG_spliceAI = models.TextField(null=True)
+    DP_AL_spliceAI = models.TextField(null=True)
+    DP_DG_spliceAI = models.TextField(null=True)
+    DP_DL_spliceAI = models.TextField(null=True)
+    result_spliceai = models.TextField(null=True)
     BayesDel_nsfp33a_noAF = models.TextField(null=True)
 
     # Data Versioning
@@ -1401,6 +1410,15 @@ class CurrentVariant(models.Model):
     VR_ID = models.TextField(null=True)
     Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
     CA_ID = models.TextField(null=True)
+    DS_AG_spliceAI = models.TextField(null=True)
+    DS_AL_spliceAI = models.TextField(null=True)
+    DS_DG_spliceAI = models.TextField(null=True)
+    DS_DL_spliceAI = models.TextField(null=True)
+    DP_AG_spliceAI = models.TextField(null=True)
+    DP_AL_spliceAI = models.TextField(null=True)
+    DP_DG_spliceAI = models.TextField(null=True)
+    DP_DL_spliceAI = models.TextField(null=True)
+    result_spliceai = models.TextField(null=True)
     BayesDel_nsfp33a_noAF = models.TextField(null=True)
 
     # Data Versioning
