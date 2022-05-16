@@ -80,9 +80,9 @@ def _extract_assertion_method(enigma_assertion):
 
 def _extract_condition_info(cvs_el):
     symbol_lst = cvs_el.xpath(
-        'ReferenceClinVarAssertion/TraitSet/Trait/Symbol[ElementValue/@Type="Preferred"]')
-
+        'ReferenceClinVarAssertion/TraitSet/Trait/Symbol')
     condition_id_type = default_val
+    condition_id_value = default_val
 
     if symbol_lst:
         el = symbol_lst[0]
@@ -95,16 +95,16 @@ def _extract_condition_info(cvs_el):
         if xref_el is not None:
             condition_id_type = xref_el.get('DB')  # e.g. OMIM
             condition_id_id = xref_el.get('ID')  # e.g. 612555
-
     omim_name_el = cvs_el.xpath(
         'ReferenceClinVarAssertion/TraitSet/Trait/Name[XRef/@DB="OMIM"]')
 
     if omim_name_el:
         id_value = clinvar.textIfPresent(omim_name_el[0], "ElementValue")
-        condition_id_value = "{}; {} ({})".format(id_value, condition_id_symbol,
-                                                  condition_id_id)
-    else:
-        condition_id_value = default_val
+        try:
+            condition_id_value = "{}; {} ({})".format(id_value, condition_id_symbol,
+                                                      condition_id_id)
+        except:
+            logging.warning("Could not find condition value for %s", cvs_el)
 
     return condition_id_type, condition_id_value
 
