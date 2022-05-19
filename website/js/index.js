@@ -48,7 +48,7 @@ var Community = require('./Community');
 var FactSheet = require('./FactSheet');
 var WhyDonate = require('./WhyDonate');
 var FundraisingDetails = require('./FundraisingDetails');
-var Splicing = require('./Splicing');
+import {Splicing} from'./Splicing';
 
 var databaseKey = require('../databaseKey');
 var util = require('./util');

@@ -1,13 +1,15 @@
 'use strict';
 import React from 'react';
 
-const _ = require('underscore');
 
+import * as _ from 'lodash';
 import CollapsibleTile from "../collapsible/CollapsibleTile";
 import CollapsibleSection from "../collapsible/CollapsibleSection";
 import {Table} from "react-bootstrap";
 const util = require('../../util');
 const slugify = require('../../slugify');
+import {geneMeta} from '../../SplicingData.js';
+import {variantInfo, overlaps, pairwise} from '../../Splicing.js';
 const ComputationalPredictionConstants = require("./ComputationalPredictionConstants");
 var KeyInline = require('../KeyInline');
 
@@ -22,17 +24,108 @@ export default class ComputationalPredictionTile extends React.Component {
         );
     }
 
+    getCIDomainOverlap(ciDomains, variantSpan) {
+        const sortedDomains = _.sortBy(
+            ciDomains.map(ciDomain => ({
+                id: ciDomain.id,
+                span: {
+                    // the +1 makes the starting bound exclusive
+                    name: ciDomain.span.name,
+                    start: Math.min(ciDomain.span.start, ciDomain.span.end) + 1,
+                    end: Math.max(ciDomain.span.start, ciDomain.span.end),
+                }
+            })),
+            (a) => a.span.start
+        );
+
+        const overlappingDomains = sortedDomains
+            .map((domain, idx) => ({idx: idx, domain: domain}))
+            .filter(({domain}) => overlaps([variantSpan[0], variantSpan[1] - 1], [domain.span.start, domain.span.end]));
+
+
+        return overlappingDomains.map(od => od.domain.span.name);
+    }
+
+    checkIfOverlapsExon(exons, variantSpan) {
+        const sortedExons = _.sortBy(
+            exons.map(exon => ({
+                id: exon.id,
+                span: {
+                    // the +1 makes the starting bound exclusive
+                    start: Math.min(exon.span.start, exon.span.end) + 1,
+                    end: Math.max(exon.span.start, exon.span.end),
+                }
+            })),
+            (a) => a.span.start
+        );
+
+        // sanity check: verify that the variant actually overlaps the gene at all
+        const geneSpan = [sortedExons[0].span.start, sortedExons[sortedExons.length - 1].span.end];
+        if (!overlaps(variantSpan, geneSpan)) {
+            return null;
+        }
+
+        // we need to use the sorted set so that 'start' and 'end' are consistent regardless of the gene's direction
+        let sorted = _.flatten(
+            pairwise(sortedExons).map(([prevExon]) => {
+                return {type: 'exon', ...prevExon};
+            })
+        );
+
+        // and stick on the last element
+        sorted.push({type: 'exon', ...(_.last(sortedExons))});
+
+        // identify if variant overlaps exon
+        // (variants are defined inclusively in the starting coordinate and exclusively in the ending one)
+        const overlappingExons = sorted
+            .map((exon, idx) => ({idx: idx, exon: exon}))
+            .filter(({exon}) => overlaps([variantSpan[0], variantSpan[1] - 1], [exon.span.start, exon.span.end]));
+
+        return (overlappingExons.length > 0) ? true : false;
+    }
+
+    getVarLoc(variant) {
+        let info = variantInfo(variant);
+        const variantStart = variant.Pos | 0;
+        const variantEnd = variantStart + info.changed + info.deleted + info.inserted;
+        const meta = geneMeta[variant['Gene_Symbol']];
+        const exons = _.toPairs(meta.exons).map(([name, span]) => ({id: parseInt(name.substr(4)), span}));
+        const ciDomains = _.toPairs(meta.CIDomains["ENIGMA Consortium"].domains).map(([name, span]) => ({id: name, span}));
+        const variantSpan = [variantStart, variantEnd];
+
+        let varLoc = this.getCIDomainOverlap(ciDomains, variantSpan);
+
+        // only assign varLoc if variant overlaps CI domain AND is located in an exon
+        if (varLoc.length > 0) {
+            if (this.checkIfOverlapsExon(exons, variantSpan)) {
+                return varLoc.join(', ');
+            }
+        }
+
+        return 'N/A';
+    }
+
     render() {
         const innerGroups = this.props.innerGroups;
         const variant = this.props.variant;
         let allEmpty = true;
         let sections = _.map(['varType', 'varLoc', 'BayesDel', 'SpliceAI'], (group) => {
 
-            if (group === 'varType' || group === 'varLoc') {
+            if (group === 'varType') {
                 return ( <CollapsibleSection
                         fieldName={group}
                         computationalPrediction={true}
                         extraHeaderItems={this.generateHeader(variant.priors[group])}
+                        twoColumnExtraHeader={true}
+                        defaultVisible={false}
+                        id={group}
+                    />);
+            } else if (group === 'varLoc') {
+                let varLoc = this.getVarLoc(variant);
+                return ( <CollapsibleSection
+                        fieldName={group}
+                        computationalPrediction={true}
+                        extraHeaderItems={this.generateHeader(varLoc)}
                         twoColumnExtraHeader={true}
                         defaultVisible={false}
                         id={group}
