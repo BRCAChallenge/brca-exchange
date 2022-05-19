@@ -636,13 +636,17 @@ const brca1CIDomains = {
         "domains": [
             {
                 "name": "ring",
-                "start": 43124096,
+                "start": 43124093,
                 "end": 43104260
+            },
+            {   "name": "coiled-coil",
+                "start": 43090958,
+                "end": 43082489
             },
             {
                 "name": "brct",
                 "start": 43070966,
-                "end": 43045705
+                "end": 43045699
             }
         ]
     },
@@ -677,7 +681,12 @@ const brca2CIDomains = {
         "label": "Clinically Important Functional Domains (ENIGMA Consortium)",
         "domains": [
             {
-                "name": "dnb",
+                "name": "palb2 binding",
+                "start": 32316488,
+                "end": 32319129
+            },
+            {
+                "name": "dna binding",
                 "start": 32356433,
                 "end": 32396954
             }

@@ -916,4 +916,9 @@ class Splicing extends React.Component {
     }
 }
 
-module.exports = Splicing;
+module.exports = {
+    Splicing,
+    variantInfo,
+    overlaps,
+    pairwise
+};

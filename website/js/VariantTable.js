@@ -100,7 +100,6 @@ const researchModeGroups = [
         {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA', core: true},
         // Note: Displayed condition value is actually a combo of Condition_ID_type_ENIGMA and
         // Condition_ID_value_ENIGMA, but only one is used as the prop to ensure proper handling downstream
-        {title: 'Condition(s) (Mode of Inheritance)', prop: 'Condition_ID_value_ENIGMA', dummy: true},
     ]},
 
     // if a group contains reportSource, it'll be replaced with a SourceReportsTile component.
@@ -146,7 +145,6 @@ const researchModeGroups = [
                 {title: 'Review Status', prop: 'Review_Status_ClinVar', dummy: true},
                 // Note: Displayed condition value is actually a combo of Condition_Value and Condition_DB_ID,
                 // but only one is used as the prop to ensure proper handling downstream
-                {title: 'Condition(s) (Mode of Inheritance)', prop: 'Condition_Value_ClinVar', dummy: true},
             ]
         }
     },
