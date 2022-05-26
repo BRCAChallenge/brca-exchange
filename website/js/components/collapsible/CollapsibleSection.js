@@ -13,7 +13,7 @@ const CollapsibleSection = React.createClass({
         this.props.onFieldToggled(id);
     },
 
-    generateHeader: function(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction) {
+    generateHeader: function(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction, varLoc) {
         let loc;
         let caret;
         if (assay) {
@@ -49,8 +49,11 @@ const CollapsibleSection = React.createClass({
                             : <i className="fa fa-caret-right" aria-hidden="true" /> );
         }
 
+        let wrapperClass = `allele-frequency-header ${(this.props.expanded && caret !== ('')) ? 'expanded' : ''}
+                            ${varLoc === "N/A" && !fieldName.endsWith("Variant Location") ? 'faded' : ''}
+                            ${caret === '' ? 'no-pointer' : ''}`;
         return (
-            <div className={`allele-frequency-header ${this.props.expanded ? 'expanded' : ''}`} onClick={(e) => caret !== '' && this.handleToggle(e, id)}>
+            <div className={wrapperClass} onClick={(e) => caret !== '' && this.handleToggle(e, id)}>
                 <div className="allele-frequency-cell allele-frequency-label">
                     {assay ? assayLoc : ''}
                     {caret}
@@ -80,14 +83,14 @@ const CollapsibleSection = React.createClass({
     },
 
     render: function() {
-        const {id, fieldName, hideEmptyItems, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction} = this.props;
+        const {id, fieldName, hideEmptyItems, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction, varLoc} = this.props;
 
         let allEmpty = false;
 
         return (
             <div className={ allEmpty && hideEmptyItems ? "group-empty" : "" }>
                 <div style={{marginBottom: 0, borderTop: 'solid 2px #ccc'}}>
-                { this.generateHeader(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction) }
+                { this.generateHeader(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction, varLoc) }
                 </div>
 
                 <Collapse className={allEmpty ? "group-empty" : ""}
