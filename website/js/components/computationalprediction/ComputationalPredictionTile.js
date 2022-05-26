@@ -120,8 +120,11 @@ export default class ComputationalPredictionTile extends React.Component {
                         defaultVisible={false}
                         id={group}
                     />);
-            } else if (group === 'varLoc') {
-                let varLoc = this.getVarLoc(variant);
+            }
+
+            let varLoc = this.getVarLoc(variant);
+
+            if (group === 'varLoc') {
                 return ( <CollapsibleSection
                         fieldName={group}
                         computationalPrediction={true}
@@ -129,6 +132,7 @@ export default class ComputationalPredictionTile extends React.Component {
                         twoColumnExtraHeader={true}
                         defaultVisible={false}
                         id={group}
+                        varLoc={varLoc}
                     />);
             }
 
@@ -139,17 +143,20 @@ export default class ComputationalPredictionTile extends React.Component {
             } else {
                 allEmpty = false;
             };
+
+            let rowClass = (varLoc === "N/A") ? "faded" : "";
+
             if (!util.isEmptyField(result) || !this.props.hideEmptyItems) {
                 const rows = groupData.map(({prop, title}) => {
                     const isEmptyValue = util.isEmptyField(this.props.variant[prop]);
                     const rowItem = util.getFormattedFieldByProp(prop, this.props.variant);
                     return (
-                        <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+                        <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? rowClass + " variantfield-empty" : rowClass }>
                             <KeyInline tableKey={title} noHelpLink={false}
                                 tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
                                 onClick={(event) => this.props.showHelp(event, prop)}
                             />
-                            <td><span className="row-value">{rowItem}</span></td>
+                            <td><span className={rowClass + "row-value"}>{rowItem}</span></td>
                         </tr>
                     );
                 });
@@ -165,7 +172,7 @@ export default class ComputationalPredictionTile extends React.Component {
                     } else {
                         if (k === "Publication") {
                             additionalRows.push(
-                                <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+                                <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? rowClass + " variantfield-empty" : rowClass }>
                                     <KeyInline tableKey={k} noHelpLink={false}
                                         tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
                                         onClick={(event) => this.props.showHelp(event, k)}
@@ -176,7 +183,7 @@ export default class ComputationalPredictionTile extends React.Component {
                         }
                     }
                     additionalRows.push(
-                        <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+                        <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? rowClass + " variantfield-empty" : rowClass }>
                             <KeyInline tableKey={k} noHelpLink={false}
                                 tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
                                 onClick={(event) => this.props.showHelp(event, k)}
@@ -195,6 +202,7 @@ export default class ComputationalPredictionTile extends React.Component {
                             twoColumnExtraHeader={true}
                             defaultVisible={false}
                             id={group}
+                            varLoc={varLoc}
                         >
                             <div>
                                 <Table key={`computational-prediction-name-${group}`} >

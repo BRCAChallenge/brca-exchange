@@ -368,6 +368,11 @@ i.gnomad-header-row {
 .tile-disclaimer div {
     padding: 5px;
 }
+
+.faded {
+    opacity: 0.5;
+}
+
 /**************************************************************/
 /**********     Variant Search box       *********************/
 /**************************************************************/
@@ -1345,6 +1350,10 @@ div.variant-submitter-group .submitter-header td {
    display: flex; flex-direction: row; width: 100%;
    align-items: center;
    overflow: hidden;
+}
+
+.no-pointer {
+    cursor: default !important;
 }
 
 .allele-frequency-header .allele-frequency-cell {
