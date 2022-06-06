@@ -632,7 +632,7 @@ Clinically important regions
 const brca1CIDomains = {
     "ENIGMA Consortium": { // 'enigma'
         "code": 'enigma',
-        "label": "Clinically Important Functional Domains (ENIGMA Consortium)",
+        "label": "Functional Domains of Potential Clinical Importance (ENIGMA Consortium)",
         "domains": [
             {
                 "name": "ring",
@@ -678,7 +678,7 @@ const brca1CIDomains = {
 const brca2CIDomains = {
     "ENIGMA Consortium": { // 'enigma'
         "code": 'enigma',
-        "label": "Clinically Important Functional Domains (ENIGMA Consortium)",
+        "label": "Functional Domains of Potential Clinical Importance (ENIGMA Consortium)",
         "domains": [
             {
                 "name": "palb2 binding",
