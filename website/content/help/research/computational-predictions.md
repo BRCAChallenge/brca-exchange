@@ -2,7 +2,7 @@
 
 Computational predictions are algorithmic estimates of the impact of the variant on BRCA protein function or abundance, or mRNA splicing. These predictors can inform variant interpretation, but should not be used in place of expert interpretation.
 
-The Computational Prediction tile contains the results of machine learning methods that were selected by the ENIGMA Consortium as informative, and serve as inputs to the classificaiton rules of the ClinGen ENIGMA/BRCA Variant Curation Expert Panel.  Along with the results of these machine learning methods, the tile contains information on the type of variant and whether or not it overlaps a clinically-important protein domain.  These are contextual attributes of the variant which inform curators on which computational prediction methods are relevant
+The Computational Prediction tile contains the results of computational methods that were selected by the ENIGMA Consortium as informative, and serve as inputs to the classificaiton rules of the ClinGen ENIGMA/BRCA Variant Curation Expert Panel.  Along with the results of these machine learning methods, the tile contains information on the type of variant and whether or not it overlaps a clinically-important protein domain.  These are contextual attributes of the variant which inform curators on which computational prediction methods are relevant
 
 For each computational predictor, we present a set of general fields that are common to all variants (**Method**, **Description**, **Publication**) as well as fields that are specific to each prediction method.
 
