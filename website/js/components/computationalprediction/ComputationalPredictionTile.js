@@ -102,7 +102,7 @@ export default class ComputationalPredictionTile extends React.Component {
             }
         }
 
-        return 'N/A';
+        return 'Outside Domain';
     }
 
     render() {
@@ -144,7 +144,7 @@ export default class ComputationalPredictionTile extends React.Component {
                 allEmpty = false;
             };
 
-            let rowClass = (varLoc === "N/A") ? "faded" : "";
+            let rowClass = (varLoc === "Outside Domain" && group !== 'SpliceAI') ? "faded" : "";
 
             if (!util.isEmptyField(result) || !this.props.hideEmptyItems) {
                 const rows = groupData.map(({prop, title}) => {
@@ -222,7 +222,7 @@ export default class ComputationalPredictionTile extends React.Component {
         return (
             <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <div className="tile-disclaimer">
-                    This tile displays computational predictions and other annotations relevant for assigning ACMG/AMP bioinformatic codes.  Additional computational predictions are available via the <em>in Silico</em> Prior Predictions tile.
+                    This tile displays computational predictions and other annotations relevant for assigning ACMG/AMP bioinformatic codes.  Additional computational predictions are available via the <em>in Silico</em> Prior Predictions tile. Variants that are outside of the potentially clincially-important functional domains are noted as Outside Domain.
                 </div>
                 {filteredSections}
             </CollapsibleTile>

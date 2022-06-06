@@ -50,7 +50,7 @@ const CollapsibleSection = React.createClass({
         }
 
         let wrapperClass = `allele-frequency-header ${(this.props.expanded && caret !== ('')) ? 'expanded' : ''}
-                            ${varLoc === "N/A" && !fieldName.endsWith("Variant Location") ? 'faded' : ''}
+                            ${varLoc === "Outside Domain" && fieldName === "Method: BayesDel" ? 'faded' : ''}
                             ${caret === '' ? 'no-pointer' : ''}`;
         return (
             <div className={wrapperClass} onClick={(e) => caret !== '' && this.handleToggle(e, id)}>
