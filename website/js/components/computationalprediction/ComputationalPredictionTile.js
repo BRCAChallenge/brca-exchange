@@ -222,7 +222,7 @@ export default class ComputationalPredictionTile extends React.Component {
         return (
             <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <div className="tile-disclaimer">
-                    This tile displays computational predictions and other annotations relevant for assigning ACMG/AMP bioinformatic codes.  Additional computational predictions are available via the <em>in Silico</em> Prior Predictions tile. Variants that are outside of the potentially clincially-important functional domains are noted as Outside Domain.
+                    This tile displays computational predictions and other annotations relevant for assigning ACMG/AMP bioinformatic codes.  Additional computational predictions are available via the <em>in Silico</em> Prior Predictions tile. Variants that are outside of the potentially clinically-important functional domains are noted as Outside Domain.
                 </div>
                 {filteredSections}
             </CollapsibleTile>
