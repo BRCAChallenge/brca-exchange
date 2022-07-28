@@ -18,6 +18,10 @@ output/
 	Top-level directory, containing pre-processed VCFs of variant data
 	from the contributing repositories, filtered for relevant variants,
 	and translated into GRCh38 coordinates as needed.
+output/variants_output.tsv
+	TSV file containing the key fields per variant.  Further variant details can be found in the release directory
+output/variants_output_field_metadata.tsv
+	Descriptions of the fields in variants_output.tsv.
 output/1000G.sorted.hg38.vcf
 	Variants selected from 1000 Genomes, with genotype data.
 output/ClinVar.vcf
@@ -45,6 +49,10 @@ output/release/built_final.tsv
 output/release/built_with_change_types.tsv
 	Tab-delimited file of the variants shared on BRCA Exchange, their attributes, and their update status since the
 	last release.
+output/release/reports_with_change_types.tsv
+	Tab-delimited file that contains the variant data from one "report" of the variant, such as one ClinVar submission.  See field_metadata.tsv for more details.
+output/release/field_metadata.tsv
+	Tab-delimited file describing the fields in the built and reports tsv files.
 output/release/diff/
 	Subdirectory containing files that detail how the set of variants has changed since the previous release
 output/release/diff/added.tsv
