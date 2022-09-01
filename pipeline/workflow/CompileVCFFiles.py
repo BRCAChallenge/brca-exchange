@@ -738,12 +738,10 @@ class AppendVRId(DefaultPipelineTask):
         os.chdir(vr_method_dir)
 
         args = [
-            'bash', 'appendvrids.sh',
-            artifacts_dir_host,
-            'built_with_priors_clean.tsv',
-            'built_with_vr_ids.tsv',
-            self.cfg.vr_docker_image_name,
-            self.cfg.seq_repo_dir
+            'python', 'appendVRIds.py',
+            '--input', self.input().path,
+            '--output', self.output().path,
+            '--logfile', artifacts_dir_host + "/get_ca_id.log"
         ]
 
         pipeline_utils.run_process(args)
