@@ -740,8 +740,7 @@ class AppendVRId(DefaultPipelineTask):
         args = [
             'python', 'appendVRIds.py',
             '--input', self.input().path,
-            '--output', self.output().path,
-            '--logfile', artifacts_dir_host + "/get_ca_id.log"
+            '--output', self.output().path
         ]
 
         pipeline_utils.run_process(args)

@@ -4,6 +4,7 @@ import logging
 import sys
 import argparse
 import csv
+from common import utils
 # from ga4gh.core import sha512t24u, ga4gh_digest, ga4gh_identify, ga4gh_serialize
 # from ga4gh.vr import __version__, models, normalize
 # from ga4gh.vr.extras.dataproxy import SeqRepoRESTDataProxy
@@ -36,8 +37,8 @@ def main(args):
     outputFile = options.output
     logfile = options.logfile
 
-    logging.basicConfig(filename=logfile, filemode="w", level=logging.WARNING,
-                        format=' %(asctime)s %(filename)-15s %(message)s')
+    utils.setup_logfile(logfile)
+
     input_file = csv.reader(inputFile, delimiter='\t')
     output_file = csv.writer(outputFile, delimiter='\t')
     
