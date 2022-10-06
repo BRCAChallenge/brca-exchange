@@ -170,7 +170,7 @@ jobs:
            paths:
              - /caches/splicing-pipeline.tar
 workflows:
-   version: 2
+   version: 2.1
    build-n-deploy:
      jobs:
        - buildweb:
