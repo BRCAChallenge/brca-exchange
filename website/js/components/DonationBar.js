@@ -9,7 +9,7 @@ const DonationBar = React.createClass({
         return (
         	<div className="donation-bar">
     			<p>
-                    Please take our <a href="https://docs.google.com/forms/d/e/1FAIpQLScaFT5IxWP7zqCiCwAHMCIr-2CfvgyITQGaQS517c5S01lyfA/viewform">brief survey</a> on BRCA Exchange usage.
+                    Please take our <a style={{textDecoration: 'underline'}} href="https://docs.google.com/forms/d/e/1FAIpQLScaFT5IxWP7zqCiCwAHMCIr-2CfvgyITQGaQS517c5S01lyfA/viewform">brief survey</a> on BRCA Exchange usage.
                     Your feedback will help us improve the site and keep it freely available.
 	        	</p>
         	</div>
