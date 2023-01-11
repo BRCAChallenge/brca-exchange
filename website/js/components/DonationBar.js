@@ -4,8 +4,6 @@
 
 import React from 'react';
 
-const {Link} = require('react-router');
-
 const DonationBar = React.createClass({
     render() {
         return (
