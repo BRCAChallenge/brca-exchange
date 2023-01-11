@@ -32,6 +32,7 @@ var {NavBarNew} = require('./NavBarNew');
 var Rx = require('rx');
 require('rx-dom');
 var moment = require('moment');
+var DonationBar = require('./components/DonationBar');
 
 
 // faisal: includes for masonry/isotope
@@ -1456,6 +1457,7 @@ var Application = React.createClass({
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
+                <DonationBar />
                 <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}

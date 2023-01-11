@@ -11,8 +11,8 @@ const DonationBar = React.createClass({
         return (
         	<div className="donation-bar">
     			<p>
-                    BRCA Exchange salutes National Hereditary Breast and Ovarian Cancer Week, 9/29/20 - 10/5/20.
-                    To learn how you can help prevent heritable cancers, <Link to={`/donatedrive`}>click here</Link>.
+                    Please take our <a href="https://docs.google.com/forms/d/e/1FAIpQLScaFT5IxWP7zqCiCwAHMCIr-2CfvgyITQGaQS517c5S01lyfA/viewform">brief survey</a> on BRCA Exchange usage.
+                    Your feedback will help us improve the site and keep it freely available.
 	        	</p>
         	</div>
         );
