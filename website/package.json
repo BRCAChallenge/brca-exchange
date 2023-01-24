@@ -36,7 +36,7 @@
     "loader-utils": "^0.2.11",
     "mark.js": "^8.11.1",
     "markdown-it-loader": "^0.1.0",
-    "mocha": "^6.0.2",
+    "mocha": "^10.2.0",
     "mocha-loader": "^2.0.1",
     "raw-loader": "^0.5.1",
     "rimraf": "^2.3.2",
