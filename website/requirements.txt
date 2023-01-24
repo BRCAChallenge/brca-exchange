@@ -17,5 +17,5 @@ pyyaml==4.2b1
 requests==2.20.0
 six==1.12.0
 tqdm==4.25.0
-urllib3==1.24.1
+urllib3==1.26.5
 mailchimp3==3.0.14
