@@ -79,5 +79,5 @@ urllib3==1.25.8
 userpath==1.2.0
 w3lib==1.21.0
 wcwidth==0.1.8
-websockets==8.1
+websockets==9.1
 yoyo-migrations==7.0.1
