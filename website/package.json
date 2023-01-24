@@ -81,7 +81,7 @@
     "rx-dom": "^4.0.4",
     "spin.js": "^2.3.2",
     "svg-to-react": "^0.1.0",
-    "underscore": "^1.7.0",
+    "underscore": "^1.12.1",
     "vcf.js": "^0.2.6"
   }
 }
