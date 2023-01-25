@@ -442,7 +442,7 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
     print("remove sample columns and two erroneous rows from 1000 Genome file")
     f_1000G = open(os.path.join(input_dir, GENOME1K_FILE + "for_pipeline"), "w")
     subprocess.call(
-       ["bash", "data_merging/1000g_preprocess.sh", os.path.join(input_dir, GENOME1K_FILE)], stdout=f_1000G)
+       ["bash", "1000g_preprocess.sh", os.path.join(input_dir, GENOME1K_FILE)], stdout=f_1000G)
 
     # merge multiple variant per vcf into multiple lines
     for source_name, file_name in source_dict.items():
