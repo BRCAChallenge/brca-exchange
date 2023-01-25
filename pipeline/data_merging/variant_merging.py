@@ -442,7 +442,7 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
     print("remove sample columns and two erroneous rows from 1000 Genome file")
     f_1000G = open(os.path.join(input_dir, GENOME1K_FILE + "for_pipeline"), "w")
     subprocess.call(
-       ["bash", "1000g_preprocess.sh", os.path.join(input_dir, GENOME1K_FILE)], stdout=f_1000G)
+       ["bash", "data_merging/1000g_preprocess.sh", os.path.join(input_dir, GENOME1K_FILE)], stdout=f_1000G)
 
     # merge multiple variant per vcf into multiple lines
     for source_name, file_name in source_dict.items():
@@ -515,7 +515,9 @@ def repeat_merging(f_in, f_out):
                     variant_dict[genome_coor].INFO[key] = deepcopy(record.INFO[key])
                 else:
                     new_value = deepcopy(record.INFO[key])
+                    new_value = [xx for xx in new_value if xx is not None]
                     old_value = deepcopy(variant_dict[genome_coor].INFO[key])
+                    old_value = [xx for xx in old_value if xx is not None]
 
                     if type(new_value) != list:
                         new_value = [new_value]
