@@ -27,7 +27,7 @@ humanfriendly==8.0
 idna==2.9
 iniherit==0.3.9
 intervaltree==3.1.0
-ipython==7.13.0
+ipython==8.10.0
 ipython-genutils==0.2.0
 itertoolz==0.5
 jedi==0.16.0
