@@ -1,4 +1,4 @@
-FROM python:3.8-buster
+FROM python:3.9
 
 RUN chmod 1777 /tmp
 
