@@ -31,9 +31,9 @@ def read_vcf_as_dataframe_and_extract_column_names(path):
 def spliceai_results_as_df(vcf):
     """
     Reading SpliceAI vcf and extracting useful information
-
     :return: dataframe with one column per variable of interest + join key
     """
+
     # spliceai_vcf_df = vcf_files_helper.read_vcf_as_dataframe(vcf).reset_index(drop=True)
     spliceai_vcf_df = read_vcf_as_dataframe_and_extract_column_names(vcf)
 
@@ -41,25 +41,35 @@ def spliceai_results_as_df(vcf):
     info_dict = spliceai_vcf_df.iloc[:, VCF_INFO_COL].str.split('|')
 
     # generating dataframe out of dict, one column per variable
-    df_spliceai_props = pd.DataFrame.from_records(info_dict.values, index=info_dict.index)
+    df_spliceai_props = pd.DataFrame.from_records(info_dict.values,
+                                                  index=info_dict.index)
 
     # update columns names
     splice_cols_with_suffix = [col + '_spliceAI' for col in SPLICE_COLS]
     df_spliceai_props.columns = splice_cols_with_suffix
 
     # join back to vcf dataframe
-    df_ret = spliceai_vcf_df.merge(df_spliceai_props, how='inner', left_index=True, right_index=True)
+    df_ret = spliceai_vcf_df.merge(df_spliceai_props, how='inner',
+                                   left_index=True, right_index=True)
 
     # calculate a coordinate representation to join with built_tsv
-    df_ret[coord_col] = 'chr' + df_ret.iloc[:, 0].astype(str) + ":g." + df_ret.iloc[:, 1].astype(
-        str) + ':' + df_ret.iloc[:, 3].astype(
-        str) + ">" + df_ret.iloc[:, 4].astype(str)
+    df_ret[coord_col] = 'chr' + df_ret.iloc[:, 0].astype(str) + ":g." \
+        + df_ret.iloc[:, 1].astype(
+            str) + ':' + df_ret.iloc[:, 3].astype(
+                str) + ">" + df_ret.iloc[:, 4].astype(str)
 
     # calculate result, which is the maximum of the 4 scores
-    df_ret[result_col] = df_ret[['DS_AG_spliceAI','DS_AL_spliceAI','DS_DG_spliceAI','DS_DL_spliceAI']].max(axis=1)
+    df_ret['DS_AG_spliceAI'] = pd.to_numeric(df_ret['DS_AG_spliceAI'], errors='coerce')
+    df_ret['DS_AL_spliceAI'] = pd.to_numeric(df_ret['DS_AL_spliceAI'], errors='coerce')
+    df_ret['DS_DG_spliceAI'] = pd.to_numeric(df_ret['DS_DG_spliceAI'], errors='coerce')
+    df_ret['DS_DL_spliceAI'] = pd.to_numeric(df_ret['DS_DL_spliceAI'], errors='coerce')
+    df_ret[result_col] = df_ret[['DS_AG_spliceAI','DS_AL_spliceAI',
+                                 'DS_DG_spliceAI',
+                                 'DS_DL_spliceAI']].max(axis=1, numeric_only=True, skipna=True)
 
     # dropping VCF columns, leaving columns for variable of interest + join field
-    return df_ret.drop(columns=['CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO','ALLELE_spliceAI','SYMBOL_spliceAI'])
+    return df_ret.drop(columns=['CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO',
+                                'ALLELE_spliceAI','SYMBOL_spliceAI'])
 
 
 @click.command()
