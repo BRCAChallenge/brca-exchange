@@ -47,7 +47,7 @@ start-local-uta: ## starting local uta docker container
 	[ `docker ps -f name=$(UTA_CONTAINER) | wc -l` -gt 1 ] || docker run -dit --name $(UTA_CONTAINER) -p $(UTA_PORT):5432 $(UTA_DOCKER_IMAGE)
 
 start-seqrepo-rest-service:
-	[ `docker ps -f name="seqrepo-rest-service" | wc -l` -gt 1 ] || docker run --name seqrepo-rest-service --detach --rm -p 5000:5000 -v $(SEQ_REPO_DIR):/usr/local/share/seqrepo/ biocommons/seqrepo-rest-service
+	[ `docker ps -f name="seqrepo-rest-service" | wc -l` -gt 1 ] || docker run --name seqrepo-rest-service --detach --rm -p 5000:5000 -v $(SEQ_REPO_DIR):/usr/local/share/seqrepo/ biocommons/seqrepo-rest-service /usr/local/share/seqrepo
 
 .ONESHELL:
 setup-files: ## setup various directories to run pipeline
@@ -75,7 +75,7 @@ endif
 COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-e "DATA_DATE=$(DATA_DATE)" \
         -e "UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
-	-e "HGVS_SEQREPO_DIR=$(SEQ_REPO_DIR_DOCKER)/latest" \
+	-e "HGVS_SEQREPO_DIR=$(SEQ_REPO_DIR_DOCKER)/2021-01-29" \
   -e "PYTHONPATH=/opt/brca-exchange/pipeline" \
 	--network host \
 	-v $(RESOURCES_DIR):/files/resources \

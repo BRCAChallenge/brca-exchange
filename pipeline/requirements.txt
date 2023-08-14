@@ -22,7 +22,9 @@ decorator==4.4.2
 distro==1.4.0
 docutils==0.16
 fake-useragent==0.1.11
-hgvs==1.5.2
+ga4gh.common==0.0.7
+ga4gh.vrs==0.8.4
+hgvs==1.5.4
 humanfriendly==8.0
 idna==2.9
 iniherit==0.3.9
