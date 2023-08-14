@@ -4,7 +4,7 @@
 import itertools
 from pathlib import Path
 
-import click
+import argparse
 import numpy as np
 import pandas as pd
 
@@ -264,14 +264,21 @@ def add_normalization_cols(df, strand_dict, processes=2):
     return df.drop(columns=[TMP_HGVS_HG38, TMP_VAR_OBJ_FIELD, TMP_GENE_SYMBOL])
 
 
-@click.command()
-@click.argument('data_dir', type=click.Path(readable=True))
-@click.argument('output_path', type=click.Path(writable=True))
-@click.option('--resource-dir', type=click.Path(readable=True), help="resource dir for lift over (same as for the main pipeline)")
-@click.option('--gene-config-path', type=click.Path(readable=True))
-def main(data_dir, output_path, resource_dir, gene_config_path):
-    data_dir = Path(data_dir)
-    cfg_df = config.load_config(gene_config_path)
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input_path", help="input directory")
+    parser.add_argument("-o", "--output_path", help="output directory")
+    parser.add_argument("-g", "--gene_config_path", help="genes for analysis")
+    parser.add_argument("-r", "--resource_dir", help="resource dir for lift over (same as for the main pipeline)")
+    args = parser.parse_args()
+    return(args)
+
+
+def main():
+    args = parse_args()
+    data_dir = Path(args.input_path)
+    cfg_df = config.load_config(args.gene_config_path)
     df_cov2 = pd.read_parquet(data_dir / 'df_cov_v2.parquet')
     df_cov3 = pd.read_parquet(data_dir / 'df_cov_v3.parquet')
 
@@ -280,13 +287,13 @@ def main(data_dir, output_path, resource_dir, gene_config_path):
 
     read_depth_thresh = 30
 
-    df = extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, Path(resource_dir))
+    df = extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, Path(args.resource_dir))
 
     # add var_name columns with different normalization to join data with other sources (e.g. brca exchange output data)
     strand_dict = { int(r['chr']) : r[config.STRAND_COL] for _, r in cfg_df.iterrows() }
     df = add_normalization_cols(df, strand_dict)
 
-    df.to_parquet(output_path)
+    df.to_parquet(args.output_path)
 
 
 if __name__ == "__main__":
