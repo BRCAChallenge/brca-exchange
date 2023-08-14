@@ -74,7 +74,7 @@ def get_vrs_id(hgvs):
     try:
         allele = TLR.translate_from(hgvs, 'hgvs')
         allele_dict = allele.as_dict()
-        return(allele_dict['id'])
+        return(allele_dict['_id'])
     except ValueError as e:
         logging.warning("Exception during processing of " + str(hgvs) + ": " + str(e))
         return '-'
