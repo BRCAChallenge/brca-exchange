@@ -9,7 +9,7 @@ const DonationBar = React.createClass({
         return (
         	<div className="donation-bar">
     			<p>
-                BRCA Exchange will be down for 1-2 hours today (May 25, 2023) for a server upgrade.  We apologize for the inconvenience.
+                Thank you to everyone who contributed to the BRCA Exchange user survey!  The results are available here.
 	        	</p>
         	</div>
         );
