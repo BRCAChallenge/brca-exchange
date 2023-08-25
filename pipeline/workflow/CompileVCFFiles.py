@@ -696,9 +696,10 @@ class RemoveProblemVariant(DefaultPipelineTask):
         artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
         os.chdir(artifacts_dir)
 
-        args = ['grep', '-v', '\"chr13:g.32398769:A>G\"',
-                'built_with_mupit.tsv', '>', 'ready_for_priors.tsv']
-        pipeline_utils.run_process(args)
+        cmd = 'grep -v "chr13:g.32398769:A>G built_with_mupit.tsv'
+        pipeline_utils.run_process(args,
+                                   redirect_stdout_path='ready_for_priors.tsv',
+                                   shell=True)
 
 
 
