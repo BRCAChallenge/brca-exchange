@@ -686,7 +686,7 @@ class AppendMupitStructure(DefaultPipelineTask):
             self.output().path)
 
 
-#@requires(AppendMupitStructure)
+@requires(AppendMupitStructure)
 class RemoveProblemVariant(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir,
