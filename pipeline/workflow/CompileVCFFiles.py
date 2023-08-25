@@ -687,6 +687,22 @@ class AppendMupitStructure(DefaultPipelineTask):
 
 
 @requires(AppendMupitStructure)
+class RemoveProblemVariant(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir,
+                                              "ready_for_priors.tsv"))
+
+    def run(self):
+        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
+        os.chdir(artifacts_dir)
+
+        args = ['grep', '-v', '\"chr13:g.32398769:A>G\"',
+                'built_with_mupit.tsv', '>', 'ready_for_priors.tsv']
+        pipeline_utils.run_process(args)
+
+
+
+@requires(RemoveProblemVariant)
 class CalculatePriors(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_priors.tsv"))
@@ -696,7 +712,7 @@ class CalculatePriors(DefaultPipelineTask):
         os.chdir(priors_method_dir)
 
         args = ['bash', 'calcpriors.sh', self.cfg.priors_references_dir,
-                artifacts_dir_host, 'built_with_mupit.tsv',
+                artifacts_dir_host, 'ready_for_priors.tsv',
                 'built_with_priors.tsv', self.cfg.priors_docker_image_name]
 
         pipeline_utils.run_process(args)
@@ -704,6 +720,9 @@ class CalculatePriors(DefaultPipelineTask):
         pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
             self.input().path,
             self.output().path)
+
+        os.chdir(artifacts_dir_host)
+        os.remove("ready_for_priors.tsv")
 
 
 @requires(CalculatePriors)
