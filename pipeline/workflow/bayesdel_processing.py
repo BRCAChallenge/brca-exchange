@@ -35,7 +35,8 @@ class GenerateSpliceAIData(DefaultPipelineTask):
         os.chdir(data_merging_method_dir)
 
         args = ["spliceai", "-I", self.input().path, "-O", self.output().path,
-                "-R", brca_resources_dir + "/hg38.fa", "-A", "grch38"]
+                "-R", brca_resources_dir + "/hg38.fa", "-A", "grch38",
+                "-D", "4999"]
 
         pipeline_utils.run_process(args)
 

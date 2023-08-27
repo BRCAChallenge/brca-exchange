@@ -38,10 +38,10 @@ fi
 ssh -l${USER} ${HOST} <<-ENDSSH
 	set -o errexit
 	. /var/www/backend/${ENVIRONMENT}/virtualenv3/bin/activate
-	sudo -u postgres pg_dump -d ${REMOTEDBNAME} -F c -c -f /tmp/full_db.dump
+	sudo -u postgres pg_dump -d ${REMOTEDBNAME} -F c -c -f /data/backup_dump/full_db.dump
 ENDSSH
 
-echo "Created db dump on remote at /tmp/full_db.dump."
+echo "Created db dump on remote at /data/backup_dump/full_db.dump."
 
 # directory of this file
 CONVENIENCESCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -55,11 +55,11 @@ cd ${WEBSITE}
 rsync -a --rsync-path='sudo rsync' ${USER}@${HOST}:${REMOTEUPLOADS} ./django/uploads/ --delete
 echo "Rsync'd remote uploads/ dir to local."
 # Copy db dump to local
-rsync -a --rsync-path='sudo rsync' ${USER}@${HOST}:/tmp/full_db.dump /tmp/
-echo "Moved db dump to local /tmp."
+rsync -a --rsync-path='sudo rsync' ${USER}@${HOST}:/data/backup_dump/full_db.dump /data/backup_dump
+echo "Moved db dump to local /data/backup_dump."
 
 # Overwrite local db with db dump.
-#pg_restore /tmp/full_db.dump -c -v -1 -d ${LOCALDBNAME}
-sudo -u postgres pg_restore /tmp/full_db.dump -c -v -1 -d ${LOCALDBNAME}
+#pg_restore /data/backup_dump/full_db.dump -c -v -1 -d ${LOCALDBNAME}
+sudo -u postgres pg_restore /data/backup_dump/full_db.dump -c -v -1 -d ${LOCALDBNAME}
 
 echo "Complete!"
