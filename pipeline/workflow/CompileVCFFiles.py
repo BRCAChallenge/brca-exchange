@@ -720,8 +720,6 @@ class CalculatePriors(DefaultPipelineTask):
             self.input().path,
             self.output().path)
 
-        os.chdir(artifacts_dir_host)
-        os.remove("ready_for_priors.tsv")
 
 
 @requires(CalculatePriors)
@@ -730,6 +728,10 @@ class FilterBlacklistedPriors(DefaultPipelineTask):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_priors_clean.tsv"))
 
     def run(self):
+        artifacts_dir_host = self.cfg.output_dir_host + "/release/artifacts/"
+        os.chdir(artifacts_dir_host)
+        os.remove("ready_for_priors.tsv")
+
         os.chdir(priors_filter_method_dir)
 
         args = ["python", "filterBlacklistedVars.py",
