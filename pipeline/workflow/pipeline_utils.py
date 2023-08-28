@@ -25,7 +25,8 @@ def create_path_if_nonexistent(path):
     return path
 
 
-def run_process(args, redirect_stdout_path=None, expected_returncode=0):
+def run_process(args, redirect_stdout_path=None, expected_returncode=0,
+                shell=False):
     if redirect_stdout_path:
         stdout_cm = open(redirect_stdout_path, 'w')
     else:
@@ -34,7 +35,8 @@ def run_process(args, redirect_stdout_path=None, expected_returncode=0):
 
     with stdout_cm as stdout:
         print(f"Running with the following args: {args}")
-        sp = subprocess.Popen(args, stdout=stdout, stderr=subprocess.PIPE)
+        sp = subprocess.Popen(args, stdout=stdout, stderr=subprocess.PIPE,
+                              shell=shell)
         print_subprocess_output_and_error(sp)
 
         if sp.returncode != expected_returncode:
