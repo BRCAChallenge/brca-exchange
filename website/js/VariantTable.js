@@ -86,7 +86,7 @@ const researchModeGroups = [
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
         {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
         {title: 'Beacons', core: true},
-        {title: 'GA4GH VRS Identifier', prop: 'VR_ID'},
+        {title: 'GA4GH VRS Identifier (hg38)', prop: 'VR_ID'},
         {title: 'Synonyms', prop: 'Synonyms'}
     ]},
 
