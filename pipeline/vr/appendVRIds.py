@@ -4,6 +4,9 @@ import logging
 import sys
 import argparse
 import csv
+import socket
+import urllib3
+
 from ga4gh.core import sha512t24u, ga4gh_digest, ga4gh_identify, ga4gh_serialize
 from ga4gh.vrs import __version__, models, normalize
 from ga4gh.vrs.dataproxy import SeqRepoRESTDataProxy
@@ -70,14 +73,23 @@ def main(args):
 def is_empty(field_value):
     return field_value == '' or field_value is None or field_value == '-'
 
-def get_vrs_id(hgvs):
-    try:
-        allele = TLR.translate_from(hgvs, 'hgvs')
-        allele_dict = allele.as_dict()
-        return(allele_dict['_id'])
-    except ValueError as e:
-        logging.warning("Exception during processing of " + str(hgvs) + ": " + str(e))
-        return '-'
+def get_vrs_id(hgvs, max_repeats=5):
+    for repeats in range(max_repeats):
+        try:
+            allele = TLR.translate_from(hgvs, 'hgvs')
+        except ValueError as e:
+            logging.warning("Exception during processing of " + str(hgvs) + ": " + str(e))
+            return '-'
+        except socket.timeout:
+            continue
+        except urllib3.exceptions.ReadTimeoutError:
+            continue
+        except requests.exceptions.ReadTimeout:
+            continue
+        else:
+            allele_dict = allele.as_dict()
+            return(allele_dict['_id'])
+    return '-'
 
 
 if __name__ == "__main__":
