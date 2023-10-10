@@ -105,9 +105,8 @@ class DownloadStaticGnomADVCF(GnomADTask):
     
 
     def run(self):
+        print("target filename", self.output()["v2"])
         self._download_file(self.gnomAD_v2_static_vcf_url, self.output()["v2"].path)
-        self._download_file(self.gnomAD_v3_static_vcf_url, self.output()["v3"]
-
         self._download_file(self.gnomAD_v3_static_data_url, self.output()["v3"].path)
 
 
