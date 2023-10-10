@@ -568,7 +568,7 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
         yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
                                                     esp_processing.SortConcatenatedESPData())
         yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
-                                                    gnomad_processing.SortGnomADData())
+                                                    gnomad_processing.DownloadStaticGnomADVCF())
         yield CopyClinvarVCFToOutputDir()
         yield CopyBICOutputToOutputDir()
         yield CopyG1KOutputToOutputDir()
@@ -722,7 +722,7 @@ class CalculatePriors(DefaultPipelineTask):
             self.input().path,
             self.output().path)
 
-        os.chdir(artifacts_dir_host)
+        os.chdir(self.artifacts_dir)
         os.remove("ready_for_priors.tsv")
 
 
