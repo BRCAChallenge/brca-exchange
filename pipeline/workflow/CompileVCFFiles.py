@@ -722,7 +722,7 @@ class CalculatePriors(DefaultPipelineTask):
             self.input().path,
             self.output().path)
 
-        os.chdir(artifacts_dir_host)
+        os.chdir(self.artifacts_dir)
         os.remove("ready_for_priors.tsv")
 
 
