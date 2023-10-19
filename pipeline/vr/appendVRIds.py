@@ -17,7 +17,7 @@ from ga4gh.vrs.extras.translator import Translator
 csv.field_size_limit(10000000)
 
 SEQREPO_REST_SERVICE_URL = "http://localhost:5000/seqrepo"
-#SEQREPO_REST_SERVICE_URL = "https://services.genomicmedlab.org/seqrepo"
+
 DP = SeqRepoRESTDataProxy(base_url=SEQREPO_REST_SERVICE_URL)
 TLR = Translator(data_proxy=DP,
                  translate_sequence_identifiers=True,
@@ -88,10 +88,6 @@ def get_vrs_id(hgvs, max_repeats=5):
             continue
         except requests.exceptions.ReadTimeout:
             continue
-        except requests.exceptions.ConnectionError:
-            print("Launching seqrepo")
-            subprocess.Popen("launch_seqrepo.sh")
-            time.sleep(3)
         else:
             allele_dict = allele.as_dict()
             if 'id' in allele_dict:
