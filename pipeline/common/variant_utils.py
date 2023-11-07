@@ -101,11 +101,13 @@ def convert_to_hg38(vars: Iterable[VCFVariant], chain_file, ref_file, resource_d
 
     lst = [pseudo_vcf_entry(v) for v in vars]
 
-    vcf_tmp = tempfile.mktemp('.vcf')
+    fd, vcf_tmp = tempfile.mkstemp('.vcf')
     with open(vcf_tmp, 'w') as f:
         f.write('\n'.join(lst))
+    os.close(fd)
 
-    vcf_tmp_out = tempfile.mktemp('.vcf')
+    fd, vcf_tmp_out = tempfile.mkstemp('.vcf')
+    os.close(fd)
 
     args = ["CrossMap.py", "vcf",
             chain_file,

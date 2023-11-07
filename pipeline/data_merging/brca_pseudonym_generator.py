@@ -1,6 +1,7 @@
 import logging
 import subprocess
 import tempfile
+import os
 from typing import Dict, List, Iterable, Optional
 from os import path
 
@@ -107,11 +108,13 @@ def convert_to_hg37(vars: Iterable[VCFVariant], brca_resources_dir: str):
 
     lst = [pseudo_vcf_entry(v) for v in vars]
 
-    vcf_tmp = tempfile.mktemp('.vcf')
+    fd, vcf_tmp = tempfile.mkstemp('.vcf')
     with open(vcf_tmp, 'w') as f:
         f.write('\n'.join(lst))
+    os.close(fd)
 
-    vcf_tmp_out = tempfile.mktemp('.vcf')
+    fd, vcf_tmp_out = tempfile.mkstemp('.vcf')
+    os.close(fd)
     args = ["CrossMap.py", "vcf",
             brca_resources_dir + "/hg38ToHg19.over.chain.gz",
             vcf_tmp,
