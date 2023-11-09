@@ -762,8 +762,7 @@ class AppendVRId(DefaultPipelineTask):
             artifacts_dir_host,
             'built_with_priors_clean.tsv',
             'built_with_vr_ids.tsv',
-            self.cfg.vr_docker_image_name,
-            self.cfg.seq_repo_dir
+             self.cfg.seq_repo_dir
         ]
 
         pipeline_utils.run_process(args)

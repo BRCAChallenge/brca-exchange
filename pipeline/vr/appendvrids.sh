@@ -14,14 +14,7 @@ SEQ_REPO_DIR="${4:-/usr/local/share/seqrepo}"
 # ----------------------------------------------------
 
 [ `docker ps -f name="seqrepo-rest-service" | wc -l` -gt 1 ] \
-  || docker run \
-       --name seqrepo-rest-service \
-       --user=`id -u`:`id -g` \
-       --detach --rm -p 5000:5000 \
-       --network=host \
-       -v ${SEQ_REPO_DIR}:/usr/local/share/seqrepo \
-       biocommons/seqrepo-rest-service \
-       seqrepo-rest-service /usr/local/share/seqrepo
+    || ../utilities/launch_seqrepo.sh ${SEQ_REPO_DIR}
 
 
 # ...and wait for it to be available
@@ -31,5 +24,6 @@ SEQ_REPO_DIR="${4:-/usr/local/share/seqrepo}"
 # ----------------------------------------------------
 # --- 2. execute append-vr-ids
 # ----------------------------------------------------
-python3 appendVRIds.py -i ${ARTIFACT_DIR}/${INPUT_FILE} \
-       -o ${ARTIFACT_DIR}/${OUTPUT_FILE}
+PATH=../utilities:${PATH} python3 appendVRIds.py \
+    -i ${ARTIFACT_DIR}/${INPUT_FILE} \
+    -o ${ARTIFACT_DIR}/${OUTPUT_FILE}
