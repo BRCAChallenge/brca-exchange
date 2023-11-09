@@ -389,13 +389,13 @@ class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
 
 class DownloadStaticG1KData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.sorted.hg38.vcf")
+        return luigi.LocalTarget(f"{self.esp_file_dir}/1000G.sorted.hg38.vcf")
 
     def run(self):
-        os.chdir(self.g1k_file_dir)
+        os.chdir(self.esp_file_dir)
 
-        g1k_vcf_url = "https://brcaexchange.org/backend/downloads/1000G.sorted.hg38.vcf"
-        pipeline_utils.download_file_and_display_progress(g1k_vcf_url)
+        esp_vcf_url = "https://brcaexchange.org/backend/downloads/ESP.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(esp_vcf_url)
 
 
 @requires(DownloadStaticG1KData)
@@ -566,7 +566,7 @@ class CopyFunctionalAssaysOutputToOutputDir(DefaultPipelineTask):
 class MergeVCFsIntoTSVFile(DefaultPipelineTask):
     def requires(self):
         yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
-                                                    esp_processing.SortConcatenatedESPData())
+                                                    esp_processing.DownloadStaticESPData())
         yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
                                                     gnomad_processing.DownloadStaticGnomADVCF())
         yield CopyClinvarVCFToOutputDir()
@@ -722,7 +722,7 @@ class CalculatePriors(DefaultPipelineTask):
             self.input().path,
             self.output().path)
 
-        os.chdir(artifacts_dir_host)
+        os.chdir(self.artifacts_dir)
         os.remove("ready_for_priors.tsv")
 
 

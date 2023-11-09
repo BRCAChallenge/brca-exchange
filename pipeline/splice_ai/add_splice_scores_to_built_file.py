@@ -80,7 +80,7 @@ def main(vcf, built_tsv, output):
     df_spliceai = spliceai_results_as_df(vcf)
     df = pd.read_csv(built_tsv, sep='\t', keep_default_na=False)
 
-    df_merged = df.merge(df_spliceai, left_on='Genomic_Coordinate_hg38', right_on=coord_col, how='left')
+    df_merged = df.merge(df_spliceai, left_on='pyhgvs_Genomic_Coordinate_38', right_on=coord_col, how='left')
 
     # drop join key and write
     (df_merged.drop(columns=[coord_col]).
