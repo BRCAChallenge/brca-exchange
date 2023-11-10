@@ -50,14 +50,15 @@ class GenerateSpliceAIData(DefaultPipelineTask):
 
         #
         # Run SpliceAI on the new variants only
-        args = ["spliceai", "-I", tmp_dir + "/new_variants.vcf", "-O", self.output().path,
+        spliceai_output_file = tmp_dir + "/spliceai.vcf"
+        args = ["spliceai", "-I", tmp_dir + "/new_variants.vcf", "-O", spliceai_output_file,
                 "-R", brca_resources_dir + "/hg38.fa", "-A", "grch38",
                 "-D", "4999"]
         pipeline_utils.run_process(args)
 
         #
         # Concatenate the old and new VCF files to generate the output spliceAI VCF
-        cmd = "vcf-concat %s/spliceai.vcf %s/new_variants.vcf" % (tmp_dir, tmp_dir)
+        cmd = "vcf-concat %s %s" % (previous_vcf_path, spliceai_output_file)
         pipeline_utils.run_process(cmd, redirect_stdout_path=self.output().path, shell=True)
         shutil.rmtree(tmp_dir)  
                 
