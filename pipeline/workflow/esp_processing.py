@@ -27,6 +27,18 @@ class ESPTask(DefaultPipelineTask):
         pipeline_utils.create_path_if_nonexistent(self.esp_file_dir)
 
 
+class DownloadStaticESPData(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(f"{self.esp_file_dir}/esp.sorted.hg38.vcf")
+
+    def run(self):
+        os.chdir(self.esp_file_dir)
+
+        esp_vcf_url = "https://brcaexchange.org/backend/downloads/esp.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(esp_vcf_url)
+
+
+        
 class DownloadLatestESPData(ESPTask):
     def output(self):
         return luigi.LocalTarget(
@@ -107,7 +119,7 @@ class ConcatenateESPData(ESPTask):
 
 
 @requires(ConcatenateESPData)
-class SortConcatenatedESPData(ESPTask):
+class DownloadSortedESPData(ESPTask):
     def output(self):
         return luigi.LocalTarget(self.esp_file_dir + "/esp.sorted.hg38.vcf")
 

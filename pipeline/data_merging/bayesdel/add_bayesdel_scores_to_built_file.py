@@ -54,7 +54,7 @@ def main(vcf_parts, built_tsv, output):
     df_victor = victor_results_as_df(vcf_parts)
     df = pd.read_csv(built_tsv, sep='\t', keep_default_na=False)
 
-    df_merged = df.merge(df_victor, left_on='Genomic_Coordinate_hg38', right_on=coord_col, how='left')
+    df_merged = df.merge(df_victor, left_on='pyhgvs_Genomic_Coordinate_38', right_on=coord_col, how='left')
 
     # drop join key and write
     (df_merged.drop(columns=[coord_col]).
