@@ -5,7 +5,7 @@ attrs==19.3.0
 backcall==0.1.0
 backports-abc==0.5
 beautifulsoup4==4.8.2
-biocommons.seqrepo==0.6.5
+biocommons.seqrepo==0.6.6
 biopython==1.69
 bioutils==0.5.7
 bs4==0.0.1
