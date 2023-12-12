@@ -8,4 +8,4 @@ docker run --name seqrepo-rest-service \
        --detach --rm -p 5000:5000 \
        -v ${SEQ_REPO_DIR}:/mnt/seqrepo \
        biocommons/seqrepo-rest-service \
-       /mnt/seqrepo
+       seqrepo-rest-service /mnt/seqrepo
