@@ -389,13 +389,13 @@ class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
 
 class DownloadStaticG1KData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(f"{self.esp_file_dir}/1000G.sorted.hg38.vcf")
+        return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.sorted.hg38.vcf")
 
     def run(self):
-        os.chdir(self.esp_file_dir)
+        os.chdir(self.g1k_file_dir)
 
-        esp_vcf_url = "https://brcaexchange.org/backend/downloads/ESP.sorted.hg38.vcf"
-        pipeline_utils.download_file_and_display_progress(esp_vcf_url)
+        g1k_vcf_url = "https://brcaexchange.org/backend/downloads/1000G.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(g1k_vcf_url)
 
 
 @requires(DownloadStaticG1KData)
