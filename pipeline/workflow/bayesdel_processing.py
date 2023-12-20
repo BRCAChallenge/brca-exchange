@@ -45,7 +45,7 @@ class GenerateSpliceAIData(DefaultPipelineTask):
         previous_vcf_path = pipeline_utils.extract_file(
             self.cfg.previous_release_tar, tmp_dir,
             'output/release/artifacts/variants_with_splice_ai.vcf')
-        args = ["python", "spliceai/add_splcieai_scores_for_new_variants.py",
+        args = ["python", "add_splcieai_scores_for_new_variants.py",
                 "-a", self.input().path, "-b", "1000", "-d", "4999",
                 "-f", brca_resources_dir + "/hg38.fa", "-f", "grch38",
                 "-o", self.output().path, "-s", previous_vcf_path,
