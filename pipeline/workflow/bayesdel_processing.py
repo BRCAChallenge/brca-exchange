@@ -34,32 +34,23 @@ class GenerateSpliceAIData(DefaultPipelineTask):
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
-        os.chdir(data_merging_method_dir)
-
+        os.chdir(splice_ai_method_dir)
               
         #
-        # Extract the spliceAI output VCF from the previous release to identify any
-        # new variants.
+        # Extract the spliceAI output VCF from the previous release to identify
+        # any new variants.  Score the new variants in batches.  Merge the
+        # old and new score sets to generate a score set for the
+        # current variants
         tmp_dir = tempfile.mkdtemp()
         previous_vcf_path = pipeline_utils.extract_file(
             self.cfg.previous_release_tar, tmp_dir,
             'output/release/artifacts/variants_with_splice_ai.vcf')
-        args = ["python", "find_missing_vcf_records.py", "-a", self.input().path, "-b",
-                previous_vcf_path,  "-o", tmp_dir + "/new_variants.vcf"]
+        args = ["python", "spliceai/add_splcieai_scores_for_new_variants.py",
+                "-a", self.input().path, "-b", "1000", "-d", "4999",
+                "-f", brca_resources_dir + "/hg38.fa", "-f", "grch38",
+                "-o", self.output(), path, "-s", previous_vcf_path,
+                "-t", tmp_dir]
         pipeline_utils.run_process(args)
-
-        #
-        # Run SpliceAI on the new variants only
-        spliceai_output_file = tmp_dir + "/spliceai.vcf"
-        args = ["spliceai", "-I", tmp_dir + "/new_variants.vcf", "-O", spliceai_output_file,
-                "-R", brca_resources_dir + "/hg38.fa", "-A", "grch38",
-                "-D", "4999"]
-        pipeline_utils.run_process(args)
-
-        #
-        # Concatenate the old and new VCF files to generate the output spliceAI VCF.
-        cmd = "vcf-concat %s %s" % (previous_vcf_path, spliceai_output_file)
-        pipeline_utils.run_process(cmd, redirect_stdout_path=self.output().path, shell=True)
         shutil.rmtree(tmp_dir)  
                 
 
