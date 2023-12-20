@@ -48,7 +48,7 @@ class GenerateSpliceAIData(DefaultPipelineTask):
         args = ["python", "spliceai/add_splcieai_scores_for_new_variants.py",
                 "-a", self.input().path, "-b", "1000", "-d", "4999",
                 "-f", brca_resources_dir + "/hg38.fa", "-f", "grch38",
-                "-o", self.output(), path, "-s", previous_vcf_path,
+                "-o", self.output().path, "-s", previous_vcf_path,
                 "-t", tmp_dir]
         pipeline_utils.run_process(args)
         shutil.rmtree(tmp_dir)  
