@@ -92,7 +92,7 @@ def main():
     print(args.temp_dir)
     scored_vcf = args.temp_dir + "/scored_variants.vcf"
     unscored_vcf = args.temp_dir + "/unscored_variants.vcf"
-    newly_scored_vcf = args.temp_dir + "/newly_score_varaints.vcf"
+    newly_scored_vcf = args.temp_dir + "/newly_score_variants.vcf"
     shutil.copy2(args.scored_variants_vcf, scored_vcf)
     while not all_variants_scored:
         #
