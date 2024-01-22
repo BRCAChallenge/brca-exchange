@@ -621,17 +621,27 @@ var VariantDetail = React.createClass({
             });
         }
 
-        // ensure that we're viewing the latest version of the variant, and redirect if we're not,
+        // ensure that we're viewing the latest version of the variant, with the stable CA_ID URL.
+        // and redirect if we're not,
         // unless the querystring param 'noRedirect=true' is specified, in which case we stay here.
+        // In the rare case there is no CA_ID, redirect to the latest version by numeric ID instead.
         // (if someone *really* wants to link to the old variant, they may also specify 'noRedirectMsg=true'
         // to silence the warning at the top of the page, too.)
         const { data } = nextState;
-
-        if (data && parseInt(this.props.params.id) !== data[0].id) {
-            // if the variant we're requesting isn't the newest version, we need to redirect to it
+        if (data && this.props.params.id !== data[0].CA_ID) {
             const { noRedirect } = this.getQuery();
             if (noRedirect !== "true") {
-                this.replaceWith(`/variant/:id`, { id: data[0].id }, { redirectedFrom: this.props.params.id });
+                // Redirect to CA_ID if it exists, or the latest numeric id if CA_ID doesn't exist.
+                const redirectToID = data[0].CA_ID  || data[0].id ;
+
+                // If we were already at the latest numeric ID, redirect without a redirectedFrom message.
+                if (parseInt(this.props.params.id) === data[0].id) {
+                    this.replaceWith(`/variant/:id`, { id: redirectToID }, {});
+                }
+                // Otherwise include redirectedFrom.
+                else {
+                    this.replaceWith(`/variant/:id`, { id: redirectToID }, { redirectedFrom: this.props.params.id });
+                }
             }
         }
     },
@@ -1276,13 +1286,14 @@ var VariantDetail = React.createClass({
                     }
 
                     {
-                        (variantVersionIdx !== 0 && noRedirectMsg !== "true") && (
+                        (variant.id !== data[0].id && noRedirectMsg !== "true") && (
+                        // if we're not on the latest variant version, show a message with link
                           <Col xs={12} classname="vcenterblock">
                               <div className="variant-message outdated-variant-message panel panel-danger">
                                   <div className="panel-body panel-danger">
                                       <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
 
-                                      The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].id}`}>Click here for updated data on this variant.</a>
+                                      The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].CA_ID}`}>Click here for updated data on this variant.</a>
                                   </div>
                               </div>
                           </Col>
