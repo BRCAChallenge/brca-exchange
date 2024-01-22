@@ -1,2 +1,2 @@
-ga4gh.vr[extras]
+ga4gh.vrs==0.8.4
 
