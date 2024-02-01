@@ -80,12 +80,6 @@ if (typeof console === "undefined") {
     };
 }
 
-// add react-ga tracking code to track each pageview
-import ReactGA from 'react-ga';
-if (window.config.analytics) {
-    ReactGA.initialize(window.config.analytics, { standardImplementation: true });
-}
-
 function isEmptyVal(val) {
     if ((typeof val === 'string' || val instanceof String) && val.trim() === '') {
             return true;
@@ -828,6 +822,7 @@ var VariantDetail = React.createClass({
             return <div />;
         }
 
+
         const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
         const variant = data[variantVersionIdx] || data[0];
         const release = variant["Data_Release"];
@@ -1456,15 +1451,6 @@ var Application = React.createClass({
     },
     render: function () {
         const path = this.getPath().slice(1);
-
-        // logs the full path, including the hash, to google analytics (if analytics is enabled)
-        if (window.config.analytics) {
-            const fullHref = window.location.href;
-            const origin = window.location.origin;
-            const fullPathWithHash = fullHref.startsWith(origin) ? fullHref.slice(origin.length) : fullHref;
-            ReactGA.ga('send', 'pageview', fullPathWithHash);
-        }
-
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
