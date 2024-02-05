@@ -5,7 +5,7 @@ import itertools
 import argparse
 import csv
 from collections import OrderedDict
-
+import math
 import numpy as np
 import pandas as pd
 
@@ -49,6 +49,13 @@ def parse_args():
     return(args)
 
 
+def read_flags(flag_data):
+    flags = {}
+    for row in flag_data:
+        flags[row["ID"]] = row
+    return(flags)
+    
+
 def var_obj_to_name(v):
     return '-'.join(str(x) for x in [v.chr, v.pos, v.ref, v.alt])
 
@@ -64,11 +71,9 @@ def add_name_col(dfx: pd.DataFrame):
                        csep + dfx['referenceAllele'] + csep + dfx['alternateAlleles'])
     return dfx
 
-def estimate_coverage(variant, start, end, chrom, df_cov):
-    start = int(variant["pyhgvs_Hg38_Start"]) - 1
-    end = int(variant["pyhgvs_Hg38_End"])
+def estimate_coverage(start, end, chrom, df_cov):
     positions = list(range(start, end))
-    coverage_this_chrom = df_cov.loc[df_cov["chrom"] == int(variant["Chr"])]
+    coverage_this_chrom = df_cov.loc[df_cov["chrom"] == int(chrom)]
     positions_this_variant = coverage_this_chrom[coverage_this_chrom["pos"].isin(positions)]
     meanval = positions_this_variant["mean"].mean()
     medianval = positions_this_variant["median"].median()
@@ -325,20 +330,25 @@ def field_defined(field):
     """
     return(field != "-")
 
-def analyze_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv, mean_read_depth, median_read_depth, debug=True):
+def analyze_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv,
+                    mean_read_depth, median_read_depth, vcf_filter_flag, debug=True):
     #
     # Get the coverage data
     #if not r['sufficient_read_depth']:
     #    return 'fail_insufficient_read_depth'
     #
     read_depth = min(mean_read_depth, median_read_depth)
+    #if np.isnan(read_depth):
+    #    print("Setting read depth to zero, components", median_read_depth, mean_read_depth)
+    #    read_depth = 0
+    #print("read depth", read_depth, "median", median_read_depth, "mean", mean_read_depth)
+
+
     #
-    # Get the VCF filter flags somehow
-    #if r['vcf_filter_flag']:
-    #    return 'fail_vcf_filter_flag'
     #
-    vcf_filter_flag = False  ### HERE
-    #
+    # Address the cases where a variant cannot be analyzed because the gnomAD data is flagged
+    if vcf_filter_flag:
+        return(FAIL_VCF_FILTER_FLAG, "Data flagged in the gnomAD VCF")
     rare_variant = False
     if field_defined(faf95_popmax_str):
         faf = float(faf95_popmax_str)
@@ -353,10 +363,6 @@ def analyze_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv, me
         return(FAIL_INSUFFICIENT_READ_DEPTH, "Insufficient read depth")
     if (not rare_variant) and read_depth < READ_DEPTH_THRESHOLD_FREQUENT_VARIANT:
         return(FAIL_INSUFFICIENT_READ_DEPTH, "Insufficient read depth")
-    #
-    # Address the cases where a variant cannot be analyzed because the gnomAD data is flagged
-    if vcf_filter_flag:
-        return(FAIL_VCF_FILTER_FLAG, "Data flagged in the gnomAD VCF")
     #
     # Address the cases where FAF is defined, and the variant is a candidate for a
     # evidence code for high population frequency (BA1, BS1, BS1_SUPPORTING)
@@ -430,8 +436,16 @@ def analyze_across_datasets(code_v2, code_v3):
     else:
         return(code_v3)
 
+def variant_is_flagged(variant_id, flags):
+    print("checking", variant_id)
+    assert(variant_id in flags)
+    variant_flagged = False
+    if flags[variant_id]["Filters"] != "PASS":
+        variant_flagged = True
+    return(variant_flagged)
 
-def analyze_variant(variant, coverage_v2, coverage_v3, debug=True):
+
+def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, debug=True):
     """
     Analyze a single variant, adding the output columns
     """
@@ -445,9 +459,10 @@ def analyze_variant(variant, coverage_v2, coverage_v3, debug=True):
     if debug:
         print("variant is snv:", is_snv)
     if field_defined(variant["Variant_id_GnomAD"]):
-        (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg19_Start"]),
-                                                                 int(variant["pyhgvs_Hg19_End"]),
+        (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
+                                                                 int(variant["pyhgvs_Hg37_End"]),
                                                                  int(variant["Chr"]),coverage_v2)
+        print("mean read depth", mean_read_depth, "median read depth", median_read_depth)
         if debug:
             print("gnomAD V2 variant", variant["Variant_id_GnomAD"], "popmax", variant["faf95_popmax_exome_GnomAD"],
                   "allele count", variant["Allele_count_exome_GnomAD"], "mean read depth", mean_read_depth,
@@ -456,13 +471,15 @@ def analyze_variant(variant, coverage_v2, coverage_v3, debug=True):
          variant[GNOMAD_V2_CODE_DESCR]) = analyze_dataset(variant["faf95_popmax_exome_GnomAD"],
                                                           variant["faf95_popmax_population_exome_GnomAD"],
                                                           variant["Allele_count_exome_GnomAD"],
-                                                          is_snv, mean_read_depth, median_read_depth)
+                                                          is_snv, mean_read_depth, median_read_depth,
+                                                          variant_is_flagged(variant["Variant_id_GnomAD"], flags_v2))
         if debug:
             print("From gnomAD V2: code ID", variant[GNOMAD_V2_CODE_ID], "descr", variant[GNOMAD_V2_CODE_DESCR])
     if field_defined(variant["Variant_id_GnomADv3"]):
-        (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg38_Start"]),
-                                                                 int(variant["pyhgvs_Hg38_End"]),
+        (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["Hg38_Start"]),
+                                                                 int(variant["Hg38_End"]),
                                                                  int(variant["Chr"]),coverage_v3)
+        print("mean read depth", mean_read_depth, "median read depth", median_read_depth)
         if debug:
             print("gnomAD V3 variant", variant["Variant_id_GnomADv3"], "popmax", variant["faf95_popmax_genome_GnomADv3"],
                   "allele count", variant["Allele_count_genome_GnomADv3"], "mean read depth", mean_read_depth,
@@ -471,7 +488,8 @@ def analyze_variant(variant, coverage_v2, coverage_v3, debug=True):
          variant[GNOMAD_V3_CODE_DESCR]) = analyze_dataset(variant["faf95_popmax_genome_GnomADv3"],
                                                           variant["faf95_popmax_population_genome_GnomADv3"],
                                                           variant["Allele_count_genome_GnomADv3"],
-                                                          is_snv, mean_read_depth, median_read_depth)
+                                                          is_snv, mean_read_depth, median_read_depth,
+                                                          variant_is_flagged(variant["Variant_id_GnomADv3"], flags_v3))
         if debug:
             print("From gnomAD V3: code ID", variant[GNOMAD_V3_CODE_ID], "descr", variant[GNOMAD_V3_CODE_DESCR])
     variant[POPFREQ_CODE_ID] = analyze_across_datasets(variant[GNOMAD_V2_CODE_ID],
@@ -481,16 +499,19 @@ def analyze_variant(variant, coverage_v2, coverage_v3, debug=True):
     return()
 
 
+
 def main():
     args = parse_args()
     print(args)
     #cfg_df = config.load_config(gene_config_path)
     df_cov2 = pd.read_parquet(args.data_dir + '/df_cov_v2.parquet')
     df_cov3 = pd.read_parquet(args.data_dir + '/df_cov_v3.parquet')
+    flags_v2 = read_flags(csv.DictReader(open(args.data_dir + "/brca.gnomAD.2.1.1.hg19.flags.tsv"), delimiter = "\t"))
+    flags_v3 = read_flags(csv.DictReader(open(args.data_dir + "/brca.gnomAD.3.1.1.hg38.flags.tsv"), delimiter = "\t"))
     input_file = csv.DictReader(open(args.input), delimiter = "\t")
     output_file = initialize_output_file(input_file, args.output)
     for variant in input_file:
-        analyze_variant(variant, df_cov2, df_cov3)
+        analyze_variant(variant, df_cov2, df_cov3, flags_v2, flags_v3)
         output_file.writerow(variant)
                 
     #df_var2 = pd.read_parquet(data_dir / 'df_var_v2.parquet')
