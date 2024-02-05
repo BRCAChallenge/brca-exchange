@@ -80,6 +80,7 @@ def estimate_coverage(start, end, chrom, df_cov):
     return(meanval, medianval)
 
 
+
 def coverage_per_variant(df_var: pd.DataFrame, df_cov: pd.DataFrame):
     """
     Computing median and mean coverage statistics per variant
@@ -154,9 +155,6 @@ def add_filter_flag_col(df, cols):
         lambda filt_el: len(set(filt_el.split(';')).intersection(cols)) > 0)
 
 
-def add_read_depth_col(df, threshold):
-    df['sufficient_read_depth'] = (df['pos_mean'] >= threshold) & (
-            df['pos_median'] >= threshold)
 
 
 def process_v2(df_var2, df_cov2, read_depth_thresh, resource_dir):
