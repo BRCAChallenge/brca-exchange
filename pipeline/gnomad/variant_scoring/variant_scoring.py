@@ -72,7 +72,7 @@ def add_name_col(dfx: pd.DataFrame):
     return dfx
 
 def estimate_coverage(start, end, chrom, df_cov):
-    positions = list(range(start, end))
+    positions = list(range(start, end+1))
     coverage_this_chrom = df_cov.loc[df_cov["chrom"] == int(chrom)]
     positions_this_variant = coverage_this_chrom[coverage_this_chrom["pos"].isin(positions)]
     meanval = positions_this_variant["mean"].mean()
@@ -331,26 +331,14 @@ def field_defined(field):
 def analyze_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv,
                     mean_read_depth, median_read_depth, vcf_filter_flag, debug=True):
     #
-    # Get the coverage data
-    #if not r['sufficient_read_depth']:
-    #    return 'fail_insufficient_read_depth'
-    #
+    # Get the coverage data.  Rule out error conditions: low coverage, VCF filter flag.
     read_depth = min(mean_read_depth, median_read_depth)
-    #if np.isnan(read_depth):
-    #    print("Setting read depth to zero, components", median_read_depth, mean_read_depth)
-    #    read_depth = 0
-    #print("read depth", read_depth, "median", median_read_depth, "mean", mean_read_depth)
-
-
-    #
-    #
-    # Address the cases where a variant cannot be analyzed because the gnomAD data is flagged
-    if vcf_filter_flag:
-        return(FAIL_VCF_FILTER_FLAG, "Data flagged in the gnomAD VCF")
+    if pd.isna(read_depth):
+        read_depth = 0
     rare_variant = False
     if field_defined(faf95_popmax_str):
         faf = float(faf95_popmax_str)
-        if np.isnan(faf):
+        if pd.isna(faf):
             rare_variant = True
         elif faf <= 0.00002:
             rare_variant = True
@@ -361,6 +349,8 @@ def analyze_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv,
         return(FAIL_INSUFFICIENT_READ_DEPTH, "Insufficient read depth")
     if (not rare_variant) and read_depth < READ_DEPTH_THRESHOLD_FREQUENT_VARIANT:
         return(FAIL_INSUFFICIENT_READ_DEPTH, "Insufficient read depth")
+    if vcf_filter_flag:
+        return(FAIL_VCF_FILTER_FLAG, "Data flagged in the gnomAD VCF")
     #
     # Address the cases where FAF is defined, and the variant is a candidate for a
     # evidence code for high population frequency (BA1, BS1, BS1_SUPPORTING)
