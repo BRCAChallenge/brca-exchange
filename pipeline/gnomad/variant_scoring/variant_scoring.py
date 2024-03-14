@@ -19,8 +19,8 @@ POPFREQ_CODE_ID = "Provisional_evidence_code_popfreq"
 POPFREQ_CODE_DESCR = "Provisional_evidence_code_description_popfreq"
 GNOMAD_V2_MEAN_COVERAGE = "gnomAD_mean_coverage_v2_exome"
 GNOMAD_V2_MEDIAN_COVERAGE = "gnomAD_median_coverage_v2_exome"
-GNOMAD_V3_MEAN_COVERAGE = "gnomAD_mean_coverage_v2_genome"
-GNOMAD_V3_MEDIAN_COVERAGE = "gnomAD_median_coverage_v2_genome"
+GNOMAD_V3_MEAN_COVERAGE = "gnomAD_mean_coverage_v3_genome"
+GNOMAD_V3_MEDIAN_COVERAGE = "gnomAD_median_coverage_v3_genome"
 
 
 FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG = "No code is met for population data (read depth, flags)"
