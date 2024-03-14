@@ -17,6 +17,11 @@ GNOMAD_V2_CODE_ID = "Provisional_code_GnomAD"
 GNOMAD_V3_CODE_ID = "Provisional_code_GnomADv3"
 POPFREQ_CODE_ID = "Provisional_evidence_code_popfreq"
 POPFREQ_CODE_DESCR = "Provisional_evidence_code_description_popfreq"
+GNOMAD_V2_MEAN_COVERAGE = "gnomAD_mean_coverage_v2_exome"
+GNOMAD_V2_MEDIAN_COVERAGE = "gnomAD_median_coverage_v2_exome"
+GNOMAD_V3_MEAN_COVERAGE = "gnomAD_mean_coverage_v2_genome"
+GNOMAD_V3_MEDIAN_COVERAGE = "gnomAD_median_coverage_v2_genome"
+
 
 FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG = "No code is met for population data (read depth, flags)"
 FAIL_NEEDS_REVIEW = "No code is met (needs review)"
@@ -51,6 +56,9 @@ def parse_args():
                         help="Directory with the processed files")
     parser.add_argument("-r", "--resource_dir", default="BRCAExchange/resources",
                         help="Pipeline resources")
+    parser.add_argument("-c", "--coverage_report", default=True,
+                        action=argparse.BooleanOptionalAction,
+                        help="Boolean flag to be set if we want to save coverage data")
     args = parser.parse_args()
     return(args)
 
@@ -73,12 +81,15 @@ def estimate_coverage(start, end, chrom, df_cov):
 
 
 
-def initialize_output_file(input_file, output_filename):
+def initialize_output_file(input_file, output_filename, report_coverage=False):
     """
     Create an empty output file with the new columns
     """
-    new_columns = [GNOMAD_V2_CODE_ID, GNOMAD_V3_CODE_ID, 
+    new_columns = [GNOMAD_V2_CODE_ID, GNOMAD_V3_CODE_ID,
                    POPFREQ_CODE_ID, POPFREQ_CODE_DESCR]
+    if report_coverage:
+        new_columns = [GNOMAD_V2_MEAN_COVERAGE, GNOMAD_V2_MEDIAN_COVERAGE,
+                       GNOMAD_V3_MEAN_COVERAGE, GNOMAD_V3_MEDIAN_COVERAGE] + new_columns
     input_header_row = input_file.fieldnames
     output_header_row = input_header_row + new_columns
     output_file = csv.DictWriter(open(output_filename,"w"), fieldnames=output_header_row,
@@ -224,7 +235,7 @@ def variant_is_flagged(variant_id, flags):
     return(variant_flagged)
 
 
-def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, debug=True):
+def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, report_coverage=False, debug=True):
     """
     Analyze a single variant, adding the output columns
     """
@@ -234,6 +245,11 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, debug
     variant[GNOMAD_V3_CODE_ID] = PM2_SUPPORTING
     variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
     variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
+    if report_coverage:
+        variant[GNOMAD_V2_MEAN_COVERAGE] = "-"
+        variant[GNOMAD_V2_MEDIAN_COVERAGE] = "-"
+        variant[GNOMAD_V3_MEAN_COVERAGE] = "-"
+        variant[GNOMAD_V3_MEDIAN_COVERAGE] = "-"
     is_snv = (variant["Hg38_Start"] == variant["Hg38_End"])
     if debug:
         print("variant is snv:", is_snv)
@@ -247,6 +263,9 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, debug
         (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
                                                                  int(variant["pyhgvs_Hg37_End"]),
                                                                  int(variant["Chr"]),coverage_v2)
+        if report_coverage:
+            variant[GNOMAD_V2_MEAN_COVERAGE] = mean_read_depth
+            variant[GNOMAD_V2_MEDIAN_COVERAGE] = median_read_depth
         variant[GNOMAD_V2_CODE_ID] = analyze_one_dataset(variant["faf95_popmax_exome_GnomAD"],
                                                          variant["faf95_popmax_population_exome_GnomAD"],
                                                          variant["Allele_count_exome_GnomAD"],
@@ -264,6 +283,9 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, debug
         (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["Hg38_Start"]),
                                                                  int(variant["Hg38_End"]),
                                                                  int(variant["Chr"]),coverage_v3)
+        if report_coverage:
+            variant[GNOMAD_V3_MEAN_COVERAGE] = mean_read_depth
+            variant[GNOMAD_V3_MEDIAN_COVERAGE] = median_read_depth
         variant[GNOMAD_V3_CODE_ID] = analyze_one_dataset(variant["faf95_popmax_genome_GnomADv3"],
                                                          variant["faf95_popmax_population_genome_GnomADv3"],
                                                          variant["Allele_count_genome_GnomADv3"],
@@ -290,8 +312,6 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, debug
 
 def main():
     args = parse_args()
-    print(args)
-    #cfg_df = config.load_config(gene_config_path)
     df_cov2 = pd.read_parquet(args.data_dir + '/df_cov_v2.parquet')
     df_cov3 = pd.read_parquet(args.data_dir + '/df_cov_v3.parquet')
     flags_v2 = read_flags(csv.DictReader(open(args.data_dir + "/brca.gnomAD.2.1.1.hg19.flags.tsv"),
@@ -299,9 +319,9 @@ def main():
     flags_v3 = read_flags(csv.DictReader(open(args.data_dir + "/brca.gnomAD.3.1.1.hg38.flags.tsv"),
                                          delimiter = "\t"))
     input_file = csv.DictReader(open(args.input), delimiter = "\t")
-    output_file = initialize_output_file(input_file, args.output)
+    output_file = initialize_output_file(input_file, args.output, args.coverage_report)
     for variant in input_file:
-        analyze_variant(variant, df_cov2, df_cov3, flags_v2, flags_v3)
+        analyze_variant(variant, df_cov2, df_cov3, flags_v2, flags_v3, args.coverage_report)
         output_file.writerow(variant)
 
 
