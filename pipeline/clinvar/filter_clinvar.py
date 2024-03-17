@@ -14,7 +14,6 @@ def filter_xml_for_gene_symbol(input_fp, output_fp, target_symbol_values,
             if gene_element is not None:
                 if "Symbol" in gene_element.attrib:
                     if gene_element.attrib["Symbol"] in target_symbol_values:
-                        print("Victory!!", gene_element.attrib["Symbol"])
                         output_fp.write(ET.tostring(elem, encoding='UTF-8'))
             elem.clear()
     output_fp.write("</ClinVarVariationRelease>".encode('UTF-8'))
