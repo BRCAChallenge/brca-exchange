@@ -65,22 +65,6 @@ def _write_auto_sql_file(as_path):
         )
         """
 
-        #sql = """table brcaExchanges
-        #" These data are in BigBed bed9 format, and include selected fields from https://brcaexchange.org"
-        #(
-        #string chrom;      "Chromosome (or contig, scaffold, etc.)"
-        #uint   chromStart; "Start position in chromosome"
-        #uint   chromEnd;   "End position in chromosome"
-        #string name;       "Name of item"
-        #uint   score;      "Score from 0-1000"
-        #char[1] strand;    "+ or -"
-        #uint thickStart;   "Start of where display should be thick (start codon)"
-        #uint thickEnd;     "End of where display should be thick (stop codon)"
-        #uint reserved;     "Used as itemRgb as of 2004-11-22"        
-        #string _mouseOver; "mouse over field hidden"
-        #)
-        #"""
-
         asFh.write(sql)
 
 
@@ -110,7 +94,7 @@ def main():
             if "pathogen" in pat:
                 color = "255,0,0"
             elif "benign" in pat:
-                color = "0,0,255"
+                color = "0,255,0"
             elif "uncertain" in pat:
                 color = "100,100,100"
             else:
@@ -127,10 +111,7 @@ def main():
             if name == "?":
                 assert(False)
 
-            mouseOvers = []
-            if rec.pyhgvs_cDNA != "-":
-                mouseOvers.append(rec.pyhgvs_cDNA)
-            mouseOver = ", ".join(mouseOvers)
+            mouseOver = rec.pyhgvs_cDNA
 
             #Start with the hg19 version
             start = str(int(rec.pyhgvs_Hg37_Start)-1)
@@ -140,7 +121,7 @@ def main():
             outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
                       rec.Gene_Symbol, rec.pyhgvs_cDNA, rec.CA_ID,
                       rec.Clinical_significance_ENIGMA, mouseOver]
-            #outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, mouseOver]
+
             outRow = [str(x) for x in outRow]
             ofh19.write("\t".join(outRow)+"\n")
 
@@ -153,7 +134,7 @@ def main():
             outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
                       rec.Gene_Symbol, rec.pyhgvs_cDNA, rec.CA_ID,
                       rec.Clinical_significance_ENIGMA, mouseOver]
-            #outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, mouseOver]
+
             outRow = [str(x) for x in outRow]
             ofh38.write("\t".join(outRow)+"\n")
 

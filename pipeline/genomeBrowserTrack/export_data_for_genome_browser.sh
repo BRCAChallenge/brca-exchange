@@ -74,7 +74,7 @@ cp -R ${SRC_DIR}/hub.txt ${SRC_DIR}/genomes.txt ${SRC_DIR}/description.html ${TR
 mkdir -p ${TRACKHUBS}/hg19
 cp ${TMP_HG19}/* ${TRACKHUBS}/hg19
 mkdir -p ${TRACKHUBS}/hg38
-cp ${TMP_HG19}/* ${TRACKHUBS}/hg38
+cp ${TMP_HG38}/* ${TRACKHUBS}/hg38
 
 
 

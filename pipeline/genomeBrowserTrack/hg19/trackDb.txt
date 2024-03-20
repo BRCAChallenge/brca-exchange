@@ -4,4 +4,6 @@ shortLabel BRCAExchange
 longLabel BRCAExchange BRCA1/2 variants
 type bigBed
 visibility pack
-
+url https://brcaexchange.org/variant/$ca_id
+itemRgb on
+mouseOver _mouseOver
