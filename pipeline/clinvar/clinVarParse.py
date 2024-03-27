@@ -23,50 +23,50 @@ MULTI_VALUE_SEP = ','
 
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
+    variant = submissionSet.variant
 
-    if ra.variant is None:
+    if variant is None:
         logging.warning("No variant information could be extracted for ReferenceClinVarAssertion ID %s %s",
                      submissionSet.referenceAssertion.id, [c.accession for c in submissionSet.otherAssertions.values()])
         return None
 
     debug = False
     for oa in list(submissionSet.otherAssertions.values()):
-        variant = ra.variant
-        #if oa.origin == "germline":
-        hgvs = ra.hgvs_cdna
+        if oa.origin != "somatic":
+            hgvs = ra.hgvs_cdna
 
-        proteinChange = None
-        if "HGVS, protein, RefSeq" in variant.attribute:
-            proteinChange = variant.attribute["HGVS, protein, RefSeq"]
+            proteinChange = None
+            if "HGVS, protein, RefSeq" in variant.attribute:
+                proteinChange = variant.attribute["HGVS, protein, RefSeq"]
 
-        if assembly in variant.coordinates:
+            if assembly in variant.coordinates:
 
-            synonyms = MULTI_VALUE_SEP.join(ra.synonyms + oa.synonyms)
+                synonyms = MULTI_VALUE_SEP.join(ra.synonyms + oa.synonyms)
 
-            vcf_var = variant.coordinates[assembly]
+                vcf_var = variant.coordinates[assembly]
 
-            # Omit the variants that don't have any genomic start coordinate indicated.
-            if vcf_var and _bases_only(vcf_var.ref) and _bases_only(vcf_var.alt):
-                print("\t".join((str(hgvs),
-                                 oa.submitter,
-                                 str(oa.clinicalSignificance),
-                                 str(oa.dateLastUpdated),
-                                 str(oa.dateSignificanceLastEvaluated),
-                                 str(oa.accession),
-                                 str(oa.accession_version),
-                                 str(oa.id),
-                                 str(oa.origin),
-                                 str(oa.method),
-                                 str(vcf_var).replace('g.', ''),
-                                 str(variant.geneSymbol),
-                                 str(proteinChange),
-                                 str(oa.description),
-                                 str(oa.summaryEvidence),
-                                 str(oa.reviewStatus),
-                                 str(ra.condition_type),
-                                 str(ra.condition_value),
-                                 ",".join(ra.condition_db_id) if isinstance(ra.condition_db_id, list) else str(ra.condition_db_id),
-                                 str(synonyms))))
+                # Omit the variants that don't have any genomic start coordinate indicated.
+                if vcf_var and _bases_only(vcf_var.ref) and _bases_only(vcf_var.alt):
+                    print("\t".join((str(hgvs),
+                                     oa.submitter,
+                                     str(oa.clinicalSignificance),
+                                     str(oa.dateLastUpdated),
+                                     str(oa.dateSignificanceLastEvaluated),
+                                     str(oa.accession),
+                                     str(oa.accession_version),
+                                     str(oa.id),
+                                     str(oa.origin),
+                                     str(oa.method),
+                                     str(vcf_var).replace('g.', ''),
+                                     str(variant.geneSymbol),
+                                     str(proteinChange),
+                                     str(oa.description),
+                                     str(oa.summaryEvidence),
+                                     str(oa.reviewStatus),
+                                     str(ra.condition_type),
+                                     str(ra.condition_value),
+                                     ",".join(ra.condition_db_id) if isinstance(ra.condition_db_id, list) else str(ra.condition_db_id),
+                                     str(synonyms))))
 
 
 def _bases_only(seq):
@@ -85,25 +85,14 @@ def main():
 
     printHeader()
 
-    inputBuffer = ""
-    with open(args.clinVarXmlFilename) as inputFile:
-        inClinVarSet = False
-        for line in inputFile:
-            if "<ClinVarSet" in line:
-                inHeader = False
-                inputBuffer = line
-                inClinVarSet = True
-            elif "</ClinVarSet>" in line:
-                inputBuffer += line
-                inClinVarSet = False
 
-                cvs = ET.fromstring(inputBuffer)
-                if clinvar.isCurrent(cvs):
-                    submissionSet = clinvar.clinVarSet(cvs)
+    with open(args.clinVarXmlFilename) as inputFile:
+        for event, elem in ET.iterparse(input_fp, events=('start', 'end')):
+            if event == 'end' and elem.tag == 'VariationArchive':
+                if clinvar.isCurrent(elem):
+                    submissionSet = clinvar.clinVarSet(elem)
                     processSubmission(submissionSet, args.assembly)
-                inputBuffer = None
-            elif inClinVarSet:
-                inputBuffer += line
+                elem.clear()
 
 if __name__ == "__main__":
     # execute only if run as a script

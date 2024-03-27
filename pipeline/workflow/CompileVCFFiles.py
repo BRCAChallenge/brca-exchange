@@ -33,12 +33,12 @@ luigi_dir = os.getcwd()
 
 class DownloadLatestClinvarData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.clinvar_file_dir + "/ClinVarFullRelease_00-latest.xml.gz")
+        return luigi.LocalTarget(self.clinvar_file_dir + "/ClinVarVCVRelease_00-latest.xml.gz")
 
     def run(self):
         os.chdir(self.clinvar_file_dir)
 
-        clinvar_data_url = "ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarFullRelease_00-latest.xml.gz"
+        clinvar_data_url = "ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarVCVRelease_00-latest.xml.gz"
         pipeline_utils.download_file_and_display_progress(clinvar_data_url)
 
 
