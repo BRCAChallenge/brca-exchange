@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from collections import namedtuple, OrderedDict
 import argparse
 
@@ -41,33 +42,32 @@ def _get_parser():
     return parser
 
 
-def _write_auto_sql_file(as_path, headers, skip_cols):
+def _write_auto_sql_file(as_path):
     with open(as_path, "w") as asFh:
 
         sql = """table brcaExchanges
-        " bed9 + many additional fields from brcaExchange.org "
-            (
-            string chrom;      "Chromosome (or contig, scaffold, etc.)"
-            uint   chromStart; "Start position in chromosome"
-            uint   chromEnd;   "End position in chromosome"
-            string name;       "Name of item"
-            uint   score;      "Score from 0-1000"
-            char[1] strand;    "+ or -"
-            uint thickStart;   "Start of where display should be thick (start codon)"
-            uint thickEnd;     "End of where display should be thick (stop codon)"
-            uint reserved;     "Used as itemRgb as of 2004-11-22"
-            string outLink;     "Link to BRCAExchange.org"
+        " These data are in BigBed bed9 format, and include selected fields from https://brcaexchange.org"
+        (
+        string chrom;      "Chromosome (or contig, scaffold, etc.)"
+        uint   chromStart; "Start position in chromosome"
+        uint   chromEnd;   "End position in chromosome"
+        string name;       "Name of item"
+        uint   score;      "Score from 0-1000"
+        char[1] strand;    "+ or -"
+        uint thickStart;   "Start of where display should be thick (start codon)"
+        uint thickEnd;     "End of where display should be thick (stop codon)"
+        uint reserved;     "Used as itemRgb as of 2004-11-22"        
+        string outlink;    "Link to the variant in BRCA Exchange"
+        string symbol;     "Gene Symbol"
+        string cdna_hgvs;       "Variant ID in cDNA HGVS nomenclature"
+        string CA_ID;       "ClinGen Allele Registry ID"
+        string Clinical_significance_ENIGMA;      "Clinical Significance as curated by the ENIGMA VCEP"
+        string _mouseOver; "mouse over field hidden"
+        )
         """
 
         asFh.write(sql)
 
-        for h in headers:
-            if h in skip_cols:
-                continue
-            asFh.write('    lstring %s; "%s"' % (h, h.replace("_", " ")))
-            asFh.write('\n')
-        asFh.write('    string _mouseOver; "mouse over field hidden"\n')
-        asFh.write('    )')
 
         print("wrote as file to {}".format(asFh.name))
 
@@ -77,101 +77,72 @@ def main():
 
     args = parser.parse_args()
 
-    with open(args.input, 'r') as ifh, open(args.output_hg19, 'w') as ofh, open(args.output_hg38, 'w') as ofh38:
+    with open(args.input, 'r') as ifh, open(args.output_hg19, 'w') as ofh19, open(args.output_hg38, 'w') as ofh38:
         print("Reading %s..." % ifh.name)
 
         headers = ifh.readline().rstrip("\n").rstrip("\r").strip().split("\t")
         rowRec = namedtuple("rec", headers)
-        skip_cols = ["Chr", "Pos", "pyhgvs_Hg37_Start", "pyhgvs_Hg37_End"]
+        include_cols = ["Chr", "Pos", "pyhgvs_Hg37_Start", "pyhgvs_Hg37_End"]
 
-        _write_auto_sql_file(args.auto_sql_file, headers, skip_cols)
+        _write_auto_sql_file(args.auto_sql_file)
 
         for line in ifh:
             row = line.rstrip("\n").rstrip("\r").split("\t")
             rec = rowRec(*row)
             rd = OrderedDict(zip(headers, row)) # row as dict
 
-            chrom = "chr"+rec.Chr
-            start = str(int(rec.pyhgvs_Hg37_Start)-1)
-            end = rec.pyhgvs_Hg37_End
-            name = rec.pyhgvs_cDNA.split(":")[-1]
-            if name == "?":
-                assert(False)
-            score = 0
-            strand = "."
-            thickStart = start
-            thickEnd = end
-
-            pat = rec.Pathogenicity_all.lower()
+            pat = rec.Clinical_significance_ENIGMA.lower()
             if "pathogen" in pat:
                 color = "255,0,0"
             elif "benign" in pat:
-                color = "0,0,255"
+                color = "0,255,0"
             elif "uncertain" in pat:
                 color = "100,100,100"
             else:
                 color = "0,0,0"
+            out_url = "https://brcaexchange.org/variant/" + rec.CA_ID
 
-            # special case requested by Melissa
-            if "discordant" in rec.Discordant.lower():
-                color = "255,160,0"
+            chrom = "chr"+rec.Chr
+            score = 0
+            strand = "."
+            name = rec.pyhgvs_cDNA[0:254]
+            if name == "?":
+                assert(False)
+            #
+            # When generating the mouseOver, truncate the HGVS string to 100 characters, to not overhwelm
+            # the browser's internal limit of 255 characters.
+            mouseOver = ("<b>Variant ID:</b> %s %s<br>" + \
+                         "<b>ENIGMA VCEP Clinical Significance:</b> %s<br>" + \
+                         "<b>Variant URL:</b> %s<br>") \
+                         % (rec.Gene_Symbol, rec.pyhgvs_cDNA[0:100], rec.Clinical_significance_ENIGMA,
+                            out_url)
 
-            outLinkId = rec.pyhgvs_Genomic_Coordinate_38
-            if len(outLinkId)>255:
-                outLinkId = ""
-            outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, outLinkId]
-
-            for h in headers:
-                if h in skip_cols:
-                    continue
-                val = rd[h]
-                if val == "-":
-                    val = ""
-                val = val.strip().strip(",").strip()
-
-                if h == "Source":
-                    val = val.replace(",", ", ")
-                if h == "Assertion_method_citation_ENIGMA" and val != "":
-                    val = "<a href='%s'>%s</a>" % (val, val.split("/")[-1])
-                if h == "Source_URL":
-                    val = _add_urls(val)
-                if h == "SCV_ClinVar":
-                    val = _add_urls(val, url="https://www.ncbi.nlm.nih.gov/clinvar/?term=")
-                if h == "Submitter_ClinVar":
-                    val = val.replace("_", " ")
-                if "," in val:
-                    val = val.replace(",", ", ")
-
-                outRow.append(val)
+            #Start with the hg19 version
+            start = str(int(rec.pyhgvs_Hg37_Start)-1)
+            end = rec.pyhgvs_Hg37_End
+            thickStart = start
+            thickEnd = end
+            outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
+                      rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254], rec.CA_ID,
+                      rec.Clinical_significance_ENIGMA, mouseOver]
 
             outRow = [str(x) for x in outRow]
+            ofh19.write("\t".join(outRow)+"\n")
 
-            mouseOvers = []
-            if rec.Pathogenicity_all != "":
-                mouseOvers.append(rec.Pathogenicity_all)
-            if rec.pyhgvs_cDNA != "-":
-                mouseOvers.append(rec.pyhgvs_cDNA)
-            if rec.Discordant != "Concordant":
-                mouseOvers.append(rec.Discordant)
-            mouseOver = ", ".join(mouseOvers)
-            outRow.append(mouseOver)
-
-            ofh.write("\t".join(outRow)+"\n")
-
-            # write out a the hg38 version of this line
+            # Repeat with the hg38 version
             ftLen = int(end)-int(start)
             start = str(int(rec.Hg38_Start)-1)
             end = str(int(start)+ftLen)
             thickStart = start
             thickEnd = end
-            outRow[1] = start
-            outRow[2] = end
-            outRow[6] = thickStart
-            outRow[7] = thickEnd
+            outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
+                      rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254], rec.CA_ID,
+                      rec.Clinical_significance_ENIGMA, mouseOver]
 
+            outRow = [str(x) for x in outRow]
             ofh38.write("\t".join(outRow)+"\n")
 
-        print("wrote to %s and %s" % (ofh.name, ofh38.name))
+        print("wrote to %s and %s" % (ofh19.name, ofh38.name))
 
 
 if __name__ == '__main__':
