@@ -2,8 +2,12 @@ track brcaexchange
 bigDataUrl https://brcaexchange.org/trackhubs/hg38/brcaExchange.bb
 shortLabel BRCAExchange
 longLabel BRCAExchange BRCA1/2 variants
-type bigBed
+type bigBed 9 +
 visibility pack
-url https://brcaexchange.org/variant/$ca_id
+url https://brcaexchange.org/variant/$CA_ID
+urlLabel Link to BRCA Exchange
 itemRgb on
 mouseOver _mouseOver
+noScoreFilter on
+skipFields chrom,chromStart,chromEnd,score,strand,thickStart,thickEnd,reserved, _mouseOver
+html https://brcaexchange.org/trackhubs/description.html

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from collections import namedtuple, OrderedDict
 import argparse
 
@@ -59,7 +60,7 @@ def _write_auto_sql_file(as_path):
         string outlink;    "Link to the variant in BRCA Exchange"
         string symbol;     "Gene Symbol"
         string cdna_hgvs;       "Variant ID in cDNA HGVS nomenclature"
-        string ca_id;       "ClinGen Allele Registry ID"
+        string CA_ID;       "ClinGen Allele Registry ID"
         string Clinical_significance_ENIGMA;      "Clinical Significance as curated by the ENIGMA VCEP"
         string _mouseOver; "mouse over field hidden"
         )
@@ -99,19 +100,22 @@ def main():
                 color = "100,100,100"
             else:
                 color = "0,0,0"
-            outLinkId = rec.pyhgvs_Genomic_Coordinate_38
-            if len(outLinkId)>255:
-                outLinkId = ""
             out_url = "https://brcaexchange.org/variant/" + rec.CA_ID
 
             chrom = "chr"+rec.Chr
             score = 0
             strand = "."
-            name = rec.pyhgvs_cDNA
+            name = rec.pyhgvs_cDNA[0:254]
             if name == "?":
                 assert(False)
-
-            mouseOver = rec.pyhgvs_cDNA
+            #
+            # When generating the mouseOver, truncate the HGVS string to 100 characters, to not overhwelm
+            # the browser's internal limit of 255 characters.
+            mouseOver = ("<b>Variant ID:</b> %s %s<br>" + \
+                         "<b>ENIGMA VCEP Clinical Significance:</b> %s<br>" + \
+                         "<b>Variant URL:</b> %s<br>") \
+                         % (rec.Gene_Symbol, rec.pyhgvs_cDNA[0:100], rec.Clinical_significance_ENIGMA,
+                            out_url)
 
             #Start with the hg19 version
             start = str(int(rec.pyhgvs_Hg37_Start)-1)
@@ -119,7 +123,7 @@ def main():
             thickStart = start
             thickEnd = end
             outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
-                      rec.Gene_Symbol, rec.pyhgvs_cDNA, rec.CA_ID,
+                      rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254], rec.CA_ID,
                       rec.Clinical_significance_ENIGMA, mouseOver]
 
             outRow = [str(x) for x in outRow]
@@ -132,7 +136,7 @@ def main():
             thickStart = start
             thickEnd = end
             outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
-                      rec.Gene_Symbol, rec.pyhgvs_cDNA, rec.CA_ID,
+                      rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254], rec.CA_ID,
                       rec.Clinical_significance_ENIGMA, mouseOver]
 
             outRow = [str(x) for x in outRow]
