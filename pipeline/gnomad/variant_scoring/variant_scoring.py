@@ -23,13 +23,13 @@ GNOMAD_V3_MEAN_COVERAGE = "gnomAD_mean_coverage_v3_genome"
 GNOMAD_V3_MEDIAN_COVERAGE = "gnomAD_median_coverage_v3_genome"
 
 
-FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG = "No code is met for population data (read depth, flags)"
-FAIL_NEEDS_REVIEW = "No code is met (needs review)"
+FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG = "No code met (read depth, flags)"
+FAIL_NEEDS_REVIEW = "No code met (needs review)"
 BA1 = "BA1 (met)"
 BS1 = "BS1 (met)"
 BS1_SUPPORTING = "BS1_Supporting (met)"
-NO_CODE = "No code is met for population data (below threshold)"
-NO_CODE_NON_SNV = "No code is met for population data (indel)"
+NO_CODE = "No code met (below threshold)"
+NO_CODE_NON_SNV = "No code met for population data (indel)"
 PM2_SUPPORTING = "PM2_Supporting (met)"
 
 READ_DEPTH_THRESHOLD_FREQUENT_VARIANT = 20
@@ -106,12 +106,9 @@ def field_defined(field):
 
 
 def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv,
-                        mean_read_depth, median_read_depth, vcf_filter_flag, debug=True):
+                        read_depth, vcf_filter_flag, debug=True):
     #
     # Get the coverage data.  Rule out error conditions: low coverage, VCF filter flag.
-    read_depth = min(mean_read_depth, median_read_depth)
-    if pd.isna(read_depth):
-        read_depth = 0
     rare_variant = False
     if field_defined(faf95_popmax_str):
         faf = float(faf95_popmax_str)
@@ -151,8 +148,9 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
     return(NEEDS_REVIEW)
 
 
-def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
-                            code_v3, faf_v3, faf_popmax_v3, in_v3, debug=True):
+def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2, read_depth_v2,
+                            code_v3, faf_v3, faf_popmax_v3, in_v3, read_depth_v3,
+                            debug=True):
     """
     Given the per-dataset evidence codes, generate an overall evidence code
     """
@@ -166,14 +164,21 @@ def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
 
     #
     # First, rule out the case of outright contradictions
-    if code_v2 in benign_codes and code_v3 in pathogenic_codes \
-       or code_v2 in pathogenic_codes and code_v3 in benign_codes:
-        return(FAIL_NEEDS_REVIEW, FAIL_NEEDS_REVIEW_MSG)
+    if read_depth_v2 > 0 and read_depth_v3 > 0:
+        if code_v2 in benign_codes and code_v3 in pathogenic_codes \
+           or code_v2 in pathogenic_codes and code_v3 in benign_codes:
+            return(FAIL_NEEDS_REVIEW, FAIL_NEEDS_REVIEW_MSG)
     #
     # Next, rule out the case where neither dataset has reliable data.
+    # This includes the special case where PM2_SUPPORTING is met because this variant
+    # is outside measurement range (e.g. deep in an intron in an exome dataset)
     # Arbitrarily use the message for v3, as the newer and presumably more robust.
     if code_v2 in failure_codes and code_v3 in failure_codes:
         return(code_v3, FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG)
+    elif code_v2 == PM2_SUPPORTING and read_depth_v2 == 0 and code_v3 in failure_codes:
+        return(code_v3, FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG)
+    elif code_v3 == PM2_SUPPORTING and read_depth_v3 == 0 and code_v2 in failure_codes:
+        return(code_v2, FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG)
     #
     # At this point, we can assume that at least one dataset has
     # reliable data.
@@ -181,9 +186,11 @@ def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
     # Next, if both datasets point to a pathogenic effect, or
     # if one points to a pathogenic effect and the other an error,
     # then return PM2_SUPPORTING.
-    if code_v2 == PM2_SUPPORTING and ordered_codes.index(code_v2) <= ordered_codes.index(code_v3):
+    if code_v2 == PM2_SUPPORTING and code_v3 == PM2_SUPPORTING:
         return(PM2_SUPPORTING, PM2_SUPPORTING_MSG)
-    elif code_v3 == PM2_SUPPORTING and ordered_codes.index(code_v3) <= ordered_codes.index(code_v2):
+    elif (code_v2 == PM2_SUPPORTING and read_depth_v2 > 0) and ordered_codes.index(code_v2) <= ordered_codes.index(code_v3):
+        return(PM2_SUPPORTING, PM2_SUPPORTING_MSG)
+    elif (code_v3 == PM2_SUPPORTING and read_depth_v3 > 0) and ordered_codes.index(code_v3) <= ordered_codes.index(code_v2):
         return(PM2_SUPPORTING, PM2_SUPPORTING_MSG)
     #
     # Next, if either dataset has an intermediate effect and the other
@@ -207,9 +214,9 @@ def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
     # In this case, identify and return the stronger code.
     if debug:
         print("prior to assertions, codes are", code_v2, code_v3)
-    assert(code_v2 in benign_codes or code_v3 in benign_codes)
-    assert(code_v2 in benign_codes or code_v2 in intermediate_codes or code_v2 in failure_codes)
-    assert(code_v3 in benign_codes or code_v3 in intermediate_codes or code_v3 in failure_codes)
+    assert(code_v2 in benign_codes or code_v3 in benign_codes or code_v2 in intermediate_codes or code_v3 in intermediate_codes)
+    assert(code_v2 in benign_codes or code_v2 in intermediate_codes or code_v2 in failure_codes or read_depth_v2 == 0)
+    assert(code_v3 in benign_codes or code_v3 in intermediate_codes or code_v3 in failure_codes or read_depth_v3 == 0)
     if code_v3 == BA1:
         return(BA1, BA1_MSG % (faf_v3, faf_popmax_v3))
     elif code_v2 == BA1:
@@ -222,6 +229,10 @@ def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
         return(BS1_SUPPORTING, BS1_SUPPORTING_MSG % (faf_v3, faf_popmax_v3))
     elif code_v2 == BS1_SUPPORTING:
         return(BS1_SUPPORTING, BS1_SUPPORTING_MSG % (faf_v2, faf_popmax_v2))
+    elif code_v2 == NO_CODE:
+        return(code_v2, NO_CODE_MSG)
+    elif code_v3 == NO_CODE:
+        return(code_v3, NO_CODE_MSG)
     #
     # If we get here, there is a hole in the logic
     return(FAIL_NEEDS_REVIEW, FAIL_NEEDS_SOFTWARE_REVIEW_MSG)
@@ -245,6 +256,8 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, repor
     variant[GNOMAD_V3_CODE_ID] = PM2_SUPPORTING
     variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
     variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
+    read_depth_v2 = 0
+    read_depth_v3 = 0
     if report_coverage:
         variant[GNOMAD_V2_MEAN_COVERAGE] = "-"
         variant[GNOMAD_V2_MEDIAN_COVERAGE] = "-"
@@ -263,13 +276,16 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, repor
         (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
                                                                  int(variant["pyhgvs_Hg37_End"]),
                                                                  int(variant["Chr"]),coverage_v2)
+        read_depth_v2 = min(mean_read_depth, median_read_depth)
+        if pd.isna(read_depth_v2):
+            read_depth_v2 = 0
         if report_coverage:
             variant[GNOMAD_V2_MEAN_COVERAGE] = mean_read_depth
             variant[GNOMAD_V2_MEDIAN_COVERAGE] = median_read_depth
         variant[GNOMAD_V2_CODE_ID] = analyze_one_dataset(variant["faf95_popmax_exome_GnomAD"],
                                                          variant["faf95_popmax_population_exome_GnomAD"],
                                                          variant["Allele_count_exome_GnomAD"],
-                                                         is_snv, mean_read_depth, median_read_depth,
+                                                         is_snv, read_depth_v2,
                                                          variant_is_flagged(variant["Variant_id_GnomAD"],
                                                                             flags_v2))
         if debug:
@@ -283,13 +299,16 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, repor
         (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["Hg38_Start"]),
                                                                  int(variant["Hg38_End"]),
                                                                  int(variant["Chr"]),coverage_v3)
+        read_depth_v3 = min(mean_read_depth, median_read_depth)
+        if pd.isna(read_depth_v3):
+            read_depth_v3 = 0
         if report_coverage:
             variant[GNOMAD_V3_MEAN_COVERAGE] = mean_read_depth
             variant[GNOMAD_V3_MEDIAN_COVERAGE] = median_read_depth
         variant[GNOMAD_V3_CODE_ID] = analyze_one_dataset(variant["faf95_popmax_genome_GnomADv3"],
                                                          variant["faf95_popmax_population_genome_GnomADv3"],
                                                          variant["Allele_count_genome_GnomADv3"],
-                                                         is_snv, mean_read_depth, median_read_depth,
+                                                         is_snv, read_depth_v3,
                                                          variant_is_flagged(variant["Variant_id_GnomADv3"],
                                                                             flags_v3))
         if debug:
@@ -300,10 +319,10 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, repor
     (variant[POPFREQ_CODE_ID],
      variant[POPFREQ_CODE_DESCR]) = analyze_across_datasets(variant[GNOMAD_V2_CODE_ID],variant["faf95_popmax_exome_GnomAD"],
                                                             variant["faf95_popmax_population_exome_GnomAD"],
-                                                            variant_in_v2, variant[GNOMAD_V3_CODE_ID], 
+                                                            variant_in_v2, read_depth_v2, variant[GNOMAD_V3_CODE_ID], 
                                                             variant["faf95_popmax_genome_GnomADv3"],
                                                             variant["faf95_popmax_population_genome_GnomADv3"],
-                                                            variant_in_v3)
+                                                            variant_in_v3, read_depth_v3)
     if debug:
         print("consensus code:", variant[POPFREQ_CODE_ID], "msg", variant[POPFREQ_CODE_DESCR])
     return()
