@@ -5,7 +5,7 @@ import itertools
 import argparse
 import csv
 from collections import OrderedDict
-
+import math
 import numpy as np
 import pandas as pd
 
@@ -14,26 +14,52 @@ import pandas as pd
 #from data_merging.brca_pseudonym_generator import _normalize_genomic_fnc
 
 GNOMAD_V2_CODE_ID = "Provisional_code_GnomAD"
-GNOMAD_V2_CODE_DESCR = "Provisional_code_description_GnomAD"
 GNOMAD_V3_CODE_ID = "Provisional_code_GnomADv3"
-GNOMAD_V3_CODE_DESCR = "Provisional_code_description_GnomADv3"
 POPFREQ_CODE_ID = "Provisional_evidence_code_popfreq"
+POPFREQ_CODE_DESCR = "Provisional_evidence_code_description_popfreq"
+GNOMAD_V2_MEAN_COVERAGE = "gnomAD_mean_coverage_v2_exome"
+GNOMAD_V2_MEDIAN_COVERAGE = "gnomAD_median_coverage_v2_exome"
+GNOMAD_V3_MEAN_COVERAGE = "gnomAD_mean_coverage_v3_genome"
+GNOMAD_V3_MEDIAN_COVERAGE = "gnomAD_median_coverage_v3_genome"
 
-FAIL_INSUFFICIENT_READ_DEPTH = "INSUFFICIENT_READ_DEPTH"
-FAIL_VCF_FILTER_FLAG = "VCF_FILTER_FLAG"
-FAIL_BOTH = "FAIL_BOTH"
-FAIL_CONTRADICTORY = "FAIL_CONTRADICTORY_RESULTS"
-BA1 = "BA1"
-BS1 = "BS1"
-BS1_SUPPORTING = "BS1_SUPPORTING"
-NO_CODE = "NO_CODE"
-PM2_SUPPORTING_ABSENT = "PM2_SUPPORTING (ABSENT)"
-PM2_SUPPORTING_NOT_OBSERVED = "PM2_SUPPORTING (NOT OBSERVED)"
-NEEDS_REVIEW = "NEEDS_REVIEW"
+
+BA1 = "BA1 (met)"
+BS1 = "BS1 (met)"
+BS1_SUPPORTING = "BS1_Supporting (met)"
+NO_CODE = "No code met (below threshold)"
+NO_CODE_NON_SNV = "No code met for population data (indel)"
+PM2_SUPPORTING = "PM2_Supporting (met)"
+FAIL_NOT_ASSAYED = "Fail_Not_Assayed"
+FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG = "No code met (read depth, flags)"
+FAIL_NEEDS_REVIEW = "No code met (needs review)"
+FAIL_NEEDS_SOFTWARE_REVIEW = "No code met (needs software review)"
 
 READ_DEPTH_THRESHOLD_FREQUENT_VARIANT = 20
 READ_DEPTH_THRESHOLD_RARE_VARIANT = 25
 
+BA1_MSG = "The highest non-cancer, non-founder population filter allele frequency in gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥20) or gnomAD v3.1 (non-cancer subset, read depth ≥20) is %s in the %s population, which is above the ENIGMA BRCA1/2 VCEP threshold (>0.001) for BA1 (BA1 met)."
+BS1_MSG = "The highest non-cancer, non-founder population filter allele frequency in gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥20) or gnomAD v3.1 (non-cancer subset, read depth ≥20) is %s in the %s population, which is above the ENIGMA BRCA1/2 VCEP threshold (>0.0001) for BS1, and below the BA1 threshold (>0.001) (BS1 met)."
+BS1_SUPPORTING_MSG = "The highest non-cancer, non-founder population filter allele frequency in gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥20) or gnomAD v3.1 f(non-cancer subset, read depth ≥20) is %s in the %s population which is within the ENIGMA BRCA1/2 VCEP threshold (>0.00002 to ≤ 0.0001) for BS1_Supporting (BS1_Supporting met)."
+PM2_SUPPORTING_MSG = "This variant is absent from gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥25) and gnomAD v3.1 (non-cancer subset, read depth ≥25) (PM2_Supporting met)."
+NO_CODE_MSG = "This variant is present in gnomAD v2.1 (exomes only, non-cancer subset) or gnomAD v3.1 (non-cancer subset) but is below the ENIGMA BRCA1/2 VCEP threshold >0.00002 for BS1_Supporting (PM2_Supporting, BS1, and BA1 are not met)."
+NO_CODE_NON_SNV_MSG = "This [insertion/deletion/large genomic rearrangement] variant was not observed in gnomAD v2.1 (exomes only, non-cancer subset) or gnomAD v3.1 (non-cancer subset), but PM2_Supporting was not applied since recall is suboptimal for this type of variant (PM2_Supporting not met)."
+FAIL_NOT_ASSAYED_MSG = "Variant not tested in this dataset"
+FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG = "This variant is present in gnomAD v2.1 (exomes only, non-cancer subset) or gnomAD v3.1 (non-cancer subset) but is not meeting the specified read depths threshold ≥20 OR was flagged as suspect by gnomAD (PM2_Supporting, BS1, and BA1 are not met)."
+FAIL_NEEDS_REVIEW_MSG = "No code is met (variant needs review)"
+FAIL_NEEDS_SOFTWARE_REVIEW_MSG = "No code is met (variant needs software review)"
+
+MESSAGES_PER_CODE = {
+    BA1: BA1_MSG,
+    BS1: BS1_MSG,
+    BS1_SUPPORTING: BS1_SUPPORTING_MSG,
+    NO_CODE: NO_CODE_MSG,
+    NO_CODE_NON_SNV: NO_CODE_NON_SNV_MSG,
+    PM2_SUPPORTING: PM2_SUPPORTING_MSG,
+    FAIL_NOT_ASSAYED: FAIL_NOT_ASSAYED_MSG,
+    FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG: FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG,
+    FAIL_NEEDS_REVIEW: FAIL_NEEDS_REVIEW_MSG,
+    FAIL_NEEDS_SOFTWARE_REVIEW: FAIL_NEEDS_SOFTWARE_REVIEW_MSG
+    }
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -45,273 +71,40 @@ def parse_args():
                         help="Directory with the processed files")
     parser.add_argument("-r", "--resource_dir", default="BRCAExchange/resources",
                         help="Pipeline resources")
+    parser.add_argument("-c", "--coverage_report", default=True,
+                        action=argparse.BooleanOptionalAction,
+                        help="Boolean flag to be set if we want to save coverage data")
     args = parser.parse_args()
     return(args)
 
 
-def var_obj_to_name(v):
-    return '-'.join(str(x) for x in [v.chr, v.pos, v.ref, v.alt])
+def read_flags(flag_data):
+    flags = {}
+    for row in flag_data:
+        flags[row["ID"]] = row
+    return(flags)
+    
 
-def var_name_to_obj(v):
-    a = v.split('-')
-    return variant_utils.VCFVariant(a[0], int(a[1]), a[2], a[3])
-
-
-csep = '-'
-def add_name_col(dfx: pd.DataFrame):
-    dfx['var_name'] = (dfx['contigName'].apply(str) + csep +
-                       (dfx['start']).apply(str) +
-                       csep + dfx['referenceAllele'] + csep + dfx['alternateAlleles'])
-    return dfx
-
-def estimate_coverage(variant, start, end, chrom, df_cov):
-    start = int(variant["pyhgvs_Hg38_Start"]) - 1
-    end = int(variant["pyhgvs_Hg38_End"])
-    positions = list(range(start, end))
-    coverage_this_chrom = df_cov.loc[df_cov["chrom"] == int(variant["Chr"])]
+def estimate_coverage(start, end, chrom, df_cov):
+    positions = list(range(start, end+1))
+    coverage_this_chrom = df_cov.loc[df_cov["chrom"] == int(chrom)]
     positions_this_variant = coverage_this_chrom[coverage_this_chrom["pos"].isin(positions)]
     meanval = positions_this_variant["mean"].mean()
     medianval = positions_this_variant["median"].median()
     return(meanval, medianval)
 
 
-def coverage_per_variant(df_var: pd.DataFrame, df_cov: pd.DataFrame):
-    """
-    Computing median and mean coverage statistics per variant
 
-    :param df_var: variant dataframe (from VCF)
-    :param df_cov: dataframe with read coverage for every position
-    :return:
-    """
-    df_var['positions'] = df_var.apply(lambda r: list(range(r['start'], r['end'])) , axis=1)
-    df_var_with_read_stats = df_var.explode('positions').merge(df_cov, left_on=['contigName', 'positions'],
-                                   right_on=['chrom', 'pos'] , how='left')
-    cov_stats_per_var = (df_var_with_read_stats.rename(columns={'mean': 'pos_mean', 'median': 'pos_median'}).
-            groupby('var_name').
-            agg({'pos_mean': np.mean, 'pos_median': np.median}) # taking means of means and medians of medians for structural variants
-            )
-    df_var_with_cov = df_var.merge(cov_stats_per_var[['pos_mean', 'pos_median']], left_on='var_name', right_index=True)
-    return df_var_with_cov
 
-
-def calculate_faf95_cols(df_all):
-    df_ret = df_all.copy()
-
-    df_faf95 = df_ret[ cnts.faf95_col_names ]
-
-    df_ret['faf95_popmax'] = df_faf95.idxmax(axis=1).apply(lambda s: s.split('_')[1] if s == s else s)
-    df_ret['faf95_max'] = df_faf95.max(axis=1)
-
-    return df_ret
-
-
-def flatten_singleton_array_cols(df, col_names):
-    df = df.copy()
-
-    # precondition
-    for c in col_names:
-        assert df[c].apply(lambda x: len(x) == 1 if x is not None and not isinstance(x, float) else None).all(), f"column {c} does not contain singletons only"
-
-    for c in col_names:
-        df[c] = df[c].apply(lambda a: a[0] if a else None)
-
-    return df
-
-
-def aggregate_data(df_var, df_cov):
-    # columns which have an 'array' type in the data frame, but actually contain just one entry
-    singleton_cols = list(set(['alternateAlleles', 'popmax', 'filters', 'names', 'AN_popmax'] +
-                          cnts.faf95_col_names +
-                          [f"{pre}_{pop.lower()}" for pre in ['AC', 'AF'] for pop in cnts.pop_names + ['popmax']]
-                          ))
-
-    df_var = (flatten_singleton_array_cols(df_var,
-                                           singleton_cols).
-              rename(columns={'alternateAlleles ': 'alternateAllele'}))
-
-    df_var = add_name_col(df_var)
-
-    df_all = coverage_per_variant(df_var, df_cov)
-
-    df_all = calculate_faf95_cols(df_all)
-
-    df_all['max_faf_or_af'] = df_all['faf95_max'].fillna(df_all['AF_popmax'])
-
-    df_all['max_faf_or_af_pop'] = df_all['faf95_popmax'].fillna(df_all['popmax'])
-
-    df_all['is_snv'] = (df_all['end'] - df_all['start']) == 1
-
-    return df_all
-
-
-def add_filter_flag_col(df, cols):
-    df['vcf_filter_flag'] = df['filters'].apply(
-        lambda filt_el: len(set(filt_el.split(';')).intersection(cols)) > 0)
-
-
-def add_read_depth_col(df, threshold):
-    df['sufficient_read_depth'] = (df['pos_mean'] >= threshold) & (
-            df['pos_median'] >= threshold)
-
-
-def process_v2(df_var2, df_cov2, read_depth_thresh, resource_dir):
-    agg_v2 = aggregate_data(df_var2, df_cov2)
-
-    agg_v2['src'] = 'v2'
-    add_filter_flag_col(agg_v2, set(['InbreedingCoeff', 'RF', 'AC0']))
-    add_read_depth_col(agg_v2, read_depth_thresh)
-
-    variants = [var_name_to_obj(v) for v in agg_v2['var_name']]
-
-    # assuming same layout of resource_dir as for the main pipeline
-    chain_file = resource_dir / 'hg19ToHg38.over.chain.gz'
-    ref_file = resource_dir / 'hg38.fa'
-    vars_gnomad2_hg38, failed_entries = variant_utils.convert_to_hg38(variants, chain_file, ref_file, resource_dir)
-
-    assert len(agg_v2) == len(vars_gnomad2_hg38) + len(failed_entries)
-
-    failed_keys = [var_obj_to_name(v) for v in failed_entries]
-    failed_indices = set(agg_v2[agg_v2['var_name'].isin(failed_keys)].index)
-    all_indices = set(agg_v2.index)
-
-    valid_indices = all_indices - failed_indices
-
-    entries_sorted = sorted(itertools.chain(zip(sorted(valid_indices), vars_gnomad2_hg38),
-                                            zip(failed_indices, [None] * len(failed_indices))), key=lambda p: p[0])
-
-    agg_v2_lift_over = agg_v2.rename(columns={'var_name': 'var_name_hg19'}).assign(
-        var_name=lambda _: pd.Series(var_obj_to_name(p[1]) if p[1] else p[1] for p in entries_sorted))
-
-    return agg_v2_lift_over
-
-
-def process_v3(df_var3, df_cov3, read_depth_thresh):
-    agg_v3 = aggregate_data(df_var3, df_cov3)
-
-    agg_v3['src'] = 'v3'
-    add_filter_flag_col(agg_v3, set(['AS_VQSR', 'AC0']))
-    add_read_depth_col(agg_v3, read_depth_thresh)
-    return agg_v3
-
-
-def determine_evidence_code_per_variant(r):
-    if not r['sufficient_read_depth']:
-        return 'fail_insufficient_read_depth'
-
-    if r['vcf_filter_flag']:
-        return 'fail_vcf_filter_flag'
-
-    if r['max_faf_or_af'] > 0.001:
-        return 'BA1'
-
-    if r['max_faf_or_af'] > 0.0001:
-        return 'BS1'
-
-    if not np.isnan(r['max_faf_or_af']):
-        # low max_faf_or_af
-        return 'code_missing'
-
-    if r['is_snv']:
-        return 'pm2_supporting'
-
-    return 'need_review'
-
-
-def add_final_code_column(df):
-    success_codes = set(['BA1', 'BS1', 'pm2_supporting'])
-    dq_failure_codes = set(['fail_insufficient_read_depth', 'fail_vcf_filter_flag', 'need_review'])
-    CODE_MISSING = 'code_missing'
-    
-    def is_both_sources(dfg):
-        return len(dfg) > 1
-
-    def set_final_code(dfg):
-        if len(dfg) == 1:
-            return dfg['evidence_code'].iloc[0]
-        elif len(dfg) == 2:
-            # we have data from both v2 and v3
-            c1 = dfg['evidence_code'].iloc[0]
-            c2 = dfg['evidence_code'].iloc[1]
-
-            if (c1 in dq_failure_codes and c2 == CODE_MISSING) or (c2 in dq_failure_codes and c1 == CODE_MISSING):
-                return CODE_MISSING
-            
-            if c1 in dq_failure_codes and c2 in dq_failure_codes:
-                return "fail_both"
-            
-            if (c1 == 'pm2_supporting' and c2 == CODE_MISSING) or (c2 == 'pm2_supporting' and c1 == CODE_MISSING):
-                return CODE_MISSING
-
-            if c1 == CODE_MISSING and c2 == CODE_MISSING:
-                return CODE_MISSING
-            
-            if c2 in success_codes and c1 not in success_codes:
-                return c2
-            if c1 in success_codes and c2 not in success_codes:
-                return c1
-
-            assert c1 in success_codes and c2 in success_codes
-            
-            if c1 == c2:
-                return c1
-            else:
-                return "contradictory_results"
-
-        raise ValueError("some duplicate variants per source?")
-
-    v2_and_v3 = df.groupby('var_name').apply(is_both_sources)
-    per_variant_code = df.groupby('var_name').apply(set_final_code)
-
-    return df.merge(pd.DataFrame({'in_v2_and_v3' : v2_and_v3, 'final_code': per_variant_code}).reset_index(), how='left')
-
-
-def extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, resource_dir):
-    agg_v2 = process_v2(df_var2, df_cov2, read_depth_thresh, resource_dir)
-    agg_v3 = process_v3(df_var3, df_cov3, read_depth_thresh)
-
-    df_overall = pd.concat([agg_v2, agg_v3]).reset_index(drop=True)
-
-    # running the actual scoring algorithm and the combined data
-    df_overall['evidence_code'] = df_overall.apply(determine_evidence_code_per_variant, axis=1)
-    df_overall = add_final_code_column(df_overall)
-
-    return df_overall.sort_values('var_name')
-
-
-def add_normalization_cols(df, strand_dict, processes=2):
-    TMP_HGVS_HG38 = 'tmp_hgvs_hg38'
-    TMP_VAR_OBJ_FIELD = 'tmp_var_obj'
-    TMP_GENE_SYMBOL = 'Gene_Symbol'
-
-    hgvs_proc = hgvs_utils.HgvsWrapper()
-
-    df[TMP_GENE_SYMBOL] = df['contigName']
-    df[TMP_VAR_OBJ_FIELD] = df['var_name'].apply(lambda v: var_name_to_obj(v))
-    df[TMP_HGVS_HG38] = df[TMP_VAR_OBJ_FIELD].apply(
-        lambda v: v.to_hgvs_obj(hgvs_proc.contig_maps[hgvs_utils.HgvsWrapper.GRCh38_Assem]))
-
-    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38,
-                                                                'var_name_right', True,
-                                                                strand_dict), processes)
-    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38,
-                                                                'var_name_left', False,
-                                                                strand_dict), processes)
-
-    def _convert_to_name(converted):
-        return converted.apply(lambda h: var_obj_to_name(variant_utils.VCFVariant.from_hgvs_obj(h)))
-
-    df['var_name_right'] = _convert_to_name(df['var_name_right'])
-    df['var_name_left'] = _convert_to_name(df['var_name_left'])
-
-    return df.drop(columns=[TMP_HGVS_HG38, TMP_VAR_OBJ_FIELD, TMP_GENE_SYMBOL])
-
-def initialize_output_file(input_file, output_filename):
+def initialize_output_file(input_file, output_filename, report_coverage=False):
     """
     Create an empty output file with the new columns
     """
-    new_columns = [GNOMAD_V2_CODE_ID, GNOMAD_V2_CODE_DESCR,
-                   GNOMAD_V3_CODE_ID, GNOMAD_V3_CODE_DESCR,
-                   POPFREQ_CODE_ID]
+    new_columns = [GNOMAD_V2_CODE_ID, GNOMAD_V3_CODE_ID,
+                   POPFREQ_CODE_ID, POPFREQ_CODE_DESCR]
+    if report_coverage:
+        new_columns = [GNOMAD_V2_MEAN_COVERAGE, GNOMAD_V2_MEDIAN_COVERAGE,
+                       GNOMAD_V3_MEAN_COVERAGE, GNOMAD_V3_MEDIAN_COVERAGE] + new_columns
     input_header_row = input_file.fieldnames
     output_header_row = input_header_row + new_columns
     output_file = csv.DictWriter(open(output_filename,"w"), fieldnames=output_header_row,
@@ -319,30 +112,35 @@ def initialize_output_file(input_file, output_filename):
     output_file.writeheader()
     return(output_file)
 
+
 def field_defined(field):
     """
     Return a binary value indicating whether or not this variant has the popmax FAF defined
     """
     return(field != "-")
 
-def analyze_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv, mean_read_depth, median_read_depth, debug=True):
+
+def is_variant_observable(start, end, chrom, coverage):
     #
-    # Get the coverage data
-    #if not r['sufficient_read_depth']:
-    #    return 'fail_insufficient_read_depth'
+    # Read the coverage at the variant position.  If the coverage metrics returned
+    # are not a number, that means that the variant could not be tested in the
+    # indicated dataset.
+    (mean_read_depth, median_read_depth) = estimate_coverage(int(start),int(end),
+                                                             int(chrom),coverage)
+    if pd.isna(mean_read_depth) and pd.isna(median_read_depth):
+        return(False)
+    else:
+        return(True)
+    
+
+def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv,
+                        read_depth, vcf_filter_flag, debug=True):
     #
-    read_depth = min(mean_read_depth, median_read_depth)
-    #
-    # Get the VCF filter flags somehow
-    #if r['vcf_filter_flag']:
-    #    return 'fail_vcf_filter_flag'
-    #
-    vcf_filter_flag = False  ### HERE
-    #
+    # Get the coverage data.  Rule out error conditions: low coverage, VCF filter flag.
     rare_variant = False
     if field_defined(faf95_popmax_str):
         faf = float(faf95_popmax_str)
-        if np.isnan(faf):
+        if pd.isna(faf):
             rare_variant = True
         elif faf <= 0.00002:
             rare_variant = True
@@ -350,161 +148,230 @@ def analyze_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv, me
         faf = None
         rare_variant = True
     if rare_variant and read_depth < READ_DEPTH_THRESHOLD_RARE_VARIANT:
-        return(FAIL_INSUFFICIENT_READ_DEPTH, "Insufficient read depth")
+        return(FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG)
     if (not rare_variant) and read_depth < READ_DEPTH_THRESHOLD_FREQUENT_VARIANT:
-        return(FAIL_INSUFFICIENT_READ_DEPTH, "Insufficient read depth")
-    #
-    # Address the cases where a variant cannot be analyzed because the gnomAD data is flagged
+        return(FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG)
     if vcf_filter_flag:
-        return(FAIL_VCF_FILTER_FLAG, "Data flagged in the gnomAD VCF")
+        return(FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG)
     #
     # Address the cases where FAF is defined, and the variant is a candidate for a
     # evidence code for high population frequency (BA1, BS1, BS1_SUPPORTING)
     if not rare_variant:
         if faf > 0.001:
-            return(BA1, "FAF > 0.001 in " + faf95_population)
+            return(BA1)
         elif faf >  0.0001:
-            return(BS1, "FAF > 0.0001 in " + faf95_population)
+            return(BS1)
         elif faf > 0.00002:
-            return(BS1_SUPPORTING, "FAF > 0.00002 in " + faf95_population)
+            return(BS1_SUPPORTING)
     if rare_variant:
         if not field_defined(allele_count):
-            return(NO_CODE, "Variant is rare in the dataset")
+            return(NO_CODE)
         elif int(allele_count) > 0:
-            return(NO_CODE, "Variant is rare in the dataset")
+            return(NO_CODE)
         else:
             if is_snv:
-                return(PM2_SUPPORTING_NOT_OBSERVED, "Variant absent from the dataset")
+                return(PM2_SUPPORTING)
             else:
-                return(NO_CODE, "Rare indel or structural variant")
-    return(NEEDS_REVIEW, "This variant_needs_review")
+                return(NO_CODE_NON_SNV)
+    return(NEEDS_REVIEW)
 
 
-def analyze_across_datasets(code_v2, code_v3):
+def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
+                            code_v3, faf_v3, faf_popmax_v3, in_v3,
+                            debug=True):
     """
     Given the per-dataset evidence codes, generate an overall evidence code
     """
     benign_codes = [BA1, BS1, BS1_SUPPORTING]
-    pathogenic_codes = [PM2_SUPPORTING_NOT_OBSERVED]
-    intermediate_codes = [ NO_CODE]
+    pathogenic_codes = [PM2_SUPPORTING]
+    intermediate_codes = [ NO_CODE, NO_CODE_NON_SNV]
     ordered_success_codes = benign_codes + intermediate_codes + pathogenic_codes
     success_codes = set(ordered_success_codes)
-    failure_codes = set([FAIL_INSUFFICIENT_READ_DEPTH, FAIL_VCF_FILTER_FLAG, NEEDS_REVIEW])
+    failure_codes = set([FAIL_NOT_ASSAYED, FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG])
+    ordered_codes = ordered_success_codes + list(failure_codes)
+
     #
-    # If the variant is absent in one of the two datasets, report its code from the one where
-    # it is present.  If the variant is absent in both datasets, the return code will be
-    # PM2_SUPPORTING_ABSENT
-    if code_v2 == PM2_SUPPORTING_ABSENT and code_v3 != PM2_SUPPORTING_ABSENT:
-        return(code_v3)
-    elif code_v3 == PM2_SUPPORTING_ABSENT:
-        #
-        # Here, either code_v2 is PM2_SUPPORTING_ABSENT or it's not.  Either way, the correct
-        # action is to return code_v2.  If it's PM2_SUPPORTING_ABSENT, then it's PM2_SUPPORTING_ABSENT
-        # in both.  If it's not PM2_SUPPORTING_ABSENT, then the correct output is whatever code_v2 is.
-        return(code_v2)
+    # First, rule out the case of outright contradictions
+    if code_v2 in benign_codes and code_v3 in pathogenic_codes \
+       or code_v2 in pathogenic_codes and code_v3 in benign_codes:
+        return(FAIL_NEEDS_REVIEW, FAIL_NEEDS_REVIEW_MSG)
     #
-    # If the variant had an error in both datasets, report that it had an error.  If the variant
-    # had an error in only one of the two datwsets, report the one in which it could be called.
+    # Next, rule out the case where neither dataset has reliable data.
+    # Arbitrarily use the message for v3, as the newer and presumably more robust.
     if code_v2 in failure_codes and code_v3 in failure_codes:
-        return(FAIL_BOTH)
-    elif code_v2 in failure_codes:
-        return(code_v3)
-    elif code_v3 in failure_codes:
-        return(code_v2)
+        return(code_v3, MESSAGES_PER_CODE[code_v3])
+
     #
-    # At this point, it should be true that the variant has been observed in both datasets
-    # and neither one had a failure code.
-    assert(code_v2 in ordered_success_codes)
-    assert(code_v3 in ordered_success_codes)
+    # At this point, we can assume that at least one dataset has
+    # reliable data.
     #
-    # If the variant had a pathogenic code in one dataset and a benign code in the other,
-    # flag it for review
-    if code_v2 in benign_codes and code_v3 in pathogenic_codes:
-        return(FAIL_CONTRADICTORY)
-    elif code_v2 in pathogenic_codes and code_v3 in benign_codes:
-        return(FAIL_CONTRADICTORY)
+    # Next, if both datasets point to a pathogenic effect, or
+    # if one points to a pathogenic effect and the other an error,
+    # then return the pathogenic effect.
+    if code_v2 in pathogenic_codes and code_v3 in pathogenic_codes:
+        return(code_v2, MESSAGES_PER_CODE[code_v2])
+    elif code_v2 in pathogenic_codes and code_v3 in failure_codes:
+        return(code_v2, MESSAGES_PER_CODE[code_v2])
+    elif code_v3 in pathogenic_codes and code_v2 in failure_codes:
+        return(code_v3, MESSAGES_PER_CODE[code_v3])
+
     #
-    # If the codes are not contradictory, then return the stronger result
-    if ordered_success_codes.index(code_v2) < ordered_success_codes.index(code_v3):
-        return(code_v2)
-    else:
-        return(code_v3)
+    # Next, if either dataset has an intermediate effect and the other
+    # is not stronger (i.e. is also intermediate, or pathogenic, or failure),
+    # return the intermediate effect code.
+    if code_v2 in intermediate_codes and ordered_codes.index(code_v2) <= ordered_codes.index(code_v3):
+        return(code_v2, MESSAGES_PER_CODE[code_v2])
+    elif code_v3 in intermediate_codes and ordered_codes.index(code_v3) <= ordered_codes.index(code_v2):
+        return(code_v3, MESSAGES_PER_CODE[code_v3])
+
+    #
+    # Now, at least one dataset must have a success code.  We can also assume that
+    # neither is pathogenic (i.e. boht are benign, intermediate or failure).
+    # In this case, identify and return the stronger code.
+    if debug:
+        print("prior to assertions, codes are", code_v2, code_v3)
+    assert(code_v2 in benign_codes or code_v2 in intermediate_codes or code_v3 in benign_codes or code_v3 in intermediate_codes)
+    if code_v3 == BA1:
+        return(BA1, BA1_MSG % (faf_v3, faf_popmax_v3))
+    elif code_v2 == BA1:
+        return(BA1, BA1_MSG % (faf_v2, faf_popmax_v2))
+    elif code_v3 == BS1:
+        return(BS1, BS1_MSG % (faf_v3, faf_popmax_v3))
+    elif code_v2 == BS1:
+        return(BS1, BS1_MSG % (faf_v2, faf_popmax_v2))
+    elif code_v3 == BS1_SUPPORTING:
+        return(BS1_SUPPORTING, BS1_SUPPORTING_MSG % (faf_v3, faf_popmax_v3))
+    elif code_v2 == BS1_SUPPORTING:
+        return(BS1_SUPPORTING, BS1_SUPPORTING_MSG % (faf_v2, faf_popmax_v2))
+    elif code_v2 == NO_CODE:
+        return(code_v2, NO_CODE_MSG)
+    elif code_v3 == NO_CODE:
+        return(code_v3, NO_CODE_MSG)
+    #
+    # If we get here, there is a hole in the logic
+    return(FAIL_NEEDS_REVIEW, FAIL_NEEDS_SOFTWARE_REVIEW_MSG)
 
 
-def analyze_variant(variant, coverage_v2, coverage_v3, debug=True):
+def variant_is_flagged(variant_id, flags):
+    assert(variant_id in flags)
+    variant_flagged = False
+    if flags[variant_id]["Filters"] != "PASS":
+        variant_flagged = True
+    return(variant_flagged)
+
+
+def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, report_coverage=False, debug=True):
     """
     Analyze a single variant, adding the output columns
     """
-    # Initialize the output columns with the assumption that the variant isn't observed
-    variant[GNOMAD_V2_CODE_ID] = PM2_SUPPORTING_ABSENT
-    variant[GNOMAD_V2_CODE_DESCR] = "Variant not observed in the gnomAD V2 Exomes"
-    variant[GNOMAD_V3_CODE_ID] = PM2_SUPPORTING_ABSENT
-    variant[GNOMAD_V3_CODE_DESCR] = "Variant not observed in the gnomAD V3 Genomes"
-    variant[POPFREQ_CODE_ID] = PM2_SUPPORTING_ABSENT
+    # Initialize the output columns.  First, check the read depth.  If the read depth is defined at the variant position.
+    # that means that the variant could have been observed in principle; set the default to PM2_SUPPORTING (indicating that
+    # by default, the variant could have been observed, but wasn't).  If no read depth is defined, this means that the variant
+    # could not have been observed in the dataset in question (for example, a deep intronic variant in an exome dataset).
+    # In such a case, set the default value to NOT_ASSAYED.
+    variant[GNOMAD_V2_CODE_ID] = FAIL_NOT_ASSAYED
+    variant[GNOMAD_V3_CODE_ID] = FAIL_NOT_ASSAYED
+    variant[POPFREQ_CODE_ID] = FAIL_NOT_ASSAYED
+    variant[POPFREQ_CODE_DESCR] = FAIL_NOT_ASSAYED_MSG
+    observable_in_v2 = False
+    observable_in_v3 = False
+    if is_variant_observable(int(variant["pyhgvs_Hg37_Start"]),int(variant["pyhgvs_Hg37_End"]),
+                             int(variant["Chr"]),coverage_v2):
+        variant[GNOMAD_V2_CODE_ID] = PM2_SUPPORTING
+        variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
+        variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
+        observable_in_v2 = True
+    if is_variant_observable(int(variant["Hg38_Start"]), int(variant["Hg38_End"]),
+                             int(variant["Chr"]), coverage_v3):
+        variant[GNOMAD_V3_CODE_ID] = PM2_SUPPORTING
+        variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
+        variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
+        observable_in_v3 = True
+    if report_coverage:
+        variant[GNOMAD_V2_MEAN_COVERAGE] = "-"
+        variant[GNOMAD_V2_MEDIAN_COVERAGE] = "-"
+        variant[GNOMAD_V3_MEAN_COVERAGE] = "-"
+        variant[GNOMAD_V3_MEDIAN_COVERAGE] = "-"
     is_snv = (variant["Hg38_Start"] == variant["Hg38_End"])
     if debug:
         print("variant is snv:", is_snv)
-    if field_defined(variant["Variant_id_GnomAD"]):
-        (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg19_Start"]),
-                                                                 int(variant["pyhgvs_Hg19_End"]),
+    #
+    # the gnomAD v2 variant ID is set when the variant is in the genome OR exome portion of gnomAD.
+    # Focus on variants that are in the exome data by making sure that the allele count is defined.
+    # The allele count is the total number of observations of the variant in the gnomAD dataset
+    variant_in_v2 = False
+    if (field_defined(variant["Variant_id_GnomAD"]) and field_defined(variant["Allele_count_exome_GnomAD"])
+        and observable_in_v2):
+        variant_in_v2 = True 
+        (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
+                                                                 int(variant["pyhgvs_Hg37_End"]),
                                                                  int(variant["Chr"]),coverage_v2)
+        read_depth_v2 = min(mean_read_depth, median_read_depth)
+        if pd.isna(read_depth_v2):
+            read_depth_v2 = 0
+        if report_coverage:
+            variant[GNOMAD_V2_MEAN_COVERAGE] = mean_read_depth
+            variant[GNOMAD_V2_MEDIAN_COVERAGE] = median_read_depth
+        variant[GNOMAD_V2_CODE_ID] = analyze_one_dataset(variant["faf95_popmax_exome_GnomAD"],
+                                                         variant["faf95_popmax_population_exome_GnomAD"],
+                                                         variant["Allele_count_exome_GnomAD"],
+                                                         is_snv, read_depth_v2,
+                                                         variant_is_flagged(variant["Variant_id_GnomAD"],
+                                                                            flags_v2))
         if debug:
-            print("gnomAD V2 variant", variant["Variant_id_GnomAD"], "popmax", variant["faf95_popmax_exome_GnomAD"],
+            print("gnomAD V2 variant", variant["Variant_id_GnomAD"],
+                  "popmax", variant["faf95_popmax_exome_GnomAD"],
                   "allele count", variant["Allele_count_exome_GnomAD"], "mean read depth", mean_read_depth,
-                  "median read depth", median_read_depth)
-        (variant[GNOMAD_V2_CODE_ID],
-         variant[GNOMAD_V2_CODE_DESCR]) = analyze_dataset(variant["faf95_popmax_exome_GnomAD"],
-                                                          variant["faf95_popmax_population_exome_GnomAD"],
-                                                          variant["Allele_count_exome_GnomAD"],
-                                                          is_snv, mean_read_depth, median_read_depth)
-        if debug:
-            print("From gnomAD V2: code ID", variant[GNOMAD_V2_CODE_ID], "descr", variant[GNOMAD_V2_CODE_DESCR])
-    if field_defined(variant["Variant_id_GnomADv3"]):
-        (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg38_Start"]),
-                                                                 int(variant["pyhgvs_Hg38_End"]),
+                  "median read depth", median_read_depth, "snv", is_snv, "V2 code", variant[GNOMAD_V2_CODE_ID])
+    variant_in_v3 = False
+    if (field_defined(variant["Variant_id_GnomADv3"]) and observable_in_v3):
+        variant_in_v3 = True
+        (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["Hg38_Start"]),
+                                                                 int(variant["Hg38_End"]),
                                                                  int(variant["Chr"]),coverage_v3)
+        read_depth_v3 = min(mean_read_depth, median_read_depth)
+        if pd.isna(read_depth_v3):
+            read_depth_v3 = 0
+        if report_coverage:
+            variant[GNOMAD_V3_MEAN_COVERAGE] = mean_read_depth
+            variant[GNOMAD_V3_MEDIAN_COVERAGE] = median_read_depth
+        variant[GNOMAD_V3_CODE_ID] = analyze_one_dataset(variant["faf95_popmax_genome_GnomADv3"],
+                                                         variant["faf95_popmax_population_genome_GnomADv3"],
+                                                         variant["Allele_count_genome_GnomADv3"],
+                                                         is_snv, read_depth_v3,
+                                                         variant_is_flagged(variant["Variant_id_GnomADv3"],
+                                                                            flags_v3))
         if debug:
-            print("gnomAD V3 variant", variant["Variant_id_GnomADv3"], "popmax", variant["faf95_popmax_genome_GnomADv3"],
+            print("gnomAD V3 variant", variant["Variant_id_GnomADv3"],
+                  "popmax", variant["faf95_popmax_genome_GnomADv3"],
                   "allele count", variant["Allele_count_genome_GnomADv3"], "mean read depth", mean_read_depth,
-                  "median read depth", median_read_depth)
-        (variant[GNOMAD_V3_CODE_ID],
-         variant[GNOMAD_V3_CODE_DESCR]) = analyze_dataset(variant["faf95_popmax_genome_GnomADv3"],
-                                                          variant["faf95_popmax_population_genome_GnomADv3"],
-                                                          variant["Allele_count_genome_GnomADv3"],
-                                                          is_snv, mean_read_depth, median_read_depth)
-        if debug:
-            print("From gnomAD V3: code ID", variant[GNOMAD_V3_CODE_ID], "descr", variant[GNOMAD_V3_CODE_DESCR])
-    variant[POPFREQ_CODE_ID] = analyze_across_datasets(variant[GNOMAD_V2_CODE_ID],
-                                                        variant[GNOMAD_V3_CODE_ID])
+                  "median read depth", median_read_depth, "snv", is_snv, "V3 code", variant[GNOMAD_V3_CODE_ID])
+    (variant[POPFREQ_CODE_ID],
+     variant[POPFREQ_CODE_DESCR]) = analyze_across_datasets(variant[GNOMAD_V2_CODE_ID],variant["faf95_popmax_exome_GnomAD"],
+                                                            variant["faf95_popmax_population_exome_GnomAD"],
+                                                            variant_in_v2, variant[GNOMAD_V3_CODE_ID], 
+                                                            variant["faf95_popmax_genome_GnomADv3"],
+                                                            variant["faf95_popmax_population_genome_GnomADv3"],
+                                                            variant_in_v3)
     if debug:
-        print("consensus code:", variant[POPFREQ_CODE_ID])
+        print("consensus code:", variant[POPFREQ_CODE_ID], "msg", variant[POPFREQ_CODE_DESCR])
     return()
+
 
 
 def main():
     args = parse_args()
-    print(args)
-    #cfg_df = config.load_config(gene_config_path)
     df_cov2 = pd.read_parquet(args.data_dir + '/df_cov_v2.parquet')
     df_cov3 = pd.read_parquet(args.data_dir + '/df_cov_v3.parquet')
+    flags_v2 = read_flags(csv.DictReader(open(args.data_dir + "/brca.gnomAD.2.1.1.hg19.flags.tsv"),
+                                         delimiter = "\t"))
+    flags_v3 = read_flags(csv.DictReader(open(args.data_dir + "/brca.gnomAD.3.1.1.hg38.flags.tsv"),
+                                         delimiter = "\t"))
     input_file = csv.DictReader(open(args.input), delimiter = "\t")
-    output_file = initialize_output_file(input_file, args.output)
+    output_file = initialize_output_file(input_file, args.output, args.coverage_report)
     for variant in input_file:
-        analyze_variant(variant, df_cov2, df_cov3)
+        analyze_variant(variant, df_cov2, df_cov3, flags_v2, flags_v3, args.coverage_report)
         output_file.writerow(variant)
-                
-    #df_var2 = pd.read_parquet(data_dir / 'df_var_v2.parquet')
-    #df_var3 = pd.read_parquet(data_dir / 'df_var_v3.parquet')
-
-    #read_depth_thresh = 30
-
-    #df = extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, Path(resource_dir))
-
-    # add var_name columns with different normalization to join data with other sources (e.g. brca exchange output data)
-    #strand_dict = { int(r['chr']) : r[config.STRAND_COL] for _, r in cfg_df.iterrows() }
-    #df = add_normalization_cols(df, strand_dict)
-
-    #df.to_parquet(output_path)
 
 
 if __name__ == "__main__":
