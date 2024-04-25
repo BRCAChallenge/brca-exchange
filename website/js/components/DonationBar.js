@@ -9,7 +9,7 @@ const DonationBar = React.createClass({
         return (
         	<div className="donation-bar">
     			<p>
-                Thank you to everyone who contributed to the BRCA Exchange user survey!  The results are available <a style={{textDecoration: 'underline'}} href="https://brcaexchange.org/blog/index.php/2023/08/20/results-of-the-brca-exchange-user-survey/">here</a> on the BRCA Exchange blog .
+                We are pleased to introduce a new feature: persistent URLs for the variants in BRCA Exchange!  More information is available <a style={{textDecoration: 'underline'}} href="https://brcaexchange.org/blog/index.php/2024/02/01/new-feature-persistent-urls-for-brca-exchange-variants/">here</a> on the BRCA Exchange blog.
 	        	</p>
         	</div>
         );

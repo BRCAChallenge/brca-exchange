@@ -1,7 +1,12 @@
-'use strict';
+<script>
+    'use strict';
 
-module.exports = {
-    captcha_key: '', /* enter captch key here */
-    backend_url: 'http://brcaexchange.org/backend',
-    environment: 'production'
-};
+    window.config = {
+        baseurl: '/',
+        captcha_key: '', /* reCAPTCHA API key */
+        maps_key: '', /* Google maps javascript API key */
+        backend_url: 'https://brcaexchange.org/backend',
+        analytics: '', /* GA4 Google tag */
+        environment: 'production'
+    };
+</script>

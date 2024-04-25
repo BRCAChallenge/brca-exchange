@@ -1,6 +1,6 @@
 {
   "name": "brcaexchange",
-  "version": "3.129.0-alpha.0",
+  "version": "3.130.0-alpha.0",
   "description": "brca variant browser",
   "main": "index.js",
   "scripts": {
@@ -74,7 +74,6 @@
     "react-bootstrap": "^0.33.1",
     "react-data-components-brcaex": "^0.5.6",
     "react-dom": "^0.14.8",
-    "react-ga": "^2.5.7",
     "react-remarkable": "^1.1.1",
     "react-router": "^0.13.3",
     "rx": "^2.4.3",
