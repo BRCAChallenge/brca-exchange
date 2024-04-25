@@ -4,10 +4,10 @@ shortLabel BRCAExchange
 longLabel BRCAExchange BRCA1/2 variants
 type bigBed 9 +
 visibility pack
-url https://brcaexchange.org/variant/$CA_ID
+url https://brcaexchange.org/variant/$<CA_ID>
 urlLabel Link to BRCA Exchange
 itemRgb on
-mouseOver _mouseOver
+mouseOver $_mouseOver
 noScoreFilter on
 skipFields chrom,chromStart,chromEnd,score,strand,thickStart,thickEnd,reserved, _mouseOver
 html https://brcaexchange.org/trackhubs/description.html
