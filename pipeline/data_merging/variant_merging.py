@@ -422,13 +422,9 @@ def string_comparison_merge(variants, seq_wrapper):
 def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
     # Preprocessing variants:
     source_dict = {
-                   "1000_Genomes": GENOME1K_FILE + "for_pipeline",
                    "ClinVar": CLINVAR_FILE,
                    "LOVD": LOVD_FILE,
                    "exLOVD": EX_LOVD_FILE,
-                   "ExAC": EXAC_FILE,
-                   "ESP": ESP_FILE,
-                   "BIC": BIC_FILE,
                    "GnomAD": GNOMAD_V2_FILE,
                    "GnomADv3": GNOMAD_V3_FILE,
                    "ENIGMA_BRCA12_Functional_Assays": FUNCTIONAL_ASSAYS_SCORES_FILE
@@ -572,8 +568,6 @@ def one_variant_transform(f_in, f_out, source_name):
     for record in vcf_reader:
         n = len(record.ALT)
         if n == 1:
-            if source_name == "ExAC":
-                record = append_exac_allele_frequencies(record)
             record.INFO['BX_ID'] = count
             count += 1
             vcf_writer.write_record(record)
@@ -587,34 +581,7 @@ def one_variant_transform(f_in, f_out, source_name):
                     value = deepcopy(record.INFO[key])
                     if type(value) == list and len(value) == n:
                         new_record.INFO[key] = [value[i]]
-                if source_name == "ExAC":
-                    new_record = append_exac_allele_frequencies(record, new_record, i)
                 vcf_writer.write_record(new_record)
-
-
-def append_exac_allele_frequencies(record, new_record=None, i=None):
-    if new_record is None:
-        for subpopulation in EXAC_SUBPOPULATIONS:
-            # calculate allele frequencies for each subpopulation
-            allele_count = record.INFO[("AC_" + subpopulation)]
-            allele_number = record.INFO[("AN_" + subpopulation)]
-            allele_frequency = "-"
-            if len(allele_count) > 0 and allele_number != 0:
-                allele_frequency = float(allele_count[0]) / float(allele_number)
-                allele_frequency = str(utilities.round_sigfigs(allele_frequency, 3))
-            record.INFO[("AF_" + subpopulation)] = allele_frequency
-        return record
-    else:
-        new_record.INFO['AF'] = record.INFO['AF'][i]
-        for subpopulation in EXAC_SUBPOPULATIONS:
-            allele_count = record.INFO[("AC_" + subpopulation)][i]
-            allele_number = record.INFO[("AN_" + subpopulation)]
-            allele_frequency = "-"
-            if allele_number != 0:
-                allele_frequency = float(allele_count) / float(allele_number)
-                allele_frequency = str(utilities.round_sigfigs(allele_frequency, 3))
-            new_record.INFO[("AF_" + subpopulation)] = allele_frequency
-        return new_record
 
 
 def write_new_tsv(filename, columns, variants):
@@ -657,11 +624,7 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
                 variants[genome_coor].append(record.INFO[value])
             except KeyError:
                 logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
-                if source == "BIC":
-                    variants[genome_coor].append(DEFAULT_CONTENTS)
-                    logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
-                else:
-                    raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
+                raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
     for value in variants.values():

@@ -101,33 +101,6 @@ class CopyClinvarVCFToOutputDir(DefaultPipelineTask):
 
 
 ###############################################
-#                     BIC                     #
-###############################################
-
-
-class DownloadBICData(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(self.bic_file_dir + "/bic_brca12.sorted.hg38.vcf")
-
-    def run(self):
-        os.chdir(self.bic_file_dir)
-
-        brca1_data_url = "https://brcaexchange.org/backend/downloads/bic_brca12.sorted.hg38.vcf"
-        pipeline_utils.download_file_and_display_progress(brca1_data_url)
-
-
-@requires(DownloadBICData)
-class CopyBICOutputToOutputDir(DefaultPipelineTask):
-
-    def output(self):
-        return luigi.LocalTarget(self.cfg.output_dir + "/bic_brca12.sorted.hg38.vcf")
-
-    def run(self):
-        copy(self.bic_file_dir + "/bic_brca12.sorted.hg38.vcf", self.cfg.output_dir)
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-###############################################
 #                  exLOVD                     #
 ###############################################
 
@@ -381,63 +354,6 @@ class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
         copy(self.input().path, self.cfg.output_dir)
         pipeline_utils.check_file_for_contents(self.output().path)
 
-
-###############################################
-#                    G1K                      #
-###############################################
-
-
-class DownloadStaticG1KData(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.sorted.hg38.vcf")
-
-    def run(self):
-        os.chdir(self.g1k_file_dir)
-
-        g1k_vcf_url = "https://brcaexchange.org/backend/downloads/1000G.sorted.hg38.vcf"
-        pipeline_utils.download_file_and_display_progress(g1k_vcf_url)
-
-
-@requires(DownloadStaticG1KData)
-class CopyG1KOutputToOutputDir(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(f"{self.cfg.output_dir}/1000G.sorted.hg38.vcf")
-
-    def run(self):
-        copy(self.input().path, self.cfg.output_dir)
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
-###############################################
-#                    EXAC                     #
-###############################################
-
-
-class DownloadStaticExACData(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(
-            self.exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
-
-    def run(self):
-        os.chdir(self.exac_file_dir)
-
-        exac_vcf_gz_url = "https://brcaexchange.org/backend/downloads/exac.brca12.sorted.hg38.vcf"
-        pipeline_utils.download_file_and_display_progress(exac_vcf_gz_url)
-
-
-@requires(DownloadStaticExACData)
-class CopyEXACOutputToOutputDir(DefaultPipelineTask):
-    def output(self):
-        return luigi.LocalTarget(
-            self.cfg.output_dir + "/exac.brca12.sorted.hg38.vcf")
-
-    def run(self):
-        copy(self.input().path,
-             self.cfg.output_dir)
-
-        pipeline_utils.check_file_for_contents(self.output().path)
-
-
 ###############################################
 #                  ENIGMA                     #
 ###############################################
@@ -570,9 +486,6 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
         yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
                                                     gnomad_processing.DownloadStaticGnomADVCF())
         yield CopyClinvarVCFToOutputDir()
-        yield CopyBICOutputToOutputDir()
-        yield CopyG1KOutputToOutputDir()
-        yield CopyEXACOutputToOutputDir()
         yield CopyEXLOVDOutputToOutputDir()
         yield CopySharedLOVDOutputToOutputDir()
         yield CopyEnigmaOutputToOutputDir()

@@ -15,15 +15,6 @@ COLUMN_VCF_ALT = 6
 # This is the string to be stored when a field is empty
 DEFAULT_CONTENTS = "-"
 
-# key value pair dictionaries of all extra fields in various databases to add
-GENOME1K_FIELDS = {"Allele_frequency": "AF",
-                   "EAS_Allele_frequency": "EAS_AF",
-                   "EUR_Allele_frequency": "EUR_AF",
-                   "AFR_Allele_frequency": "AFR_AF",
-                   "AMR_Allele_frequency": "AMR_AF",
-                   "SAS_Allele_frequency": "SAS_AF",
-                   "BX_ID": "BX_ID"}
-
 CLINVAR_FIELDS = {"HGVS": "HGVS",
                   "Submitter": "Submitter",
                   "Clinical_Significance": "ClinicalSignificance",
@@ -75,58 +66,6 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "HGVS_cDNA": "dna_change",
                   "HGVS_protein": "protein_change",
                   "BX_ID": "BX_ID"}
-
-BIC_FIELDS = {"Clinical_classification": "Category",
-              "Number_of_family_member_carrying_mutation": "Number_Reported",
-              "Patient_nationality": "Nationality",
-              "Germline_or_Somatic": "G_or_S",
-              "Mutation_type": "Mutation_Type",
-              "BIC_Designation": "Designation",
-              "Clinical_importance": "Clinically_Importance",
-              "Ethnicity": "Ethnicity",
-              "Literature_citation": "Reference",
-              "BX_ID": "BX_ID"}
-
-ESP_FIELDS = {"polyPhen2_result": "PH",
-              "Minor_allele_frequency_percent": "MAF",
-              "EA_Allele_Frequency": "BX_EAAF",
-              "AA_Allele_Frequency": "BX_AAAF",
-              "Allele_Frequency": "BX_AF",
-              "BX_ID": "BX_ID"}
-
-
-EXAC_FIELDS = {"Allele_frequency": "AF",
-               "Allele_count_AFR": "AC_AFR",
-               "Allele_number_AFR": "AN_AFR",
-               "Allele_frequency_AFR": "AF_AFR",
-               "Homozygous_count_AFR": "Hom_AFR",
-               "Allele_count_AMR": "AC_AMR",
-               "Allele_number_AMR": "AN_AMR",
-               "Allele_frequency_AMR": "AF_AMR",
-               "Homozygous_count_AMR": "Hom_AMR",
-               "Allele_count_EAS": "AC_EAS",
-               "Allele_number_EAS": "AN_EAS",
-               "Allele_frequency_EAS": "AF_EAS",
-               "Homozygous_count_EAS": "Hom_EAS",
-               "Allele_count_FIN": "AC_FIN",
-               "Allele_number_FIN": "AN_FIN",
-               "Allele_frequency_FIN": "AF_FIN",
-               "Homozygous_count_FIN": "Hom_FIN",
-               "Allele_count_NFE": "AC_NFE",
-               "Allele_number_NFE": "AN_NFE",
-               "Allele_frequency_NFE": "AF_NFE",
-               "Homozygous_count_NFE": "Hom_NFE",
-               "Allele_count_OTH": "AC_OTH",
-               "Allele_number_OTH": "AN_OTH",
-               "Allele_frequency_OTH": "AF_OTH",
-               "Homozygous_count_OTH": "Hom_OTH",
-               "Allele_count_SAS": "AC_SAS",
-               "Allele_number_SAS": "AN_SAS",
-               "Allele_frequency_SAS": "AF_SAS",
-               "Homozygous_count_SAS": "Hom_SAS",
-               "BX_ID": "BX_ID"}
-
-EXAC_SUBPOPULATIONS = ["AFR", "AMR", "EAS", "FIN", "NFE", "OTH", "SAS"]
 
 GNOMAD_V2_FIELDS = {"HGVS_cDNA": "hgvs",
                  "Flags": "flags",
@@ -429,9 +368,6 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ClinVar": CLINVAR_FIELDS,
               "LOVD": LOVD_FIELDS,
               "exLOVD": EX_LOVD_FIELDS,
-              "ExAC": EXAC_FIELDS,
-              "ESP": ESP_FIELDS,
-              "BIC": BIC_FIELDS,
               "GnomAD": GNOMAD_V2_FIELDS,
               "GnomADv3": GNOMAD_V3_FIELDS,
               "ENIGMA_BRCA12_Functional_Assays": ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS}
@@ -443,13 +379,9 @@ LIST_TYPE_FIELDS = {
 
 ENIGMA_FILE = "enigma_from_clinvar.tsv"
 
-GENOME1K_FILE = "1000G.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVar.vcf"
 LOVD_FILE = "sharedLOVD.sorted.hg38.vcf"
 EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
-BIC_FILE = "bic_brca12.sorted.hg38.vcf"
-EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
-ESP_FILE = "esp.sorted.hg38.vcf"
 GNOMAD_V2_FILE = "gnomADv2.sorted.hg38.vcf"
 GNOMAD_V3_FILE = "gnomADv3.sorted.hg38.vcf"
 

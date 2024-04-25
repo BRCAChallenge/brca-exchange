@@ -21,8 +21,6 @@ FIELDS_TO_REMOVE = ["Protein_ClinVar",
                     "Submission_ID_LOVD",
                     "HGVS_protein_exLOVD",
                     "polyPhen2_result_ESP",
-                    "BIC_Designation_BIC",
-                    "BIC_Nomenclature_exLOVD",
                     "Synonyms_ClinVar"]
 FIELDS_TO_ADD = ["Hg38_Start", "Hg38_End", "Hg37_Start", "Hg37_End",
                  "HGVS_RNA",
@@ -36,7 +34,7 @@ FIELDS_TO_RENAME = {"Gene_symbol_ENIGMA": "Gene_Symbol",
                     "Reference_sequence_ENIGMA": "Reference_Sequence",
                     "Abbrev_AA_change_ENIGMA": "Protein_Change",
                     "HGVS_cDNA_ENIGMA": "HGVS_cDNA",
-                    "HGVS_protein_ENIGMA": "HGVS_Protein",
+                    "HGVS_protein_ENIGMA": "HGVS_Protein" 
                     "BIC_Nomenclature_ENIGMA": "BIC_Nomenclature"}
 
 
@@ -222,13 +220,6 @@ def selectAlleleFrequency(row):
     gnomAD_AF = determineGnomADAlleleFrequency(row)
     if gnomAD_AF != EMPTY:
         return "%s (GnomAD)" % gnomAD_AF
-    elif row["Allele_frequency_ExAC"] != EMPTY:
-        return "%s (ExAC minus TCGA)" % row["Allele_frequency_ExAC"]
-    elif row["Minor_allele_frequency_percent_ESP"] != EMPTY:
-        # Percent must be converted to a fraction
-        return "%s (ESP)" % (float(row["Minor_allele_frequency_percent_ESP"].split(',')[-1])/100)
-    elif row["Allele_frequency_1000_Genomes"] != EMPTY:
-        return "%s (1000 Genomes)" % row["Allele_frequency_1000_Genomes"]
     else:
         return EMPTY
 

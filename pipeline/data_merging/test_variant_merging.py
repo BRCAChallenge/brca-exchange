@@ -319,7 +319,7 @@ class TestVariantMerging(unittest.TestCase):
                               'Germline', 'SCV000282396.1', 'p.(Asn1626SerfsTer12)', '46']
                              }
         self.genomic_coordinate = 'chr13:g.32339228:GAA>G'
-        self.values_to_add = ['BIC', 'BRCA2', 'chr13:32339228:GAA>G', '13', '32339228', 'GAA', 'G', 'NM_000059.3',
+        self.values_to_add = ['ENIGMA', 'BRCA2', 'chr13:32339228:GAA>G', '13', '32339228', 'GAA', 'G', 'NM_000059.3',
                               'c.4876_4877delAA', '', 'N1626Sfs*12', '', 'OMIM',
                               'BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 2; BROVCA2 (612555)', 'Disease',
                               'Pathogenic', '2016-09-08', 'ENIGMA BRCA1/2 Classification Criteria (2015)',
@@ -364,7 +364,6 @@ class TestVariantMerging(unittest.TestCase):
         self.assertIn('2016-09-08', merged[date_index])
         self.assertIn('677', merged[bx_id_index])
         self.assertIn('46', merged[bx_id_index])
-        self.assertIn('BIC', merged[COLUMN_SOURCE])
         self.assertIn('ENIGMA', merged[COLUMN_SOURCE])
 
     def test_add_variant_to_dict_merge_ignores_trailing_spaces(self):
@@ -377,17 +376,6 @@ class TestVariantMerging(unittest.TestCase):
         merged = variant_dict[self.genomic_coordinate]
         self.assertEqual('5104delAA', merged[9])
 
-    def test_append_exac_allele_frequencies_rounds_to_three_sig_figs(self):
-        EXAC_VCF_FILENAME = os.path.join(os.path.dirname(__file__), 'test_files/ExAC_AF.vcf')
-        for record in vcf.Reader(open(EXAC_VCF_FILENAME, 'r')):
-            record = append_exac_allele_frequencies(record, new_record=None, i=None)
-            for subpopulation in EXAC_SUBPOPULATIONS:
-                val = record.INFO["AF_" + subpopulation]
-                try:
-                    float_val = float(val)
-                    self.assertEqual(float_val, round_sigfigs(float(val), 3))
-                except ValueError:
-                    self.assertEqual(val, '-')
 
 def test_find_equivalent_variant(seq_fetcher):
     # mocking _fetch_seq method

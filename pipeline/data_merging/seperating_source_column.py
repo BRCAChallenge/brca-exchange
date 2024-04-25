@@ -2,20 +2,14 @@
 seperating the Variant_Source column merged_v4.tsv into six columns:
 Variant_in_ENIGMA
 Variant_in_ClinVar
-Variant_in_1000_Genomes
-Variant_in_ExAC
 Variant_in_LOVD
-Variant_in_BIC
 """
 
 COLUMNS = ["Variant_in_ENIGMA",
            "Variant_in_ClinVar",
-           "Variant_in_1000_Genomes",
-           "Variant_in_ExAC",
-           "Variant_in_LOVD",
-           "Variant_in_BIC"]
+           "Variant_in_LOVD"]
 
-SOURCES = ["ENIGMA", "ClinVar", "1000_Genomes", "ExAC", "LOVD", "BIC"]
+SOURCES = ["ENIGMA", "ClinVar",  "LOVD"]
 
 
 def main():
