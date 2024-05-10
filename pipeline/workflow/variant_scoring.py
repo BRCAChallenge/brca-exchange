@@ -9,6 +9,7 @@ import workflow.pipeline_utils as pipeline_utils
 from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_dir, analysis_method_dir
 
 
+
 @requires(bayesdel_processing.AddBayesdelScores)
 class DownloadResources(DefaultPipelineTask):
     def output(self):
