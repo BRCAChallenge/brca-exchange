@@ -7,7 +7,7 @@ from luigi.util import requires
 
 import workflow.pipeline_utils as pipeline_utils
 from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_dir, analysis_method_dir
-
+from workflow import bayesdel_processing
 
 
 @requires(bayesdel_processing.AddBayesdelScores)
