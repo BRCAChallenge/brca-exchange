@@ -10,36 +10,37 @@ from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_di
 from workflow import bayesdel_processing
 
 
-@requires(bayesdel_processing.AddBayesdelScores)
+#@requires(bayesdel_processing.AddBayesdelScores)
 class DownloadResources(DefaultPipelineTask):
     def output(self):
-        wdir = Path(self.cfg.output_dir) / 'release' / 'artifacts' / 'variant_scoring_wdir'
-        return{'wdir': luigi.LocalTarget(wdir),
-               'covV2': "df_cov_v2.parquet",
-               'covV3': "df_cov_v2.parquet",
-               'flagsV2': "brca.gnomAD.2.1.1.hg19.flags.tsv",
-               'flagsV3': "brca.gnomAD.3.1.1.hg38.flags.tsv"
-               }
+        return(luigi.LocalTarget(Path(self.cfg.output_dir) / 'release' / 'artifacts' / 'analysis'))
+
     
     def run(self):
-        wdir = self.output()['wdir'].path
-        if not os.path.exists(wdir):
-            os.mkdir(wdir)
-        os.chdir(wdir)
-        variant_scoring_data_url = "https://brcaexchange.org/backend/downloads/variant_scoring/*"
-        pipeline_utils.download_file_and_display_progress(brca1_data_url)
+        download_url = "https://brcaexchange.org/backend/downloads/variant_scoring/"
+        self.inputfiles = [ "df_cov_v2.parquet", "df_cov_v3.parquet",
+                            "brca.gnomAD.2.1.1.hg19.flags.tsv",
+                            "brca.gnomAD.3.1.1.hg38.flags.tsv"
+                            ]
+        self.wdir = self.output().path
+        if not os.path.exists(self.wdir):
+            os.mkdir(self.wdir)
+        os.chdir(self.wdir)
+        for this_file in self.inputfiles:
+            pathname = download_url + "/" + this_file
+            pipeline_utils.download_file_and_display_progress(pathname)
         
 
 @requires(DownloadResources)
 class runPopfreqAssessment(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'built_with_popfreq.tsv'))
+        return luigi.LocalTarget(Path(self.cfg.output_dir)/'release'/'artifacts'/'built_with_popfreq.tsv')
 
     def run(self):
         os.chdir(analysis_method_dir)
         args = ["python", "popfreq_assessment.py",
-                "--input", "bayesdel_processing.AddBayesdelScores.output()",
-                "--data_dir", DownloadResources.output()["wdir"],
+                "--input", bayesdel_processing.AddBayesdelScores().output().path,
+                "--data_dir", DownloadResources().output().path,
                 "--output", self.output().path]
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
