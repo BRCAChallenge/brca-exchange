@@ -10,7 +10,7 @@ from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_di
 from workflow import bayesdel_processing
 
 
-#@requires(bayesdel_processing.AddBayesdelScores)
+@requires(bayesdel_processing.AddBayesdelScores)
 class DownloadResources(DefaultPipelineTask):
     def output(self):
         return(luigi.LocalTarget(Path(self.cfg.output_dir) / 'release' / 'artifacts' / 'analysis'))
@@ -41,6 +41,19 @@ class runPopfreqAssessment(DefaultPipelineTask):
         args = ["python", "popfreq_assessment.py",
                 "--input", bayesdel_processing.AddBayesdelScores().output().path,
                 "--data_dir", DownloadResources().output().path,
+                "--output", self.output().path]
+        pipeline_utils.run_process(args)
+        pipeline_utils.check_file_for_contents(self.output().path)
+                 
+@requires(runPopfreqAssessment)
+class runBioinfoPred(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(Path(self.cfg.output_dir)/'release'/'artifacts'/'built_with_bioinfo_pred.tsv')
+
+    def run(self):
+        os.chdir(analysis_method_dir)
+        args = ["python", "add_bioinfo_pred.py",
+                "--input", runPopfreqAssessment().output().path,
                 "--output", self.output().path]
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
