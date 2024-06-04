@@ -9,9 +9,6 @@ import math
 import numpy as np
 import pandas as pd
 
-#import gnomad.variant_scoring.constants as cnts
-#from common import config, hgvs_utils, variant_utils, utils
-#from data_merging.brca_pseudonym_generator import _normalize_genomic_fnc
 
 POPFREQ_CODE_ID = "Provisional_Evidence_Code_Popfreq"
 POPFREQ_CODE_DESCR = "Provisional_Evidence_Description_Popfreq"
@@ -63,6 +60,8 @@ def parse_args():
                         help="Output file with new columns")
     parser.add_argument("-d", "--data_dir", default="./processed_brca",
                         help="Directory with the processed files")
+    parser.add_argument("--debug", action="store_true", default=False,
+                        help="Print debugging info")
     args = parser.parse_args()
     return(args)
 
@@ -91,7 +90,7 @@ def initialize_output_file(input_file, output_filename):
     """
     new_columns = [POPFREQ_CODE_ID, POPFREQ_CODE_DESCR]
     input_header_row = input_file.fieldnames
-    if input_header_row.index("change_type"):
+    if "change_type" in input_header_row:
         idx = input_header_row.index("change_type")
         output_header_row = input_header_row[:idx] + new_columns \
             + input_header_row[idx:]
@@ -169,7 +168,7 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
 
 def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
                             code_v3, faf_v3, faf_popmax_v3, in_v3,
-                            debug=True):
+                            debug=False):
     """
     Given the per-dataset evidence codes, generate an overall evidence code
     """
@@ -252,7 +251,7 @@ def variant_is_flagged(variant_id, flags):
 
 
 def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
-                    debug=True):
+                    debug=False):
     """
     Analyze a single variant, adding the output columns
     """
@@ -366,7 +365,8 @@ def main():
     input_file = csv.DictReader(open(args.input), delimiter = "\t")
     output_file = initialize_output_file(input_file, args.output)
     for variant in input_file:
-        analyze_variant(variant, df_cov2, df_cov3, flags_v2, flags_v3)
+        analyze_variant(variant, df_cov2, df_cov3, flags_v2, flags_v3,
+                        debug=args.debug)
         output_file.writerow(variant)
 
 
