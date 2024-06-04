@@ -141,3 +141,5 @@
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.start
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.stop
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.version
+./release/artifacts/built_with_popfreq.tsv
+./release/artifacts/built_with_bioinfo_pred.tsv
