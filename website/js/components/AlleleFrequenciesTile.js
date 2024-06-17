@@ -5,12 +5,12 @@
 import React from "react";
 import {Panel} from 'react-bootstrap';
 import {AlleleFrequencyField} from "./AlleleFrequencyField";
-import {AlleleFreqProvEvidField} from "./AlleleFrequencyProvisionalEvidenceField"; //ETK
 import GroupHelpButton from './GroupHelpButton';
 
 const _ = require('underscore');
 
 // Includes the Allele Frequency fields plus the Provisional Evidence.
+// when true, the field starts in the expanded state.
 const fieldsOfInterest = {
     'Provisional ACMG Variant Evidence': true,
     'gnomAD V2.1 Exomes, Non-Cancer (Graphical)': true,
@@ -49,7 +49,6 @@ export default class AlleleFrequenciesTile extends React.Component {
     }
 
     render() {
-        console.log(this.props); // ETK
         const variant = this.props.variant;
         const data = this.props.alleleFrequencyData;
 
@@ -69,7 +68,11 @@ export default class AlleleFrequenciesTile extends React.Component {
                                 return dd.source === "GnomADv3 Genomes";
                             }).data, "gnomAD V3.1 Genomes, Non-Cancer (Numerical)"];
 
-        const alleleFrequencyFields = [gnomadExomeGraph, gnomadExomeData, gnomadGenomeGraph,
+        const provisionalEvidenceData = [_.find(data, function(dd) {
+                                return dd.source === "VCEP";
+                            }).data, "Provisional ACMG Variant Evidence"];
+
+        const alleleFrequencyFields = [provisionalEvidenceData, gnomadExomeGraph, gnomadExomeData, gnomadGenomeGraph,
                                        gnomadGenomeData];
 
         const renderedAlleleFrequencyFields = alleleFrequencyFields.map((field, idx) => {
@@ -92,22 +95,6 @@ export default class AlleleFrequenciesTile extends React.Component {
                 />
             );
         });
-
-        let fieldNameACMG = 'Provisional ACMG Variant Evidence';
-        let expandedACMG = this.state[fieldNameACMG];
-        let provisionalEvidence = {
-            codePopfreq: variant.Provisional_Evidence_Code_Popfreq,
-            descriptionPopfreq: variant.Provisional_Evidence_Description_Popfreq
-        };
-        const renderedProvEvidenceField = (
-            <AlleleFreqProvEvidField
-                field="AFPE Field"
-                fieldName={fieldNameACMG}
-                onFieldToggled={this.fieldToggled}
-                expanded={expandedACMG}
-                provisionalEvidence={provisionalEvidence}
-            />
-        );
 
         // TODO: figure out how to determine if everything is empty even though variant is in GnomAD
         const allEmpty = !variant.Variant_in_GnomAD;
@@ -170,7 +157,6 @@ export default class AlleleFrequenciesTile extends React.Component {
                                     to assess pathogenicity represent individuals not affected by cancer.
                                 </div>
                             </div>
-                            {renderedProvEvidenceField}
                             {renderedAlleleFrequencyFields}
                         </Panel.Body>
                     </Panel.Collapse>

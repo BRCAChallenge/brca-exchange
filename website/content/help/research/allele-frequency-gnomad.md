@@ -46,7 +46,7 @@ The BRCA Exchange displays the primary subsets used by ExAC and gnomAD (i.e. “
 	Overall allele frequency (for genomes) according to all studied populations, per gnomAD 3.1
 * #### Popmax Filtering Allele Frequency (95% confidence) ((faf95_popmax_genome_GnomADv3))
 	The 95% confidence bound on the most significant gnomAD genome population frequency (gnomAD 3.1)
-* #### AAllele frequency African ((Allele_frequency_genome_AFR_GnomADv3))
+* #### Allele frequency African ((Allele_frequency_genome_AFR_GnomADv3))
 	Allele Frequency in genomes of African/African American Populations (gnomAD 3.1)
 * #### Allele frequency Latino ((Allele_frequency_genome_AMR_GnomADv3))
 	Allele Frequency in genomes of Latino Populations (gnomAD 3.1)

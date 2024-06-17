@@ -1,3 +1,5 @@
 The Allele Frequency Reference Sets tile shows the frequency of a _BRCA1_ or _BRCA2_ variant in a reference population. Allele Frequencies can be helpful in understanding the frequency at which a variant appears in the population, and whether there is a population in which the variant is more common and therefore not likely to increase the risk of disease. Different sets are shown in different subtiles. To view or collapse all subtiles, click the arrows at the top right of the tile on the Variant Details Page. 
 
 BRCA Exchange has standardized on gnomAD as its source of allele frequency reference data.  The earlier allele frequency reference sets, ExAC, ESP, and 1000 Genomes, have mostly been subsumed by gnomAD.  We have retired the display of these earlier datasets, but still retain their data in our database for historical puposes.
+
+ETK TODO Line about provisional evidence!

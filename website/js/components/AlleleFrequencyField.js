@@ -145,7 +145,13 @@ const AlleleFrequencyField = React.createClass({
         let allEmpty = false;
         let isChart = false;
         let isGnomad = false;
+        let isProvisionalEvidence = false;
         let popmax = this.getPopMax(fieldName, variant);
+
+        if (fieldName ===  "Provisional ACMG Variant Evidence") {
+            isProvisionalEvidence = true; // This will be used below to display the header
+            renderedRows = this.getRowsAndDetermineIfEmpty("VCEP", field, variant);
+        }
 
         if (fieldName.toLowerCase().includes('gnomad')) {
             flag = variant.Flags_GnomAD;
@@ -227,6 +233,15 @@ const AlleleFrequencyField = React.createClass({
                                 Additional data for this variant, including detailed
                                 populations, quality scores, and flags relative to other transcripts,
                                 <a href={gnomadLink} target="_blank">&nbsp;are available at gnomAD</a>.
+                            </div>
+                        </div>
+                        <div className="tile-disclaimer" style={{display: isProvisionalEvidence ? '' : 'none'}}>
+                            <div>
+                                The following describes the population frequency evidence
+                                under the Variant Curation Expert Panel (VCEP) rules of
+                                the ENIGMA BRCA1/2 VCEP, Version 1.1.0, dated 2023-11-22.
+                                <b> This provisional evidence assessment has not yet been
+                                reviewed by the VCEP biocuration team.</b>
                             </div>
                         </div>
                         <Table key={`allele-frequency-name-${fieldName}`} >

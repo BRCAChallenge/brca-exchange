@@ -203,6 +203,13 @@ const researchModeGroups = [
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', alleleFrequencies: true,
         innerGroups: [
             {
+                source: "VCEP",
+                data: [
+                    {title: "Provisional Code", prop: "Provisional_Evidence_Code_Popfreq", core: true},
+                    {title: "Description", prop: "Provisional_Evidence_Description_Popfreq", core: true}
+                ]
+            },
+            {
                 source: "GnomADv3 Genomes",
                 chart: [
                     {title: 'Allele Frequency Charts (gnomAD V3.1 Genomes)', prop: 'Allele_Frequency_Charts_Genome_GnomADv3', replace: alleleFrequencyCharts, tableKey: false, dummy: true},

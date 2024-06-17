@@ -816,6 +816,7 @@ var VariantDetail = React.createClass({
             };
         });
     },
+    // render for VariantDetail
     render: function () {
         const {data, error} = this.state;
         if (!data) {

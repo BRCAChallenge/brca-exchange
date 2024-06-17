@@ -248,7 +248,11 @@ const helpContentResearch = [
                 contents: require("../content/help/research/allele-frequency-reference-sets.md"),
                 list: [
                     {
-			name: "gnomAD: Genome Aggregation Database (non-cancer cohort)",
+                        name: "Provisional ACMG Variant Evidence",
+                        contents: require("../content/help/research/allele-frequency-provisional-evidence.md")
+                    },
+                    {
+                        name: "gnomAD: Genome Aggregation Database (non-cancer cohort)",
                         contents: require("../content/help/research/allele-frequency-gnomad.md")
                     },
                 ]
