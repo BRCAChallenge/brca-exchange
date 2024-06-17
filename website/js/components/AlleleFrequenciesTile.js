@@ -5,12 +5,14 @@
 import React from "react";
 import {Panel} from 'react-bootstrap';
 import {AlleleFrequencyField} from "./AlleleFrequencyField";
+import {AlleleFreqProvEvidField} from "./AlleleFrequencyProvisionalEvidenceField"; //ETK
 import GroupHelpButton from './GroupHelpButton';
 
 const _ = require('underscore');
 
-
+// Includes the Allele Frequency fields plus the Provisional Evidence.
 const fieldsOfInterest = {
+    'Provisional ACMG Variant Evidence': true,
     'gnomAD V2.1 Exomes, Non-Cancer (Graphical)': true,
     'gnomAD V2.1 Exomes, Non-Cancer (Numerical)': false,
     'gnomAD V3.1 Genomes, Non-Cancer (Graphical)': true,
@@ -47,6 +49,7 @@ export default class AlleleFrequenciesTile extends React.Component {
     }
 
     render() {
+        console.log(this.props); // ETK
         const variant = this.props.variant;
         const data = this.props.alleleFrequencyData;
 
@@ -89,6 +92,22 @@ export default class AlleleFrequenciesTile extends React.Component {
                 />
             );
         });
+
+        let fieldNameACMG = 'Provisional ACMG Variant Evidence';
+        let expandedACMG = this.state[fieldNameACMG];
+        let provisionalEvidence = {
+            codePopfreq: variant.Provisional_Evidence_Code_Popfreq,
+            descriptionPopfreq: variant.Provisional_Evidence_Description_Popfreq
+        };
+        const renderedProvEvidenceField = (
+            <AlleleFreqProvEvidField
+                field="AFPE Field"
+                fieldName={fieldNameACMG}
+                onFieldToggled={this.fieldToggled}
+                expanded={expandedACMG}
+                provisionalEvidence={provisionalEvidence}
+            />
+        );
 
         // TODO: figure out how to determine if everything is empty even though variant is in GnomAD
         const allEmpty = !variant.Variant_in_GnomAD;
@@ -151,6 +170,7 @@ export default class AlleleFrequenciesTile extends React.Component {
                                     to assess pathogenicity represent individuals not affected by cancer.
                                 </div>
                             </div>
+                            {renderedProvEvidenceField}
                             {renderedAlleleFrequencyFields}
                         </Panel.Body>
                     </Panel.Collapse>
