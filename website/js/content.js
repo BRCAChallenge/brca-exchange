@@ -224,11 +224,6 @@ const helpContentResearch = [
                         id: "clinical-significance-lovd",
                         contents: require("../content/help/research/clinical-significance-lovd.md")
                     },
-                    {
-                        name: "BIC",
-                        id: "clinical-significance-bic",
-                        contents: require("../content/help/research/clinical-significance-bic.md")
-                    },
                 ]
             },
             {
