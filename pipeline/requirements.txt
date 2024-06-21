@@ -1,7 +1,7 @@
 appdirs==1.4.3
 appnope==0.1.0
 argcomplete==1.10.0
-attrs==19.3.0
+attrs==22.2.0
 backcall==0.1.0
 backports-abc==0.5
 beautifulsoup4==4.8.2
