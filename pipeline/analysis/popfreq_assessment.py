@@ -2,27 +2,16 @@
 # coding: utf-8
 
 import itertools
-
 import argparse
 import csv
 from collections import OrderedDict
 import math
-
 import numpy as np
 import pandas as pd
 
-#import gnomad.variant_scoring.constants as cnts
-#from common import config, hgvs_utils, variant_utils, utils
-#from data_merging.brca_pseudonym_generator import _normalize_genomic_fnc
 
-GNOMAD_V2_CODE_ID = "Provisional_code_GnomAD"
-GNOMAD_V3_CODE_ID = "Provisional_code_GnomADv3"
-POPFREQ_CODE_ID = "Provisional_evidence_code_popfreq"
-POPFREQ_CODE_DESCR = "Provisional_evidence_code_description_popfreq"
-GNOMAD_V2_MEAN_COVERAGE = "gnomAD_mean_coverage_v2_exome"
-GNOMAD_V2_MEDIAN_COVERAGE = "gnomAD_median_coverage_v2_exome"
-GNOMAD_V3_MEAN_COVERAGE = "gnomAD_mean_coverage_v3_genome"
-GNOMAD_V3_MEDIAN_COVERAGE = "gnomAD_median_coverage_v3_genome"
+POPFREQ_CODE_ID = "Provisional_Evidence_Code_Popfreq"
+POPFREQ_CODE_DESCR = "Provisional_Evidence_Description_Popfreq"
 
 
 BA1 = "BA1 (met)"
@@ -71,11 +60,8 @@ def parse_args():
                         help="Output file with new columns")
     parser.add_argument("-d", "--data_dir", default="./processed_brca",
                         help="Directory with the processed files")
-    parser.add_argument("-r", "--resource_dir", default="BRCAExchange/resources",
-                        help="Pipeline resources")
-    parser.add_argument("-c", "--coverage_report", default=True,
-                        action=argparse.BooleanOptionalAction,
-                        help="Boolean flag to be set if we want to save coverage data")
+    parser.add_argument("--debug", action="store_true", default=False,
+                        help="Print debugging info")
     args = parser.parse_args()
     return(args)
 
@@ -98,18 +84,20 @@ def estimate_coverage(start, end, chrom, df_cov):
 
 
 
-def initialize_output_file(input_file, output_filename, report_coverage=False):
+def initialize_output_file(input_file, output_filename):
     """
     Create an empty output file with the new columns
     """
-    new_columns = [GNOMAD_V2_CODE_ID, GNOMAD_V3_CODE_ID,
-                   POPFREQ_CODE_ID, POPFREQ_CODE_DESCR]
-    if report_coverage:
-        new_columns = [GNOMAD_V2_MEAN_COVERAGE, GNOMAD_V2_MEDIAN_COVERAGE,
-                       GNOMAD_V3_MEAN_COVERAGE, GNOMAD_V3_MEDIAN_COVERAGE] + new_columns
+    new_columns = [POPFREQ_CODE_ID, POPFREQ_CODE_DESCR]
     input_header_row = input_file.fieldnames
-    output_header_row = input_header_row + new_columns
-    output_file = csv.DictWriter(open(output_filename,"w"), fieldnames=output_header_row,
+    if "change_type" in input_header_row:
+        idx = input_header_row.index("change_type")
+        output_header_row = input_header_row[:idx] + new_columns \
+            + input_header_row[idx:]
+    else:
+        output_header_row = input_header_row + new_columns
+    output_file = csv.DictWriter(open(output_filename,"w"),
+                                 fieldnames=output_header_row,
                                  delimiter = '\t')
     output_file.writeheader()
     return(output_file)
@@ -176,78 +164,11 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
             else:
                 return(NO_CODE_NON_SNV)
     return(NEEDS_REVIEW)
-=======
-def extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, resource_dir):
-    agg_v2 = process_v2(df_var2, df_cov2, read_depth_thresh, resource_dir)
-    agg_v3 = process_v3(df_var3, df_cov3, read_depth_thresh)
-
-    df_overall = pd.concat([agg_v2, agg_v3]).reset_index(drop=True)
-
-    # running the actual scoring algorithm and the combined data
-    df_overall['evidence_code'] = df_overall.apply(determine_evidence_code_per_variant, axis=1)
-    df_overall = add_final_code_column(df_overall)
-
-    return df_overall.sort_values('var_name')
-
-
-def add_normalization_cols(df, strand_dict, processes=2):
-    TMP_HGVS_HG38 = 'tmp_hgvs_hg38'
-    TMP_VAR_OBJ_FIELD = 'tmp_var_obj'
-    TMP_GENE_SYMBOL = 'Gene_Symbol'
-
-    hgvs_proc = hgvs_utils.HgvsWrapper()
-
-    df[TMP_GENE_SYMBOL] = df['contigName']
-    df[TMP_VAR_OBJ_FIELD] = df['var_name'].apply(lambda v: var_name_to_obj(v))
-    df[TMP_HGVS_HG38] = df[TMP_VAR_OBJ_FIELD].apply(
-        lambda v: v.to_hgvs_obj(hgvs_proc.contig_maps[hgvs_utils.HgvsWrapper.GRCh38_Assem]))
-
-    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38,
-                                                                'var_name_right', True,
-                                                                strand_dict), processes)
-    df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG38,
-                                                                'var_name_left', False,
-                                                                strand_dict), processes)
-
-    def _convert_to_name(converted):
-        return converted.apply(lambda h: var_obj_to_name(variant_utils.VCFVariant.from_hgvs_obj(h)))
-
-    df['var_name_right'] = _convert_to_name(df['var_name_right'])
-    df['var_name_left'] = _convert_to_name(df['var_name_left'])
-
-    return df.drop(columns=[TMP_HGVS_HG38, TMP_VAR_OBJ_FIELD, TMP_GENE_SYMBOL])
-
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input_path", help="input directory")
-    parser.add_argument("-o", "--output_path", help="output directory")
-    parser.add_argument("-g", "--gene_config_path", help="genes for analysis")
-    parser.add_argument("-r", "--resource_dir", help="resource dir for lift over (same as for the main pipeline)")
-    args = parser.parse_args()
-    return(args)
-
-
-def main():
-    args = parse_args()
-    data_dir = Path(args.input_path)
-    cfg_df = config.load_config(args.gene_config_path)
-    df_cov2 = pd.read_parquet(data_dir / 'df_cov_v2.parquet')
-    df_cov3 = pd.read_parquet(data_dir / 'df_cov_v3.parquet')
-
-    df_var2 = pd.read_parquet(data_dir / 'df_var_v2.parquet')
-    df_var3 = pd.read_parquet(data_dir / 'df_var_v3.parquet')
-
-    read_depth_thresh = 30
-
-    df = extract_variant_scoring_data(df_cov2, df_cov3, df_var2, df_var3, read_depth_thresh, Path(args.resource_dir))
-
 
 
 def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
                             code_v3, faf_v3, faf_popmax_v3, in_v3,
-                            debug=True):
+                            debug=False):
     """
     Given the per-dataset evidence codes, generate an overall evidence code
     """
@@ -329,59 +250,60 @@ def variant_is_flagged(variant_id, flags):
     return(variant_flagged)
 
 
-def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, report_coverage=False, debug=True):
+def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
+                    debug=False):
     """
     Analyze a single variant, adding the output columns
     """
-    # Initialize the output columns.  First, check the read depth.  If the read depth is defined at the variant position.
-    # that means that the variant could have been observed in principle; set the default to PM2_SUPPORTING (indicating that
-    # by default, the variant could have been observed, but wasn't).  If no read depth is defined, this means that the variant
-    # could not have been observed in the dataset in question (for example, a deep intronic variant in an exome dataset).
+    # Initialize the output columns.  First, check the read depth.  If the
+    # read depth is defined at the variant position, this means that the
+    # variant could have been observed in principle; set the default to
+    # PM2_SUPPORTING (indicating that by default, the variant could have been
+    # observed, but wasn't).  If no read depth is defined, this means that
+    # the variant could not have been observed in the dataset in question
+    # (for example, a deep intronic variant in an exome dataset).
     # In such a case, set the default value to NOT_ASSAYED.
-    variant[GNOMAD_V2_CODE_ID] = FAIL_NOT_ASSAYED
-    variant[GNOMAD_V3_CODE_ID] = FAIL_NOT_ASSAYED
+    variant_v2_code_id = FAIL_NOT_ASSAYED
+    variant_v3_code_id = FAIL_NOT_ASSAYED
     variant[POPFREQ_CODE_ID] = FAIL_NOT_ASSAYED
     variant[POPFREQ_CODE_DESCR] = FAIL_NOT_ASSAYED_MSG
     observable_in_v2 = False
     observable_in_v3 = False
     if is_variant_observable(int(variant["pyhgvs_Hg37_Start"]),int(variant["pyhgvs_Hg37_End"]),
                              int(variant["Chr"]),coverage_v2):
-        variant[GNOMAD_V2_CODE_ID] = PM2_SUPPORTING
+        variant_v2_code_id = PM2_SUPPORTING
         variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
         variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
         observable_in_v2 = True
-    if is_variant_observable(int(variant["Hg38_Start"]), int(variant["Hg38_End"]),
+    if is_variant_observable(int(variant["Hg38_Start"]),
+                             int(variant["Hg38_End"]),
                              int(variant["Chr"]), coverage_v3):
-        variant[GNOMAD_V3_CODE_ID] = PM2_SUPPORTING
+        variant_v3_code_id = PM2_SUPPORTING
         variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
         variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
         observable_in_v3 = True
-    if report_coverage:
-        variant[GNOMAD_V2_MEAN_COVERAGE] = "-"
-        variant[GNOMAD_V2_MEDIAN_COVERAGE] = "-"
-        variant[GNOMAD_V3_MEAN_COVERAGE] = "-"
-        variant[GNOMAD_V3_MEDIAN_COVERAGE] = "-"
     is_snv = (variant["Hg38_Start"] == variant["Hg38_End"])
     if debug:
         print("variant is snv:", is_snv)
     #
-    # the gnomAD v2 variant ID is set when the variant is in the genome OR exome portion of gnomAD.
-    # Focus on variants that are in the exome data by making sure that the allele count is defined.
-    # The allele count is the total number of observations of the variant in the gnomAD dataset
+    # the gnomAD v2 variant ID is set when the variant is in the genome
+    # OR exome portion of gnomAD. Focus on variants that are in the exome
+    # data by making sure that the allele count is defined.  The allele
+    # count is the total number of observations of the variant in the gnomAD
+    # dataset
     variant_in_v2 = False
-    if (field_defined(variant["Variant_id_GnomAD"]) and field_defined(variant["Allele_count_exome_GnomAD"])
+    if (field_defined(variant["Variant_id_GnomAD"])
+        and field_defined(variant["Allele_count_exome_GnomAD"])
         and observable_in_v2):
         variant_in_v2 = True 
-        (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
-                                                                 int(variant["pyhgvs_Hg37_End"]),
-                                                                 int(variant["Chr"]),coverage_v2)
+        (mean_read_depth,
+         median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
+                                                int(variant["pyhgvs_Hg37_End"]),
+                                                int(variant["Chr"]),coverage_v2)
         read_depth_v2 = min(mean_read_depth, median_read_depth)
         if pd.isna(read_depth_v2):
             read_depth_v2 = 0
-        if report_coverage:
-            variant[GNOMAD_V2_MEAN_COVERAGE] = mean_read_depth
-            variant[GNOMAD_V2_MEDIAN_COVERAGE] = median_read_depth
-        variant[GNOMAD_V2_CODE_ID] = analyze_one_dataset(variant["faf95_popmax_exome_GnomAD"],
+        variant_v2_code_id = analyze_one_dataset(variant["faf95_popmax_exome_GnomAD"],
                                                          variant["faf95_popmax_population_exome_GnomAD"],
                                                          variant["Allele_count_exome_GnomAD"],
                                                          is_snv, read_depth_v2,
@@ -390,21 +312,22 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, repor
         if debug:
             print("gnomAD V2 variant", variant["Variant_id_GnomAD"],
                   "popmax", variant["faf95_popmax_exome_GnomAD"],
-                  "allele count", variant["Allele_count_exome_GnomAD"], "mean read depth", mean_read_depth,
-                  "median read depth", median_read_depth, "snv", is_snv, "V2 code", variant[GNOMAD_V2_CODE_ID])
+                  "allele count", variant["Allele_count_exome_GnomAD"],
+                  "mean read depth", mean_read_depth,
+                  "median read depth", median_read_depth, "snv", is_snv,
+                  "V2 code", variant_v2_code_id)
     variant_in_v3 = False
     if (field_defined(variant["Variant_id_GnomADv3"]) and observable_in_v3):
         variant_in_v3 = True
-        (mean_read_depth, median_read_depth) = estimate_coverage(int(variant["Hg38_Start"]),
-                                                                 int(variant["Hg38_End"]),
-                                                                 int(variant["Chr"]),coverage_v3)
+        (mean_read_depth,
+         median_read_depth) = estimate_coverage(int(variant["Hg38_Start"]),
+                                                int(variant["Hg38_End"]),
+                                                int(variant["Chr"]),
+                                                coverage_v3)
         read_depth_v3 = min(mean_read_depth, median_read_depth)
         if pd.isna(read_depth_v3):
             read_depth_v3 = 0
-        if report_coverage:
-            variant[GNOMAD_V3_MEAN_COVERAGE] = mean_read_depth
-            variant[GNOMAD_V3_MEDIAN_COVERAGE] = median_read_depth
-        variant[GNOMAD_V3_CODE_ID] = analyze_one_dataset(variant["faf95_popmax_genome_GnomADv3"],
+        variant_v3_code_id = analyze_one_dataset(variant["faf95_popmax_genome_GnomADv3"],
                                                          variant["faf95_popmax_population_genome_GnomADv3"],
                                                          variant["Allele_count_genome_GnomADv3"],
                                                          is_snv, read_depth_v3,
@@ -413,17 +336,20 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3, repor
         if debug:
             print("gnomAD V3 variant", variant["Variant_id_GnomADv3"],
                   "popmax", variant["faf95_popmax_genome_GnomADv3"],
-                  "allele count", variant["Allele_count_genome_GnomADv3"], "mean read depth", mean_read_depth,
-                  "median read depth", median_read_depth, "snv", is_snv, "V3 code", variant[GNOMAD_V3_CODE_ID])
+                  "allele count", variant["Allele_count_genome_GnomADv3"],
+                  "mean read depth", mean_read_depth,
+                  "median read depth", median_read_depth, "snv", is_snv,
+                  "V3 code", variant_v3_code_id)
     (variant[POPFREQ_CODE_ID],
-     variant[POPFREQ_CODE_DESCR]) = analyze_across_datasets(variant[GNOMAD_V2_CODE_ID],variant["faf95_popmax_exome_GnomAD"],
+     variant[POPFREQ_CODE_DESCR]) = analyze_across_datasets(variant_v2_code_id,variant["faf95_popmax_exome_GnomAD"],
                                                             variant["faf95_popmax_population_exome_GnomAD"],
-                                                            variant_in_v2, variant[GNOMAD_V3_CODE_ID], 
+                                                            variant_in_v2, variant_v3_code_id, 
                                                             variant["faf95_popmax_genome_GnomADv3"],
                                                             variant["faf95_popmax_population_genome_GnomADv3"],
                                                             variant_in_v3)
     if debug:
-        print("consensus code:", variant[POPFREQ_CODE_ID], "msg", variant[POPFREQ_CODE_DESCR])
+        print("consensus code:", variant[POPFREQ_CODE_ID], "msg",
+              variant[POPFREQ_CODE_DESCR])
     return()
 
 
@@ -437,9 +363,10 @@ def main():
     flags_v3 = read_flags(csv.DictReader(open(args.data_dir + "/brca.gnomAD.3.1.1.hg38.flags.tsv"),
                                          delimiter = "\t"))
     input_file = csv.DictReader(open(args.input), delimiter = "\t")
-    output_file = initialize_output_file(input_file, args.output, args.coverage_report)
+    output_file = initialize_output_file(input_file, args.output)
     for variant in input_file:
-        analyze_variant(variant, df_cov2, df_cov3, flags_v2, flags_v3, args.coverage_report)
+        analyze_variant(variant, df_cov2, df_cov3, flags_v2, flags_v3,
+                        debug=args.debug)
         output_file.writerow(variant)
 
 

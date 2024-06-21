@@ -22,6 +22,7 @@ decorator==4.4.2
 distro==1.4.0
 docutils==0.16
 fake-useragent==0.1.11
+fastparquet==2024.5.0
 ga4gh.common==0.0.7
 ga4gh.vrs==0.8.4
 hgvs==1.5.4
