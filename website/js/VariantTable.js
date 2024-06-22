@@ -169,14 +169,6 @@ const researchModeGroups = [
         }
     },
 
-    {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
-        {title: 'Patient Nationality', prop: 'Patient_nationality_BIC'},
-        {title: 'Ethnicity', prop: 'Ethnicity_BIC'},
-        {title: 'Family members carrying this variant', prop: 'Number_of_family_member_carrying_mutation_BIC'},
-        {title: 'Literature Reference', prop: 'Literature_citation_BIC', core: true},
-        {title: 'Allele Origin', prop: 'Germline_or_Somatic_BIC'},
-    ]},
-
     {groupTitle: 'Computational Predictions', internalGroupName: 'Computational Predictions', innerGroups: [
         {
             source: "BayesDel",
@@ -202,6 +194,13 @@ const researchModeGroups = [
 
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', alleleFrequencies: true,
         innerGroups: [
+            {
+                source: "VCEP",
+                data: [
+                    {title: "Provisional Code", prop: "Provisional_Evidence_Code_Popfreq", core: true},
+                    {title: "Description", prop: "Provisional_Evidence_Description_Popfreq", core: true}
+                ]
+            },
             {
                 source: "GnomADv3 Genomes",
                 chart: [

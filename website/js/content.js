@@ -224,11 +224,6 @@ const helpContentResearch = [
                         id: "clinical-significance-lovd",
                         contents: require("../content/help/research/clinical-significance-lovd.md")
                     },
-                    {
-                        name: "BIC",
-                        id: "clinical-significance-bic",
-                        contents: require("../content/help/research/clinical-significance-bic.md")
-                    },
                 ]
             },
             {
@@ -248,7 +243,11 @@ const helpContentResearch = [
                 contents: require("../content/help/research/allele-frequency-reference-sets.md"),
                 list: [
                     {
-			name: "gnomAD: Genome Aggregation Database (non-cancer cohort)",
+                        name: "Provisional ACMG Variant Evidence",
+                        contents: require("../content/help/research/allele-frequency-provisional-evidence.md")
+                    },
+                    {
+                        name: "gnomAD: Genome Aggregation Database (non-cancer cohort)",
                         contents: require("../content/help/research/allele-frequency-gnomad.md")
                     },
                 ]

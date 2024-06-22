@@ -227,7 +227,7 @@ var Home = React.createClass({
                     {notCurrentSupporterLogoItems}
                 </Row>
                 <Row className="logo-block">
-                    <h3 className="logo-header">Currently Supported By:</h3>
+                    {currentSupporterLogoItems.length ? (<h3 className="logo-header">Currently Supported By:</h3>) : '' }
                     {currentSupporterLogoItems}
                 </Row>
                 <Row className="logo-block">
@@ -273,7 +273,7 @@ var About = React.createClass({
                         {notCurrentSupporterLogoItems}
                     </Row>
                     <Row className="logo-block">
-                        <h3 className="logo-header">Currently Supported By:</h3>
+                        {currentSupporterLogoItems.length ? (<h3 className="logo-header">Currently Supported By:</h3>) : '' }
                         {currentSupporterLogoItems}
                     </Row>
                 </Grid>
@@ -816,6 +816,7 @@ var VariantDetail = React.createClass({
             };
         });
     },
+    // render for VariantDetail
     render: function () {
         const {data, error} = this.state;
         if (!data) {
@@ -963,15 +964,6 @@ var VariantDetail = React.createClass({
                 );
             }
 
-            // remove the BIC classification and importance fields unless the classification is 1 or 5
-            if (groupTitle === 'Clinical Significance (BIC)') {
-                const bicClass = variant['Clinical_classification_BIC'];
-
-                if (bicClass !== 'Class 1' && bicClass !== 'Class 5') {
-                    innerCols = innerCols.filter(x => x.prop !== 'Clinical_classification_BIC' && x.prop !== 'Clinical_importance_BIC');
-                }
-            }
-
             // now map the group's columns to a list of row objects
             const rows = _.map(innerCols, (rowDescriptor) => {
                 let {prop, title, noHelpLink} = rowDescriptor;
@@ -1067,28 +1059,6 @@ var VariantDetail = React.createClass({
                 </Table>
             );
 
-            const bicTileTable = (
-                <div>
-                    <div className="tile-disclaimer">
-                        <div>
-                            Please note that the BIC database is no longer actively curated. A copy of all BIC data has
-                            been shared with several other variation databases.
-                        </div>
-                        <div>
-                            Though the National Human Genome Research Institute recommends using ClinVar or BRCA Exchange for
-                            updated information on BRCA1 and BRCA2 variants, the BIC database will be maintained to allow
-                            historical studies and other uses.
-                        </div>
-                    </div>
-
-                    <Table>
-                        <tbody>
-                            {rows}
-                        </tbody>
-                    </Table>
-                </div>
-            );
-
             return (
                 <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
                     <Panel
@@ -1109,7 +1079,7 @@ var VariantDetail = React.createClass({
                             onExited={this.relayoutGrid}
                         >
                             <Panel.Body>
-                            {groupTitle === "Clinical Significance (BIC)" ? bicTileTable : tileTable}
+                                {tileTable}
                             </Panel.Body>
                         </Panel.Collapse>
                     </Panel>

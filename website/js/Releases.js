@@ -36,10 +36,10 @@ var Releases = React.createClass({
                 <td style={{ whiteSpace: 'nowrap' }}><Link to={`/release/${release.id}`}>Version {release.name}</Link></td>
                 <td style={{ whiteSpace: 'nowrap' }}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
                 <td>{this.getSourceRepresentations(release.sources)}</td>
-                <td><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']}</Link></td>
-                <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']}</Link></td>
-                <td><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']}</Link></td>
-                <td><Link to={`/variants?release=${release.id}&changeTypes[]=deleted`}>{release['variants_deleted']}</Link></td>
+                <td>{release['variants_added']}</td>
+                <td>{release['variants_classified']}</td>
+                <td>{release['variants_modified']}</td>
+                <td>{release['variants_deleted']}</td>
             </tr>
         ));
         return (
@@ -114,10 +114,10 @@ var Release = React.createClass({
                 <Row>
                     <Col sm={8} smOffset={2} md={6} mdOffset={3} className='text-center'>
                         <p className='release-notes text-left' dangerouslySetInnerHTML={this.generateReleaseNotes()}></p>
-                        <h3><Link to={`/variants?release=${release.id}&changeTypes[]=new`}>{release['variants_added']} new variant{s(release['variants_added'])}</Link></h3>
-                        <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_classification&changeTypes[]=changed_classification`}>{release['variants_classified']} new classification{s(release['variants_classified'])}</Link></h3>
-                        <h3><Link to={`/variants?release=${release.id}&changeTypes[]=added_information&changeTypes[]=changed_information`}>{release['variants_modified']} changed/updated variant{s(release['variants_modified'])}</Link></h3>
-                        <h3><Link to={`/variants?release=${release.id}&changeTypes[]=deleted`}>{release['variants_deleted']} removed variant{s(release['variants_deleted'])}</Link></h3>
+                        <h3>{release['variants_added']} new variant{s(release['variants_added'])}</h3>
+                        <h3>{release['variants_classified']} new classification{s(release['variants_classified'])}</h3>
+                        <h3>{release['variants_modified']} changed/updated variant{s(release['variants_modified'])}</h3>
+                        <h3>{release['variants_deleted']} removed variant{s(release['variants_deleted'])}</h3>
                     </Col>
                 </Row>
                 <Row>
