@@ -40,6 +40,7 @@
 ./release/artifacts/rightexLOVD
 ./release/artifacts/rightENIGMA_BRCA12_Functional_Assays
 ./release/artifacts/
+./release/artifacts/ready_for_priors.tsv
 ./release/artifacts/rightGnomAD
 ./release/artifacts/rightGnomADv3
 ./release/artifacts/rightLOVD
