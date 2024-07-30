@@ -20,16 +20,18 @@ def textIfPresent(element, field):
     """Return the text associated with a field under the element, or
     None if the field is not present"""
     ff = element.find(field)
-    if ff == None or ff.text == None:
-        return None
-    else:
+    if ff is not None:
         return ff.text
+    elif field in element.attrib:
+        return element.attrib[field]
+    else:
+        return None
 
-
+    
 def processClinicalSignificanceElement(el, obj):
     if el != None:
         obj.reviewStatus = textIfPresent(el, "ReviewStatus")
-        obj.clinicalSignificance = textIfPresent(el, "Description")
+        obj.clinicalSignificance = textIfPresent(el, "Interpretation")
         obj.summaryEvidence = textIfPresent(el, "Comment")
         obj.dateSignificanceLastEvaluated = el.get('DateLastEvaluated', None)
     else:
@@ -39,12 +41,12 @@ def processClinicalSignificanceElement(el, obj):
         obj.dateSignificanceLastEvaluated = None
 
 
-def build_xpath_filter_for_cv_assertions(gene_symbols):
-    symbols_str = [ f'text()="{s}"' for s in gene_symbols]
-    symbols_pred = ' or '.join(symbols_str)
+#def build_xpath_filter_for_cv_assertions(gene_symbols):
+##    symbols_str = [ f'text()="{s}"' for s in gene_symbols] ### HERE
+#    symbols_pred = ' or '.join(symbols_str)
 
     # filter assertion if it contains a Symbol we are interested in
-    return f"ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[({symbols_pred}) and @Type=\"Preferred\"]"
+#    return f"ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[({symbols_pred}) and @Type=\"Preferred\"]"
 
 
 def extractSynonyms(el):
@@ -167,9 +169,9 @@ class variant:
     """The Measure set.  We are interested in the variants specifically,
     but measure sets can be other things as well, such as haplotypes"""
 
-    def __init__(self, element, name, id, debug=False):
+    def __init__(self, element, debug=False):
         self.element = element
-        self.id = id
+        self.id = element.get("AlleleID")
         if debug:
             print("Parsing variant", self.id)
         self.name = name
@@ -182,9 +184,9 @@ class variant:
         self.coordinates = extract_genomic_coordinates_from_measure(element)
 
         self.geneSymbol = None
-        symbols = element.findall("MeasureRelationship/Symbol")
+        symbols = element.findall("Gene")
         for symbol in symbols:
-            symbol_val = textIfPresent(symbol, "ElementValue")
+            symbol_val = textIfPresent(symbol, "Symbol")
             if symbol_val.startswith('BRCA'):
                 self.geneSymbol = symbol_val
 
@@ -195,76 +197,22 @@ class referenceAssertion:
 
     def __init__(self, element, debug=False):
         self.element = element
-        self.id = element.get("ID")
+        self.title = element.get("Title")
         if debug:
-            print("Parsing ReferenceClinVarAssertion", self.id)
+            print("Parsing ReferenceClinVarAssertion", self.title)
 
         processClinicalSignificanceElement(element.find(
-            "ClinicalSignificance"), self)
-
-
-        obs = element.find("ObservedIn")
-        if obs == None:
-            self.origin = None
-            self.ethnicity = None
-            self.geographicOrigin = None
-            self.age = None
-            self.gender = None
-            self.familyData = None
-            self.method = None
-        else:
-            sample = obs.find("Sample")
-            if sample != None:
-                self.origin = textIfPresent(sample, "Origin")
-                self.ethnicity = textIfPresent(sample, "Ethnicity")
-                self.geographicOrigin = textIfPresent(sample, "GeographicOrigin")
-                self.age = textIfPresent(sample, "Age")
-                self.gender = textIfPresent(sample, "Gender")
-                self.familyData = textIfPresent(sample, "FamilyData")
-            method = obs.find("Method")
-            if method != None:
-                self.method = textIfPresent(method, "MethodType")
-        self.variant = None
-        self.synonyms = []
-
-        measureSet = element.find("MeasureSet")
-        #if measureSet.get("Type") == "Variant":
-
-        if len(measureSet.findall("Measure")) > 1:
-            logging.warning("Assertion with ID " + str(self.id) + " has multiple measures. Taking first one.")
-        if len(measureSet.findall("Measure")) >= 1:
-            name = measureSet.find("Name")
-            if name == None:
-                variantName = None
-            else:
-                variantName = name.find("ElementValue").text
-            self.variant = variant(measureSet.find("Measure"), variantName,
-                                   measureSet.get("ID"),
-                                   debug=debug)
-
-        self.synonyms = extractSynonyms(element)
+            "Interpretation"), self)
 
         # extract condition
-        self.condition_type = None
         self.condition_value = None
         self.condition_db_id = None
-        traitSet = element.find("TraitSet")
+        traitSet = element.find("InterpretedConditionList")
         if traitSet != None:
-            self.condition_type = traitSet.attrib["Type"]
-            trait = traitSet.find("Trait")
+            trait = traitSet.find("InterpretedCondition")
             if trait != None:
-                names = trait.findall("Name")
-                if names != None and len(names) > 0:
-                    for name in names:
-                        ev = name.find("ElementValue")
-                        if ev != None and ev.attrib["Type"] == "Preferred":
-                            self.condition_value = textIfPresent(name, "ElementValue")
-                        break
-                xrefs = trait.findall("XRef")
-                if xrefs != None and len(xrefs) > 0:
-                    self.condition_db_id = []
-                    for xref in xrefs:
-                        self.condition_db_id.append(xref.attrib["DB"] + "_" + xref.attrib["ID"])
+                self.condition_db_id = trait.attrib["DB"] + "_" + trait.attrib["ID"]
+                self.condition_value = trait.text
 
 
 
@@ -323,24 +271,31 @@ class clinVarSet:
     one or more submissions ("SCV Accessions").
     """
 
-    def __init__(self, element, debug=False):
+    def __init__(self, element, debug=True):
         self.element = element
-        self.id = element.get("ID")
+        self.id = element.get("VariationID")
         if debug:
             print("Parsing ClinVarSet ID", self.id)
-        rcva = element.find("ReferenceClinVarAssertion")
-        if isCurrent(rcva):
-            self.referenceAssertion = referenceAssertion(rcva, debug=debug)
+        #
+        # Look for the RCVAccession object.  There should be exactly one.
+        rcva_found = False
+        for next_rcva in element.iter("RCVAccession"):
+            assert(rcva_found is False)
+            rcva = next_rcva
+            rcva_found = True
+        self.referenceAssertion = referenceAssertion(rcva, debug=debug)
+        sa = element.find("SimpleAllele")
+        #self.variant = variant(sa, debug=debug)
         self.otherAssertions = dict()
 
-        for item in element.findall("ClinVarAssertion"):
-            if isCurrent(item):
-                cva = clinVarAssertion(item)
-                accession = cva.accession
-                self.otherAssertions[accession] = cva
-
-        if self.referenceAssertion.variant:
-            self.referenceAssertion.hgvs_cdna = self.extract_hgvs_cdna(self.referenceAssertion.variant.name, element)
+        #for item in element.findall("ClinVarAssertion"):
+        #    if isCurrent(item):
+        #        cva = clinVarAssertion(item)
+        #        accession = cva.accession
+        #        self.otherAssertions[accession] = cva
+        #
+        #if self.referenceAssertion.variant:
+        #    self.referenceAssertion.hgvs_cdna = self.extract_hgvs_cdna(self.referenceAssertion.variant.name, element)
 
     def extract_hgvs_cdna(self, variant_name, clinvar_set_el):
         """

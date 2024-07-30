@@ -67,6 +67,26 @@ def processSubmission(submissionSet, assembly):
                                      str(ra.condition_value),
                                      ",".join(ra.condition_db_id) if isinstance(ra.condition_db_id, list) else str(ra.condition_db_id),
                                      str(synonyms))))
+                    #print("\t".join((str(hgvs),
+                    #                 oa.submitter,
+                    #                 str(oa.clinicalSignificance),
+                    #                 str(oa.dateLastUpdated),
+                    #                 str(oa.dateSignificanceLastEvaluated),
+                    #                 str(oa.accession),
+                    #                 str(oa.accession_version),
+                    #                 str(oa.id),
+                    #                 str(oa.origin),
+                    #                 str(oa.method),
+                    #                 str(vcf_var).replace('g.', ''),
+                    #                 str(variant.geneSymbol),
+                    #                 str(proteinChange),
+                    #                 str(oa.description),
+                    #                 str(oa.summaryEvidence),
+                    #                 str(oa.reviewStatus),
+                    #                 str(ra.condition_type),
+                    #                 str(ra.condition_value),
+                    #                 ",".join(ra.condition_db_id) if isinstance(ra.condition_db_id, list) else str(ra.condition_db_id),
+                    #                 str(synonyms))))
 
 
 def _bases_only(seq):
@@ -87,7 +107,7 @@ def main():
 
 
     with open(args.clinVarXmlFilename) as inputFile:
-        for event, elem in ET.iterparse(input_fp, events=('start', 'end')):
+        for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
             if event == 'end' and elem.tag == 'VariationArchive':
                 if clinvar.isCurrent(elem):
                     submissionSet = clinvar.clinVarSet(elem)
