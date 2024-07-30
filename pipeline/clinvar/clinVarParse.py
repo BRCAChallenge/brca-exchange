@@ -23,6 +23,7 @@ MULTI_VALUE_SEP = ','
 
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
+    interpretation = submissionSet.interpretation
     variant = submissionSet.variant
 
     if variant is None:
@@ -63,9 +64,9 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.description),
                                      str(oa.summaryEvidence),
                                      str(oa.reviewStatus),
-                                     str(ra.condition_type),
-                                     str(ra.condition_value),
-                                     ",".join(ra.condition_db_id) if isinstance(ra.condition_db_id, list) else str(ra.condition_db_id),
+                                     str(interpretation.condition_type),
+                                     str(interpretation.condition_value),
+                                     ",".join(interpretation.condition_db_id) if isinstance(interpretation.condition_db_id, list) else str(interpretation.condition_db_id),
                                      str(synonyms))))
                     #print("\t".join((str(hgvs),
                     #                 oa.submitter,

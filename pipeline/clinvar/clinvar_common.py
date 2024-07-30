@@ -27,7 +27,19 @@ def textIfPresent(element, field):
     else:
         return None
 
-    
+def findUniqueElement(name, parent):
+    """Find a child element directly or indirectly underneath this parent
+       element which should occur only once (i.e. there should be no other
+       elements of the same name).  Test this assumption and return
+       the child element"""
+    child_found = False
+    for next_child in parent.iter(name):
+        assert(child_found is False)
+        child = next_child
+        child_found = True
+    return(child)
+
+
 def processClinicalSignificanceElement(el, obj):
     if el != None:
         obj.reviewStatus = textIfPresent(el, "ReviewStatus")
@@ -204,16 +216,36 @@ class referenceAssertion:
         processClinicalSignificanceElement(element.find(
             "Interpretation"), self)
 
-        # extract condition
+
+class interpretations:
+    """For gathering data on the trait.  This code expects only one trait"""
+
+    def __init__(self, element, debug=False):
+        self.element = element
+        
+        self.condition_type = None
         self.condition_value = None
         self.condition_db_id = None
-        traitSet = element.find("InterpretedConditionList")
-        if traitSet != None:
-            trait = traitSet.find("InterpretedCondition")
-            if trait != None:
-                self.condition_db_id = trait.attrib["DB"] + "_" + trait.attrib["ID"]
-                self.condition_value = trait.text
-
+        for interpretation in element.iter("Interpretation"):
+            if interpretation.attrib["Type"] == "Clinical significance"]:
+                for trait in interpretation.iter("Trait"):
+                    assert(self.condition_type is None)
+                    self.condition_type = trait.attrib("Type")
+                    for name in trait.iter("Name"):
+                        ev = name.find("ElementValue")
+                        if ev.attrib["Type"] == "Preferred":
+                            assert(self.condition_value is None)
+                            self.condition_value = ev.text
+                    for xref in trait.iter("XRef"):
+                        if self.condition_db_id is None:
+                            self.condition_db_id = (xref.attrib["DB"] + "_"
+                                                    + xref.attrib["ID"])
+                        else:
+                            c_db_id = list()
+                            c_db_id.append(self.condition_db_id)
+                            self.condition_db_id = c_db_id
+                            self.condition_db_id.append(xref.attrib["DB"] + \
+                                                        "_" + xref.attrib["ID"])
 
 
 class clinVarAssertion:
@@ -278,12 +310,14 @@ class clinVarSet:
             print("Parsing ClinVarSet ID", self.id)
         #
         # Look for the RCVAccession object.  There should be exactly one.
-        rcva_found = False
-        for next_rcva in element.iter("RCVAccession"):
-            assert(rcva_found is False)
-            rcva = next_rcva
-            rcva_found = True
+        rcva = findUniqueElement("RCVAccession", element)
         self.referenceAssertion = referenceAssertion(rcva, debug=debug)
+        
+        #
+        # Look for the Interpretations object.  There should be exactly one.
+        interp = findUniqueElement("Interpretations", element)
+        self.interpretations = interpretations(interp, debug=debug)
+        
         sa = element.find("SimpleAllele")
         #self.variant = variant(sa, debug=debug)
         self.otherAssertions = dict()
