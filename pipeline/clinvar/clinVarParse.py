@@ -34,15 +34,11 @@ def processSubmission(submissionSet, assembly):
     debug = False
     for oa in list(submissionSet.otherAssertions.values()):
         if oa.origin != "somatic":
-            hgvs = ra.hgvs_cdna
-
-            proteinChange = None
-            if "HGVS, protein, RefSeq" in variant.attribute:
-                proteinChange = variant.attribute["HGVS, protein, RefSeq"]
+            hgvs = variant.hgvs_cdna
 
             if assembly in variant.coordinates:
 
-                synonyms = MULTI_VALUE_SEP.join(ra.synonyms + oa.synonyms)
+                synonyms = MULTI_VALUE_SEP.join(variant.synonyms + oa.synonyms)
 
                 vcf_var = variant.coordinates[assembly]
 
@@ -60,7 +56,7 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.method),
                                      str(vcf_var).replace('g.', ''),
                                      str(variant.geneSymbol),
-                                     str(proteinChange),
+                                     str(variant.proteinChange),
                                      str(oa.description),
                                      str(oa.summaryEvidence),
                                      str(oa.reviewStatus),

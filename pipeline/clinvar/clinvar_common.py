@@ -84,32 +84,25 @@ def extractSynonyms(el):
     return sy + sy_alt
 
 
-def extract_genomic_coordinates_from_measure(meas_el):
+def extract_genomic_coordinates_from_location(loc):
     """
-    meas_el: `xml` module object of a ClinVar `Measure` element
-
+    loc: `xml` module object of a ClinVar `Location` element
     returns: dictionary of assembly (str) to genomic coordinates (VCFVariant object)
     """
-
-    sequence_locations = meas_el.findall('SequenceLocation')
-
     coords = {}
-    for el in sequence_locations:
-        assembly = el.attrib['Assembly'] # GRCh38
-
-        if el.get('referenceAlleleVCF'):
+    for sl in loc.iter('SequenceLocation'):
+        assembly = sl.attrib['Assembly'] # GRCh38
+        if sl.get('referenceAlleleVCF'):
             coords[assembly] = variant_utils.VCFVariant(
-                int(el.get('Chr')),
-                int(el.get('positionVCF')),
-                el.get('referenceAlleleVCF'),
-                el.get('alternateAlleleVCF')
+                int(sl.attrib['Chr']),
+                int(sl.attrib['positionVCF']),
+                sl.attrib['referenceAlleleVCF'],
+                sl.attrib['alternateAlleleVCF']
             )
-
     # if no reference/alternate allele found, compute (assuming genomic coordinates
     # are either present for all assemblies or for none)
-    if not coords:
-        coords = _extract_genomic_coordinates_from_non_genomic_fields(meas_el)
-
+    #if not coords:
+    #    coords = _extract_genomic_coordinates_from_non_genomic_fields(meas_el)
     return coords
 
 
@@ -183,25 +176,43 @@ class variant:
 
     def __init__(self, element, debug=False):
         self.element = element
-        self.id = element.get("AlleleID")
+        self.id = element.attrib["AlleleID"]
         if debug:
             print("Parsing variant", self.id)
-        self.name = name
-
-        self.attribute = dict()
-        for attrs in element.findall("AttributeSet"):
-            for attrib in attrs.findall("Attribute"):
-                self.attribute[attrib.get("Type")] = attrib.text
-
-        self.coordinates = extract_genomic_coordinates_from_measure(element)
-
-        self.geneSymbol = None
-        symbols = element.findall("Gene")
-        for symbol in symbols:
-            symbol_val = textIfPresent(symbol, "Symbol")
-            if symbol_val.startswith('BRCA'):
-                self.geneSymbol = symbol_val
-
+        gene = findUniqueElement("Gene", element)
+        self.geneSymbol = gene.attrib["Symbol"]
+        location = element.find("Location")
+        self.coordinates = extract_genomic_coordinates_from_location(location)
+        self.proteinChange = None
+        pc = element.find("ProteinChange")
+        if pc is not None:
+            self.proteinChange = pc.text
+        self.synonyms = list()
+        self.hgvs_cdna = None
+        self.hgvs_protein = None
+        for hgvs in element.find("HGVSlist").iter("HGVS"):
+            pe = hgvs.find("ProteinExpression")
+            if pe:
+                proteinHgvs = pe.find("Expression").text
+                if debug:
+                    print("protein HGVS", proteinHgvs)
+                self.synonyms.append(proteinHgvs)
+            ne = hgvs.find("NucleotideExpression")
+            if ne:
+                nucleotideHgvs = ne.find("Expression").text
+                if debug:
+                    print("Nucleotide hgvs", nucleotideHgvs)
+                self.synonyms.append(nucleotideHgvs)
+                if "MANESelect" in ne.attrib:
+                    if ne.attrib["MANESelect"] == "true":
+                        self.hgvs_cdna = nucleotideHgvs
+                        if pe:
+                            self.hgvs_protein = proteinHgvs
+                        if debug:
+                            print("MANE Select HGVS cDNA ", nucleotideHgvs,
+                                  "protein", proteinHgvs)
+                
+                
 
 
 class referenceAssertion:
@@ -213,30 +224,30 @@ class referenceAssertion:
         if debug:
             print("Parsing ReferenceClinVarAssertion", self.title)
 
-        processClinicalSignificanceElement(element.find(
-            "Interpretation"), self)
+        processClinicalSignificanceElement(element, self)
 
 
 class interpretations:
     """For gathering data on the trait.  This code expects only one trait"""
-
     def __init__(self, element, debug=False):
-        self.element = element
-        
+        self.element = element        
         self.condition_type = None
         self.condition_value = None
         self.condition_db_id = None
         for interpretation in element.iter("Interpretation"):
-            if interpretation.attrib["Type"] == "Clinical significance"]:
+            if interpretation.attrib["Type"] == "Clinical significance":
                 for trait in interpretation.iter("Trait"):
+                    print("found trait")
                     assert(self.condition_type is None)
-                    self.condition_type = trait.attrib("Type")
+                    self.condition_type = trait.attrib["Type"]
                     for name in trait.iter("Name"):
+                        print("Found name")
                         ev = name.find("ElementValue")
                         if ev.attrib["Type"] == "Preferred":
                             assert(self.condition_value is None)
                             self.condition_value = ev.text
                     for xref in trait.iter("XRef"):
+                        print("found xref")
                         if self.condition_db_id is None:
                             self.condition_db_id = (xref.attrib["DB"] + "_"
                                                     + xref.attrib["ID"])
@@ -250,7 +261,7 @@ class interpretations:
 
 class clinVarAssertion:
     """Class for representing one submission (i.e. one annotation of a
-    submitted variant"""
+dir(referen    submitted variant"""
 
     def __init__(self, element, debug=False):
         self.element = element
@@ -299,7 +310,8 @@ class clinVarAssertion:
 class clinVarSet:
     """Container class for a ClinVarSet record, which is a set of submissions
     that were submitted to ClinVar together.  In the ClinVar terminology,
-    each ClinVarSet is one aggregate record ("RCV Accession"), which contains
+    each ClinVarSet is one "SimpleAllele" with one aggregate record 
+   ("RCV Accession"), which contains
     one or more submissions ("SCV Accessions").
     """
 
@@ -308,6 +320,9 @@ class clinVarSet:
         self.id = element.get("VariationID")
         if debug:
             print("Parsing ClinVarSet ID", self.id)
+        sa = element.find("InterpretedRecord/SimpleAllele")
+        self.variant = variant(sa, debug=debug)
+
         #
         # Look for the RCVAccession object.  There should be exactly one.
         rcva = findUniqueElement("RCVAccession", element)
@@ -318,8 +333,6 @@ class clinVarSet:
         interp = findUniqueElement("Interpretations", element)
         self.interpretations = interpretations(interp, debug=debug)
         
-        sa = element.find("SimpleAllele")
-        #self.variant = variant(sa, debug=debug)
         self.otherAssertions = dict()
 
         #for item in element.findall("ClinVarAssertion"):
