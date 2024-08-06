@@ -33,13 +33,10 @@ def processSubmission(submissionSet, assembly):
 
     debug = False
     for oa in list(submissionSet.otherAssertions.values()):
-        if oa.origin != "somatic":
+        if not ("somatic" in oa.origin and length(oa.origin) == 1):
             hgvs = variant.hgvs_cdna
-
             if assembly in variant.coordinates:
-
-                synonyms = MULTI_VALUE_SEP.join(variant.synonyms + oa.synonyms)
-
+                synonyms = MULTI_VALUE_SEP.join(variant.synonyms)
                 vcf_var = variant.coordinates[assembly]
 
                 # Omit the variants that don't have any genomic start coordinate indicated.
@@ -52,12 +49,12 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.accession),
                                      str(oa.accession_version),
                                      str(oa.id),
-                                     str(oa.origin),
-                                     str(oa.method),
-                                     str(vcf_var).replace('g.', ''),
+                                     ",".join(oa.origin),
+                                     ",".join(oa.method),
+                                     str(vcf_var).replace('g.', ''), #change
                                      str(variant.geneSymbol),
                                      str(variant.proteinChange),
-                                     str(oa.description),
+                                     ",".join(oa.description),
                                      str(oa.summaryEvidence),
                                      str(oa.reviewStatus),
                                      str(interpretation.condition_type),
@@ -107,7 +104,7 @@ def main():
         for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
             if event == 'end' and elem.tag == 'VariationArchive':
                 if clinvar.isCurrent(elem):
-                    submissionSet = clinvar.clinVarSet(elem)
+                    submissionSet = clinvar.clinVarSet(elem, debug=True)
                     processSubmission(submissionSet, args.assembly)
                 elem.clear()
 

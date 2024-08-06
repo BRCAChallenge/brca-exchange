@@ -40,18 +40,6 @@ def findUniqueElement(name, parent):
     return(child)
 
 
-def processClinicalSignificanceElement(el, obj):
-    if el != None:
-        obj.reviewStatus = textIfPresent(el, "ReviewStatus")
-        obj.clinicalSignificance = textIfPresent(el, "Interpretation")
-        obj.summaryEvidence = textIfPresent(el, "Comment")
-        obj.dateSignificanceLastEvaluated = el.get('DateLastEvaluated', None)
-    else:
-        obj.reviewStatus = None
-        obj.clinicalSignificance = None
-        obj.summaryEvidence = None
-        obj.dateSignificanceLastEvaluated = None
-
 
 #def build_xpath_filter_for_cv_assertions(gene_symbols):
 ##    symbols_str = [ f'text()="{s}"' for s in gene_symbols] ### HERE
@@ -59,7 +47,6 @@ def processClinicalSignificanceElement(el, obj):
 
     # filter assertion if it contains a Symbol we are interested in
 #    return f"ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[({symbols_pred}) and @Type=\"Preferred\"]"
-
 
 def extractSynonyms(el):
     include_types = {'ProteinChange3LetterCode', 'ProteinChange1LetterCode',
@@ -174,7 +161,7 @@ class variant:
     """The Measure set.  We are interested in the variants specifically,
     but measure sets can be other things as well, such as haplotypes"""
 
-    def __init__(self, element, debug=False):
+    def __init__(self, element, debug=True):
         self.element = element
         self.id = element.attrib["AlleleID"]
         if debug:
@@ -183,13 +170,12 @@ class variant:
         self.geneSymbol = gene.attrib["Symbol"]
         location = element.find("Location")
         self.coordinates = extract_genomic_coordinates_from_location(location)
-        self.proteinChange = None
-        pc = element.find("ProteinChange")
-        if pc is not None:
-            self.proteinChange = pc.text
-        self.synonyms = list()
         self.hgvs_cdna = None
-        self.hgvs_protein = None
+        self.proteinChange = None
+        self.synonyms = list()
+        pc = textIfPresent(element, "ProteinChange")
+        if pc is not None:
+            self.synonyms.append(pc)
         for hgvs in element.find("HGVSlist").iter("HGVS"):
             pe = hgvs.find("ProteinExpression")
             if pe:
@@ -207,7 +193,7 @@ class variant:
                     if ne.attrib["MANESelect"] == "true":
                         self.hgvs_cdna = nucleotideHgvs
                         if pe:
-                            self.hgvs_protein = proteinHgvs
+                            self.proteinChange = proteinHgvs
                         if debug:
                             print("MANE Select HGVS cDNA ", nucleotideHgvs,
                                   "protein", proteinHgvs)
@@ -223,11 +209,13 @@ class referenceAssertion:
         self.title = element.get("Title")
         if debug:
             print("Parsing ReferenceClinVarAssertion", self.title)
+        self.reviewStatus = element.attrib["ReviewStatus"]
+        self.clinicalSignificance = element.attrib["Interpretation"]
+        self.dateSignificanceLastEvaluated = element.attrib["DateLastEvaluated"]
+        self.summaryDescription = None
 
-        processClinicalSignificanceElement(element, self)
 
-
-class interpretations:
+class interpretation:
     """For gathering data on the trait.  This code expects only one trait"""
     def __init__(self, element, debug=False):
         self.element = element        
@@ -237,17 +225,14 @@ class interpretations:
         for interpretation in element.iter("Interpretation"):
             if interpretation.attrib["Type"] == "Clinical significance":
                 for trait in interpretation.iter("Trait"):
-                    print("found trait")
                     assert(self.condition_type is None)
                     self.condition_type = trait.attrib["Type"]
                     for name in trait.iter("Name"):
-                        print("Found name")
                         ev = name.find("ElementValue")
                         if ev.attrib["Type"] == "Preferred":
                             assert(self.condition_value is None)
                             self.condition_value = ev.text
                     for xref in trait.iter("XRef"):
-                        print("found xref")
                         if self.condition_db_id is None:
                             self.condition_db_id = (xref.attrib["DB"] + "_"
                                                     + xref.attrib["ID"])
@@ -259,52 +244,57 @@ class interpretations:
                                                         "_" + xref.attrib["ID"])
 
 
-class clinVarAssertion:
+class clinicalAssertion:
     """Class for representing one submission (i.e. one annotation of a
 dir(referen    submitted variant"""
 
+    
+    
     def __init__(self, element, debug=False):
         self.element = element
         self.id = element.get("ID")
         if debug:
-            print("Parsing ClinVarAssertion", self.id)
-        cvsd = element.find("ClinVarSubmissionID")
-        if cvsd == None:
-            self.submitter = None
-            self.dateSubmitted = None
-        else:
-            self.submitter = cvsd.get("submitter", default=None)
-            self.dateSubmitted = cvsd.get("submitterDate")
+            print("Parsing ClinicalAssertion", self.id)
+        self.dateSubmitted = element.attrib["SubmissionDate"]
+        self.dateLastUpdated = element.attrib["DateLastUpdated"]
         cva = element.find("ClinVarAccession")
         if cva == None:
             self.accession = None
         else:
-            self.accession = cva.get("Acc", default=None)
-            self.accession_version = cva.get("Version", default=None)
-
-        self.origin = None
-        self.method = None
-        self.description = None
-        oi = element.find("ObservedIn")
-        if oi != None:
+            self.accession = cva.attrib["Accession"]
+            self.accession_version = cva.attrib["Version"]
+            self.submitter = cva.attrib["SubmitterName"]
+        self.reviewStatus = textIfPresent(element, "ReviewStatus")
+        interpretation = element.find("Interpretation")
+        self.dateSignificanceLastEvaluated = interpretation.attrib["DateLastEvaluated"]
+        self.clinicalSignificance = textIfPresent(interpretation,
+                                                  "Description")
+        self.summaryEvidence = textIfPresent(interpretation, "Comment")
+        oil = element.find("ObservedInList")
+        self.origin = list()
+        self.method = list()
+        self.description = list()
+        for oi in oil.iter("ObservedIn"):
             sample = oi.find("Sample")
             if sample != None:
-                self.origin = textIfPresent(sample, "Origin")
+                origin = textIfPresent(sample, "Origin")
+                if not origin in self.origin:
+                    self.origin.append(origin)
             method = oi.find("Method")
             if method != None:
-                self.method = textIfPresent(method, "MethodType")
-            description = oi.find("ObservedData")
-            if description != None:
-                for attr in description.findall("Attribute"):
+                newMethod = textIfPresent(method, "MethodType")
+                if not newMethod in self.method:
+                    self.method.append(newMethod)
+            od = oi.find("ObservedData")
+            if od != None:
+                for attr in od.iter("Attribute"):
                     if attr.attrib["Type"] == 'Description':
-                        self.description = textIfPresent(description, "Attribute")
+                        newDescription = textIfPresent(od, "Attribute")
+                    else:
+                        newDescription = "None"
+                    if not newDescription in self.description:
+                        self.description.append(newDescription)
 
-        processClinicalSignificanceElement(element.find(
-            "ClinicalSignificance"), self)
-
-        self.dateLastUpdated = cva.get("DateUpdated")
-
-        self.synonyms = extractSynonyms(element)
 
 
 class clinVarSet:
@@ -321,29 +311,26 @@ class clinVarSet:
         if debug:
             print("Parsing ClinVarSet ID", self.id)
         sa = element.find("InterpretedRecord/SimpleAllele")
-        self.variant = variant(sa, debug=debug)
+        self.variant = variant(sa, debug=False)
 
         #
         # Look for the RCVAccession object.  There should be exactly one.
         rcva = findUniqueElement("RCVAccession", element)
-        self.referenceAssertion = referenceAssertion(rcva, debug=debug)
+        self.referenceAssertion = referenceAssertion(rcva, debug=False)
         
         #
         # Look for the Interpretations object.  There should be exactly one.
         interp = findUniqueElement("Interpretations", element)
-        self.interpretations = interpretations(interp, debug=debug)
+        self.interpretation = interpretation(interp, debug=debug)
         
         self.otherAssertions = dict()
 
-        #for item in element.findall("ClinVarAssertion"):
-        #    if isCurrent(item):
-        #        cva = clinVarAssertion(item)
-        #        accession = cva.accession
-        #        self.otherAssertions[accession] = cva
-        #
-        #if self.referenceAssertion.variant:
-        #    self.referenceAssertion.hgvs_cdna = self.extract_hgvs_cdna(self.referenceAssertion.variant.name, element)
-
+        for item in element.iter("ClinicalAssertion"):
+            if isCurrent(item):
+                cva = clinicalAssertion(item)
+                accession = cva.accession
+                self.otherAssertions[accession] = cva
+        
     def extract_hgvs_cdna(self, variant_name, clinvar_set_el):
         """
         Finds a HGVS CDNA representation of a variant within a ClinVarSet.
