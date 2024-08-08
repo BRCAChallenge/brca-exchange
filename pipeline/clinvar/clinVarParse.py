@@ -23,7 +23,7 @@ MULTI_VALUE_SEP = ','
 
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
-    interpretation = submissionSet.interpretation
+    classification = submissionSet.classification
     variant = submissionSet.variant
 
     if variant is None:
@@ -33,7 +33,7 @@ def processSubmission(submissionSet, assembly):
 
     debug = False
     for oa in list(submissionSet.otherAssertions.values()):
-        if not ("somatic" in oa.origin and length(oa.origin) == 1):
+        if not ("somatic" in oa.origin and len(oa.origin) == 1):
             hgvs = variant.hgvs_cdna
             if assembly in variant.coordinates:
                 synonyms = MULTI_VALUE_SEP.join(variant.synonyms)
@@ -57,9 +57,9 @@ def processSubmission(submissionSet, assembly):
                                      ",".join(oa.description),
                                      str(oa.summaryEvidence),
                                      str(oa.reviewStatus),
-                                     str(interpretation.condition_type),
-                                     str(interpretation.condition_value),
-                                     ",".join(interpretation.condition_db_id) if isinstance(interpretation.condition_db_id, list) else str(interpretation.condition_db_id),
+                                     str(classification.condition_type),
+                                     str(classification.condition_value),
+                                     ",".join(classification.condition_db_id),
                                      str(synonyms))))
                     #print("\t".join((str(hgvs),
                     #                 oa.submitter,
@@ -104,8 +104,9 @@ def main():
         for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
             if event == 'end' and elem.tag == 'VariationArchive':
                 if clinvar.isCurrent(elem):
-                    submissionSet = clinvar.clinVarSet(elem, debug=True)
-                    processSubmission(submissionSet, args.assembly)
+                    submissionSet = clinvar.variationArchive(elem, debug=True)
+                    if submissionSet.valid:
+                        processSubmission(submissionSet, args.assembly)
                 elem.clear()
 
 if __name__ == "__main__":
