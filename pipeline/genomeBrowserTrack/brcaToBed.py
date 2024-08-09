@@ -31,12 +31,16 @@ def _get_parser():
 
     parser.add_argument("-i", "--input", help="Path to built_with_change_types.tsv file",
                         default="output/release/built_with_change_types.tsv")
-
-    parser.add_argument("-o19", "--output-hg19", help="Output BED file with hg19",
-                        default="brcaExchange.hg19.bed")
-    parser.add_argument("-o38", "--output-hg38", help="Output BED file with hg38",
-                        default="brcaExchange.hg38.bed")
-
+    parser.add_argument("-l", "--length_threshold", help="Length threshold for short/structural variants",
+                        type=int, default=50)
+    parser.add_argument("--output_hg19_var", help="Short variants: hg19 output BED file",
+                        default="variants.hg19.bed")
+    parser.add_argument("--output_hg38_var", help="Short variants: hg38 output BED file",
+                        default="variants.hg38.bed")
+    parser.add_argument("--output_hg19_sv", help="Structural variants: hg19 output BED file",
+                        default="structural_variants.hg19.bed")
+    parser.add_argument("--output_hg38_sv", help="Structural variants: hg38 output BED file",
+                        default="structural_variants.hg38.bed")
     parser.add_argument("-a", "--auto-sql-file", help="Field definitions in AutoSQL format",
                         default="brcaExchange.as")
     return parser
@@ -71,18 +75,57 @@ def _write_auto_sql_file(as_path):
 
         print("wrote as file to {}".format(asFh.name))
 
+def write_track_item(rec, start, end, output_fp):
+    chrom = "chr"+rec.Chr
+    score = 0
+    strand = "."
+    name = rec.pyhgvs_cDNA[0:254]
+    if name == "?":
+        assert(False)
+    thickStart = start
+    thickEnd = end
+    pathogenicity = rec.Clinical_significance_ENIGMA.lower()
+    if "pathogen" in pathogenicity:
+        color = "225,0,0"
+    elif "benign" in pathogenicity:
+        color = "0,180,75"
+    else:
+        color = "125,125,125"
+    out_url = "https://brcaexchange.org/variant/" + rec.CA_ID
+    #
+    # When generating the mouseOver, truncate the cDNA and protein HGVS string to 50 characters each, 
+    # to not overhwelm the browser's internal limit of 255 characters.
+    mouseOver = ("<b>Gene:</b> %s" + \
+                 "<b>HGVS cDNA:</b> %s<br>" + \
+                 "<b>HGVS Protein:</b> %s" + \
+                 "<b>VCEP Curation:</b> %s<br>" + \
+                 "<b>URL:</b> %s<br>") \
+                 % (rec.Gene_Symbol, rec.pyhgvs_cDNA[0:25], rec.pyhgvs_Protein[0:25],
+                    rec.Clinical_significance_ENIGMA,
+                    out_url)
+    outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
+              rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254], rec.CA_ID,
+              rec.Clinical_significance_ENIGMA, mouseOver]
+    outRow = [str(x) for x in outRow]
+    output_fp.write("\t".join(outRow)+"\n")
+
+    
+        
 
 def main():
     parser = _get_parser()
 
     args = parser.parse_args()
 
-    with open(args.input, 'r') as ifh, open(args.output_hg19, 'w') as ofh19, open(args.output_hg38, 'w') as ofh38:
+    with open(args.input, 'r') as ifh:
+        ofhg19v = open(args.output_hg19_var, 'w')
+        ofhg38v = open(args.output_hg38_var, 'w') 
+        ofhg19sv = open(args.output_hg19_sv, 'w')
+        ofhg38sv =  open(args.output_hg38_sv, 'w')
         print("Reading %s..." % ifh.name)
 
         headers = ifh.readline().rstrip("\n").rstrip("\r").strip().split("\t")
         rowRec = namedtuple("rec", headers)
-        include_cols = ["Chr", "Pos", "pyhgvs_Hg37_Start", "pyhgvs_Hg37_End"]
 
         _write_auto_sql_file(args.auto_sql_file)
 
@@ -90,60 +133,16 @@ def main():
             row = line.rstrip("\n").rstrip("\r").split("\t")
             rec = rowRec(*row)
             rd = OrderedDict(zip(headers, row)) # row as dict
-            if int(rec.Hg38_End) - int(rec.Hg38_Start) < 60:
 
-                pat = rec.Clinical_significance_ENIGMA.lower()
-                if "pathogen" in pat:
-                    color = "255,0,0"
-                elif "benign" in pat:
-                    color = "0,255,0"
-                elif "uncertain" in pat:
-                    color = "100,100,100"
-                else:
-                    color = "0,0,0"
-                out_url = "https://brcaexchange.org/variant/" + rec.CA_ID
+            if int(rec.Hg38_End) - int(rec.Hg38_Start) < args.length_threshold:
+                write_track_item(rec, str(int(rec.pyhgvs_Hg37_Start)-1), rec.pyhgvs_Hg37_End, ofhg19v)
+                write_track_item(rec, str(int(rec.Hg38_Start)-1), rec.Hg38_End, ofhg38v)
+            else:
+                write_track_item(rec, str(int(rec.pyhgvs_Hg37_Start)-1), rec.pyhgvs_Hg37_End, ofhg19sv)
+                write_track_item(rec, str(int(rec.Hg38_Start)-1), rec.Hg38_End, ofhg38sv)
+                
 
-                chrom = "chr"+rec.Chr
-                score = 0
-                strand = "."
-                name = rec.pyhgvs_cDNA[0:254]
-                if name == "?":
-                    assert(False)
-                #
-                # When generating the mouseOver, truncate the HGVS string to 100 characters, to not overhwelm
-                # the browser's internal limit of 255 characters.
-                mouseOver = ("<b>Variant ID:</b> %s %s<br>" + \
-                             "<b>ENIGMA VCEP Clinical Significance:</b> %s<br>" + \
-                             "<b>Variant URL:</b> %s<br>") \
-                             % (rec.Gene_Symbol, rec.pyhgvs_cDNA[0:100], rec.Clinical_significance_ENIGMA,
-                                out_url)
-
-                #Start with the hg19 version
-                start = str(int(rec.pyhgvs_Hg37_Start)-1)
-                end = rec.pyhgvs_Hg37_End
-                thickStart = start
-                thickEnd = end
-                outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
-                          rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254], rec.CA_ID,
-                          rec.Clinical_significance_ENIGMA, mouseOver]
-
-                outRow = [str(x) for x in outRow]
-                ofh19.write("\t".join(outRow)+"\n")
-
-                # Repeat with the hg38 version
-                ftLen = int(end)-int(start)
-                start = str(int(rec.Hg38_Start)-1)
-                end = str(int(start)+ftLen)
-                thickStart = start
-                thickEnd = end
-                outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
-                          rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254], rec.CA_ID,
-                          rec.Clinical_significance_ENIGMA, mouseOver]
-
-                outRow = [str(x) for x in outRow]
-                ofh38.write("\t".join(outRow)+"\n")
-
-        print("wrote to %s and %s" % (ofh19.name, ofh38.name))
+        print("wrote to %s, %s, %s and %s" % (ofhg19v.name, ofhg38v.name, ofhg19sv.name, ofhg38sv.name))
 
 
 if __name__ == '__main__':

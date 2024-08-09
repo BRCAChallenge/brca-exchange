@@ -1,7 +1,14 @@
 track brcaexchange
-bigDataUrl https://brcaexchange.org/trackhubs/hg38/brcaExchange.bb
-shortLabel BRCAExchange
-longLabel BRCAExchange BRCA1/2 variants
+superTrack on
+shortLabel BRCAExchange Variants
+longLabel BRCA Exchange: Germline Variants in BRCA1 and BRCA2
+html ../description.html
+
+track brcaVariants
+bigDataUrl https://brcaexchange.org/trackhubs/hg38/variants.bb
+shortLabel BRCAExchange Variants
+longLabel BRCAExchange BRCA1/2 variants of <50 nucleotides
+supertrack brcaexchange hide
 type bigBed 9 +
 visibility pack
 url https://brcaexchange.org/variant/$<CA_ID>
@@ -10,4 +17,19 @@ itemRgb on
 mouseOver $_mouseOver
 noScoreFilter on
 skipFields chrom,chromStart,chromEnd,score,strand,thickStart,thickEnd,reserved, _mouseOver
-html https://brcaexchange.org/trackhubs/description.html
+html ../description.html
+
+track brcaStructuralVariants
+bigDataUrl https://brcaexchange.org/trackhubs/hg38/structural_variants.bb
+shortLabel BRCAExchange SVs
+longLabel BRCAExchange BRCA1/2 variants of >= 50 nucleotides
+supertrack brcaexchange hide
+type bigBed 9 +
+visibility hide
+url https://brcaexchange.org/variant/$<CA_ID>
+urlLabel Link to BRCA Exchange
+itemRgb on
+mouseOver $_mouseOver
+noScoreFilter on
+skipFields chrom,chromStart,chromEnd,score,strand,thickStart,thickEnd,reserved, _mouseOver
+html ../description.html
