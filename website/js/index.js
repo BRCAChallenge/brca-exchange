@@ -9,6 +9,7 @@ import LiteratureTable from "./components/LiteratureTable";
 import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
 import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
 import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
+import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
 import MupitStructure from './MupitStructure';
 
 // shims for older browsers
@@ -961,6 +962,21 @@ var VariantDetail = React.createClass({
                         variant={variant}
                         innerGroups={innerGroups}
                     />
+                );
+            }
+
+            if (groupTitle === "ACMG Variant Evidence Codes, Provisional Assignment") {
+                return (
+                    <ProvisionalEvidenceTile
+                        groupTitle={groupTitle}
+                        onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        relayoutGrid={this.relayoutGrid}
+                        helpSection="acmg-variant-evidence-codes-provisional-assignment"
+                        showHelp={this.showHelp}
+                        variant={variant}
+                        innerGroups={innerGroups}
+                    />
+
                 );
             }
 
