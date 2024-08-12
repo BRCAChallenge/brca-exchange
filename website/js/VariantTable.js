@@ -243,6 +243,25 @@ const researchModeGroups = [
         ]
     },
 
+    {groupTitle: 'ACMG Variant Evidence Codes, Provisional Assignment',
+        innerGroups: [
+            {
+                source: "Population Frequency",
+                data: [
+                    {title: "Provisional Code Assignment", prop: "Provisional_Evidence_Code_Popfreq", core: true},
+                    {title: "Description", prop: "Provisional_Evidence_Description_Popfreq", core: true}
+                ]
+            },
+            {
+                source: "Computational Prediction",
+                data: [
+                    {title: "Provisional Code Assignment", prop: "Provisional_Evidence_Code_Bioinfo", core: true},
+                    {title: "Description", prop: "Provisional_Evidence_Description_Bioinfo", core: true}
+                ]
+            }]
+    },
+
+
     {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
         {title: 'Posterior probability of pathogenicity', prop: 'Posterior_probability_exLOVD', core: true},
         {title: 'Prior probability of pathogenicity', prop: 'Combined_prior_probablility_exLOVD', core: true},
