@@ -1,6 +1,6 @@
-Placeholder text for  Computational Prediction within ACMG Variant Evidence Codes, Provisional Assignment
+(Coming Soon)
 
 * #### Provisional Code Assignment ((Provisional_Evidence_Code_Bioinfo))
-	The provisional ... PLACEHOLDER
+	(Coming Soon)
 * #### Description ((Provisional_Evidence_Description_Bioinfo))
-	Details ... PLACEHOLDER
+	(Coming Soon)
