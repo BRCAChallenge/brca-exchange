@@ -41,73 +41,13 @@ python ${SRC_DIR}/brcaToBed.py \
        --output_hg38_sv ${HG38_SV_BED} \
        -a ${AS}
 
-sort -k1,1 -k2,2 ${HG19_VAR_BED} -o ${HG19_VAR_BED}
-sort -k1,1 -k2,2 ${HG38_VAR_BED} -o ${HG38_VAR_BED}
-sort -k1,1 -k2,2 ${HG19_SV_BED} -o ${HG19_SV_BED}
-sort -k1,1 -k2,2 ${HG38_SV_BED} -o ${HG38_SV_BED}
 
 set +e
 
-# bedToBigBed errors on variants > 255 characters, this removes those problem variants until bedToBigBed succeeds
-
-# captures error message if present
-ERROR=`bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_VAR_BED} ${SRC_DIR}/hg19.chrom.sizes ${TMP_HG19}/variants.bb 2>&1 `
-
-# parses line number of problem variant from error
-ERRORLINE=`echo $ERROR | sed -n -e 's/^.*line //p' | sed 's/\s.*$//'`
-
-until [ -z "$ERRORLINE" ]
-do
-	# removes error variant from both BED files if present
-	sed -i "${ERRORLINE}d" ${HG19_VAR_BED}
-	sed -i "${ERRORLINE}d" ${HG38_VAR_BED}
-	echo "removed variant due to error:"
-	echo $ERROR
-
-	# captures error message if present
-        ERROR=`bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_VAR_BED} ${SRC_DIR}/hg19.chrom.sizes ${TMP_HG19}/variants.bb 2>&1 `
-        echo $ERROR
-
-        # parses line number of problem variant from error
-        ERRORLINE=`echo $ERROR | sed -n -e 's/^.*line //p' | sed 's/\s.*$//'`
-        echo $ERRORLINE
-done
-
-#
-# Repeat with the structural variants
-# captures error message if present
-ERROR=`bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_SV_BED} ${SRC_DIR}/hg19.chrom.sizes ${TMP_HG19}/structuralVariants.bb 2>&1 `
-
-# parses line number of problem variant from error
-ERRORLINE=`echo $ERROR | sed -n -e 's/^.*line //p' | sed 's/\s.*$//'`
-
-until [ -z "$ERRORLINE" ]
-do
-	# removes error variant from both BED files if present
-	sed -i "${ERRORLINE}d" ${HG19_SV_BED}
-	sed -i "${ERRORLINE}d" ${HG38_SV_BED}
-	echo "removed variant due to error:"
-	echo $ERROR
-
-	# captures error message if present
-        ERROR=`bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_SV_BED} ${SRC_DIR}/hg19.chrom.sizes ${TMP_HG19}/structuralVariants.bb 2>&1 `
-        echo $ERROR
-
-        # parses line number of problem variant from error
-        ERRORLINE=`echo $ERROR | sed -n -e 's/^.*line //p' | sed 's/\s.*$//'`
-        echo $ERRORLINE
-done
-
-set -e
-
-bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_VAR_BED} \
-	    ${SRC_DIR}/hg19.chrom.sizes ${TMP_HG19}/variants.bb
-bedToBigBed -type=bed9+ -as=${AS} -tab ${HG38_VAR_BED} \
-	    ${SRC_DIR}/hg38.chrom.sizes ${TMP_HG38}/variants.bb
-bedToBigBed -type=bed9+ -as=${AS} -tab ${HG19_SV_BED} \
-	    ${SRC_DIR}/hg19.chrom.sizes ${TMP_HG19}/structural_variants.bb
-bedToBigBed -type=bed9+ -as=${AS} -tab ${HG38_SV_BED} \
-	    ${SRC_DIR}/hg38.chrom.sizes ${TMP_HG38}/structural_variants.bb
+${SRC_DIR}/bigBedFromBed.sh ${HG19_VAR_BED} ${AS} ${SRC_DIR}/hg19.chrom_sizes ${TMP_HG19}/variants.bb
+${SRC_DIR}/bigBedFromBed.sh ${HG38_VAR_BED} ${AS} ${SRC_DIR}/hg38.chrom_sizes ${TMP_HG38}/variants.bb
+${SRC_DIR}/bigBedFromBed.sh ${HG19_SV_BED} ${AS} ${SRC_DIR}/hg19.chrom_sizes ${TMP_HG19}/structural_variants.bb
+${SRC_DIR}/bigBedFromBed.sh ${HG38_SV_BED} ${AS} ${SRC_DIR}/hg38.chrom_sizes ${TMP_HG38}/structural_variants.bb
 
 # preparing trackhubs directory, which then gets pushed to the remote machine
 TRACKHUBS=${TMP_DIR}/trackhubs
