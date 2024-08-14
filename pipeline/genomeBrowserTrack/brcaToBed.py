@@ -1,30 +1,7 @@
 #!/usr/bin/env python
 from collections import namedtuple, OrderedDict
 import argparse
-
-
-def _add_urls(s, url=None):
-    """ transform a list of URLs to hrefs """
-    lines = []
-    for part in s.split(","):
-        part = part.strip()
-        if part == "":
-            continue
-        if part.startswith("http"):
-            label = part.split("/")[-1]
-            if "=" in label:
-                label = label.split("=")[-1]
-            part = "<a href='%s'>%s</a>" % (part, label)
-            lines.append(part)
-        else:
-            if url == None:
-                lines.append(part)
-            else:
-                part = "<a href='%s%s'>%s</a>" % (url, part, part)
-                lines.append(part)
-
-    return ", ".join(lines)
-
+import genomeBrowserUtils
 
 def _get_parser():
     parser = argparse.ArgumentParser()
@@ -64,6 +41,7 @@ def _write_auto_sql_file(as_path):
         string outlink;    "Link to the variant in BRCA Exchange"
         string symbol;     "Gene Symbol"
         string cdna_hgvs;       "Variant ID in cDNA HGVS nomenclature"
+        string protein_hgvs;    "Variant ID in protein HGVS nomenclature"
         string CA_ID;       "ClinGen Allele Registry ID"
         string Clinical_significance_ENIGMA;      "Clinical Significance as curated by the ENIGMA VCEP"
         string _mouseOver; "mouse over field hidden"
@@ -84,13 +62,7 @@ def write_track_item(rec, start, end, output_fp):
         assert(False)
     thickStart = start
     thickEnd = end
-    pathogenicity = rec.Clinical_significance_ENIGMA.lower()
-    if "pathogen" in pathogenicity:
-        color = "225,0,0"
-    elif "benign" in pathogenicity:
-        color = "0,180,75"
-    else:
-        color = "125,125,125"
+    color = genomeBrowserUtils.pathogenicityToColor(rec.Clinical_significance_ENIGMA)
     out_url = "https://brcaexchange.org/variant/" + rec.CA_ID
     #
     # When generating the mouseOver, truncate the cDNA and protein HGVS string to 50 characters each, 
@@ -104,7 +76,7 @@ def write_track_item(rec, start, end, output_fp):
                     rec.Clinical_significance_ENIGMA,
                     out_url)
     outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
-              rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254], rec.CA_ID,
+              rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254], rec.pyhgvs_Protein[0:254], rec.CA_ID,
               rec.Clinical_significance_ENIGMA, mouseOver]
     outRow = [str(x) for x in outRow]
     output_fp.write("\t".join(outRow)+"\n")
