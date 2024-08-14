@@ -9,7 +9,7 @@ const DonationBar = React.createClass({
         return (
         	<div className="donation-bar">
     			<p>
-                We are pleased to introduce a new feature: persistent URLs for the variants in BRCA Exchange!  More information is available <a style={{textDecoration: 'underline'}} href="https://brcaexchange.org/blog/index.php/2024/02/01/new-feature-persistent-urls-for-brca-exchange-variants/">here</a> on the BRCA Exchange blog.
+                We are excited to introduce provisional assignments of the ACMG evidence codes for all variants in BRCA Exchange!  Please see our <a style={{textDecoration: 'underline'}} href="https://brcaexchange.org/blog/index.php/2024/08/14/new-feature-acmg-evidence-code-provisional-assignments/">latest blog post</a> for more information
 	        	</p>
         	</div>
         );
