@@ -1,26 +1,6 @@
 #!/usr/bin/env python
 from collections import namedtuple, OrderedDict
-import argparse
 import genomeBrowserUtils
-
-def _get_parser():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-i", "--input", help="Path to built_with_change_types.tsv file",
-                        default="output/release/built_with_change_types.tsv")
-    parser.add_argument("-l", "--length_threshold", help="Length threshold for short/structural variants",
-                        type=int, default=50)
-    parser.add_argument("--output_hg19_var", help="Short variants: hg19 output BED file",
-                        default="variants.hg19.bed")
-    parser.add_argument("--output_hg38_var", help="Short variants: hg38 output BED file",
-                        default="variants.hg38.bed")
-    parser.add_argument("--output_hg19_sv", help="Structural variants: hg19 output BED file",
-                        default="structural_variants.hg19.bed")
-    parser.add_argument("--output_hg38_sv", help="Structural variants: hg38 output BED file",
-                        default="structural_variants.hg38.bed")
-    parser.add_argument("-a", "--auto-sql-file", help="Field definitions in AutoSQL format",
-                        default="brcaExchange.as")
-    return parser
 
 
 def _write_auto_sql_file(as_path):
@@ -67,16 +47,19 @@ def write_track_item(rec, start, end, output_fp):
     #
     # When generating the mouseOver, truncate the cDNA and protein HGVS string to 50 characters each, 
     # to not overhwelm the browser's internal limit of 255 characters.
-    mouseOver = ("<b>Gene:</b> %s" + \
+    mouseOver = ("<b>Gene:</b> %s<br>" + \
                  "<b>HGVS cDNA:</b> %s<br>" + \
-                 "<b>HGVS Protein:</b> %s" + \
+                 "<b>HGVS Protein:</b> %s<br>" + \
                  "<b>VCEP Curation:</b> %s<br>" + \
                  "<b>URL:</b> %s<br>") \
                  % (rec.Gene_Symbol, rec.pyhgvs_cDNA[0:25], rec.pyhgvs_Protein[0:25],
                     rec.Clinical_significance_ENIGMA,
                     out_url)
     outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
-              rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254], rec.pyhgvs_Protein[0:254], rec.CA_ID,
+              rec.Gene_Symbol,
+              genomeBrowserUtils.displayString(rec.pyhgvs_cDNA[0:254]),
+              genomeBrowserUtils.displayString(rec.pyhgvs_Protein[0:254]),
+              genomeBrowserUtils.displayString(rec.CA_ID),
               rec.Clinical_significance_ENIGMA, mouseOver]
     outRow = [str(x) for x in outRow]
     output_fp.write("\t".join(outRow)+"\n")
@@ -85,9 +68,7 @@ def write_track_item(rec, start, end, output_fp):
         
 
 def main():
-    parser = _get_parser()
-
-    args = parser.parse_args()
+    args = genomeBrowserUtils._get_args()
 
     with open(args.input, 'r') as ifh:
         ofhg19v = open(args.output_hg19_var, 'w')

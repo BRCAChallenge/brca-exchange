@@ -26,6 +26,7 @@ cp ${SRC_DIR}/hg38/trackDb.txt ${TMP_HG38}
 
 tar zxf ${RELEASE_ARCHIVE} -C ${TMP_DIR}
 
+echo "Generating ENIGMA variant tracks"
 HG19_VAR_BED=${TMP_OUT}/variants.hg19.bed
 HG38_VAR_BED=${TMP_OUT}/variants.hg38.bed
 HG19_SV_BED=${TMP_OUT}/structural_variants.hg19.bed
@@ -40,14 +41,32 @@ python ${SRC_DIR}/brcaToBed.py \
        --output_hg19_sv ${HG19_SV_BED} \
        --output_hg38_sv ${HG38_SV_BED} \
        -a ${AS}
-
-
 set +e
+${SRC_DIR}/bigBedFromBed.sh ${HG19_VAR_BED} ${AS} ${SRC_DIR}/hg19.chrom.sizes ${TMP_HG19}/variants.bb
+${SRC_DIR}/bigBedFromBed.sh ${HG38_VAR_BED} ${AS} ${SRC_DIR}/hg38.chrom.sizes ${TMP_HG38}/variants.bb
+${SRC_DIR}/bigBedFromBed.sh ${HG19_SV_BED} ${AS} ${SRC_DIR}/hg19.chrom.sizes ${TMP_HG19}/structural_variants.bb
+${SRC_DIR}/bigBedFromBed.sh ${HG38_SV_BED} ${AS} ${SRC_DIR}/hg38.chrom.sizes ${TMP_HG38}/structural_variants.bb
 
-${SRC_DIR}/bigBedFromBed.sh ${HG19_VAR_BED} ${AS} ${SRC_DIR}/hg19.chrom_sizes ${TMP_HG19}/variants.bb
-${SRC_DIR}/bigBedFromBed.sh ${HG38_VAR_BED} ${AS} ${SRC_DIR}/hg38.chrom_sizes ${TMP_HG38}/variants.bb
-${SRC_DIR}/bigBedFromBed.sh ${HG19_SV_BED} ${AS} ${SRC_DIR}/hg19.chrom_sizes ${TMP_HG19}/structural_variants.bb
-${SRC_DIR}/bigBedFromBed.sh ${HG38_SV_BED} ${AS} ${SRC_DIR}/hg38.chrom_sizes ${TMP_HG38}/structural_variants.bb
+echo "Generating popfreq evidence tracks"
+HG19_POPFREQ_VAR_BED=${TMP_OUT}/popfreq_var.hg19.bed
+HG38_POPFREQ_VAR_BED=${TMP_OUT}/popfreq_var.hg38.bed
+HG19_POPFREQ_SV_BED=${TMP_OUT}/popfreq_sv.hg19.bed
+HG38_POPFREQ_SV_BED=${TMP_OUT}/popfreq_sv.hg38.bed
+POPFREQ_AS=${TMP_OUT}/popfreq.as
+
+python ${SRC_DIR}/brcaPopfreqToBed.py \
+       -i ${TMP_DIR}/output/release/built_with_change_types.tsv \
+       -l 50 \
+       --output_hg19_var ${HG19_POPFREQ_VAR_BED} \
+       --output_hg38_var ${HG38_POPFREQ_VAR_BED} \
+       --output_hg19_sv ${HG19_POPFREQ_SV_BED} \
+       --output_hg38_sv ${HG38_POPFREQ_SV_BED} \
+       -a ${POPFREQ_AS}
+set +e
+${SRC_DIR}/bigBedFromBed.sh ${HG19_POPFREQ_VAR_BED} ${POPFREQ_AS} ${SRC_DIR}/hg19.chrom.sizes ${TMP_HG19}/popfreq_var.bb
+${SRC_DIR}/bigBedFromBed.sh ${HG38_POPFREQ_VAR_BED} ${POPFREQ_AS} ${SRC_DIR}/hg38.chrom.sizes ${TMP_HG38}/popfreq_var.bb
+${SRC_DIR}/bigBedFromBed.sh ${HG19_POPFREQ_SV_BED} ${POPFREQ_AS} ${SRC_DIR}/hg19.chrom.sizes ${TMP_HG19}/popfreq_sv.bb
+${SRC_DIR}/bigBedFromBed.sh ${HG38_POPFREQ_SV_BED} ${POPFREQ_AS} ${SRC_DIR}/hg38.chrom.sizes ${TMP_HG38}/popfreq_sv.bb
 
 # preparing trackhubs directory, which then gets pushed to the remote machine
 TRACKHUBS=${TMP_DIR}/trackhubs

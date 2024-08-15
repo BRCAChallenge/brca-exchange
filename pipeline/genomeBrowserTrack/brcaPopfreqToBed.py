@@ -1,29 +1,9 @@
 #!/usr/bin/env python
 from collections import namedtuple, OrderedDict
-import argparse
 import html
 import genomeBrowserUtils
 
 
-
-def _get_parser():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-i", "--input", help="Path to built_with_change_types.tsv file",
-                        default="output/release/built_with_change_types.tsv")
-
-    parser.add_argument("--output_hg19_var", help="Output BED file with hg19",
-                        default="popfreq_var.hg19.bed")
-    parser.add_argument("--output_hg38_var", help="Output BED file with hg38",
-                        default="popfreq_var.hg38.bed")
-    parser.add_argument("--output_hg19_sv", help="Structural variants: hg19 output BED file",
-                        default="popfreq_sv.hg19.bed")
-    parser.add_argument("--output_hg38_sv", help="Structural variants: hg38 output BED file",
-                        default="popfreq_sv.hg38.bed")
-
-    parser.add_argument("-a", "--auto-sql-file", help="Field definitions in AutoSQL format",
-                        default="popfreq.as")
-    return parser
 
 
 def _write_auto_sql_file(as_path):
@@ -41,9 +21,11 @@ def _write_auto_sql_file(as_path):
         uint thickStart;   "Start of where display should be thick (start codon)"
         uint thickEnd;     "End of where display should be thick (stop codon)"
         uint reserved;     "Used as itemRgb as of 2004-11-22"        
+        string outlink;    "Link to the variant in BRCA Exchange"
         string symbol;     "Gene Symbol"
         string cdna_hgvs;       "Variant ID in cDNA HGVS nomenclature"
         string protein_hgvs;    "Variant ID in protein HGVS nomenclature"
+        string CA_ID;       "ClinGen Allele Registry ID"
         string provisional_evidence_code;      "Provisional ACMG code"
         string provional_code_description; "Accompanying description"
         string _mouseOver; "mouse over field hidden"
@@ -63,7 +45,7 @@ def write_track_item(rec, start, end, output_fp):
         assert(False)
     thickStart = start
     thickEnd = end
-    acmgCode = rec.Provisional_evidence_code_popfreq
+    acmgCode = rec.Provisional_Evidence_Code_Popfreq
     color = genomeBrowserUtils.acmgCodeToColor(acmgCode)
     out_url = "https://brcaexchange.org/variant/" + rec.CA_ID
     #                                                                                                 
@@ -72,11 +54,13 @@ def write_track_item(rec, start, end, output_fp):
     description = "Click on the track item for more details"
     mouseOver = (("<b>Provisional ACMG Evidence Code:</b> %s<br>" + \
                   "<b>Details:</b> %s") \
-                 % (rec.Provisional_evidence_code_popfreq, description))[:245] + "<br>"
-    outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, 
-              rec.Gene_Symbol, rec.pyhgvs_cDNA[0:254],rec.pyhgvs_Protein[0:254],
-              rec.Provisional_evidence_code_popfreq,
-              description[:254],
+                 % (acmgCode, description))[:245] + "<br>"
+    outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
+              rec.Gene_Symbol,
+              genomeBrowserUtils.displayString(rec.pyhgvs_cDNA[0:254]),
+              genomeBrowserUtils.displayString(rec.pyhgvs_Protein[0:254]),
+              genomeBrowserUtils.displayString(rec.CA_ID),
+              acmgCode, description[:254],
               mouseOver]
     outRow = [str(x) for x in outRow]
     output_fp.write("\t".join(outRow)+"\n")
@@ -84,9 +68,7 @@ def write_track_item(rec, start, end, output_fp):
 
     
 def main():
-    parser = _get_parser()
-
-    args = parser.parse_args()
+    args = genomeBrowserUtils._get_args()
 
     with open(args.input, 'r') as ifh:
         ofhg19v = open(args.output_hg19_var, 'w')
@@ -111,7 +93,7 @@ def main():
                 write_track_item(rec, str(int(rec.pyhgvs_Hg37_Start)-1), rec.pyhgvs_Hg37_End, ofhg19sv)
                 write_track_item(rec, str(int(rec.Hg38_Start)-1), rec.Hg38_End, ofhg38sv)
 
-        print("wrote to %s and %s" % (ofh19.name, ofh38.name))
+        print("wrote to %s and %s" % (ofhg19v.name, ofhg38v.name))
 
 
 if __name__ == '__main__':
