@@ -55,6 +55,11 @@ export default class ProvisionalEvidenceTile extends React.Component {
             let groupData = group.data;
             let renderedRows = this.getRowsAndDetermineIfEmpty(groupSource, groupData, variant);
 
+            // TEMPORARY - hide ComputationalPrediction subsection until data is populated
+            if (groupSource === "Computational Prediction") {
+                return ( <div id={groupSource}/> );
+            }
+
             // Attempt to retrieve the prop name of the provisional code so we can put the value in the subsection header
             let extraHeaderProp = false ;
             for ( const dataItem of groupData ) {
