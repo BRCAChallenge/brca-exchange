@@ -164,9 +164,6 @@ class variant:
         self.element = element
         self.valid = True
         self.variantType = textIfPresent(element, "VariantType")
-        if self.variantType in ["Deletion", "Duplication", "Insertion"]:
-            self.valid = False
-            return
         if "AlleleID" in element.attrib:
             self.id = element.get("AlleleID")
         else:
@@ -174,12 +171,14 @@ class variant:
         if debug:
             print("Parsing variant", self.id)
         self.geneSymbol = None
-        for gene in element.iter("GeneList/Gene"):
-            geneSymbol = gene.get("Symbol")
-            if self.geneSymbol is None:
-                self.geneSymbol = geneSymbol
-            else:
-                self.geneSymbol = self.geneSymbol + "," + geneSymbol
+        geneList = element.find("GeneList")
+        if geneList is not None:
+            for gene in geneList.iter("Gene"):
+                geneSymbol = gene.get("Symbol")
+                if self.geneSymbol is None:
+                    self.geneSymbol = geneSymbol
+                else:
+                    self.geneSymbol = self.geneSymbol + "," + geneSymbol
         location = element.find("Location")
         if location is None:
             self.valid = False
@@ -281,8 +280,8 @@ dir(referen    submitted variant"""
             self.accession = cva.get("Accession")
             self.accession_version = cva.get("Version")
             self.submitter = cva.get("SubmitterName")
-        self.reviewStatus = textIfPresent(element, "ReviewStatus")
         classif = element.find("Classification")
+        self.reviewStatus = textIfPresent(classif, "ReviewStatus")
         self.dateSignificanceLastEvaluated = classif.get("DateLastEvaluated")
         self.clinicalSignificance = textIfPresent(classif,
                                                   "GermlineClassification")
@@ -327,7 +326,7 @@ class variationArchive:
         self.element = element
         self.id = element.get("VariationID")
         if debug:
-            print("Parsing ClinVarSet ID", self.id)
+            print("DEBUG: Parsing ClinVarSet ID", self.id)
         self.valid = True
         sa = element.find("./ClassifiedRecord/SimpleAllele")
         if sa is None:

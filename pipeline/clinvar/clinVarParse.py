@@ -104,7 +104,7 @@ def main():
         for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
             if event == 'end' and elem.tag == 'VariationArchive':
                 if clinvar.isCurrent(elem):
-                    submissionSet = clinvar.variationArchive(elem, debug=True)
+                    submissionSet = clinvar.variationArchive(elem, debug=False)
                     if submissionSet.valid:
                         processSubmission(submissionSet, args.assembly)
                 elem.clear()
