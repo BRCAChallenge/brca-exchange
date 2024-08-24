@@ -63,7 +63,7 @@ export default class ProvisionalEvidenceTile extends React.Component {
             // Attempt to retrieve the prop name of the provisional code so we can put the value in the subsection header
             let extraHeaderProp = false ;
             for ( const dataItem of groupData ) {
-                if (dataItem.title === "Provisional Code Assignment" ) {
+                if (dataItem.title === "Provisionally Assigned" ) {
                     extraHeaderProp = dataItem.prop ;
                 }
             }
