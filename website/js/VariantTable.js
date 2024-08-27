@@ -241,14 +241,14 @@ const researchModeGroups = [
             {
                 source: "Population Frequency",
                 data: [
-                    {title: "Provisional Code Assignment", prop: "Provisional_Evidence_Code_Popfreq", core: true},
+                    {title: "Provisionally Assigned", prop: "Provisional_Evidence_Code_Popfreq", core: true},
                     {title: "Description", prop: "Provisional_Evidence_Description_Popfreq", core: true}
                 ]
             },
             {
                 source: "Computational Prediction",
                 data: [
-                    {title: "Provisional Code Assignment", prop: "Provisional_Evidence_Code_Bioinfo", core: true},
+                    {title: "Provisionally Assigned", prop: "Provisional_Evidence_Code_Bioinfo", core: true},
                     {title: "Description", prop: "Provisional_Evidence_Description_Bioinfo", core: true}
                 ]
             }]
