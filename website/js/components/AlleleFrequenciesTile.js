@@ -9,10 +9,9 @@ import GroupHelpButton from './GroupHelpButton';
 
 const _ = require('underscore');
 
-// Includes the Allele Frequency fields plus the Provisional Evidence.
+// Includes the Allele Frequency fields.
 // when true, the field starts in the expanded state.
 const fieldsOfInterest = {
-    'Provisional ACMG Variant Evidence': true,
     'gnomAD V2.1 Exomes, Non-Cancer (Graphical)': true,
     'gnomAD V2.1 Exomes, Non-Cancer (Numerical)': false,
     'gnomAD V3.1 Genomes, Non-Cancer (Graphical)': true,
@@ -68,12 +67,7 @@ export default class AlleleFrequenciesTile extends React.Component {
                                 return dd.source === "GnomADv3 Genomes";
                             }).data, "gnomAD V3.1 Genomes, Non-Cancer (Numerical)"];
 
-        const provisionalEvidenceData = [_.find(data, function(dd) {
-                                return dd.source === "VCEP";
-                            }).data, "Provisional ACMG Variant Evidence"];
-
-        const alleleFrequencyFields = [provisionalEvidenceData, gnomadExomeGraph, gnomadExomeData, gnomadGenomeGraph,
-                                       gnomadGenomeData];
+        const alleleFrequencyFields = [gnomadExomeGraph, gnomadExomeData, gnomadGenomeGraph, gnomadGenomeData];
 
         const renderedAlleleFrequencyFields = alleleFrequencyFields.map((field, idx) => {
             let fieldValue = field[0];
