@@ -35,13 +35,18 @@ git merge myfeature
 git push origin master      # push master to github
 ```
 
-## Create a new release
+## Create a new labeled release
 
-Before running, make sure you're on master and pull the latest master from origin. Also make sure your working directory is clean.
+Before running, make sure you're on master and pull the latest master from origin. Also make sure your working directory is clean, and that you're on a server where your git credentials allow pushing to master.  Also, this is best executed under a tmux or screen shell, particularly if there are any new database migrations to apply.
 
 ```sh
+git pull origin master
+cd website
+npm install                 # update the release number in package.json and package_lock.json
+cd ..
 ./deployment/release new    # create release branch & push to github
 ```
+This will trigger the automated deployment of new code to beta in CircleCI, including applying any new database migrations.
 
 ## Patch a release
 
@@ -57,6 +62,18 @@ git cherry-pick abc123
 
 ## Deploy a release
 
+This is best executed under a tmux or screen shell, especially if there are any database migrations to apply.  These steps are best executed under the _brca_ account on dev.
+
 ```sh
 ./deployment/deploy-production
 ```
+This will copy the web portal software from beta to production, and will trigger any database migrations on the production database.
+
+## Deploy new data to dev, beta or production
+
+Deploying new data is a separate process from deploying new code.  The two deployments are deliberately de-coupled so that new code and new data can be deployed independently.  
+
+```sh
+./deployment/deploy-data <machine> PATH/TO/release-MM-DD-YY.tar.gz
+```
+Where _machine_ is one of _dev_, _beta_ or _production_
