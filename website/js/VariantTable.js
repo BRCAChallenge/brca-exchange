@@ -169,14 +169,6 @@ const researchModeGroups = [
         }
     },
 
-    {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
-        {title: 'Patient Nationality', prop: 'Patient_nationality_BIC'},
-        {title: 'Ethnicity', prop: 'Ethnicity_BIC'},
-        {title: 'Family members carrying this variant', prop: 'Number_of_family_member_carrying_mutation_BIC'},
-        {title: 'Literature Reference', prop: 'Literature_citation_BIC', core: true},
-        {title: 'Allele Origin', prop: 'Germline_or_Somatic_BIC'},
-    ]},
-
     {groupTitle: 'Computational Predictions', internalGroupName: 'Computational Predictions', innerGroups: [
         {
             source: "BayesDel",
@@ -243,6 +235,25 @@ const researchModeGroups = [
             },
         ]
     },
+
+    {groupTitle: 'ACMG Variant Evidence Codes, Provisional Assignment',
+        innerGroups: [
+            {
+                source: "Population Frequency",
+                data: [
+                    {title: "Provisionally Assigned", prop: "Provisional_Evidence_Code_Popfreq", core: true},
+                    {title: "Description", prop: "Provisional_Evidence_Description_Popfreq", core: true}
+                ]
+            },
+            {
+                source: "Computational Prediction",
+                data: [
+                    {title: "Provisionally Assigned", prop: "Provisional_Evidence_Code_Bioinfo", core: true},
+                    {title: "Description", prop: "Provisional_Evidence_Description_Bioinfo", core: true}
+                ]
+            }]
+    },
+
 
     {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
         {title: 'Posterior probability of pathogenicity', prop: 'Posterior_probability_exLOVD', core: true},

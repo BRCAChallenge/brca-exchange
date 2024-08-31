@@ -74,6 +74,7 @@ class Variant(models.Model):
     Variant_in_GnomAD = models.BooleanField(default=False)
     Variant_in_GnomADv3 = models.BooleanField(default=False)
 
+    # These are regular columns
     Source = models.TextField()
     URL_ENIGMA = models.TextField()
     Condition_ID_type_ENIGMA = models.TextField()
@@ -506,6 +507,10 @@ class Variant(models.Model):
     DP_DL_spliceAI = models.TextField(null=True)
     result_spliceai = models.TextField(null=True)
     BayesDel_nsfp33a_noAF = models.TextField(null=True)
+    Provisional_Evidence_Code_Popfreq = models.TextField(default='')
+    Provisional_Evidence_Description_Popfreq = models.TextField(default='')
+    Provisional_Evidence_Code_Bioinfo = models.TextField(default='')
+    Provisional_Evidence_Description_Bioinfo = models.TextField(default='')
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
@@ -990,6 +995,7 @@ class CurrentVariant(models.Model):
     Variant_in_GnomAD = models.BooleanField(default=False)
     Variant_in_GnomADv3 = models.BooleanField(default=False)
 
+    # These are regular columns
     Source = models.TextField()
     URL_ENIGMA = models.TextField()
     Condition_ID_type_ENIGMA = models.TextField()
@@ -1420,6 +1426,10 @@ class CurrentVariant(models.Model):
     DP_DL_spliceAI = models.TextField(null=True)
     result_spliceai = models.TextField(null=True)
     BayesDel_nsfp33a_noAF = models.TextField(null=True)
+    Provisional_Evidence_Code_Popfreq = models.TextField(default='')
+    Provisional_Evidence_Description_Popfreq = models.TextField(default='')
+    Provisional_Evidence_Code_Bioinfo = models.TextField(default='')
+    Provisional_Evidence_Description_Bioinfo = models.TextField(default='')
 
     # Data Versioning
     Data_Release = models.ForeignKey(DataRelease)
