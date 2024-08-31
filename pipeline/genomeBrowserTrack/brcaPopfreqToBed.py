@@ -65,7 +65,6 @@ def write_track_item(rec, start, end, output_fp):
     outRow = [str(x) for x in outRow]
     output_fp.write("\t".join(outRow)+"\n")
 
-
     
 def main():
     args = genomeBrowserUtils._get_args()

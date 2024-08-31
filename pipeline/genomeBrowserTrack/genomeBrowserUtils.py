@@ -85,13 +85,13 @@ def acmgCodeToColor(acmgCode):
     """
     Given an ACMG provisional evidence code, return the appropriate display color
     """
-    if re.search("^B.*Supporting$", acmgCode, re.IGNORECASE):
+    if re.search("^B.*Supporting", acmgCode, re.IGNORECASE):
         color = BENIGN_SUPPORTING_COLOR
-    elif re.search("^B.*Moderate$", acmgCode, re.IGNORECASE):
+    elif re.search("^B.*Moderate", acmgCode, re.IGNORECASE):
         color = BENIGN_MODERATE_COLOR
-    elif re.search("^B.*Strong$", acmgCode, re.IGNORECASE):
+    elif re.search("^B.*Strong", acmgCode, re.IGNORECASE):
         color = BENIGN_STRONG_COLOR
-    elif re.search("^B.*VeryStrong$", acmgCode, re.IGNORECASE):
+    elif re.search("^B.*VeryStrong", acmgCode, re.IGNORECASE):
         color = BENIGN_VERY_STRONG_COLOR
     elif re.search("$BA", acmgCode, re.IGNORECASE):
         color = BENIGN_VERY_STRONG_COLOR
@@ -101,13 +101,13 @@ def acmgCodeToColor(acmgCode):
         color = BENIGN_MODERATE_COLOR
     elif re.search("$BP", acmgCode, re.IGNORECASE):
         color = BENIGN_SUPPORTIVE_COLOR
-    elif re.search("^P.*Supporting$", acmgCode, re.IGNORECASE):
+    elif re.search("^P.*Supporting", acmgCode, re.IGNORECASE):
         color = PATHOGENIC_SUPPORTING_COLOR
-    elif re.search("^P.*Moderate$", acmgCode, re.IGNORECASE):
+    elif re.search("^P.*Moderate", acmgCode, re.IGNORECASE):
         color = PATHOGENIC_MODERATE_COLOR
-    elif re.search("^P.*Strong$", acmgCode, re.IGNORECASE):
+    elif re.search("^P.*Strong", acmgCode, re.IGNORECASE):
         color = PATHOGENIC_STRONG_COLOR
-    elif re.search("^P.*VeryStrong$", acmgCode, re.IGNORECASE):
+    elif re.search("^P.*VeryStrong", acmgCode, re.IGNORECASE):
         color = PATHOGENIC_VERY_STRONG_COLOR
     elif re.search("$PVS", acmgCode, re.IGNORECASE):
         color = PATHOGENIC_VERY_STRONG_COLOR
