@@ -42,9 +42,11 @@ Before running, make sure you're on master and pull the latest master from origi
 ```sh
 git pull origin master
 cd website
-npm install                 # update the release number in package.json and package_lock.json
+npm install                 # installs the release script's semver dependency
 cd ..
-./deployment/release new    # create release branch & push to github
+./deployment/release new
+# release updates the release number in package.json and package_lock.json
+# it creates the release branch & pushes to github
 ```
 This will trigger the automated deployment of new code to beta in CircleCI, including applying any new database migrations.
 
@@ -71,9 +73,9 @@ This will copy the web portal software from beta to production, and will trigger
 
 ## Deploy new data to dev, beta or production
 
-Deploying new data is a separate process from deploying new code.  The two deployments are deliberately de-coupled so that new code and new data can be deployed independently.  
+Deploying new data is a separate process from deploying new code.  The two deployments are deliberately de-coupled so that new code and new data can be deployed independently.  This can be a slow process and is best executed under a tmux or screen shell.
 
 ```sh
 ./deployment/deploy-data <machine> PATH/TO/release-MM-DD-YY.tar.gz
 ```
-Where _machine_ is one of _dev_, _beta_ or _production_
+Where _machine_ is one of _dev_, _beta_ or _production._
