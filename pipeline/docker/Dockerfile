@@ -31,7 +31,7 @@ COPY pipeline/requirements.txt .
 COPY test-requirements.txt .
 
 # pip 20.3+ uses strict dependency resolver that causes biocommons/bioutils and hgvs/ipython errors
-RUN pip install pip==20.2
+RUN pip install pip==24.0
 
 # install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
 RUN pip install $(grep numpy requirements.txt)
