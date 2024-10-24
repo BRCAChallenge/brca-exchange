@@ -6,6 +6,7 @@ import re
 from common import hgvs_utils, variant_utils
 from hgvs.exceptions import HGVSError
 import hgvs
+import html
 import logging
 
 def isCurrent(element):
@@ -192,14 +193,14 @@ class variant:
         if pc is not None:
             self.synonyms.append(pc)
         if element.find("HGVSlist"):
-            for hgvs in element.find("HGVSlist").iter("HGVS"):
-                pe = hgvs.find("ProteinExpression")
+            for hgvsObj in element.find("HGVSlist").iter("HGVS"):
+                pe = hgvsObj.find("ProteinExpression")
                 if pe:
                     proteinHgvs = pe.find("Expression").text
                     if debug:
                         print("protein HGVS", proteinHgvs)
                     self.synonyms.append(proteinHgvs)
-                ne = hgvs.find("NucleotideExpression")
+                ne = hgvsObj.find("NucleotideExpression")
                 if ne:
                     nucleotideHgvs = ne.find("Expression").text
                     if debug:
@@ -254,9 +255,10 @@ class classification:
                 if ev.get("Type") == "Preferred":
                     self.condition_value = ev.text
                 for xref in trait.iter("XRef"):
-                    xref_string = xref.get("DB") + "_" + xref.get("ID")
-                    if not xref_string in self.condition_db_id:
-                        self.condition_db_id.append(xref_string)
+                    if not re.search("Genetic Testing Registry", xref.get("DB")):
+                        xref_string = xref.get("DB") + "_" + xref.get("ID")
+                        if not xref_string in self.condition_db_id:
+                            self.condition_db_id.append(xref_string)
 
 
 
@@ -336,7 +338,14 @@ class variationArchive:
         if not self.variant.valid:
             self.valid = False
             return
-
+        #
+        # Find an HGVS variant name, either by taking the VariationName object of this element and removing the
+        # gene name in the parens, or if that name doesn't match an HGVS expression, look for a viable HGVS expression
+        # amoung the synonyms
+        fullname = re.sub(r'\([^)]*\)', '', html.unescape(element.get("VariationName")))
+        selected_hgvs = extract_hgvs_cdna(fullname, self.variant.synonyms)
+        self.name = re.sub(r'^\s+|\s+$', '', selected_hgvs)
+                                      
         #
         # Look for the RCVAccession object.  There should be exactly one.
         rcva = element.find("./ClassifiedRecord/RCVList/RCVAccession")
@@ -361,30 +370,23 @@ class variationArchive:
                 accession = ca.accession
                 self.otherAssertions[accession] = ca
         
-    def extract_hgvs_cdna(self, variant_name, clinvar_set_el):
-        """
-        Finds a HGVS CDNA representation of a variant within a ClinVarSet.
-        If possible, avoid repeat representations using the "[]" synatax, since
-        we are currently not able to handle it further downstream (https://github.com/biocommons/hgvs/issues/113)
+def extract_hgvs_cdna(variant_name, synonym_list):
+    """
+    Finds a HGVS CDNA representation of a variant within a ClinVarSet.
+    If possible, avoid repeat representations using the "[]" synatax, since
+    we are currently not able to handle it further downstream (https://github.com/biocommons/hgvs/issues/113)
 
-        :param variant_name: variant name from title
-        :param clinvar_set_el: clinvar set element
-        :return: HGVS CDNA representation as string
-        """
-        hgvs_cand = re.sub(r"\(" + "(BRCA[1|2])" + r"\)",
-                      "", variant_name.split()[0])
+    :param variant_name: variant name from title
+    :param synonym_list: synonyms extracted from variant object
+    :return: HGVS CDNA representation as string
+    """
 
-        # only take variants starting with NM_ and not containing []
-        hgvs_cdna_re = r'NM_.*:[^\[]*$'
+    # only take variants starting with NM_ and not containing []
+    hgvs_cdna_re = r'NM_.*:[^\[]*$'
+    if not re.match(hgvs_cdna_re, variant_name):
+        # check for anything in the synonym list that matches an HGVS expression
+        filtered = [s for s in synonym_list if re.match(hgvs_cdna_re, s)]
+        if filtered:
+            return filtered[0]
 
-        if not re.match(hgvs_cdna_re, hgvs_cand):
-            # taking Attribute of 'HGVS', 'HGVS, coding' or 'HGVS, coding, RefSeq' in
-            # both ReferenceClinVarAssertion and ClinVarAssertion's
-            hgvs_candidates = [ev.text for ev in clinvar_set_el.findall('.//Measure/AttributeSet/Attribute')
-                               if ev.attrib['Type'].startswith('HGVS, coding') or ev.attrib['Type'] == 'HGVS']
-
-            filtered = [s for s in hgvs_candidates if re.match(hgvs_cdna_re, s)]
-            if filtered:
-                return filtered[0]
-
-        return hgvs_cand
+    return variant_name

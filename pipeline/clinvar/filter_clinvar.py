@@ -3,16 +3,24 @@
 import argparse
 import gzip
 import io
+import re
 import xml.etree.ElementTree as ET
 
-def contains_target_gene_symbol(variationArchiveElement, target_symbol_values):
+def contains_target_gene_symbol(variationArchiveElement,
+                                target_symbol_values, debug=True):
     root = ET.fromstring(variationArchiveElement)
+    if debug:
+        print("testing", root.get("VariationName"))
     geneList = root.find(".//GeneList")
     if geneList:
         for geneElement in geneList.iter("Gene"):
             if "Symbol" in geneElement.attrib:
                 if geneElement.attrib["Symbol"] in target_symbol_values:
+                    if debug:
+                        print("Saving")
                     return(True)
+    if debug:
+        print("rejecting")
     return(False)
 
 
@@ -23,7 +31,9 @@ def filter_xml_for_gene_symbol(input_fp, output_fp, target_symbol_values,
     in_variation_archive = False
     in_header = True
     for line in input_fp:
-        if '<VariationArchive' in line:
+        if re.search("NM_000059.4(BRCA2):c.193C>T", line):
+            print("Found it!", line)
+        if re.search('<VariationArchive', line):
             in_variation_archive = True
             in_header = False
             variation_archive = io.StringIO()
@@ -31,12 +41,12 @@ def filter_xml_for_gene_symbol(input_fp, output_fp, target_symbol_values,
             output_fp.write(line)
         if in_variation_archive:
             variation_archive.write(line)
-        if '</VariationArchive>' in line:
+        if re.search('</VariationArchive>', line):
             in_variation_archive = False
             xml_string = variation_archive.getvalue()
             variation_archive.close()
             if contains_target_gene_symbol(xml_string,
-                                           target_symbol_values):
+                                           target_symbol_values, debug=True):
                 output_fp.write(xml_string)
 
 
@@ -46,7 +56,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', "--input")
     parser.add_argument('-o', "--output")
-    parser.add_argument('-g', "--gene", action='append')  
+    parser.add_argument('-g', "--gene", action='append')
+    parser.add_argument('-d', "--debug", action='store_true')
+    parser.set_defaults(debug=False)
     args = parser.parse_args()
     if args.input.endswith('gz'):
         input_fp = io.TextIOWrapper(gzip.open(args.input, 'rb'),
