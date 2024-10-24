@@ -1,7 +1,14 @@
 track brcaexchange
-bigDataUrl https://brcaexchange.org/trackhubs/hg19/brcaExchange.bb
-shortLabel BRCAExchange
-longLabel BRCAExchange BRCA1/2 variants
+superTrack on
+shortLabel BRCAExchange Variants
+longLabel BRCA Exchange: Germline Variants in BRCA1 and BRCA2
+html ../description.html
+
+track brcaVariants
+bigDataUrl variants.bb
+shortLabel BRCAExchange Variants
+longLabel BRCAExchange BRCA1/2 variants of <50 nucleotides
+supertrack brcaexchange hide
 type bigBed 9 +
 visibility pack
 url https://brcaexchange.org/variant/$<CA_ID>
@@ -10,5 +17,50 @@ itemRgb on
 mouseOver $_mouseOver
 noScoreFilter on
 skipFields chrom,chromStart,chromEnd,score,strand,thickStart,thickEnd,reserved, _mouseOver
-html https://brcaexchange.org/trackhubs/description.html
+html ../description.html
 
+track brcaStructuralVariants
+bigDataUrl structural_variants.bb
+shortLabel BRCAExchange SVs
+longLabel BRCAExchange BRCA1/2 variants of >= 50 nucleotides
+supertrack brcaexchange hide
+type bigBed 9 +
+visibility hide
+url https://brcaexchange.org/variant/$<CA_ID>
+urlLabel Link to BRCA Exchange
+itemRgb on
+mouseOver $_mouseOver
+noScoreFilter on
+skipFields chrom,chromStart,chromEnd,score,strand,thickStart,thickEnd,reserved, _mouseOver
+html ../description.html
+
+
+track popfreqVariants
+bigDataUrl popfreq_var.bb
+shortLabel ACMG_Popfreq_var
+longLabel BRCAExchange: ACMG Population Frequency Evidence Code Assignments (Provisional) for variants of <50 nucleotides
+supertrack brcaexchange hide
+type bigBed 9 +
+visibility pack
+url https://brcaexchange.org/variant/$<CA_ID>
+urlLabel Link to BRCA Exchange
+itemRgb on
+mouseOver $_mouseOver
+noScoreFilter on
+skipFields chrom,chromStart,chromEnd,score,strand,thickStart,thickEnd,reserved, _mouseOver
+html ../description.html
+
+track popfreqSV
+bigDataUrl popfreq_sv.bb
+shortLabel ACMG_Popfreq_SV
+longLabel BRCAExchange: ACMG Population Frequency Evidence Code Assignments (Provisional) for variants of  >= 50 nucleotides
+supertrack brcaexchange hide
+type bigBed 9 +
+visibility hide
+url https://brcaexchange.org/variant/$<CA_ID>
+urlLabel Link to BRCA Exchange
+itemRgb on
+mouseOver $_mouseOver
+noScoreFilter on
+skipFields chrom,chromStart,chromEnd,score,strand,thickStart,thickEnd,reserved, _mouseOver
+html ../description.html
