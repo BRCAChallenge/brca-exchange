@@ -1,0 +1,1 @@
+Under the [ACMG/AMP Standards and Guidelines](https://pubmed.ncbi.nlm.nih.gov/25741868/), variant curators can assign specific evidence codes to variants according to their frequency in reference populations. These evidence codes contribute to the curation of the variants as Benign, Pathogenic, Likely Benign, or Likely Pathogenic.

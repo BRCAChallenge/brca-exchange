@@ -61,7 +61,7 @@ module.exports = [
         logo: require('./img/brotman_baty_institute_logo.jpg'),
         url: 'https://brotmanbaty.org/',
         currentSupporter: false
-    },
+    }/*,
     {
         id: 'NIH',
         logo: require('./img/nih_bd2k_horizontal.png'),
@@ -79,5 +79,5 @@ module.exports = [
         logo: require('./img/nci_itcr.png'),
         url: 'https://itcr.cancer.gov/',
         currentSupporter: true
-    }
+    }*/
 ];

@@ -341,8 +341,8 @@ def find_correct_hgvs(variants, transcripts):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-o', '--output', help='Output file base name')
-    parser.add_argument('-l', '--logfile', help='Ouput logfile.')
+    parser.add_argument('-o', '--output', help='Output file base name', default="out.tsv")
+    parser.add_argument('-l', '--logfile', help='Ouput logfile.', default="out.log")
     options = parser.parse_args()
     return options
 
