@@ -6,6 +6,7 @@ import re
 from common import hgvs_utils, variant_utils
 from hgvs.exceptions import HGVSError
 import hgvs
+import html
 import logging
 
 def isCurrent(element):
@@ -20,32 +21,33 @@ def textIfPresent(element, field):
     """Return the text associated with a field under the element, or
     None if the field is not present"""
     ff = element.find(field)
-    if ff == None or ff.text == None:
-        return None
-    else:
+    if ff is not None:
         return ff.text
-
-
-def processClinicalSignificanceElement(el, obj):
-    if el != None:
-        obj.reviewStatus = textIfPresent(el, "ReviewStatus")
-        obj.clinicalSignificance = textIfPresent(el, "Description")
-        obj.summaryEvidence = textIfPresent(el, "Comment")
-        obj.dateSignificanceLastEvaluated = el.get('DateLastEvaluated', None)
+    elif field in element.attrib:
+        return element.attrib[field]
     else:
-        obj.reviewStatus = None
-        obj.clinicalSignificance = None
-        obj.summaryEvidence = None
-        obj.dateSignificanceLastEvaluated = None
+        return None
+
+def findUniqueElement(name, parent):
+    """Find a child element directly or indirectly underneath this parent
+       element which should occur only once (i.e. there should be no other
+       elements of the same name).  Test this assumption and return
+       the child element"""
+    child_found = False
+    for next_child in parent.iter(name):
+        assert(child_found is False)
+        child = next_child
+        child_found = True
+    return(child)
 
 
-def build_xpath_filter_for_cv_assertions(gene_symbols):
-    symbols_str = [ f'text()="{s}"' for s in gene_symbols]
-    symbols_pred = ' or '.join(symbols_str)
+
+#def build_xpath_filter_for_cv_assertions(gene_symbols):
+##    symbols_str = [ f'text()="{s}"' for s in gene_symbols] ### HERE
+#    symbols_pred = ' or '.join(symbols_str)
 
     # filter assertion if it contains a Symbol we are interested in
-    return f"ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[({symbols_pred}) and @Type=\"Preferred\"]"
-
+#    return f"ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[({symbols_pred}) and @Type=\"Preferred\"]"
 
 def extractSynonyms(el):
     include_types = {'ProteinChange3LetterCode', 'ProteinChange1LetterCode',
@@ -70,32 +72,25 @@ def extractSynonyms(el):
     return sy + sy_alt
 
 
-def extract_genomic_coordinates_from_measure(meas_el):
+def extract_genomic_coordinates_from_location(loc):
     """
-    meas_el: `xml` module object of a ClinVar `Measure` element
-
+    loc: `xml` module object of a ClinVar `Location` element
     returns: dictionary of assembly (str) to genomic coordinates (VCFVariant object)
     """
-
-    sequence_locations = meas_el.findall('SequenceLocation')
-
     coords = {}
-    for el in sequence_locations:
-        assembly = el.attrib['Assembly'] # GRCh38
-
-        if el.get('referenceAlleleVCF'):
+    for sl in loc.iter('SequenceLocation'):
+        assembly = sl.attrib['Assembly'] # GRCh38
+        if sl.get('referenceAlleleVCF'):
             coords[assembly] = variant_utils.VCFVariant(
-                int(el.get('Chr')),
-                int(el.get('positionVCF')),
-                el.get('referenceAlleleVCF'),
-                el.get('alternateAlleleVCF')
+                int(sl.attrib['Chr']),
+                int(sl.attrib['positionVCF']),
+                sl.attrib['referenceAlleleVCF'],
+                sl.attrib['alternateAlleleVCF']
             )
-
     # if no reference/alternate allele found, compute (assuming genomic coordinates
     # are either present for all assemblies or for none)
-    if not coords:
-        coords = _extract_genomic_coordinates_from_non_genomic_fields(meas_el)
-
+    #if not coords:
+    #    coords = _extract_genomic_coordinates_from_non_genomic_fields(meas_el)
     return coords
 
 
@@ -164,30 +159,64 @@ class genomicCoordinates:
 
 
 class variant:
-    """The Measure set.  We are interested in the variants specifically,
-    but measure sets can be other things as well, such as haplotypes"""
+    """The variant (SimpleAllele) set.  """
 
-    def __init__(self, element, name, id, debug=False):
+    def __init__(self, element, debug=True):
         self.element = element
-        self.id = id
+        self.valid = True
+        self.variantType = textIfPresent(element, "VariantType")
+        if "AlleleID" in element.attrib:
+            self.id = element.get("AlleleID")
+        else:
+            self.id = None
         if debug:
             print("Parsing variant", self.id)
-        self.name = name
-
-        self.attribute = dict()
-        for attrs in element.findall("AttributeSet"):
-            for attrib in attrs.findall("Attribute"):
-                self.attribute[attrib.get("Type")] = attrib.text
-
-        self.coordinates = extract_genomic_coordinates_from_measure(element)
-
         self.geneSymbol = None
-        symbols = element.findall("MeasureRelationship/Symbol")
-        for symbol in symbols:
-            symbol_val = textIfPresent(symbol, "ElementValue")
-            if symbol_val.startswith('BRCA'):
-                self.geneSymbol = symbol_val
-
+        geneList = element.find("GeneList")
+        if geneList is not None:
+            for gene in geneList.iter("Gene"):
+                geneSymbol = gene.get("Symbol")
+                if self.geneSymbol is None:
+                    self.geneSymbol = geneSymbol
+                else:
+                    self.geneSymbol = self.geneSymbol + "," + geneSymbol
+        location = element.find("Location")
+        if location is None:
+            self.valid = False
+            return
+        self.coordinates = extract_genomic_coordinates_from_location(location)
+        self.hgvs_cdna = None
+        self.proteinChange = None
+        self.synonyms = list()
+        spdi = textIfPresent(element, "CanonicalSPDI")
+        pc = textIfPresent(element, "ProteinChange")
+        if pc is not None:
+            self.synonyms.append(pc)
+        if element.find("HGVSlist"):
+            for hgvsObj in element.find("HGVSlist").iter("HGVS"):
+                pe = hgvsObj.find("ProteinExpression")
+                if pe:
+                    proteinHgvs = pe.find("Expression").text
+                    if debug:
+                        print("protein HGVS", proteinHgvs)
+                    self.synonyms.append(proteinHgvs)
+                ne = hgvsObj.find("NucleotideExpression")
+                if ne:
+                    nucleotideHgvs = ne.find("Expression").text
+                    if debug:
+                        print("Nucleotide hgvs", nucleotideHgvs)
+                    self.synonyms.append(nucleotideHgvs)
+                    if "MANESelect" in ne.attrib:
+                        if ne.attrib["MANESelect"] == "true":
+                            self.hgvs_cdna = nucleotideHgvs
+                            if pe:
+                                self.proteinChange = proteinHgvs
+                                if debug:
+                                    print("MANE Select HGVS cDNA ",
+                                          nucleotideHgvs,
+                                          "protein", proteinHgvs)
+                
+                
 
 
 class referenceAssertion:
@@ -195,177 +224,169 @@ class referenceAssertion:
 
     def __init__(self, element, debug=False):
         self.element = element
-        self.id = element.get("ID")
+        self.valid = True
+        self.title = element.get("Title")
         if debug:
-            print("Parsing ReferenceClinVarAssertion", self.id)
-
-        processClinicalSignificanceElement(element.find(
-            "ClinicalSignificance"), self)
-
-
-        obs = element.find("ObservedIn")
-        if obs == None:
-            self.origin = None
-            self.ethnicity = None
-            self.geographicOrigin = None
-            self.age = None
-            self.gender = None
-            self.familyData = None
-            self.method = None
+            print("Parsing ReferenceClinVarAssertion", self.title)
+        gc = element.find(".//GermlineClassification")
+        if gc is None:
+            self.valid = False
+            return
+        self.reviewStatus = textIfPresent(gc, "ReviewStatus")
+        self.clinicalSignificance = textIfPresent(gc, "Description")
+        if self.clinicalSignificance is not None:
+            self.dateSignificanceLastEvaluated = gc.find("Description").get("DateLastEvaluated")
         else:
-            sample = obs.find("Sample")
-            if sample != None:
-                self.origin = textIfPresent(sample, "Origin")
-                self.ethnicity = textIfPresent(sample, "Ethnicity")
-                self.geographicOrigin = textIfPresent(sample, "GeographicOrigin")
-                self.age = textIfPresent(sample, "Age")
-                self.gender = textIfPresent(sample, "Gender")
-                self.familyData = textIfPresent(sample, "FamilyData")
-            method = obs.find("Method")
-            if method != None:
-                self.method = textIfPresent(method, "MethodType")
-        self.variant = None
-        self.synonyms = []
+            self.dateSignificanceLastEvaluated = None
+        self.summaryDescription = None
 
-        measureSet = element.find("MeasureSet")
-        #if measureSet.get("Type") == "Variant":
 
-        if len(measureSet.findall("Measure")) > 1:
-            logging.warning("Assertion with ID " + str(self.id) + " has multiple measures. Taking first one.")
-        if len(measureSet.findall("Measure")) >= 1:
-            name = measureSet.find("Name")
-            if name == None:
-                variantName = None
-            else:
-                variantName = name.find("ElementValue").text
-            self.variant = variant(measureSet.find("Measure"), variantName,
-                                   measureSet.get("ID"),
-                                   debug=debug)
-
-        self.synonyms = extractSynonyms(element)
-
-        # extract condition
+class classification:
+    """For gathering data on the trait.  This code expects only one trait"""
+    def __init__(self, element, debug=False):
+        self.element = element        
         self.condition_type = None
         self.condition_value = None
-        self.condition_db_id = None
-        traitSet = element.find("TraitSet")
-        if traitSet != None:
-            self.condition_type = traitSet.attrib["Type"]
-            trait = traitSet.find("Trait")
-            if trait != None:
-                names = trait.findall("Name")
-                if names != None and len(names) > 0:
-                    for name in names:
-                        ev = name.find("ElementValue")
-                        if ev != None and ev.attrib["Type"] == "Preferred":
-                            self.condition_value = textIfPresent(name, "ElementValue")
-                        break
-                xrefs = trait.findall("XRef")
-                if xrefs != None and len(xrefs) > 0:
-                    self.condition_db_id = []
-                    for xref in xrefs:
-                        self.condition_db_id.append(xref.attrib["DB"] + "_" + xref.attrib["ID"])
+        self.condition_db_id = list()
+        for trait in element.iter("Trait"):
+            self.condition_type = trait.get("Type")
+            for name in trait.iter("Name"):
+                ev = name.find("ElementValue")
+                if ev.get("Type") == "Preferred":
+                    self.condition_value = ev.text
+                for xref in trait.iter("XRef"):
+                    if not re.search("Genetic Testing Registry", xref.get("DB")):
+                        xref_string = xref.get("DB") + "_" + xref.get("ID")
+                        if not xref_string in self.condition_db_id:
+                            self.condition_db_id.append(xref_string)
 
 
 
-class clinVarAssertion:
+class clinicalAssertion:
     """Class for representing one submission (i.e. one annotation of a
-    submitted variant"""
+dir(referen    submitted variant"""
 
+    
+    
     def __init__(self, element, debug=False):
         self.element = element
         self.id = element.get("ID")
         if debug:
-            print("Parsing ClinVarAssertion", self.id)
-        cvsd = element.find("ClinVarSubmissionID")
-        if cvsd == None:
-            self.submitter = None
-            self.dateSubmitted = None
-        else:
-            self.submitter = cvsd.get("submitter", default=None)
-            self.dateSubmitted = cvsd.get("submitterDate")
+            print("Parsing ClinicalAssertion", self.id)
+        self.dateSubmitted = element.get("SubmissionDate")
+        self.dateLastUpdated = element.get("DateLastUpdated")
         cva = element.find("ClinVarAccession")
         if cva == None:
             self.accession = None
         else:
-            self.accession = cva.get("Acc", default=None)
-            self.accession_version = cva.get("Version", default=None)
-
-        self.origin = None
-        self.method = None
-        self.description = None
-        oi = element.find("ObservedIn")
-        if oi != None:
+            self.accession = cva.get("Accession")
+            self.accession_version = cva.get("Version")
+            self.submitter = cva.get("SubmitterName")
+        classif = element.find("Classification")
+        self.reviewStatus = textIfPresent(classif, "ReviewStatus")
+        self.dateSignificanceLastEvaluated = classif.get("DateLastEvaluated")
+        self.clinicalSignificance = textIfPresent(classif,
+                                                  "GermlineClassification")
+        self.summaryEvidence = textIfPresent(classif, "Comment")
+        oil = element.find("ObservedInList")
+        self.origin = list()
+        self.method = list()
+        self.description = list()
+        for oi in oil.iter("ObservedIn"):
             sample = oi.find("Sample")
             if sample != None:
-                self.origin = textIfPresent(sample, "Origin")
+                origin = textIfPresent(sample, "Origin")
+                if not origin in self.origin:
+                    self.origin.append(origin)
             method = oi.find("Method")
             if method != None:
-                self.method = textIfPresent(method, "MethodType")
-            description = oi.find("ObservedData")
-            if description != None:
-                for attr in description.findall("Attribute"):
-                    if attr.attrib["Type"] == 'Description':
-                        self.description = textIfPresent(description, "Attribute")
+                newMethod = textIfPresent(method, "MethodType")
+                if not newMethod in self.method:
+                    self.method.append(newMethod)
+            od = oi.find("ObservedData")
+            if od != None:
+                for attr in od.iter("Attribute"):
+                    if attr.get("Type") == 'Description':
+                        newDescription = textIfPresent(od, "Attribute")
+                    else:
+                        newDescription = "None"
+                    if not newDescription in self.description:
+                        self.description.append(newDescription)
 
-        processClinicalSignificanceElement(element.find(
-            "ClinicalSignificance"), self)
-
-        self.dateLastUpdated = cva.get("DateUpdated")
-
-        self.synonyms = extractSynonyms(element)
 
 
-class clinVarSet:
-    """Container class for a ClinVarSet record, which is a set of submissions
+class variationArchive:
+    """Container class for a variationArchive record, which is a set of 
+    submissions
     that were submitted to ClinVar together.  In the ClinVar terminology,
-    each ClinVarSet is one aggregate record ("RCV Accession"), which contains
+    each ClinVarSet is one "SimpleAllele" with one aggregate record 
+   ("RCV Accession"), which contains
     one or more submissions ("SCV Accessions").
     """
 
-    def __init__(self, element, debug=False):
+    def __init__(self, element, debug=True):
         self.element = element
-        self.id = element.get("ID")
+        self.id = element.get("VariationID")
         if debug:
-            print("Parsing ClinVarSet ID", self.id)
-        rcva = element.find("ReferenceClinVarAssertion")
-        if isCurrent(rcva):
-            self.referenceAssertion = referenceAssertion(rcva, debug=debug)
+            print("DEBUG: Parsing ClinVarSet ID", self.id)
+        self.valid = True
+        sa = element.find("./ClassifiedRecord/SimpleAllele")
+        if sa is None:
+            self.valid = False
+            return
+        self.variant = variant(sa, debug=False)
+        if not self.variant.valid:
+            self.valid = False
+            return
+        #
+        # Find an HGVS variant name, either by taking the VariationName object of this element and removing the
+        # gene name in the parens, or if that name doesn't match an HGVS expression, look for a viable HGVS expression
+        # amoung the synonyms
+        fullname = re.sub(r'\([^)]*\)', '', html.unescape(element.get("VariationName")))
+        selected_hgvs = extract_hgvs_cdna(fullname, self.variant.synonyms)
+        self.name = re.sub(r'^\s+|\s+$', '', selected_hgvs)
+                                      
+        #
+        # Look for the RCVAccession object.  There should be exactly one.
+        rcva = element.find("./ClassifiedRecord/RCVList/RCVAccession")
+        if rcva is None:
+            self.valid = False
+            return
+        self.referenceAssertion = referenceAssertion(rcva, debug=False)
+        if not self.referenceAssertion.valid:
+            self.valid = False
+            return
+        
+        #
+        # Look for the GermlineClassification object.
+        cl = element.find("./ClassifiedRecord/Classifications")
+        self.classification = classification(cl, debug=debug)
+        
         self.otherAssertions = dict()
 
-        for item in element.findall("ClinVarAssertion"):
+        for item in element.iter("ClinicalAssertion"):
             if isCurrent(item):
-                cva = clinVarAssertion(item)
-                accession = cva.accession
-                self.otherAssertions[accession] = cva
+                ca = clinicalAssertion(item)
+                accession = ca.accession
+                self.otherAssertions[accession] = ca
+        
+def extract_hgvs_cdna(variant_name, synonym_list):
+    """
+    Finds a HGVS CDNA representation of a variant within a ClinVarSet.
+    If possible, avoid repeat representations using the "[]" synatax, since
+    we are currently not able to handle it further downstream (https://github.com/biocommons/hgvs/issues/113)
 
-        if self.referenceAssertion.variant:
-            self.referenceAssertion.hgvs_cdna = self.extract_hgvs_cdna(self.referenceAssertion.variant.name, element)
+    :param variant_name: variant name from title
+    :param synonym_list: synonyms extracted from variant object
+    :return: HGVS CDNA representation as string
+    """
 
-    def extract_hgvs_cdna(self, variant_name, clinvar_set_el):
-        """
-        Finds a HGVS CDNA representation of a variant within a ClinVarSet.
-        If possible, avoid repeat representations using the "[]" synatax, since
-        we are currently not able to handle it further downstream (https://github.com/biocommons/hgvs/issues/113)
+    # only take variants starting with NM_ and not containing []
+    hgvs_cdna_re = r'NM_.*:[^\[]*$'
+    if not re.match(hgvs_cdna_re, variant_name):
+        # check for anything in the synonym list that matches an HGVS expression
+        filtered = [s for s in synonym_list if re.match(hgvs_cdna_re, s)]
+        if filtered:
+            return filtered[0]
 
-        :param variant_name: variant name from title
-        :param clinvar_set_el: clinvar set element
-        :return: HGVS CDNA representation as string
-        """
-        hgvs_cand = re.sub(r"\(" + "(BRCA[1|2])" + r"\)",
-                      "", variant_name.split()[0])
-
-        # only take variants starting with NM_ and not containing []
-        hgvs_cdna_re = r'NM_.*:[^\[]*$'
-
-        if not re.match(hgvs_cdna_re, hgvs_cand):
-            # taking Attribute of 'HGVS', 'HGVS, coding' or 'HGVS, coding, RefSeq' in
-            # both ReferenceClinVarAssertion and ClinVarAssertion's
-            hgvs_candidates = [ev.text for ev in clinvar_set_el.findall('.//Measure/AttributeSet/Attribute')
-                               if ev.attrib['Type'].startswith('HGVS, coding') or ev.attrib['Type'] == 'HGVS']
-
-            filtered = [s for s in hgvs_candidates if re.match(hgvs_cdna_re, s)]
-            if filtered:
-                return filtered[0]
-
-        return hgvs_cand
+    return variant_name

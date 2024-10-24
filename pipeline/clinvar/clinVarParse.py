@@ -23,30 +23,30 @@ MULTI_VALUE_SEP = ','
 
 def processSubmission(submissionSet, assembly):
     ra = submissionSet.referenceAssertion
+    classification = submissionSet.classification
     variant = submissionSet.variant
 
     if variant is None:
-        logging.warning("No variant information could be extracted for ReferenceClinVarAssertion ID %s %s",
+        logging.warning("Warning","No variant information could be extracted for ReferenceClinVarAssertion ID %s %s",
                      submissionSet.referenceAssertion.id, [c.accession for c in submissionSet.otherAssertions.values()])
         return None
 
+    hgvs = submissionSet.name
     debug = False
     for oa in list(submissionSet.otherAssertions.values()):
-        if oa.origin != "somatic":
-            hgvs = ra.hgvs_cdna
-
-            proteinChange = None
-            if "HGVS, protein, RefSeq" in variant.attribute:
-                proteinChange = variant.attribute["HGVS, protein, RefSeq"]
-
-            if assembly in variant.coordinates:
-
-                synonyms = MULTI_VALUE_SEP.join(ra.synonyms + oa.synonyms)
-
+        if ("somatic" in oa.origin and len(oa.origin) == 1):
+            logging.warning("HGVS %s because submissions are only somatic in origin", hgvs)
+        else:
+            if not assembly in variant.coordinates:
+                logging.warning("HGVS %s rejected for poor variant coordinate data", hgvs)
+            else:
+                synonyms = MULTI_VALUE_SEP.join(variant.synonyms)
                 vcf_var = variant.coordinates[assembly]
 
                 # Omit the variants that don't have any genomic start coordinate indicated.
-                if vcf_var and _bases_only(vcf_var.ref) and _bases_only(vcf_var.alt):
+                if not (vcf_var and _bases_only(vcf_var.ref) and _bases_only(vcf_var.alt)):
+                    logging.warning("HGVS %s rejected for poor VCF data", hgvs)
+                else:
                     print("\t".join((str(hgvs),
                                      oa.submitter,
                                      str(oa.clinicalSignificance),
@@ -55,17 +55,17 @@ def processSubmission(submissionSet, assembly):
                                      str(oa.accession),
                                      str(oa.accession_version),
                                      str(oa.id),
-                                     str(oa.origin),
-                                     str(oa.method),
-                                     str(vcf_var).replace('g.', ''),
+                                     ",".join(oa.origin),
+                                     ",".join(oa.method),
+                                     str(vcf_var).replace('g.', ''), #change
                                      str(variant.geneSymbol),
-                                     str(proteinChange),
-                                     str(oa.description),
+                                     str(variant.proteinChange),
+                                     ",".join(oa.description),
                                      str(oa.summaryEvidence),
                                      str(oa.reviewStatus),
-                                     str(ra.condition_type),
-                                     str(ra.condition_value),
-                                     ",".join(ra.condition_db_id) if isinstance(ra.condition_db_id, list) else str(ra.condition_db_id),
+                                     str(classification.condition_type),
+                                     str(classification.condition_value),
+                                     ",".join(classification.condition_db_id),
                                      str(synonyms))))
 
 
@@ -87,11 +87,17 @@ def main():
 
 
     with open(args.clinVarXmlFilename) as inputFile:
-        for event, elem in ET.iterparse(input_fp, events=('start', 'end')):
+        for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
             if event == 'end' and elem.tag == 'VariationArchive':
                 if clinvar.isCurrent(elem):
-                    submissionSet = clinvar.clinVarSet(elem)
-                    processSubmission(submissionSet, args.assembly)
+                    submissionSet = clinvar.variationArchive(elem, debug=False)
+                    if submissionSet.valid:
+                        processSubmission(submissionSet, args.assembly)
+                    else:
+                        if hasattr(submissionSet, 'name'):
+                            logging.warning("Submission %s not valid", submissionSet.name)
+                        else:
+                            logging.warning("Submission not valid, name not available")
                 elem.clear()
 
 if __name__ == "__main__":
