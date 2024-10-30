@@ -159,6 +159,8 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
         elif int(allele_count) > 0:
             return(NO_CODE)
         else:
+            if debug:
+                print("Returning PM2_supporting or no code: is_snv", is_snv)
             if is_snv:
                 return(PM2_SUPPORTING)
             else:
@@ -167,7 +169,7 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
 
 
 def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
-                            code_v3, faf_v3, faf_popmax_v3, in_v3,
+                            code_v3, faf_v3, faf_popmax_v3, in_v3, is_snv,
                             debug=False):
     """
     Given the per-dataset evidence codes, generate an overall evidence code
@@ -269,22 +271,26 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
     variant[POPFREQ_CODE_DESCR] = FAIL_NOT_ASSAYED_MSG
     observable_in_v2 = False
     observable_in_v3 = False
-    if is_variant_observable(int(variant["pyhgvs_Hg37_Start"]),int(variant["pyhgvs_Hg37_End"]),
-                             int(variant["Chr"]),coverage_v2):
-        variant_v2_code_id = PM2_SUPPORTING
-        variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
-        variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
-        observable_in_v2 = True
-    if is_variant_observable(int(variant["Hg38_Start"]),
-                             int(variant["Hg38_End"]),
-                             int(variant["Chr"]), coverage_v3):
-        variant_v3_code_id = PM2_SUPPORTING
-        variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
-        variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
-        observable_in_v3 = True
-    is_snv = (variant["Hg38_Start"] == variant["Hg38_End"])
+    is_snv = (variant["Hg38_Start"] == variant["Hg38_End"]
+              and len(variant["Ref"]) == 1 and len(variant["Alt"]) == 1)
+    if is_snv:
+        if is_variant_observable(int(variant["pyhgvs_Hg37_Start"]),
+                                 int(variant["pyhgvs_Hg37_End"]),
+                                 int(variant["Chr"]),coverage_v2):
+            variant_v2_code_id = PM2_SUPPORTING
+            variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
+            variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
+            observable_in_v2 = True
+        if is_variant_observable(int(variant["Hg38_Start"]),
+                                 int(variant["Hg38_End"]),
+                                 int(variant["Chr"]), coverage_v3):
+            variant_v3_code_id = PM2_SUPPORTING
+            variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
+            variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
+            observable_in_v3 = True
     if debug:
-        print("variant is snv:", is_snv)
+        print("variant is snv:", is_snv, "codes", variant_v2_code_id,
+              variant_v3_code_id)
     #
     # the gnomAD v2 variant ID is set when the variant is in the genome
     # OR exome portion of gnomAD. Focus on variants that are in the exome
@@ -308,7 +314,7 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
                                                          variant["Allele_count_exome_GnomAD"],
                                                          is_snv, read_depth_v2,
                                                          variant_is_flagged(variant["Variant_id_GnomAD"],
-                                                                            flags_v2))
+                                                                            flags_v2), debug)
         if debug:
             print("gnomAD V2 variant", variant["Variant_id_GnomAD"],
                   "popmax", variant["faf95_popmax_exome_GnomAD"],
@@ -332,7 +338,7 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
                                                          variant["Allele_count_genome_GnomADv3"],
                                                          is_snv, read_depth_v3,
                                                          variant_is_flagged(variant["Variant_id_GnomADv3"],
-                                                                            flags_v3))
+                                                                            flags_v3), debug)
         if debug:
             print("gnomAD V3 variant", variant["Variant_id_GnomADv3"],
                   "popmax", variant["faf95_popmax_genome_GnomADv3"],
@@ -346,10 +352,11 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
                                                             variant_in_v2, variant_v3_code_id, 
                                                             variant["faf95_popmax_genome_GnomADv3"],
                                                             variant["faf95_popmax_population_genome_GnomADv3"],
-                                                            variant_in_v3)
+                                                            variant_in_v3, is_snv, debug)
     if debug:
         print("consensus code:", variant[POPFREQ_CODE_ID], "msg",
-              variant[POPFREQ_CODE_DESCR])
+              variant[POPFREQ_CODE_DESCR], "v2 code", variant_v2_code_id,
+              "v3 code", variant_v3_code_id)
     return()
 
 
