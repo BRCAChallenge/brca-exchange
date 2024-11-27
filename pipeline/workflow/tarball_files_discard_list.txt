@@ -30,6 +30,7 @@
 ./release/artifacts/GnomADv3.vcf
 ./release/artifacts/LOVDready.vcf
 ./release/artifacts/LOVD.vcf
+./release/artifacts/ready_for_priors.tsv
 ./release/artifacts/releaseDiff.log
 ./release/artifacts/right1000_Genomes
 ./release/artifacts/rightBIC
@@ -39,6 +40,7 @@
 ./release/artifacts/rightexLOVD
 ./release/artifacts/rightENIGMA_BRCA12_Functional_Assays
 ./release/artifacts/
+./release/artifacts/ready_for_priors.tsv
 ./release/artifacts/rightGnomAD
 ./release/artifacts/rightGnomADv3
 ./release/artifacts/rightLOVD
@@ -141,3 +143,5 @@
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.start
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.stop
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.version
+./release/artifacts/built_with_popfreq.tsv
+./release/artifacts/built_with_bioinfo_pred.tsv

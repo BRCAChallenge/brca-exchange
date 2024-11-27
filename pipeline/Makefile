@@ -75,7 +75,6 @@ endif
 
 COMMON_DOCKER_ARGS = --rm -u `id -u ${USER}`:$(DOCKER_GRP) \
 	-e "DATA_DATE=$(DATA_DATE)" \
-        -e "UTA_DB_URL=postgresql://anonymous@0.0.0.0:$(UTA_PORT)/uta/uta_$(UTA_RELEASE_DATE)" \
 	-e "HGVS_SEQREPO_DIR=$(SEQ_REPO_DIR_DOCKER)/latest" \
   -e "PYTHONPATH=/opt/brca-exchange/pipeline" \
 	--network host \
@@ -142,7 +141,7 @@ test-coverage: ## Running pipeline unit tests with coverage information
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --cov --ignore=splicing/ && coverage html --include="/opt/brca-exchange/pipeline/*" --omit="*/test_*"'
 
 
-build-release: start-local-uta checkout build-docker setup-files setup-lovd download-resources download-seqrepo start-seqrepo-rest-service run-pipeline variants-by-source ## create new data release
+build-release: checkout build-docker setup-files setup-lovd download-resources download-seqrepo start-seqrepo-rest-service run-pipeline variants-by-source ## create new data release
 
 variants-by-source: ## postprocessing: compute statistics for changes with respect to the last release
 	docker run $(COMMON_DOCKER_ARGS) $(PIPELINE_IMAGE) python /opt/brca-exchange/pipeline/utilities/variantsBySource.py  -i /files/data/output/release/built_with_change_types.tsv -c true
@@ -179,7 +178,7 @@ post-release-cmds: cleanup-failed include-release-notes push-docker tag-release 
 setup-data-from-latest-release-tar: setup-files ## sets up brca output dir with data contained in release archive from last release (only data from variant merging onwards)
 	tar -C $(OUT_DIR) -zxf $(PREVIOUS_RELEASE_PATH)
 
-setup-dev-env: start-local-uta build-docker setup-files download-resources ## setup development environment
+setup-dev-env: build-docker setup-files download-resources ## setup development environment
 
 clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +

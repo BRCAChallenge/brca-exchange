@@ -465,3 +465,7 @@ DP_DL_spliceAI	Evidence	#COPY	"The location of donor loss relative to variant po
 result_spliceai	Evidence	#COPY	"The maximum of four delta scores (DS_AG, DS_AL, DS_DG, DS_DL) is used as basis for spliceogenicity predictions"	0.0
 BayesDel_nsfp33a_noAF	Evidence	bayesdel_noaf	"BayesDel score, computed without allele frequency"	0.55
 change_type	Internal	#SKIP	"type of change with respect to last release"	"changed_information"
+Provisional_Evidence_Code_Popfreq	Evidence #COPY	"The provisional ACMG population frequency evidence code, by the VCEP rules"	"PM2_Supporting (met)"
+Provisional_Evidence_Description_Popfreq	 #Copy	"Details on how the provisional ACMG popfreq evidence code was determined"   "This variant is absent from gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥25) and gnomAD v3.1 (non-cancer subset, read depth ≥25) (PM2_Supporting met)"
+Provisional_Evidence_Code_Bioinfo		 Evidence	 #SKIP	"The provisional ACMG bioinformatic evidence code, by the VCEP rules"  N/A
+Provisional_Evidence_Description_Bioinfo	 Evidence	 #SKIP	"Details on how the provisional ACMG bioinformatic evidence code was determined"	NA

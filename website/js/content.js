@@ -224,11 +224,6 @@ const helpContentResearch = [
                         id: "clinical-significance-lovd",
                         contents: require("../content/help/research/clinical-significance-lovd.md")
                     },
-                    {
-                        name: "BIC",
-                        id: "clinical-significance-bic",
-                        contents: require("../content/help/research/clinical-significance-bic.md")
-                    },
                 ]
             },
             {
@@ -243,13 +238,30 @@ const helpContentResearch = [
                 // reference: "https://www.ncbi.nlm.nih.gov/pubmed/21990134"
             },
             {
-                name: "What information is provided in the Allele Frequency Reference Sets Tile?",
+                name: "What information is provided in the Allele Frequency Reference Sets tile?",
                 id: "allele-frequency-reference-sets",
                 contents: require("../content/help/research/allele-frequency-reference-sets.md"),
                 list: [
                     {
-			name: "gnomAD: Genome Aggregation Database (non-cancer cohort)",
+                        name: "gnomAD: Genome Aggregation Database (non-cancer cohort)",
                         contents: require("../content/help/research/allele-frequency-gnomad.md")
+                    },
+                ]
+            },
+            {
+                name: "What information is provided in the ACMG Variant Evidence Codes, Provisional Assignment tile?",
+                id: "acmg-variant-evidence-codes-provisional-assignment",
+                contents: require("../content/help/research/acmg-variant-evidence-codes-provisional-assignment.md"),
+                list: [
+                    {
+                        name: "Population Frequency",
+                        id: "acmg-variant-evidence-codes-population-frequency",
+                        contents: require("../content/help/research/acmg-variant-evidence-codes-population-frequency.md")
+                    },
+                    {
+                        name: "Computational Prediction",
+                        id: "acmg-variant-evidence-codes-computational-prediction",
+                        contents: require("../content/help/research/acmg-variant-evidence-codes-computational-prediction.md")
                     },
                 ]
             },
