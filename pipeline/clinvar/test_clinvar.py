@@ -17,7 +17,7 @@ sitionVCF="32919382" referenceAlleleVCF="A" alternateAlleleVCF="G"/>
       </Location>
     """
 
-    measure_el = ET.fromstring(sample_measure)
+    location_el = ET.fromstring(sample_location)
 
     genomic_coords = clinvar_common.extract_genomic_coordinates_from_location(location_el)
 
@@ -34,7 +34,7 @@ def test_genomic_coordinate_extraction_from_NM():
     """
     measure_el = ET.fromstring(sample_measure)
 
-    genomic_coords = clinvar_common.extract_genomic_coordinates_from_measure(measure_el)
+    genomic_coords = clinvar_common._extract_genomic_coordinates_from_non_genomic_fields(measure_el)
 
     assert genomic_coords[hgvs_utils.HgvsWrapper.GRCh38_Assem] == variant_utils.VCFVariant(13, 32340945, "CTG", "C")
 
