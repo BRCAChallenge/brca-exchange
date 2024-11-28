@@ -264,9 +264,7 @@ class classification:
 
 class clinicalAssertion:
     """Class for representing one submission (i.e. one annotation of a
-dir(referen    submitted variant"""
-
-    
+    submitted variant)"""
     
     def __init__(self, element, debug=False):
         self.element = element
@@ -287,6 +285,18 @@ dir(referen    submitted variant"""
         self.dateSignificanceLastEvaluated = classif.get("DateLastEvaluated")
         self.clinicalSignificance = textIfPresent(classif,
                                                   "GermlineClassification")
+        self.clinicalSignificanceCitations = list()
+        for citation in classif.iter("Citation"):
+            if citation.get("Source") == "PubMed":
+                self.clinicalSignificanceCitations.append(textIfPresent(citation, "ID"))
+        attributeSet = element.find("AttributeSet")
+        self.assertionMethod = None
+        self.assertionMethodCitation = None
+        for attribute in attributeSet.iter("Attribute"):
+            if attributeSet.get("Type") == "AssertionMethod":
+                self.assertionMethod = attributeSet.text
+                citation = attributeSet.find("Citation")
+                self.assertionMethodCitation = textIfPresent(citation, "URL")
         self.summaryEvidence = textIfPresent(classif, "Comment")
         oil = element.find("ObservedInList")
         self.origin = list()
@@ -340,8 +350,8 @@ class variationArchive:
             return
         #
         # Find an HGVS variant name, either by taking the VariationName object of this element and removing the
-        # gene name in the parens, or if that name doesn't match an HGVS expression, look for a viable HGVS expression
-        # amoung the synonyms
+        # gene name in the parens, or if that name doesn't match an HGVS expression, look for a viable HGVS 
+        # expression amoung the synonyms
         fullname = re.sub(r'\([^)]*\)', '', html.unescape(element.get("VariationName")))
         selected_hgvs = extract_hgvs_cdna(fullname, self.variant.synonyms)
         self.name = re.sub(r'^\s+|\s+$', '', selected_hgvs)
@@ -361,9 +371,7 @@ class variationArchive:
         # Look for the GermlineClassification object.
         cl = element.find("./ClassifiedRecord/Classifications")
         self.classification = classification(cl, debug=debug)
-        
         self.otherAssertions = dict()
-
         for item in element.iter("ClinicalAssertion"):
             if isCurrent(item):
                 ca = clinicalAssertion(item)
