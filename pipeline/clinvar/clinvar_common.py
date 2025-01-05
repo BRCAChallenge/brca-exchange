@@ -289,13 +289,15 @@ class clinicalAssertion:
         for citation in classif.iter("Citation"):
             if citation.get("Source") == "PubMed":
                 self.clinicalSignificanceCitations.append(textIfPresent(citation, "ID"))
-        attributeSet = element.find("AttributeSet")
         self.assertionMethod = None
         self.assertionMethodCitation = None
-        for attribute in attributeSet.iter("Attribute"):
-            if attributeSet.get("Type") == "AssertionMethod":
-                self.assertionMethod = attributeSet.text
-                citation = attributeSet.find("Citation")
+        self.citation = None
+        for attributeSet in element.iter("AttributeSet"):
+            for attribute in attributeSet.iter("Attribute"):
+                if attribute.get("Type") == "AssertionMethod":
+                    self.assertionMethod = attribute.text
+            citation = attributeSet.find("Citation")
+            if citation != None:
                 self.assertionMethodCitation = textIfPresent(citation, "URL")
         self.summaryEvidence = textIfPresent(classif, "Comment")
         oil = element.find("ObservedInList")
@@ -353,7 +355,7 @@ class variationArchive:
         # gene name in the parens, or if that name doesn't match an HGVS expression, look for a viable HGVS 
         # expression amoung the synonyms
         fullname = re.sub(r'\([^)]*\)', '', html.unescape(element.get("VariationName")))
-        selected_hgvs = extract_hgvs_cdna(fullname, self.variant.synonyms)
+        selected_hgvs = extract_hgvs_cdna(fullname, self.variant.hgvs_cdna, self.variant.synonyms)
         self.name = re.sub(r'^\s+|\s+$', '', selected_hgvs)
                                       
         #
@@ -378,7 +380,7 @@ class variationArchive:
                 accession = ca.accession
                 self.otherAssertions[accession] = ca
         
-def extract_hgvs_cdna(variant_name, synonym_list):
+def extract_hgvs_cdna(variant_name, variant_hgvs_cdna, synonym_list):
     """
     Finds a HGVS CDNA representation of a variant within a ClinVarSet.
     If possible, avoid repeat representations using the "[]" synatax, since
@@ -391,10 +393,14 @@ def extract_hgvs_cdna(variant_name, synonym_list):
 
     # only take variants starting with NM_ and not containing []
     hgvs_cdna_re = r'NM_.*:[^\[]*$'
-    if not re.match(hgvs_cdna_re, variant_name):
+    if re.match(hgvs_cdna_re, variant_name):
+        return(variant_name)
+    elif re.match(hgvs_cdna_re, variant_hgvs_cdna):
+        return(variant_hgvs_cdna)
+    else:
         # check for anything in the synonym list that matches an HGVS expression
         filtered = [s for s in synonym_list if re.match(hgvs_cdna_re, s)]
         if filtered:
             return filtered[0]
-
-    return variant_name
+        
+    return None
