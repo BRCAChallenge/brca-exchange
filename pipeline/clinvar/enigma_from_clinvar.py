@@ -35,10 +35,23 @@ def _fetch_bic(cvs_el):
     return default_val
 
 
-def _compute_protein_changes(hgvs_cdna, hgvs_util):
+def _compute_protein_changes(hgvs_cdna, hgvs_util, synonyms):
     if hgvs_cdna is not None:
-        v_protein = hgvs_util.compute_protein_change(hgvs_cdna)
-        if v_protein is not None:
+        v_protein = hgvs_util.compute_protein_change(hgvs_cdna) 
+        if v_protein is None:
+            # this hgvs cDNA wouldn't convert to a protein.  See if one of
+            # the available synonyms matches a refseq accession and works better
+            success = False
+            print("protein translation failed on", hgvs_cdna, "testing synonyms")
+            for alt_name in synonyms:
+                if re.match(r'NM_.*:[^\[]*$', alt_name):
+                    print("testing synonym", alt_name)
+                    v_protein = hgvs_util.compute_protein_change(alt_name)
+                    if v_protein is not None:
+                        print("recursing")
+                        return(_compute_protein_changes(alt_name, hgvs_util, synonyms))
+            return(hgvs_cdna, default_val, default_val)
+        else:
             hgvs_protein = v_protein.format(
                 {'p_3_letter': True, 'p_term_asterisk': False})
             abbrev_aa_change = v_protein.format(
@@ -52,8 +65,8 @@ def _compute_protein_changes(hgvs_cdna, hgvs_util):
                     lstrip("p.").replace('(', '').replace(')', '')
             else:
                 abbrev_aa_change = default_val
-            return (abbrev_aa_change, hgvs_protein)
-    return (default_val, default_val)
+            return (hgvs_cdna, abbrev_aa_change, hgvs_protein)
+    return (hgvs_cdna, default_val, default_val)
 
 
 
@@ -75,24 +88,22 @@ def _xpath_text(el, xpath):
 
 def _parse_engima_assertion(enigma_assertion, hgvs_util):
     rec = {}
-
     rec["URL"] = default_val
     rec["Clinical_significance"] = enigma_assertion.clinicalSignificance
     rec["Date_last_evaluated"] = enigma_assertion.dateSignificanceLastEvaluated
     rec["Assertion_method"] = enigma_assertion.assertionMethod
     rec["Assertion_method_citation"] = enigma_assertion.assertionMethodCitation
-    rec["Comment_on_clinical_significance"] = ','.join(enigma_assertion.description)
+    rec["Comment_on_clinical_significance"] = enigma_assertion.summaryEvidence
     rec["Collection_method"] = ','.join(enigma_assertion.method)
     rec["Allele_origin"] = ','.join(enigma_assertion.origin)
-    rec["ClinVarAccession"] = "%s.%s" (enigma_assertion.accession, enigma_assertion.accession_version)
-
+    rec["ClinVarAccession"] = "%s.%s" % (enigma_assertion.accession,
+                                         enigma_assertion.accession_version)
     return rec
 
 # Parse a ClinVar variation archive element
 def parse_record(va_el, hgvs_util, symbols, assembly="GRCh38"):
     '''
     Extracts information out of a VariationArchive element
-
     :param cvs_el: VariationArchive element
     :param hgvs_util: instance of HGVS util to calculate protein changes
     :param assembly: str assembly to use
@@ -102,41 +113,39 @@ def parse_record(va_el, hgvs_util, symbols, assembly="GRCh38"):
     rec = {}
     va = clinvar.variationArchive(va_el)
     variant = va.variant
-    
-    rec["Gene_symbol"] = variant.geneSymbol
-    if assembly not in variant.coordinates.keys():
-        logging.warning("Skipping variant %s as no genomic coordinates could be extracted", va.name)
-        return []
-    coords = variant.coordinates[assembly]
-    rec["Genomic_Coordinate"] = "chr%d:%d:%s>%s" % (coords.chr, coords.pos, coords.ref, coords.alt)
-    rec["BIC_Nomenclature"] = _fetch_bic(va_el)
-    rec["Reference_sequence"] = default_val
-    rec["HGVS_cDNA"] = default_val
-    rec["Abbrev_AA_change"] = default_val
-    rec["HGVS_protein"] = default_val
-    if re.match("NM_", variant.hgvs_cdna):
-        rec["Reference_sequence"] = variant.hgvs_cdna.split(":")[0]
-        rec["HGVS_cDNA"] = variant.hgvs_cdna.split(":")[1]
-        (rec["Abbrev_AA_change"], rec["HGVS_protein"]) = _compute_protein_changes(variant.hgvs_cdna, hgvs_util)
-    rec["Condition_ID_type"] = va.classification.condition_type
-    rec["Condition_ID_value"] = va.classification.condition_value
-    #
-    # 11/25/2024: the trait set / condition category has been deprecated (is no longer displayed)
-    rec["Condition_category"] = default_val
-    for scv_accession in va.otherAssertions.keys():
-        oa = va.otherAssertions[scv_accession]
-        if oa.reviewStatus == "reviewed by expert panel":
-        rec_tmp = copy.deepcopy(rec)
-        rec_tmp.update(_parse_engima_assertion(oa, hgvs_util))
-        return(rec_tmp)
+    if variant.valid:
+        rec["Gene_symbol"] = variant.geneSymbol
+        if assembly not in variant.coordinates.keys():
+            logging.warning("Skipping variant %s as no genomic coordinates could be extracted", va.name)
+            return None
+        coords = variant.coordinates[assembly]
+        rec["Genomic_Coordinate"] = "chr%d:%d:%s>%s" % (coords.chr, coords.pos, coords.ref, coords.alt)
+        rec["BIC_Nomenclature"] = _fetch_bic(va_el)
+        rec["Reference_sequence"] = default_val
+        rec["HGVS_cDNA"] = default_val
+        rec["Abbrev_AA_change"] = default_val
+        rec["HGVS_protein"] = default_val
+        if re.match("NM_", va.name): 
+            (hgvs_cdna, rec["Abbrev_AA_change"], rec["HGVS_protein"]) = _compute_protein_changes(va.name, hgvs_util, variant.synonyms)
+            rec["Reference_sequence"] = hgvs_cdna.split(":")[0]
+            rec["HGVS_cDNA"] = hgvs_cdna.split(":")[1]
+        rec["Condition_ID_type"] = va.classification.condition_type
+        rec["Condition_ID_value"] = va.classification.condition_value
+        #
+        # 11/25/2024: the trait set / condition category has been deprecated (is no longer displayed)
+        rec["Condition_category"] = default_val
+        for scv_accession in va.otherAssertions.keys():
+            oa = va.otherAssertions[scv_accession]
+            if oa.reviewStatus == "reviewed by expert panel":
+                rec_tmp = copy.deepcopy(rec)
+                rec_tmp.update(_parse_engima_assertion(oa, hgvs_util))
+                return(rec_tmp)
     return None
 
 
 def _create_df(variant_records):
     df = pd.DataFrame.from_dict(variant_records)
-
     df['BX_ID'] = pd.Series(range(1, len(df) + 1))
-
     target_header = ['Gene_symbol',
                      'Genomic_Coordinate',
                      'Reference_sequence',
@@ -158,11 +167,9 @@ def _create_df(variant_records):
                      'ClinVarAccession',
                      'HGVS_protein',
                      'BX_ID']
-
     if df.empty:
         # can happen if none of the genes of interest are curated by ENIGMA
         return pd.DataFrame({}, columns=target_header)
-
     return df.loc[:, target_header]
 
 
@@ -179,8 +186,10 @@ def main(filtered_clinvar_xml, gene, output, logs):
     with open(filtered_clinvar_xml) as inputFile:
         for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
             if event == 'end' and elem.tag == 'VariationArchive':
-                next_record = parse_record(elem, hgvs_util, gene_symbol)
-                variant_records.append(next_record)
+                next_record = parse_record(elem, hgvs_util, gene_symbols)
+                if next_record is not None:
+                    variant_records.append(next_record)
+                elem.clear()
     df = _create_df(variant_records)
     df.to_csv(output, sep='\t', index=False, na_rep='-')
 

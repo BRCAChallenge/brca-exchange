@@ -36,7 +36,9 @@ class HGVSWrapper:
             else:
                 # fail the pipeline. We actually should get data, but don't due to some intermittent issue
                 # see also https://github.com/biocommons/hgvs/issues/519
-                raise RuntimeError("HGVS data not available for %s . Cannot continue. Error was %s", hgvs_cdna, e.message)
+                #raise RuntimeError("HGVS data not available for %s . Cannot continue. Error was %s", hgvs_cdna, e.message)
+                logging.warning("Issues converting %s, error was %s", hgvs_cdna, e.message)
+                return None
         except HGVSError as e:
             logging.warning('Issues converting %s. %s type %s', hgvs_cdna, e, type(e))
             return None

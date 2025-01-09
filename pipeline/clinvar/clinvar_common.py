@@ -87,10 +87,6 @@ def extract_genomic_coordinates_from_location(loc):
                 sl.attrib['referenceAlleleVCF'],
                 sl.attrib['alternateAlleleVCF']
             )
-    # if no reference/alternate allele found, compute (assuming genomic coordinates
-    # are either present for all assemblies or for none)
-    #if not coords:
-    #    coords = _extract_genomic_coordinates_from_non_genomic_fields(meas_el)
     return coords
 
 
@@ -99,21 +95,11 @@ def _preprocess_element_value(var_str):
     return re.sub(r'\s*\(p[^)]+\)', '', var_str)
 
 
-def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [hgvs_utils.HgvsWrapper.GRCh38_Assem], hgvs_wrapper = hgvs_utils.HgvsWrapper.get_instance()):
-    pref_el_lst = meas_el.findall('Name/ElementValue[@Type="Preferred"]')
-
+def accession_to_genomic_coordinates(accession, assemblies = [hgvs_utils.HgvsWrapper.GRCh38_Assem], hgvs_wrapper = hgvs_utils.HgvsWrapper.get_instance()):
     coords = {}
-    if not pref_el_lst:
-        return coords
-
-    pref = pref_el_lst[0].text
-    preprocessed_var = _preprocess_element_value(pref)
-
     hutils = hgvs_wrapper.get_instance()
-
     try:
-        v = hgvs_wrapper.hgvs_parser.parse(preprocessed_var)
-
+        v = hgvs_wrapper.hgvs_parser.parse(accession)
         for assembly in assemblies:
             if v.ac.startswith('U'):
                 v_g = hutils.u_to_genomic(v, assembly)
@@ -124,14 +110,22 @@ def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [
             else:
                 logging.warning("Skipping genomic coordinate extraction for " + preprocessed_var)
                 continue
-
             if v_g:
                 vcf = variant_utils.VCFVariant.from_hgvs_obj(v_g)
                 coords[assembly] = vcf
     except HGVSError as e:
         logging.warning("HGVS Error while attempting to process " + preprocessed_var + " : " + str(e))
-
     return coords
+
+def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [hgvs_utils.HgvsWrapper.GRCh38_Assem], hgvs_wrapper = hgvs_utils.HgvsWrapper.get_instance()):
+    pref_el_lst = meas_el.findall('Name/ElementValue[@Type="Preferred"]')
+    coords = {}
+    if not pref_el_lst:
+        return coords
+    pref = pref_el_lst[0].text
+    preprocessed_var = _preprocess_element_value(pref)
+    return accession_to_genomic_coordinates(preprocessed_var, assemblies,
+                                            hgvs_wrapper)
 
 
 class genomicCoordinates:
@@ -355,7 +349,9 @@ class variationArchive:
         # gene name in the parens, or if that name doesn't match an HGVS expression, look for a viable HGVS 
         # expression amoung the synonyms
         fullname = re.sub(r'\([^)]*\)', '', html.unescape(element.get("VariationName")))
-        selected_hgvs = extract_hgvs_cdna(fullname, self.variant.hgvs_cdna, self.variant.synonyms)
+        selected_hgvs = extract_hgvs_cdna(_preprocess_element_value(fullname),
+                                          self.variant.hgvs_cdna,
+                                          self.variant.synonyms)
         self.name = re.sub(r'^\s+|\s+$', '', selected_hgvs)
                                       
         #
