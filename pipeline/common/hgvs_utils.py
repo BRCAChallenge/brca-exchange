@@ -38,27 +38,57 @@ class HgvsWrapper:
                     m[s['name']] = s['refseq_ac']
             self.contig_maps[a] = m
 
-    def genomic_to_cdna(self, hgvs_obj, assembly=GRCh38_Assem):
+    def parse_hgvs_string(self, hgvs_string):
+        hp = self.hgvs_parser
+        hgvs_obj = None
+        try:
+            hgvs_obj = hp.parse_hgvs_variant(hgvs_string)
+        except hgvs.exceptions.HGVSParseError as e:
+            logging.info("HGVS Parsing error " + str(e))
+        return(hgvs_obj)
+
+    def to_cdna(self, hgvs_obj, target_transcript=None):
+        cdna_hgvs_obj = None
+        if hgvs_obj.type == 'c':
+            genomic_hgvs_obj = self.nm_to_genomic(hgvs_obj)
+            if genomic_hgvs_obj:
+                cdna_hgvs_obj = self.genomic_to_cdna(genomic_hgvs_obj,
+                                                     target_transcript=target_transcript)
+        elif hgvs_obj.type == 'g':
+            cdna_hgvs_obj = self.genomic_to_cdna(genomic_hgvs_ojb,
+                                                 target_transcript=target_transcript)
+        return(cdna_hgvs_obj)
+    
+        
+    def genomic_to_cdna(self, hgvs_obj, assembly=GRCh38_Assem,
+                        target_transcript=None):
         am = self.hgvs_ams[assembly]
 
         try:
             tr = am.relevant_transcripts(hgvs_obj)
 
             if tr:
-                return am.g_to_c(hgvs_obj, tr[0])
+                if target_transcript:
+                    return am.g_to_c(hgvs_obj, target_transcript)
+                else:
+                    return am.g_to_c(hgvs_obj, tr[0])
 
         except HGVSError as e:
             logging.info("CDNA conversion issues " + str(e))
 
         return None
 
-    def cdna_to_protein(self, hgvs_cdna):
+    def cdna_to_protein(self, hgvs_cdna, return_str=True):
         if not hgvs_cdna:
             return None
 
         try:
-            return str(self.hgvs_ams[HgvsWrapper.GRCh38_Assem].c_to_p(
-                hgvs_cdna))
+            if return_str:
+                return str(self.hgvs_ams[HgvsWrapper.GRCh38_Assem].c_to_p(
+                    hgvs_cdna))
+            else:
+                return self.hgvs_ams[HgvsWrapper.GRCh38_Assem].c_to_p(
+                    hgvs_cdna)
         except (hgvs.exceptions.HGVSError, IndexError, ValueError) as e:
             logging.info(
                 "Protein conversion issues with " + str(hgvs_cdna) + ": " + str(
@@ -120,7 +150,14 @@ class HgvsWrapper:
         return self.hgvs_ams[target_assembly].c_to_g(v_c)
 
     def nm_to_genomic(self, v, target_assembly=GRCh38_Assem):
-        return self.hgvs_ams[target_assembly].c_to_g(v)
+        try:
+            genomic_v = self.hgvs_ams[target_assembly].c_to_g(v)
+            return(genomic_v)
+        except hgvs.exceptions.HGVSDataNotAvailableError as e:
+            logging.info("Assembly mapping data not available " + str(e))
+        except hgvs.exceptions.HGVSInvalidIntervalError as e:
+            logging.info("Out of bounds error " + str(e))
+        return(None)
 
     @staticmethod
     def get_instance():

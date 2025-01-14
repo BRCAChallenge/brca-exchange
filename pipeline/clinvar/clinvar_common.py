@@ -155,7 +155,7 @@ class genomicCoordinates:
 class variant:
     """The variant (SimpleAllele) set.  """
 
-    def __init__(self, element, debug=True):
+    def __init__(self, element, target_gene_symbols=None, debug=True):
         self.element = element
         self.valid = True
         self.variantType = textIfPresent(element, "VariantType")
@@ -170,10 +170,17 @@ class variant:
         if geneList is not None:
             for gene in geneList.iter("Gene"):
                 geneSymbol = gene.get("Symbol")
-                if self.geneSymbol is None:
-                    self.geneSymbol = geneSymbol
+                goodSymbol = False
+                if not target_gene_symbols:
+                    goodSymbol = True
                 else:
-                    self.geneSymbol = self.geneSymbol + "," + geneSymbol
+                    if geneSymbol in target_gene_symbols:
+                        goodSymbol = True
+                if goodSymbol:
+                    if self.geneSymbol is None:
+                        self.geneSymbol = geneSymbol
+                    else:
+                        self.geneSymbol = self.geneSymbol + "," + geneSymbol
         location = element.find("Location")
         if location is None:
             self.valid = False
@@ -330,7 +337,8 @@ class variationArchive:
     one or more submissions ("SCV Accessions").
     """
 
-    def __init__(self, element, debug=True):
+    def __init__(self, element, gene_symbols=None,
+                 mane_transcripts=None, debug=False):
         self.element = element
         self.id = element.get("VariationID")
         if debug:
@@ -340,7 +348,8 @@ class variationArchive:
         if sa is None:
             self.valid = False
             return
-        self.variant = variant(sa, debug=False)
+        self.variant = variant(sa, target_gene_symbols=gene_symbols,
+                               debug=False)
         if not self.variant.valid:
             self.valid = False
             return
@@ -399,4 +408,4 @@ def extract_hgvs_cdna(variant_name, variant_hgvs_cdna, synonym_list):
         if filtered:
             return filtered[0]
         
-    return None
+    return Non

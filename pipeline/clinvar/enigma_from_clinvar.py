@@ -8,18 +8,15 @@ import xml.etree.ElementTree as ET
 
 
 import common
+import common.hgvs_utils
+import common.ucsc
 from clinvar import clinvar_common as clinvar
-from clinvar import hgvs_utils
+
 
 default_val = None
 
 MULTI_ENTRY_SEP = ','
 
-
-def _get_variation_archives(fin):
-    f = etree.parse(fin)
-    root = f.getroot()
-    return root.xpath('//VariationArchive')
 
 
 three_letters_aa = re.compile('p.\\(?[A-Z][a-z]{2}[0-9]+[A-Z][a-z]{2}') # e.g. p.(Tyr831SerfsTer9)
@@ -35,27 +32,14 @@ def _fetch_bic(cvs_el):
     return default_val
 
 
-def _compute_protein_changes(hgvs_cdna, hgvs_util, synonyms):
+def _compute_protein_changes(hgvs_cdna, hgvs_util):
     if hgvs_cdna is not None:
-        v_protein = hgvs_util.compute_protein_change(hgvs_cdna) 
-        if v_protein is None:
-            # this hgvs cDNA wouldn't convert to a protein.  See if one of
-            # the available synonyms matches a refseq accession and works better
-            success = False
-            print("protein translation failed on", hgvs_cdna, "testing synonyms")
-            for alt_name in synonyms:
-                if re.match(r'NM_.*:[^\[]*$', alt_name):
-                    print("testing synonym", alt_name)
-                    v_protein = hgvs_util.compute_protein_change(alt_name)
-                    if v_protein is not None:
-                        print("recursing")
-                        return(_compute_protein_changes(alt_name, hgvs_util, synonyms))
-            return(hgvs_cdna, default_val, default_val)
-        else:
-            hgvs_protein = v_protein.format(
-                {'p_3_letter': True, 'p_term_asterisk': False})
-            abbrev_aa_change = v_protein.format(
-                {'p_3_letter': False, 'p_term_asterisk': True})
+        v_protein = hgvs_util.cdna_to_protein(hgvs_cdna, return_str=False) 
+        if v_protein is not None:
+            hgvs_protein = str(v_protein.format(
+                {'p_3_letter': True, 'p_term_asterisk': False}))
+            abbrev_aa_change = str(v_protein.format(
+                {'p_3_letter': False, 'p_term_asterisk': True}))
             if ':' in hgvs_protein:
                 hgvs_protein = hgvs_protein.split(":")[1]
             else:
@@ -65,8 +49,8 @@ def _compute_protein_changes(hgvs_cdna, hgvs_util, synonyms):
                     lstrip("p.").replace('(', '').replace(')', '')
             else:
                 abbrev_aa_change = default_val
-            return (hgvs_cdna, abbrev_aa_change, hgvs_protein)
-    return (hgvs_cdna, default_val, default_val)
+            return (abbrev_aa_change, hgvs_protein)
+    return (default_val, default_val)
 
 
 
@@ -90,6 +74,7 @@ def _parse_engima_assertion(enigma_assertion, hgvs_util):
     rec = {}
     rec["URL"] = default_val
     rec["Clinical_significance"] = enigma_assertion.clinicalSignificance
+    rec["Clinical_significance_citations"] = ','.join(enigma_assertion.clinicalSignificanceCitations)
     rec["Date_last_evaluated"] = enigma_assertion.dateSignificanceLastEvaluated
     rec["Assertion_method"] = enigma_assertion.assertionMethod
     rec["Assertion_method_citation"] = enigma_assertion.assertionMethodCitation
@@ -101,17 +86,24 @@ def _parse_engima_assertion(enigma_assertion, hgvs_util):
     return rec
 
 # Parse a ClinVar variation archive element
-def parse_record(va_el, hgvs_util, symbols, assembly="GRCh38"):
+def parse_record(va_el, hgvs_util, symbols, mane_transcript,
+                 assembly="GRCh38"):
     '''
     Extracts information out of a VariationArchive element
-    :param cvs_el: VariationArchive element
+    :param va_el: VariationArchive element
     :param hgvs_util: instance of HGVS util to calculate protein changes
+    :param symbols: gene symbols to be parsed for
+    :param mane_transcripts: dict mapping symbols to MANE Select transcripts
     :param assembly: str assembly to use
     :return: list of dictionary containing the extracted data. keys correspond to column names.
     Each element of the list corresponds to a ENIGMA submission
     '''
     rec = {}
-    va = clinvar.variationArchive(va_el)
+    va = clinvar.variationArchive(va_el, gene_symbols=symbols,
+                                  mane_transcripts=mane_transcript)
+    if not hasattr(va, 'variant'):
+        logging.warning("Skipping VariationArchive %s as no variant record was found", va.id)
+        return(None)
     variant = va.variant
     if variant.valid:
         rec["Gene_symbol"] = variant.geneSymbol
@@ -125,10 +117,43 @@ def parse_record(va_el, hgvs_util, symbols, assembly="GRCh38"):
         rec["HGVS_cDNA"] = default_val
         rec["Abbrev_AA_change"] = default_val
         rec["HGVS_protein"] = default_val
-        if re.match("NM_", va.name): 
-            (hgvs_cdna, rec["Abbrev_AA_change"], rec["HGVS_protein"]) = _compute_protein_changes(va.name, hgvs_util, variant.synonyms)
-            rec["Reference_sequence"] = hgvs_cdna.split(":")[0]
-            rec["HGVS_cDNA"] = hgvs_cdna.split(":")[1]
+        #
+        # Get the MANE Select cDNA transcript for the reference sequence
+        # and HGVS cDNA and protein.
+        # 1. If it's already the variant name, do nothing (common case)
+        # 2. Else, if it's any of the variant synonyms, use that
+        # 3. Else, translate the named transcript to genomic HGVS, and
+        #    from that to the MANE Select transcript.
+        transcript = None
+        hgvs_obj = None
+        target_reference_sequence = mane_transcript[rec["Gene_symbol"]]
+        if re.search("^" + target_reference_sequence, va.name):
+            transcript = va.name
+        else:
+            for synonym in variant.synonyms:
+                if re.search("^" + target_reference_sequence, synonym):
+                    transcript = synonym
+                    break
+            if transcript is None:
+                hgvs_obj = hgvs_util.parse_hgvs_string(va.name)
+                if not hgvs_obj:
+                    logging.warning("Skipping variant %s because its HGVS could nt be parsed", va.name)
+                    return(None)
+                transcript_obj = hgvs_util.to_cdna(hgvs_obj,
+                                                   target_transcript=target_reference_sequence)
+                if not transcript_obj:
+                    logging.warning("Skipping variant %s because its HGVS could not be mapped", va.name)
+                    return(None)
+                transcript = str(transcript_obj)
+        if transcript:
+            if not hgvs_obj:
+                hgvs_obj = hgvs_util.parse_hgvs_string(transcript)
+                if not hgvs_obj:
+                    logging.warning("Skipping variant %s due to HGVS parsing error", va.name)
+                    return(None)
+            (rec["Abbrev_AA_change"], rec["HGVS_protein"]) = _compute_protein_changes(hgvs_obj, hgvs_util)
+            rec["Reference_sequence"] = transcript.split(":")[0]
+            rec["HGVS_cDNA"] = transcript.split(":")[1]
         rec["Condition_ID_type"] = va.classification.condition_type
         rec["Condition_ID_value"] = va.classification.condition_value
         #
@@ -180,13 +205,15 @@ def _create_df(variant_records):
 @click.option('--gene', type=str, required=True, multiple=True)
 def main(filtered_clinvar_xml, gene, output, logs):
     common.utils.setup_logfile(logs)
-    hgvs_util = hgvs_utils.HGVSWrapper()
+    hgvs_util = common.hgvs_utils.HgvsWrapper()
     gene_symbols = list(set(gene))
+    mane_transcripts = common.ucsc.symbols_to_mane_transcripts(gene_symbols)
     variant_records = list()
     with open(filtered_clinvar_xml) as inputFile:
         for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
             if event == 'end' and elem.tag == 'VariationArchive':
-                next_record = parse_record(elem, hgvs_util, gene_symbols)
+                next_record = parse_record(elem, hgvs_util, gene_symbols,
+                                           mane_transcripts)
                 if next_record is not None:
                     variant_records.append(next_record)
                 elem.clear()
