@@ -56,7 +56,8 @@ UTA_RELEASE_DATE := {{ UTA_RELEASE_DATE }}
 UTA_DOCKER_IMAGE := {{ UTA_DOCKER_IMAGE | default("biocommons/uta:uta_" + UTA_RELEASE_DATE) }}
 UTA_CONTAINER := {{ UTA_CONTAINER | default("uta_" + UTA_RELEASE_DATE) }}
 UTA_PORT := {{ UTA_PORT | default("50828") }}
-UTA_DB_URL := {{ "postgresql://anonymous@localhost:" + UTA_PORT + "/uta/uta_" + UTA_RELEASE_DATE }}
+#UTA_DB_URL := {{ "postgresql://anonymous@localhost:" + UTA_PORT + "/uta/uta_" + UTA_RELEASE_DATE }}
+UTA_DB_URL := {{ "postgresql://anonymous@localhost:50828/uta/uta_20210129b" }}
 
 ## varia
 
