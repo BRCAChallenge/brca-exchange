@@ -17,6 +17,7 @@ PREVIOUS_RELEASE_DIR := {{ PREVIOUS_RELEASE_DIR }}
 # path to seqrepo instance downloads
 {% set SEQ_REPO_DIR = SEQ_REPO_DIR|default("/data/seqrepo") %}
 SEQ_REPO_DIR := {{ SEQ_REPO_DIR }}
+HGVS_SEQREPO_DIR := {{ SEQ_REPO_DIR }}
 
 {% set VICTOR_DATA_DIR = VICTOR_DATA_DIR|default("/data/victor") %}
 VICTOR_DATA_DIR := {{ VICTOR_DATA_DIR }}
@@ -50,11 +51,12 @@ VR_IMAGE := {{ VR_IMAGE | default("brcachallenge/append-vr-ids:" + VR_IMAGE_DEFA
 
 ## UTA configurations
 
-{% set UTA_RELEASE_DATE = UTA_RELEASE_DATE|default("20171026") %}
+{% set UTA_RELEASE_DATE = UTA_RELEASE_DATE|default("20210129b") %}
 UTA_RELEASE_DATE := {{ UTA_RELEASE_DATE }}
 UTA_DOCKER_IMAGE := {{ UTA_DOCKER_IMAGE | default("biocommons/uta:uta_" + UTA_RELEASE_DATE) }}
 UTA_CONTAINER := {{ UTA_CONTAINER | default("uta_" + UTA_RELEASE_DATE) }}
 UTA_PORT := {{ UTA_PORT | default("50828") }}
+UTA_DB_URL := {{ "postgresql://anonymous@localhost:" + UTA_PORT + "/uta/uta_" + UTA_RELEASE_DATE }}
 
 ## varia
 

@@ -41,13 +41,17 @@ def findUniqueElement(name, parent):
     return(child)
 
 
-
-#def build_xpath_filter_for_cv_assertions(gene_symbols):
-##    symbols_str = [ f'text()="{s}"' for s in gene_symbols] ### HERE
-#    symbols_pred = ' or '.join(symbols_str)
+#
+# This function is outdated (11/25/2024), but is currently part of an
+# ENIGMA unit test
+#
+def build_xpath_filter_for_cv_assertions(gene_symbols):
+    symbols_str = [ f'text()="{s}"' for s in gene_symbols] ### HERE
+    symbols_pred = ' or '.join(symbols_str)
 
     # filter assertion if it contains a Symbol we are interested in
-#    return f"ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[({symbols_pred}) and @Type=\"Preferred\"]"
+    return f"ReferenceClinVarAssertion/MeasureSet/Measure/MeasureRelationship/Symbol/ElementValue[({symbols_pred}) and @Type=\"Preferred\"]"
+
 
 def extractSynonyms(el):
     include_types = {'ProteinChange3LetterCode', 'ProteinChange1LetterCode',
@@ -88,6 +92,7 @@ def extract_genomic_coordinates_from_location(loc):
                 sl.attrib['alternateAlleleVCF']
             )
     return coords
+
 
 
 def _preprocess_element_value(var_str):

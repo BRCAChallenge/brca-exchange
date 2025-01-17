@@ -25,6 +25,7 @@ sitionVCF="32919382" referenceAlleleVCF="A" alternateAlleleVCF="G"/>
 
 
 def test_genomic_coordinate_extraction_from_NM():
+
     sample_name="NM_007294.4:c.6591_6592del"
     genomic_coords = clinvar_common.accession_to_genomic_coordinates(sample_name)
 
