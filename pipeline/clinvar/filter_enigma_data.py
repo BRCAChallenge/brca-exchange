@@ -12,11 +12,11 @@ def filter_engima_xml(fin, fout):
     new_root = ET.Element(root.tag, attrib=root.attrib)
     new_tree = ET.ElementTree(new_root)
     for (event, elem) in context:
-        if event == 'end' and elem.tag == "ClinVarSet":
+        if event == 'end' and elem.tag == "VariationArchive":
             enigma_variant = False
-            for sub_elem in elem.findall(".//ClinVarAssertion/ClinVarSubmissionID"):
-                if "submitter" in sub_elem.attrib:
-                    if re.search("ENIGMA", sub_elem.attrib["submitter"]):
+            for sub_elem in elem.findall(".//ClinicalAssertion/ClinVarAccession"):
+                if "SubmitterName" in sub_elem.attrib:
+                    if re.search("ENIGMA", sub_elem.attrib["SubmitterName"]):
                         enigma_variant = True
             if enigma_variant:
                 new_root.append(elem)

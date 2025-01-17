@@ -91,11 +91,8 @@ def extract_genomic_coordinates_from_location(loc):
                 sl.attrib['referenceAlleleVCF'],
                 sl.attrib['alternateAlleleVCF']
             )
-    # if no reference/alternate allele found, compute (assuming genomic coordinates
-    # are either present for all assemblies or for none)
-#    if not coords:
-#        coords = _extract_genomic_coordinates_from_non_genomic_fields(meas_el)
-#    return coords
+    return coords
+
 
 
 def _preprocess_element_value(var_str):
@@ -103,21 +100,11 @@ def _preprocess_element_value(var_str):
     return re.sub(r'\s*\(p[^)]+\)', '', var_str)
 
 
-def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [hgvs_utils.HgvsWrapper.GRCh38_Assem], hgvs_wrapper = hgvs_utils.HgvsWrapper.get_instance()):
-    pref_el_lst = meas_el.findall('Name/ElementValue[@Type="Preferred"]')
-
+def accession_to_genomic_coordinates(accession, assemblies = [hgvs_utils.HgvsWrapper.GRCh38_Assem], hgvs_wrapper = hgvs_utils.HgvsWrapper.get_instance()):
     coords = {}
-    if not pref_el_lst:
-        return coords
-
-    pref = pref_el_lst[0].text
-    preprocessed_var = _preprocess_element_value(pref)
-
     hutils = hgvs_wrapper.get_instance()
-
     try:
-        v = hgvs_wrapper.hgvs_parser.parse(preprocessed_var)
-
+        v = hgvs_wrapper.hgvs_parser.parse(accession)
         for assembly in assemblies:
             if v.ac.startswith('U'):
                 v_g = hutils.u_to_genomic(v, assembly)
@@ -128,14 +115,22 @@ def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [
             else:
                 logging.warning("Skipping genomic coordinate extraction for " + preprocessed_var)
                 continue
-
             if v_g:
                 vcf = variant_utils.VCFVariant.from_hgvs_obj(v_g)
                 coords[assembly] = vcf
     except HGVSError as e:
         logging.warning("HGVS Error while attempting to process " + preprocessed_var + " : " + str(e))
-
     return coords
+
+def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [hgvs_utils.HgvsWrapper.GRCh38_Assem], hgvs_wrapper = hgvs_utils.HgvsWrapper.get_instance()):
+    pref_el_lst = meas_el.findall('Name/ElementValue[@Type="Preferred"]')
+    coords = {}
+    if not pref_el_lst:
+        return coords
+    pref = pref_el_lst[0].text
+    preprocessed_var = _preprocess_element_value(pref)
+    return accession_to_genomic_coordinates(preprocessed_var, assemblies,
+                                            hgvs_wrapper)
 
 
 class genomicCoordinates:
@@ -165,7 +160,7 @@ class genomicCoordinates:
 class variant:
     """The variant (SimpleAllele) set.  """
 
-    def __init__(self, element, debug=True):
+    def __init__(self, element, target_gene_symbols=None, debug=True):
         self.element = element
         self.valid = True
         self.variantType = textIfPresent(element, "VariantType")
@@ -180,10 +175,17 @@ class variant:
         if geneList is not None:
             for gene in geneList.iter("Gene"):
                 geneSymbol = gene.get("Symbol")
-                if self.geneSymbol is None:
-                    self.geneSymbol = geneSymbol
+                goodSymbol = False
+                if not target_gene_symbols:
+                    goodSymbol = True
                 else:
-                    self.geneSymbol = self.geneSymbol + "," + geneSymbol
+                    if geneSymbol in target_gene_symbols:
+                        goodSymbol = True
+                if goodSymbol:
+                    if self.geneSymbol is None:
+                        self.geneSymbol = geneSymbol
+                    else:
+                        self.geneSymbol = self.geneSymbol + "," + geneSymbol
         location = element.find("Location")
         if location is None:
             self.valid = False
@@ -196,6 +198,9 @@ class variant:
         pc = textIfPresent(element, "ProteinChange")
         if pc is not None:
             self.synonyms.append(pc)
+        if element.find("OtherNameList"):
+            for name in element.find("OtherNameList").iter("Name"):
+                self.synonyms.append(name.text)
         if element.find("HGVSlist"):
             for hgvsObj in element.find("HGVSlist").iter("HGVS"):
                 pe = hgvsObj.find("ProteinExpression")
@@ -268,9 +273,7 @@ class classification:
 
 class clinicalAssertion:
     """Class for representing one submission (i.e. one annotation of a
-dir(referen    submitted variant"""
-
-    
+    submitted variant)"""
     
     def __init__(self, element, debug=False):
         self.element = element
@@ -291,6 +294,20 @@ dir(referen    submitted variant"""
         self.dateSignificanceLastEvaluated = classif.get("DateLastEvaluated")
         self.clinicalSignificance = textIfPresent(classif,
                                                   "GermlineClassification")
+        self.clinicalSignificanceCitations = list()
+        for citation in classif.iter("Citation"):
+            if citation.get("Source") == "PubMed":
+                self.clinicalSignificanceCitations.append(textIfPresent(citation, "ID"))
+        self.assertionMethod = None
+        self.assertionMethodCitation = None
+        self.citation = None
+        for attributeSet in element.iter("AttributeSet"):
+            for attribute in attributeSet.iter("Attribute"):
+                if attribute.get("Type") == "AssertionMethod":
+                    self.assertionMethod = attribute.text
+            citation = attributeSet.find("Citation")
+            if citation != None:
+                self.assertionMethodCitation = textIfPresent(citation, "URL")
         self.summaryEvidence = textIfPresent(classif, "Comment")
         oil = element.find("ObservedInList")
         self.origin = list()
@@ -328,7 +345,8 @@ class variationArchive:
     one or more submissions ("SCV Accessions").
     """
 
-    def __init__(self, element, debug=True):
+    def __init__(self, element, gene_symbols=None,
+                 mane_transcripts=None, debug=False):
         self.element = element
         self.id = element.get("VariationID")
         if debug:
@@ -338,16 +356,19 @@ class variationArchive:
         if sa is None:
             self.valid = False
             return
-        self.variant = variant(sa, debug=False)
+        self.variant = variant(sa, target_gene_symbols=gene_symbols,
+                               debug=False)
         if not self.variant.valid:
             self.valid = False
             return
         #
         # Find an HGVS variant name, either by taking the VariationName object of this element and removing the
-        # gene name in the parens, or if that name doesn't match an HGVS expression, look for a viable HGVS expression
-        # amoung the synonyms
+        # gene name in the parens, or if that name doesn't match an HGVS expression, look for a viable HGVS 
+        # expression amoung the synonyms
         fullname = re.sub(r'\([^)]*\)', '', html.unescape(element.get("VariationName")))
-        selected_hgvs = extract_hgvs_cdna(fullname, self.variant.synonyms)
+        selected_hgvs = extract_hgvs_cdna(_preprocess_element_value(fullname),
+                                          self.variant.hgvs_cdna,
+                                          self.variant.synonyms)
         self.name = re.sub(r'^\s+|\s+$', '', selected_hgvs)
                                       
         #
@@ -365,16 +386,14 @@ class variationArchive:
         # Look for the GermlineClassification object.
         cl = element.find("./ClassifiedRecord/Classifications")
         self.classification = classification(cl, debug=debug)
-        
         self.otherAssertions = dict()
-
         for item in element.iter("ClinicalAssertion"):
             if isCurrent(item):
                 ca = clinicalAssertion(item)
                 accession = ca.accession
                 self.otherAssertions[accession] = ca
         
-def extract_hgvs_cdna(variant_name, synonym_list):
+def extract_hgvs_cdna(variant_name, variant_hgvs_cdna, synonym_list):
     """
     Finds a HGVS CDNA representation of a variant within a ClinVarSet.
     If possible, avoid repeat representations using the "[]" synatax, since
@@ -387,10 +406,14 @@ def extract_hgvs_cdna(variant_name, synonym_list):
 
     # only take variants starting with NM_ and not containing []
     hgvs_cdna_re = r'NM_.*:[^\[]*$'
-    if not re.match(hgvs_cdna_re, variant_name):
+    if re.match(hgvs_cdna_re, variant_name):
+        return(variant_name)
+    elif re.match(hgvs_cdna_re, variant_hgvs_cdna):
+        return(variant_hgvs_cdna)
+    else:
         # check for anything in the synonym list that matches an HGVS expression
         filtered = [s for s in synonym_list if re.match(hgvs_cdna_re, s)]
         if filtered:
             return filtered[0]
-
-    return variant_name
+        
+    return Non

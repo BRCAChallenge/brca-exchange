@@ -25,18 +25,11 @@ sitionVCF="32919382" referenceAlleleVCF="A" alternateAlleleVCF="G"/>
 
 
 def test_genomic_coordinate_extraction_from_NM():
-    sample_measure = """
-    <Measure Type="Deletion" ID="24358">
-        <Name>
-          <ElementValue Type="Preferred">NM_000059.3(BRCA2):c.6591_6592del (p.Glu2198fs)</ElementValue>
-        </Name>
-    </Measure>
-    """
-    measure_el = ET.fromstring(sample_measure)
 
-    genomic_coords = clinvar_common._extract_genomic_coordinates_from_non_genomic_fields(measure_el)
+    sample_name="NM_007294.4:c.6591_6592del"
+    genomic_coords = clinvar_common.accession_to_genomic_coordinates(sample_name)
 
-    assert genomic_coords[hgvs_utils.HgvsWrapper.GRCh38_Assem] == variant_utils.VCFVariant(13, 32340945, "CTG", "C")
+    assert genomic_coords[hgvs_utils.HgvsWrapper.GRCh38_Assem] == variant_utils.VCFVariant(17, 43044677, "AAT", "A")
 
 
 def test_preprocess_element_value():
