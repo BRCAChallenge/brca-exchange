@@ -193,6 +193,9 @@ class variant:
         pc = textIfPresent(element, "ProteinChange")
         if pc is not None:
             self.synonyms.append(pc)
+        if element.find("OtherNameList"):
+            for name in element.find("OtherNameList").iter("Name"):
+                self.synonyms.append(name.text)
         if element.find("HGVSlist"):
             for hgvsObj in element.find("HGVSlist").iter("HGVS"):
                 pe = hgvsObj.find("ProteinExpression")

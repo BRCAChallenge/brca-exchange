@@ -2,22 +2,30 @@ import os
 
 import pytest
 import xml.etree.ElementTree as ET
+import sys
+
+current_dir = os.getcwd()
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+import common
+import common.hgvs_utils
+
+
 
 from . import enigma_from_clinvar
-from . import hgvs_utils
+
 
 
 
 def test_parse_record():
-    
-    hgvs_util = hgvs_utils.HGVSWrapper()
+    hgvs_util = common.hgvs_utils.HgvsWrapper()
 
     xml_path = os.path.join(os.path.dirname(__file__), 'test_files',
                             'enigma_clinvar_set.xml')
     tree = ET.parse(open(xml_path))
     root = tree.getroot()
     for element in root:
-        res = enigma_from_clinvar.parse_record(element, hgvs_util, ['BRCA1', 'BRCA2'])
+        res = enigma_from_clinvar.parse_record(element, hgvs_util, ['BRCA1', 'BRCA2'], {'BRCA1':'NM_007294.4', 'BRCA2': 'NM_000059.4'})
         expected = {
             'Abbrev_AA_change': 'L392Qfs*6',
             'Allele_origin': 'germline',
@@ -26,6 +34,7 @@ def test_parse_record():
             'BIC_Nomenclature': None,
             'ClinVarAccession': 'SCV000783591.1',
             'Clinical_significance': 'Pathogenic',
+            'Clinical_significance_citations': '',
             'Collection_method': 'curation',
             'Comment_on_clinical_significance': 'Variant allele predicted to encode a truncated non-functional protein.',
             'Condition_category': None,
