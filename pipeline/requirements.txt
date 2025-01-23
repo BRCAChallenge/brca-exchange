@@ -35,7 +35,7 @@ ipython-genutils==0.2.0
 itertoolz==0.5
 jedi==0.16.0
 lockfile==0.12.2
-luigi==2.8.12
+luigi==3.6.0
 lxml==4.9.2
 mock==5.0.1
 nose==1.3.7
