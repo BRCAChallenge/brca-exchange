@@ -366,10 +366,13 @@ class variationArchive:
         # gene name in the parens, or if that name doesn't match an HGVS expression, look for a viable HGVS 
         # expression amoung the synonyms
         fullname = re.sub(r'\([^)]*\)', '', html.unescape(element.get("VariationName")))
-        selected_hgvs = extract_hgvs_cdna(_preprocess_element_value(fullname),
-                                          self.variant.hgvs_cdna,
-                                          self.variant.synonyms)
-        self.name = re.sub(r'^\s+|\s+$', '', selected_hgvs)
+        selected_hgvs = extract_refseq_hgvs_cdna(_preprocess_element_value(fullname),
+                                                 self.variant.hgvs_cdna,
+                                                 self.variant.synonyms)
+        if selected_hgvs is not None:
+            self.name = re.sub(r'^\s+|\s+$', '', selected_hgvs)
+        else:
+            self.name = fullname
                                       
         #
         # Look for the RCVAccession object.  There should be exactly one.
@@ -393,7 +396,7 @@ class variationArchive:
                 accession = ca.accession
                 self.otherAssertions[accession] = ca
         
-def extract_hgvs_cdna(variant_name, variant_hgvs_cdna, synonym_list):
+def extract_refseq_hgvs_cdna(variant_name, variant_hgvs_cdna, synonym_list):
     """
     Finds a HGVS CDNA representation of a variant within a ClinVarSet.
     If possible, avoid repeat representations using the "[]" synatax, since
@@ -408,7 +411,7 @@ def extract_hgvs_cdna(variant_name, variant_hgvs_cdna, synonym_list):
     hgvs_cdna_re = r'NM_.*:[^\[]*$'
     if re.match(hgvs_cdna_re, variant_name):
         return(variant_name)
-    elif re.match(hgvs_cdna_re, variant_hgvs_cdna):
+    elif (variant_hgvs_cdna is not None and re.match(hgvs_cdna_re, variant_hgvs_cdna)):
         return(variant_hgvs_cdna)
     else:
         # check for anything in the synonym list that matches an HGVS expression
@@ -416,4 +419,4 @@ def extract_hgvs_cdna(variant_name, variant_hgvs_cdna, synonym_list):
         if filtered:
             return filtered[0]
         
-    return Non
+    return None
