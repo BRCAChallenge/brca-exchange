@@ -99,7 +99,7 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
     Each element of the list corresponds to a ENIGMA submission
     '''
     rec = {}
-    va = clinvar.variationArchive(va_el, gene_symbols=symbols,
+    va = clinvar.variationArchive(va_el, gene_symbols=symbols, debug=False,
                                   mane_transcripts=mane_transcript)
     if not hasattr(va, 'variant'):
         logging.warning("Skipping VariationArchive %s as no variant record was found", va.id)

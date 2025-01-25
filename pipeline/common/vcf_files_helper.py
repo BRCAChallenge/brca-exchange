@@ -25,11 +25,13 @@ def cdna_str_to_genomic_var(cdna_hgvs_str, assembly=HgvsWrapper.GRCh38_Assem, hg
         "Got " +  seq_fetcher.assembly_name + " and " + assembly
 
     hgvs_cdna = hgvs_wrapper.hgvs_parser.parse(cdna_hgvs_str)
-
-    hgvs_g = hgvs_wrapper.nm_to_genomic(hgvs_cdna, assembly)
-
-    hgvs_g_norm = hgvs.normalizer.Normalizer(hgvs_wrapper.hgvs_dp, shuffle_direction=5).normalize(hgvs_g)
-    return VCFVariant.from_hgvs_obj(hgvs_g_norm, seq_fetcher)
+    if hgvs_cdna:
+        hgvs_g = hgvs_wrapper.nm_to_genomic(hgvs_cdna, assembly)
+        if hgvs_g:
+            hgvs_g_norm = hgvs.normalizer.Normalizer(hgvs_wrapper.hgvs_dp, shuffle_direction=5).normalize(hgvs_g)
+            if hgvs_g_norm:
+                return VCFVariant.from_hgvs_obj(hgvs_g_norm, seq_fetcher)
+    return None
 
 
 def normalize_field_value(field_value):
