@@ -31,8 +31,6 @@ def filter_xml_for_gene_symbol(input_fp, output_fp, target_symbol_values,
     in_variation_archive = False
     in_header = True
     for line in input_fp:
-        if re.search("NM_000059.4(BRCA2):c.193C>T", line):
-            print("Found it!", line)
         if re.search('<VariationArchive', line):
             in_variation_archive = True
             in_header = False

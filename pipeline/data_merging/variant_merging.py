@@ -779,6 +779,7 @@ def is_outside_boundaries(c, pos, gene_regions_trees):
     if c not in gene_regions_trees.keys():
         return(True)
 
+
     chr_regions = gene_regions_trees[c]
     return len(chr_regions.at(pos)) == 0
 
