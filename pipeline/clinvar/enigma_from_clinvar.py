@@ -79,8 +79,8 @@ def _parse_engima_assertion(enigma_assertion, hgvs_util):
     rec["Assertion_method"] = enigma_assertion.assertionMethod
     rec["Assertion_method_citation"] = enigma_assertion.assertionMethodCitation
     rec["Comment_on_clinical_significance"] = enigma_assertion.summaryEvidence
-    rec["Collection_method"] = ','.join(enigma_assertion.method)
-    rec["Allele_origin"] = ','.join(enigma_assertion.origin)
+    rec["Collection_method"] = ','.join(enigma_assertion.method.capitalize())
+    rec["Allele_origin"] = ','.join(enigma_assertion.origin.capitalize())
     rec["ClinVarAccession"] = "%s.%s" % (enigma_assertion.accession,
                                          enigma_assertion.accession_version)
     return rec
@@ -155,7 +155,10 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
             rec["Reference_sequence"] = transcript.split(":")[0]
             rec["HGVS_cDNA"] = transcript.split(":")[1]
         rec["Condition_ID_type"] = va.classification.condition_type
-        rec["Condition_ID_value"] = va.classification.condition_value
+        if va.classification_condition_value == None:
+            rec["Condition_ID_value"] = "not provided"
+        else:
+            rec["Condition_ID_value"] = va.classification.condition_value
         #
         # 11/25/2024: the trait set / condition category has been deprecated (is no longer displayed)
         rec["Condition_category"] = default_val
