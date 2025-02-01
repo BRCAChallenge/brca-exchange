@@ -15,6 +15,7 @@ from hgvs.sequencevariant import SequenceVariant
 
 from common import config
 from common import utils
+from common import ucsc
 from common.hgvs_utils import HgvsWrapper
 from common.variant_utils import VCFVariant
 
@@ -49,7 +50,7 @@ TMP_CDNA_UNORM_FIELD = 'tmp_HGVS_CDNA_FIELD_unorm'
 TMP_CDNA_NORM_FIELD = 'tmp_HGVS_CDNA_FIELD_norm'
 TMP_CDNA_NORM_LEFT_ALINGED_FIELD = 'tmp_HGVS_CDNA_FIELD_left'
 TMP_PROTEIN_LEFT_ALINGED_FIELD = 'tmp_Protein_Field_left'
-
+TMP_PREFERRED_TRANSCRIPT_FIELD = 'tmp_Preferred_Transcript'
 
 def _normalize_genomic_coordinates(hgvs_obj: Optional[SequenceVariant], strand: str, hgvs_norm_3: Normalizer, hgvs_norm_5: Normalizer):
     normalizer = hgvs_norm_3 if strand == config.POSITIVE_STRAND else hgvs_norm_5
@@ -63,7 +64,7 @@ def _normalize_genomic_coordinates(hgvs_obj: Optional[SequenceVariant], strand: 
 
 
 def _normalize_genomic_fnc(src_col: str, target_col: str, right_shift: bool, strand_dict: Dict[str, str]):
-    """Returns a function to normalize genomic coordinates
+     """Returns a function to normalize genomic coordinates
 
     Used for parallelizing normalization
     """
@@ -106,18 +107,15 @@ def convert_to_hg37(vars: Iterable[VCFVariant], brca_resources_dir: str):
         return '\t'.join([str(s) for s in entries])
 
     lst = [pseudo_vcf_entry(v) for v in vars]
-
     vcf_tmp = tempfile.mktemp('.vcf')
     with open(vcf_tmp, 'w') as f:
         f.write('\n'.join(lst))
-
     vcf_tmp_out = tempfile.mktemp('.vcf')
     args = ["CrossMap.py", "vcf",
             brca_resources_dir + "/hg38ToHg19.over.chain.gz",
             vcf_tmp,
             brca_resources_dir + "/hg19.fa",
             vcf_tmp_out]
-
     logging.info("Running CrossMap.py to convert to hg19")
     sp = subprocess.Popen(args)
     out, err = sp.communicate()
@@ -125,9 +123,7 @@ def convert_to_hg37(vars: Iterable[VCFVariant], brca_resources_dir: str):
         logging.info("standard output of subprocess: {}".format(out))
     if err:
         logging.info("standard output of subprocess: {}".format(err))
-
     vcf_out_lines = open(vcf_tmp_out, 'r').readlines()
-
     if path.exists(vcf_tmp_out + '.unmap'):
         vcf_out_failed_lines = open(vcf_tmp_out + '.unmap', 'r').readlines()
         return ([VCFVariant(v[0], int(v[1]), v[3], v[4]) for v in [l.strip().split('\t') for l in vcf_out_lines]],
@@ -159,52 +155,41 @@ def get_synonyms(row: pd.Series, hgvs_proc: HgvsWrapper, syn_ac_dict: Dict[str, 
 
     if not row[GENE_SYMBOL_COL]:
         return []
-
     # calculate other representations wrt other accensions supported by the hgvs library
     for _, _, _, dst, alt_ac, method in hgvs_proc.hgvs_dp.get_tx_for_gene(row[GENE_SYMBOL_COL]):
         if row[GENE_SYMBOL_COL] not in syn_ac_dict:
             continue
-
         accessions = syn_ac_dict[row[GENE_SYMBOL_COL]]
-
         if dst in accessions:
             cdna_rep_list = [row[TMP_CDNA_NORM_FIELD]]
-
             if row[TMP_CDNA_NORM_FIELD] != row[TMP_CDNA_NORM_LEFT_ALINGED_FIELD]:
                 cdna_rep_list = [row[TMP_CDNA_NORM_FIELD], row[TMP_CDNA_NORM_LEFT_ALINGED_FIELD]]
-
             for vc in cdna_rep_list:
                 if not vc:
                     continue
-
                 try:
                     pj = hgvs.projector.Projector(hdp=hgvs_proc.hgvs_dp,
                                                   alt_ac=alt_ac,
                                                   src_ac=vc.ac,
                                                   dst_ac=dst, dst_alt_aln_method=method)
-
                     vp = pj.project_variant_forward(vc)
                     synonyms.append(vp)
                 except HGVSError as e:
                     logging.info("Exception in synonym handling " + str(vc) + " from " + str(vc.ac) + " to " +
                                  str(dst) + " using " + str(method) + " via " + str(alt_ac) + " : " + str(
                         e) + " " + str(e.__class__.__name__))
-
     return list({str(s) for s in synonyms}) # making sure, every representation appears only once
 
 
 def _merge_and_clean_synonyms(row: pd.Series):
     """ Merging with synonmys already determined from sources and cleaning up"""
     orig_list = [s for s in row[SYNONYMS_COL].split(',') if s]  # filter away ''
-
     combined = set(orig_list + row[NEW_SYNONYMS_FIELD])
     list_sorted = sorted(list(combined))
-
     # remove redundant representations, which we are already included in other columns
     reps_other_cols = {row[GENOMIC_HGVS_HG37_COL], row[GENOMIC_HGVS_HG38_COL], row[PYHGVS_CDNA_COL], row[PYHGVS_PROTEIN_COL],
                        row[HGVS_CDNA_COL]}
     list_sorted_cleaned = [v for v in list_sorted if v not in reps_other_cols and v != str(None) and v != '-']
-
     return ','.join(list_sorted_cleaned)
 
 
@@ -249,11 +234,8 @@ def main(input, output, log_path, config_file, resources, processes):
 
     logging.info("Compute hg37 representation of internal representation")
     var_objs_hg37, var_objs_hg37_failed = convert_to_hg37(df[VAR_OBJ_FIELD], resources)
-
     tmp_hgvs_hg37_values = [v.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh37_Assem]) for v in var_objs_hg37]
-
     var_objs_hg37, tmp_hgvs_hg37_values, df = handle_failed_hg37_translations(df, var_objs_hg37, var_objs_hg37_failed, tmp_hgvs_hg37_values, hgvs_proc)
-
     df[TMP_HGVS_HG37] = pd.Series(tmp_hgvs_hg37_values)
 
     logging.info("Compute hg37 normalized representation of internal")
@@ -265,20 +247,29 @@ def main(input, output, log_path, config_file, resources, processes):
     df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37,
                                                                 GENOMIC_HGVS_HG37_COL, True, strand_dict), processes)
     df[GENOMIC_HGVS_HG37_COL] = df[GENOMIC_HGVS_HG37_COL].apply(str)
-
     df = utils.parallelize_dataframe(df, _normalize_genomic_fnc(TMP_HGVS_HG37,
                                                                 TMP_HGVS_HG37_LEFT_ALIGNED, False, strand_dict), processes)
 
     logging.info("Compute cDNA representation")
 
+    def lookup_value(key):
+    return value_dict.get(key, 'Not Found')
+
+
+    def _get_preferred_transcripts(gene_symbol):
+        return(cdna_default_ac_dict.get(gene_symbol, 'Not Found'))
+    
     def _compute_cdna(df_part):
         hgvs_proc = HgvsWrapper()  # create it to avoid pickle issues when copying to subprocess
-        df_part[TMP_CDNA_NORM_FIELD] = df_part[TMP_HGVS_HG38].apply(
-            lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj))
-        df_part[TMP_CDNA_NORM_LEFT_ALINGED_FIELD] = df_part[TMP_HGVS_HG38_LEFT_ALIGNED].apply(
-            lambda hgvs_obj: hgvs_proc.genomic_to_cdna(hgvs_obj))
-        return df_part
+        df_part[TMP_CDNA_NORM_FIELD] = df_part.apply(
+            lambda row: hgvs_proc.genomic_to_cdna(row[TMP_HGVS_HG38],
+                                                  target_transcript=row[TMP_PREFERRED_TRANSCRIPT_FIELD]), axis=1)
+        df_part[TMP_CDNA_NORM_LEFT_ALINGED_FIELD] = df_part.apply(
+            lambda row: hgvs_proc.genomic_to_cdna(row[TMP_HGVS_HG38_LEFT_ALIGNED],
+                                                  target_transcript=row[TMP_PREFERRED_TRANSCRIPT_FIELD]), axis=1)
+        return(df_part)
 
+    df[TMP_PREFERRED_TRANSCRIPT_FIELD] = df[GENE_SYMBOL_COL].map(_get_preferred_transcripts)
     df = utils.parallelize_dataframe(df, _compute_cdna, processes)
 
     # extract cdna from source if it could not be computed

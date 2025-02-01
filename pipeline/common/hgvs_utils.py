@@ -55,7 +55,7 @@ class HgvsWrapper:
                 cdna_hgvs_obj = self.genomic_to_cdna(genomic_hgvs_obj,
                                                      target_transcript=target_transcript)
         elif hgvs_obj.type == 'g':
-            cdna_hgvs_obj = self.genomic_to_cdna(genomic_hgvs_ojb,
+            cdna_hgvs_obj = self.genomic_to_cdna(genomic_hgvs_obj,
                                                  target_transcript=target_transcript)
         return(cdna_hgvs_obj)
     
