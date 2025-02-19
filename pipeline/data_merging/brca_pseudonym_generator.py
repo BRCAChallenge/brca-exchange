@@ -64,7 +64,7 @@ def _normalize_genomic_coordinates(hgvs_obj: Optional[SequenceVariant], strand: 
 
 
 def _normalize_genomic_fnc(src_col: str, target_col: str, right_shift: bool, strand_dict: Dict[str, str]):
-     """Returns a function to normalize genomic coordinates
+    """Returns a function to normalize genomic coordinates
 
     Used for parallelizing normalization
     """
@@ -253,7 +253,7 @@ def main(input, output, log_path, config_file, resources, processes):
     logging.info("Compute cDNA representation")
 
     def lookup_value(key):
-    return value_dict.get(key, 'Not Found')
+        return value_dict.get(key, 'Not Found')
 
 
     def _get_preferred_transcripts(gene_symbol):
