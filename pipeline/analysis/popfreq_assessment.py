@@ -8,7 +8,9 @@ from collections import OrderedDict
 import math
 import numpy as np
 import pandas as pd
+import sys
 
+csv.field_size_limit(sys.maxsize)
 
 POPFREQ_CODE_ID = "Provisional_Evidence_Code_Popfreq"
 POPFREQ_CODE_DESCR = "Provisional_Evidence_Description_Popfreq"

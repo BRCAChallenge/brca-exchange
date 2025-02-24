@@ -143,5 +143,9 @@
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.start
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.stop
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.version
+./release/artifacts/analysis/df_cov_v2.parquet
+./release/artifacts/analysis/df_cov_v3.parquet
+./release/artifacts/analysis/brca.gnomAD.2.1.1.hg19.flags.tsv
+./release/artifacts/analysis/brca.gnomAD.3.1.1.hg38.flags.tsv
 ./release/artifacts/built_with_popfreq.tsv
 ./release/artifacts/built_with_bioinfo_pred.tsv

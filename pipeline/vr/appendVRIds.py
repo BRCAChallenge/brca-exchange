@@ -41,34 +41,24 @@ def main(args):
     inputFile = options.input
     outputFile = options.output
     logfile = options.logfile
-
     logging.basicConfig(filename=logfile, filemode="w", level=logging.WARNING,
                         format=' %(asctime)s %(filename)-15s %(message)s')
     input_file = csv.reader(inputFile, delimiter='\t')
     output_file = csv.writer(outputFile, delimiter='\t')
-    
     for row in input_file:
         input_header_row = row
         break
-
     new_column_to_append = ["VR_ID"]
-
     output_header_row = input_header_row + new_column_to_append
-
     output_file.writerow(output_header_row)
-
     hgvsIndex = input_header_row.index("Genomic_HGVS_38")
-    
     for variant in input_file:
         hgvs = variant[hgvsIndex]
-        
         # Add empty data by default
         variant.append('-')
-
         if not is_empty(hgvs):
             vrs_id = get_vrs_id(hgvs)
             variant[output_header_row.index("VR_ID")] = vrs_id
-
         output_file.writerow(variant)
 
 
