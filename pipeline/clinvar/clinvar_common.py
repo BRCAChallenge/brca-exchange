@@ -17,6 +17,7 @@ def isCurrent(element):
     else:
         return(rr.text == "current")
 
+    
 def textIfPresent(element, field):
     """Return the text associated with a field under the element, or
     None if the field is not present"""
@@ -28,6 +29,7 @@ def textIfPresent(element, field):
     else:
         return None
 
+    
 def findUniqueElement(name, parent):
     """Find a child element directly or indirectly underneath this parent
        element which should occur only once (i.e. there should be no other
@@ -256,13 +258,14 @@ class classification:
         self.element = element        
         self.condition_type = None
         self.condition_value = None
+        self.condition_category = None
         self.condition_db_id = list()
         for trait in element.iter("Trait"):
             self.condition_type = trait.get("Type")
             for name in trait.iter("Name"):
                 ev = name.find("ElementValue")
                 if ev.get("Type") == "Preferred":
-                    self.condition_value = ev.text
+                    self.condition_category = ev.text
                 for xref in trait.iter("XRef"):
                     if not re.search("Genetic Testing Registry", xref.get("DB")):
                         xref_string = xref.get("DB") + "_" + xref.get("ID")
