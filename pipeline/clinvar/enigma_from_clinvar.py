@@ -18,7 +18,6 @@ default_val = None
 MULTI_ENTRY_SEP = ','
 
 
-
 three_letters_aa = re.compile('p.\\(?[A-Z][a-z]{2}[0-9]+[A-Z][a-z]{2}') # e.g. p.(Tyr831SerfsTer9)
 
 def _is_bic_designation(s):
