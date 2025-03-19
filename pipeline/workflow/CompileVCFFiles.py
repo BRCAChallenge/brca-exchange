@@ -698,7 +698,7 @@ class RemoveProblemVariant(DefaultPipelineTask):
         artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
         os.chdir(artifacts_dir)
 
-        cmd = 'grep -v "chr13:g.32398769:A>G" built_with_mupit.tsv | grep -v "chr13:g.32398768:T>G"'
+        cmd = 'grep -v "chr13:g.32398769:A>G" built_with_mupit.tsv | grep -v "chr13:g.32398768:T>G"| awk -F\'\\t\'  \'BEGIN {OFS=FS} { sub(/\."4"$/, ".3", $337); print}\''
         pipeline_utils.run_process(cmd,
                                    redirect_stdout_path='ready_for_priors.tsv',
                                    shell=True)
@@ -749,8 +749,23 @@ class FilterBlacklistedPriors(DefaultPipelineTask):
             self.input().path,
             self.output().path)
 
-
 @requires(FilterBlacklistedPriors)
+class PostProcessPriors(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_priors_postprocessed.tsv"))
+
+    def run(self):
+        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
+        os.chdir(artifacts_dir)
+
+        cmd = 'cat built_with_priors.tsv | awk \' BEGIN {FS=OFS="\t"} { sub(/\.3$/, ".4", $337); print}\''
+        pipeline_utils.run_process(cmd,
+                                   redirect_stdout_path='built_with_priors_postprocessed.tsv',
+                                   shell=True)
+        
+
+        
+@requires(PostProcessPriors)
 class AppendVRId(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_vr_ids.tsv"))

@@ -92,7 +92,7 @@ def _parse_engima_assertion(enigma_assertion, hgvs_util):
 
 # Parse a ClinVar variation archive element
 def parse_record(va_el, hgvs_util, symbols, mane_transcript,
-                 assembly="GRCh38"):
+                 assembly="GRCh38", debug=False):
     '''
     Extracts information out of a VariationArchive element
     :param va_el: VariationArchive element
@@ -104,7 +104,7 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
     Each element of the list corresponds to a ENIGMA submission
     '''
     rec = {}
-    va = clinvar.variationArchive(va_el, gene_symbols=symbols, debug=False,
+    va = clinvar.variationArchive(va_el, gene_symbols=symbols, debug=debug,
                                   mane_transcripts=mane_transcript)
     if not hasattr(va, 'variant'):
         logging.warning("Skipping VariationArchive %s as no variant record was found", va.id)
@@ -135,11 +135,15 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
         if re.search("^" + target_reference_sequence, va.name):
             transcript = va.name
         else:
+            if debug:
+                print("Looking for transcript in synonyms")
             for synonym in variant.synonyms:
                 if re.search("^" + target_reference_sequence, synonym):
                     transcript = synonym
                     break
             if transcript is None:
+                if debug:
+                    print("Trying to translate HGVS string", va.name)
                 hgvs_obj = hgvs_util.parse_hgvs_string(va.name)
                 if not hgvs_obj:
                     logging.warning("Skipping variant %s because its HGVS could nt be parsed", va.name)
@@ -225,7 +229,7 @@ def main(filtered_clinvar_xml, gene, output, logs):
         for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
             if event == 'end' and elem.tag == 'VariationArchive':
                 next_record = parse_record(elem, hgvs_util, gene_symbols,
-                                           mane_transcripts)
+                                           mane_transcripts, debug=False)
                 if next_record is not None:
                     variant_records.append(next_record)
                 elem.clear()
