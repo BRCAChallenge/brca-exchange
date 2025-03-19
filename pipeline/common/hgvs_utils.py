@@ -49,21 +49,21 @@ class HgvsWrapper:
 
     def to_cdna(self, hgvs_obj, target_transcript=None):
         cdna_hgvs_obj = None
-        if hgvs_obj.type == 'c':
-            genomic_hgvs_obj = self.nm_to_genomic(hgvs_obj)
-            if genomic_hgvs_obj:
-                cdna_hgvs_obj = self.genomic_to_cdna(genomic_hgvs_obj,
-                                                     target_transcript=target_transcript)
-        elif hgvs_obj.type == 'g':
-            cdna_hgvs_obj = self.genomic_to_cdna(genomic_hgvs_obj,
-                                                 target_transcript=target_transcript)
+        genomic_hgvs_obj = self.nm_to_genomic(hgvs_obj)
+        if genomic_hgvs_obj:
+            if hgvs_obj.type == 'c':
+                if genomic_hgvs_obj:
+                    cdna_hgvs_obj = self.genomic_to_cdna(genomic_hgvs_obj,
+                                                         target_transcript=target_transcript)
+                elif hgvs_obj.type == 'g':
+                    cdna_hgvs_obj = self.genomic_to_cdna(genomic_hgvs_obj,
+                                                         target_transcript=target_transcript)
         return(cdna_hgvs_obj)
     
         
     def genomic_to_cdna(self, hgvs_obj, assembly=GRCh38_Assem,
                         target_transcript=None):
         am = self.hgvs_ams[assembly]
-
         try:
             tr = am.relevant_transcripts(hgvs_obj)
 
