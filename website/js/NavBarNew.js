@@ -134,9 +134,6 @@ var NavBarNew = React.createClass({
                                 <NavLink onClick={this.close} to='/about/api'>
                                     Webservices for API Data Access
                                 </NavLink>
-                                <NavLink onClick={this.close} to='/about/app'>
-                                    The Mobile App
-                                </NavLink>
                                 <NavLink onClick={this.close} to='/about/dataSubmissionPolicy'>
                                     Data Submission Policy
                                 </NavLink>

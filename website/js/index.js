@@ -113,7 +113,6 @@ var Footer = React.createClass({
                         <li><a href="/">Home</a></li>
                         <li><a href="/about/history">About</a></li>
                         <li><a href="/variants">Variants</a></li>
-                        <li><a href="/about/app">Mobile App</a></li>
                         <li><a href="/about/api">API</a></li>
                         <li><a href="https://brcaexchange.org/blog">Blog</a></li>
                     </ul>
@@ -135,7 +134,7 @@ var Footer = React.createClass({
                             </a>
                         </li>
                         <li>
-                            <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=BRCA Exchange website">
+                            <a href="mailto:brcaexchange@gmail.com?subject=BRCA Exchange website">
                                 Contact us
                             </a>
                         </li>
