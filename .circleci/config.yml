@@ -92,14 +92,6 @@ workflows:
            filters:
              tags:
                only: /.*/
-       - test-pipeline:
-           filters:
-             tags:
-               only: /.*/
-       - test-splicing-pipeline:
-          filters:
-             tags:
-               only: /.*/
        - deploy-dev:
            requires:
              - buildweb

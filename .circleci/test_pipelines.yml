@@ -85,3 +85,15 @@ jobs:
            key: v1-{{ .Branch }}-{{ epoch }}
            paths:
              - /caches/splicing-pipeline.tar
+workflows:
+   version: 2
+   test-back-end:
+     jobs:
+       - test-pipeline:
+           filters:
+             tags:
+               only: /.*/
+       - test-splicing-pipeline:
+          filters:
+             tags:
+               only: /.*/
