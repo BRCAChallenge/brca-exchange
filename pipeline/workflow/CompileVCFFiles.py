@@ -771,13 +771,13 @@ class AppendVRId(DefaultPipelineTask):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_vr_ids.tsv"))
 
     def run(self):
-        artifacts_dir_host = self.cfg.output_dir_host + "/release/artifacts/"
+        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
         os.chdir(vr_method_dir)
 
         args = [
             'bash', 'appendvrids.sh',
-            artifacts_dir_host,
-            'built_with_priors_clean.tsv',
+            artifacts_dir,
+            'built_with_priors_postprocessed.tsv',
             'built_with_vr_ids.tsv',
              self.cfg.seq_repo_dir
         ]
