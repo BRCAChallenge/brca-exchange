@@ -4,7 +4,7 @@ jobs:
      working_directory: /pipeline
      docker:
        - image: docker:17.05.0-ce-git
-       # heavily inspired from https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
+       # heavily inspired from  https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
      steps:
        - checkout
        - setup_remote_docker
@@ -85,3 +85,15 @@ jobs:
            key: v1-{{ .Branch }}-{{ epoch }}
            paths:
              - /caches/splicing-pipeline.tar
+workflows:
+   version: 2
+   test-back-end:
+     jobs:
+       - test-pipeline:
+           filters:
+             tags:
+               only: /.*/
+       - test-splicing-pipeline:
+          filters:
+             tags:
+               only: /.*/
