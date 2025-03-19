@@ -59,7 +59,7 @@ jobs:
                  StrictHostKeyChecking no
              EOF
        - run:
-           name: deploying to dev machine
+           name: deploying to the dev machine
            command: ~/project/deployment/deploy-dev
    deploy-beta:
      circleci_ip_ranges: true
@@ -82,7 +82,7 @@ jobs:
                  StrictHostKeyChecking no
              EOF
        - run:
-           name: deploying to beta machine
+           name: deploying to the beta machine 
            command: HOST=brcaexchange-prod.gi.ucsc.edu ~/project/deployment/deploy-dev
 workflows:
    version: 2
