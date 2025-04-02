@@ -92,7 +92,7 @@ def _parse_engima_assertion(enigma_assertion, hgvs_util):
 
 # Parse a ClinVar variation archive element
 def parse_record(va_el, hgvs_util, symbols, mane_transcript,
-                 assembly="GRCh38", debug=False):
+                 assembly="GRCh38", debug=True):
     '''
     Extracts information out of a VariationArchive element
     :param va_el: VariationArchive element
@@ -122,47 +122,6 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
         rec["HGVS_cDNA"] = default_val
         rec["Abbrev_AA_change"] = default_val
         rec["HGVS_protein"] = default_val
-        #
-        # Get the MANE Select cDNA transcript for the reference sequence
-        # and HGVS cDNA and protein.
-        # 1. If it's already the variant name, do nothing (common case)
-        # 2. Else, if it's any of the variant synonyms, use that
-        # 3. Else, translate the named transcript to genomic HGVS, and
-        #    from that to the MANE Select transcript.
-        transcript = None
-        hgvs_obj = None
-        target_reference_sequence = mane_transcript[rec["Gene_symbol"]]
-        if re.search("^" + target_reference_sequence, va.name):
-            transcript = va.name
-        else:
-            if debug:
-                print("Looking for transcript in synonyms")
-            for synonym in variant.synonyms:
-                if re.search("^" + target_reference_sequence, synonym):
-                    transcript = synonym
-                    break
-            if transcript is None:
-                if debug:
-                    print("Trying to translate HGVS string", va.name)
-                hgvs_obj = hgvs_util.parse_hgvs_string(va.name)
-                if not hgvs_obj:
-                    logging.warning("Skipping variant %s because its HGVS could nt be parsed", va.name)
-                    return(None)
-                transcript_obj = hgvs_util.to_cdna(hgvs_obj,
-                                                   target_transcript=target_reference_sequence)
-                if not transcript_obj:
-                    logging.warning("Skipping variant %s because its HGVS could not be mapped", va.name)
-                    return(None)
-                transcript = str(transcript_obj)
-        if transcript:
-            if not hgvs_obj:
-                hgvs_obj = hgvs_util.parse_hgvs_string(transcript)
-                if not hgvs_obj:
-                    logging.warning("Skipping variant %s due to HGVS parsing error", va.name)
-                    return(None)
-            (rec["Abbrev_AA_change"], rec["HGVS_protein"]) = _compute_protein_changes(hgvs_obj, hgvs_util)
-            rec["Reference_sequence"] = transcript.split(":")[0]
-            rec["HGVS_cDNA"] = transcript.split(":")[1]
         rec["Condition_ID_type"] = va.classification.condition_type
         if va.classification.condition_value == None:
             rec["Condition_ID_value"] = "not provided"
@@ -175,6 +134,49 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
         # fields are actually displayed.
         rec["Condition_category"] = va.classification.condition_type
         rec["Condition_type"] = default_val
+        #
+        # Get the MANE Select cDNA transcript for the reference sequence
+        # and HGVS cDNA and protein.
+        # 1. If it's already the variant name, do nothing (common case)
+        # 2. Else, if it's any of the variant synonyms, use that
+        # 3. Else, translate the named transcript to genomic HGVS, and
+        #    from that to the MANE Select transcript.
+        transcript = None
+        hgvs_obj = None
+        target_reference_sequence = mane_transcript[rec["Gene_symbol"]]
+        if re.search("^" + target_reference_sequence, va.name):
+            transcript = va.name
+            if debug:
+                print("variant", transcript, "from va.name, coords", rec["Genomic_Coordinate"])
+        else:
+            if debug:
+                print("Looking for transcript in synonyms")
+            for synonym in variant.synonyms:
+                if re.search("^" + target_reference_sequence, synonym):
+                    transcript = synonym
+                    break
+            if transcript is None:
+                if debug:
+                    print("Trying to translate HGVS string", va.name, "coords", rec["Genomic_Coordinate"])
+                hgvs_obj = hgvs_util.parse_hgvs_string(va.name)
+                if not hgvs_obj:
+                    logging.warning("Skipping variant %s because its HGVS could nt be parsed", va.name)
+                    return(None)
+                transcript_obj = hgvs_util.to_cdna(hgvs_obj,
+                                                   target_transcript=target_reference_sequence)
+                if not transcript_obj:
+                    logging.warning("Skipping variant %s because its HGVS could not be mapped", va.name)
+                    return(None)
+                transcript = str(transcript_obj)
+        if transcript:
+            rec["Reference_sequence"] = transcript.split(":")[0]
+            rec["HGVS_cDNA"] = transcript.split(":")[1]
+            if not hgvs_obj:
+                hgvs_obj = hgvs_util.parse_hgvs_string(transcript)
+            if hgvs_obj:
+                (rec["Abbrev_AA_change"], rec["HGVS_protein"]) = _compute_protein_changes(hgvs_obj, hgvs_util)
+        if debug:
+            print("finalized on transcript", transcript, "coordinates", rec["Genomic_Coordinate"])
         for scv_accession in va.otherAssertions.keys():
             oa = va.otherAssertions[scv_accession]
             if oa.reviewStatus == "reviewed by expert panel":
