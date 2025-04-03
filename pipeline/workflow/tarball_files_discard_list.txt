@@ -149,3 +149,4 @@
 ./release/artifacts/analysis/brca.gnomAD.3.1.1.hg38.flags.tsv
 ./release/artifacts/built_with_popfreq.tsv
 ./release/artifacts/built_with_bioinfo_pred.tsv
+./release/artifacts/built_with_priors_postprocessed.tsv
