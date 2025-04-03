@@ -20,7 +20,7 @@ BA1 = "BA1 (met)"
 BS1 = "BS1 (met)"
 BS1_SUPPORTING = "BS1_Supporting (met)"
 NO_CODE = "No code met (below threshold)"
-NO_CODE_NON_SNV = "No code met for population data (indel)"
+NO_CODE_NON_SNV = "No code met (non-SNV)"
 PM2_SUPPORTING = "PM2_Supporting (met)"
 FAIL_QC = "No code met (QC filter)"
 FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG = "No code met (read depth, flags)"
@@ -37,7 +37,7 @@ PM2_SUPPORTING_MSG = "This variant is absent from gnomAD v2.1 (exomes only, non-
 NO_CODE_MSG = "This variant is present in gnomAD v2.1 (exomes only, non-cancer subset) or gnomAD v3.1 (non-cancer subset) but is below the ENIGMA BRCA1/2 VCEP threshold >0.00002 for BS1_Supporting (PM2_Supporting, BS1, and BA1 are not met)."
 NO_CODE_NON_SNV_MSG = "This [insertion/deletion/large genomic rearrangement] variant was not observed in gnomAD v2.1 (exomes only, non-cancer subset) or gnomAD v3.1 (non-cancer subset), but PM2_Supporting was not applied since recall is suboptimal for this type of variant (PM2_Supporting not met)."
 FAIL_QC_MSG = "This variant was not observed in gnomAD v2.1 (exomes only, non-cancer subset) or gnomAD v3.1 (non-cancer subset), but PM2_Supporting was not applied since this variant failed a gnomAD QC filter (PM2_Supporting not met)."
-FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG = "This variant is present in gnomAD v4.1 but is not meeting the specified read depths threshold ≥20 (PM2_Supporting, BS1, and BA1 are not met)."
+FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG = "This variant is present in gnomAD but is not meeting the specified read depths threshold ≥20 (PM2_Supporting, BS1, and BA1 are not met)."
 FAIL_NEEDS_REVIEW_MSG = "No code is met (variant needs review)"
 FAIL_NEEDS_SOFTWARE_REVIEW_MSG = "No code is met (variant needs software review)"
 
@@ -75,13 +75,22 @@ def read_flags(flag_data):
     return(flags)
     
 
-def estimate_coverage(start, end, chrom, df_cov):
+def estimate_coverage(start, end, chrom, df_cov, debug=False):
     positions = list(range(start, end+1))
     coverage_this_chrom = df_cov.loc[df_cov["chrom"] == int(chrom)]
     positions_this_variant = coverage_this_chrom[coverage_this_chrom["pos"].isin(positions)]
     meanval = positions_this_variant["mean"].mean()
     medianval = positions_this_variant["median"].median()
-    return(meanval, medianval)
+    if pd.isna(meanval) or pd.isna(medianval):
+        observable = False
+        coverage = 0
+    else:
+        observable = True
+        coverage = min(meanval, medianval)
+    if debug:
+        print("coverage assessment: observable:", observable, "meanval:",
+              meanval, "medianval:", medianval, "coverage", coverage)
+    return(observable, coverage)
 
 
 
@@ -111,27 +120,12 @@ def field_defined(field):
     """
     return(field != "-")
 
-
-def is_variant_observable(start, end, chrom, coverage):
-    #
-    # Read the coverage at the variant position.  If the coverage metrics returned
-    # are not a number, that means that the variant could not be tested in the
-    # indicated dataset.
-    print("Chhecking if variant is observable") ###
-    (mean_read_depth, median_read_depth) = estimate_coverage(int(start),int(end),
-                                                             int(chrom),coverage)
-    print("mean read depth", mean_read_depth, "median", median_read_depth) ###
-    if pd.isna(mean_read_depth) and pd.isna(median_read_depth):
-        return(False)
-    else:
-        return(True)
     
 
 def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv,
                         read_depth, vcf_filter_flag, debug=True):
     #
     # Get the coverage data.  Rule out error conditions: low coverage, VCF filter flag.
-    print("\nHello")
     rare_variant = False
     if field_defined(faf95_popmax_str):
         faf = float(faf95_popmax_str)
@@ -143,7 +137,7 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
         faf = None
         rare_variant = True
     if debug:
-        print("Rare variant", rare_variant)
+        print("Rare variant", rare_variant, "read depth", read_depth)
     if rare_variant and read_depth < READ_DEPTH_THRESHOLD_RARE_VARIANT:
         return(FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG)
     if (not rare_variant) and read_depth < READ_DEPTH_THRESHOLD_FREQUENT_VARIANT:
@@ -154,6 +148,8 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
     # Address the cases where FAF is defined, and the variant is a candidate for a
     # evidence code for high population frequency (BA1, BS1, BS1_SUPPORTING)
     if not rare_variant:
+        if debug:
+            print("Not rare variant.  FAF:", faf)
         if faf > 0.001:
             return(BA1)
         elif faf >  0.0001:
@@ -161,6 +157,8 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
         elif faf > 0.00002:
             return(BS1_SUPPORTING)
     if rare_variant:
+        if debug:
+            print("Rare variant.  Allele count", allele_count, "SNV", is_snv)
         if not field_defined(allele_count):
             return(NO_CODE)
         elif int(allele_count) > 0:
@@ -264,41 +262,40 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
     """
     Analyze a single variant, adding the output columns
     """
-    # Initialize the output columns.  First, check the read depth.  If the
-    # read depth is defined at the variant position, this means that the
-    # variant could have been observed in principle; set the default to
-    # PM2_SUPPORTING (indicating that by default, the variant could have been
-    # observed, but wasn't).  If no read depth is defined, this means that
-    # the variant could not have been observed in the dataset in question
-    # (for example, a deep intronic variant in an exome dataset).
-    # In such a case, set the default value to NOT_ASSAYED.
-    variant_v2_code_id = FAIL_QC
-    variant_v3_code_id = FAIL_QC
-    variant[POPFREQ_CODE_ID] = FAIL_QC
-    variant[POPFREQ_CODE_DESCR] = FAIL_QC_MSG
-    observable_in_v2 = False
-    observable_in_v3 = False
+    # Initialize the output columns.  First, check the read depth.
+    # to see if the variant could have been observed (exception: non-exomic
+    # regions for an exomic dataset).  Check to see if the variant was a SNV.
+    # If the variant is observable and a SNV, initialize to PM2_Supporting
+    # If it's observable and not a SNV, initialze to NO_CODE_NON_SNV
+    # If it's not observable, initialize to FAIL_QC
+    # If not observable and not a SNV, initialize to NO_CODE_NON_SNV
+    (observable_in_v2,
+     read_depth_v2) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
+                                        int(variant["pyhgvs_Hg37_End"]),
+                                        int(variant["Chr"]),coverage_v2,
+                                        debug=debug)
+    (observable_in_v3,
+     read_depth_v3) = estimate_coverage(int(variant["Hg38_Start"]),
+                                        int(variant["Hg38_End"]),
+                                        int(variant["Chr"]),coverage_v3,
+                                        debug=debug)
     is_snv = (variant["Hg38_Start"] == variant["Hg38_End"]
               and len(variant["Ref"]) == 1 and len(variant["Alt"]) == 1)
     if is_snv:
-        print("Checking if variant is observable in hg37")
-        if is_variant_observable(int(variant["pyhgvs_Hg37_Start"]),
-                                 int(variant["pyhgvs_Hg37_End"]),
-                                 int(variant["Chr"]),coverage_v2):
+        if observable_in_v2:
             variant_v2_code_id = PM2_SUPPORTING
-            variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
-            variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
-            observable_in_v2 = True
-        print("Checking if observable in hg38")
-        if is_variant_observable(int(variant["Hg38_Start"]),
-                                 int(variant["Hg38_End"]),
-                                 int(variant["Chr"]), coverage_v3):
+        else:
+            variant_v2_code_id = FAIL_QC
+        if observable_in_v3:
             variant_v3_code_id = PM2_SUPPORTING
-            variant[POPFREQ_CODE_ID] = PM2_SUPPORTING
-            variant[POPFREQ_CODE_DESCR] = PM2_SUPPORTING_MSG
-            observable_in_v3 = True
+        else:
+            variant_v3_code_id = FAIL_QC
+    else:
+        variant_v2_code_id = NO_CODE_NON_SNV
+        variant_v3_code_id = NO_CODE_NON_SNV
+
     if debug:
-        print("variant", variant["pyhgvs_cDNA"], " is snv:", is_snv, "codes", variant_v2_code_id,
+        print("variant", variant["pyhgvs_cDNA"], " is snv:", is_snv, "preliminary codes", variant_v2_code_id,
               variant_v3_code_id, "observable", observable_in_v2, observable_in_v3)
     #
     # the gnomAD v2 variant ID is set when the variant is in the genome
@@ -311,13 +308,6 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
         and field_defined(variant["Allele_count_exome_GnomAD"])
         and observable_in_v2):
         variant_in_v2 = True 
-        (mean_read_depth,
-         median_read_depth) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
-                                                int(variant["pyhgvs_Hg37_End"]),
-                                                int(variant["Chr"]),coverage_v2)
-        read_depth_v2 = min(mean_read_depth, median_read_depth)
-        if pd.isna(read_depth_v2):
-            read_depth_v2 = 0
         variant_v2_code_id = analyze_one_dataset(variant["faf95_popmax_exome_GnomAD"],
                                                          variant["faf95_popmax_population_exome_GnomAD"],
                                                          variant["Allele_count_exome_GnomAD"],
@@ -328,20 +318,11 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
             print("gnomAD V2 variant", variant["Variant_id_GnomAD"],
                   "popmax", variant["faf95_popmax_exome_GnomAD"],
                   "allele count", variant["Allele_count_exome_GnomAD"],
-                  "mean read depth", mean_read_depth,
-                  "median read depth", median_read_depth, "snv", is_snv,
+                  "read depth", read_depth_v2, "snv", is_snv,
                   "V2 code", variant_v2_code_id)
     variant_in_v3 = False
     if (field_defined(variant["Variant_id_GnomADv3"]) and observable_in_v3):
         variant_in_v3 = True
-        (mean_read_depth,
-         median_read_depth) = estimate_coverage(int(variant["Hg38_Start"]),
-                                                int(variant["Hg38_End"]),
-                                                int(variant["Chr"]),
-                                                coverage_v3)
-        read_depth_v3 = min(mean_read_depth, median_read_depth)
-        if pd.isna(read_depth_v3):
-            read_depth_v3 = 0
         variant_v3_code_id = analyze_one_dataset(variant["faf95_popmax_genome_GnomADv3"],
                                                          variant["faf95_popmax_population_genome_GnomADv3"],
                                                          variant["Allele_count_genome_GnomADv3"],
@@ -352,8 +333,7 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
             print("gnomAD V3 variant", variant["Variant_id_GnomADv3"],
                   "popmax", variant["faf95_popmax_genome_GnomADv3"],
                   "allele count", variant["Allele_count_genome_GnomADv3"],
-                  "mean read depth", mean_read_depth,
-                  "median read depth", median_read_depth, "snv", is_snv,
+                  "read depth", read_depth_v3, "snv", is_snv,
                   "V3 code", variant_v3_code_id)
     (variant[POPFREQ_CODE_ID],
      variant[POPFREQ_CODE_DESCR]) = analyze_across_datasets(variant_v2_code_id,variant["faf95_popmax_exome_GnomAD"],
@@ -381,6 +361,8 @@ def main():
     input_file = csv.DictReader(open(args.input), delimiter = "\t")
     output_file = initialize_output_file(input_file, args.output)
     for variant in input_file:
+        if args.debug:
+            print("About to analyze", variant["pyhgvs_cDNA"])
         analyze_variant(variant, df_cov2, df_cov3, flags_v2, flags_v3,
                         debug=args.debug)
         output_file.writerow(variant)
