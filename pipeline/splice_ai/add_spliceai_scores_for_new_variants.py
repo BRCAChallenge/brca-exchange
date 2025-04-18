@@ -105,6 +105,10 @@ def main():
                                                        int(args.batch_size))
         if unscored_variant_count == 0:
             all_variants_scored = True
+            # There are no more variants to score.  Copy the scored VCF
+            # to the output.
+            shutil.copy2(scored_vcf, args.output_vcf)
+            print("copy scored to output", args.output_vcf)
         else:
             run_spliceai(unscored_vcf, newly_scored_vcf, args.genome_fa_file,
                          args.genome_name, args.depth)
@@ -116,9 +120,12 @@ def main():
             shutil.copy2(args.output_vcf, scored_vcf)
     #
     # Cleanup
-    os.remove(scored_vcf)
-    os.remove(unscored_vcf)
-    os.remove(newly_scored_vcf)
+    #if os.path.exists(newly_scored_vcf):
+    #    os.remove(newly_scored_vcf)
+    #if os.path.exists(scored_vcf):
+    #    os.remove(scored_vcf)
+    #if os.path.exists(unscored_vcf):
+    #    os.remove(unscored_vcf)
             
             
 if __name__ == "__main__":
