@@ -70,7 +70,6 @@ def existing_variant():
         'Synonyms': '5074T>C,5074T>C,M1652T,NM_007294.2:c.4955T>C,NM_007300.3:c.5018T>C,NM_007299.3:c.1643T>C,NM_007298.3:c.1643T>C,NM_007297.3:c.4814T>C,U14680.1:c.5067T>C',
         'Variant_in_ClinVar': True,
         'Clinical_importance_BIC': 'unknown',
-        'Discordant': 'Concordant',
         'Condition_category_ENIGMA': 'Disease',
         'Minor_allele_frequency_percent_ESP': '-',
         'Segregation_LR_exLOVD': '0.012',
