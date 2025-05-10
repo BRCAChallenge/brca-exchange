@@ -29,7 +29,7 @@ FIELDS_TO_ADD = ["Hg38_Start", "Hg38_End", "Hg37_Start", "Hg37_End",
                  "Allele_Frequency",
                  "Max_Allele_Frequency",
                  "Genomic_Coordinate_hg37", "Source_URL",
-                 "Discordant", "Synonyms",
+                 "Synonyms",
                  "Pathogenicity_expert", "Pathogenicity_all"]
 FIELDS_TO_RENAME = {"Gene_symbol_ENIGMA": "Gene_Symbol",
                     "Genomic_Coordinate": "Genomic_Coordinate_hg38",
@@ -85,7 +85,6 @@ def updateRow(row, toRename, toRemove):
      newRow["Pathogenicity_all"]) = pathogenicityUpdate(newRow)
     newRow["Allele_Frequency"] = selectAlleleFrequency(newRow)
     newRow["Max_Allele_Frequency"] = selectMaxAlleleFrequency(newRow)
-    newRow["Discordant"] = checkDiscordantStatus(newRow)
     newRow["Source_URL"] = setSourceUrls(newRow)
     newRow["Synonyms"] = setSynonym(row)
     newRow["Genomic_Coordinate_hg37"] = EMPTY
@@ -237,36 +236,6 @@ def selectMaxAlleleFrequency(newRow):
     # MaxAF was removed from the UI and is now automatically set to '-' as of 8/11/17.
     return '-'
 
-
-def checkDiscordantStatus(row):
-    hasPathogenicClassification = False
-    hasBenignClassification = False
-    for column in (row["Clinical_Significance_ClinVar"], row["Clinical_significance_ENIGMA"]):
-        for item in column.split(","):
-            if re.search("^pathogenic$", item.lower()):
-                hasPathogenicClassification = True
-            if re.search("^pathologic$", item.lower()):
-                hasPathogenicClassification = True
-            if re.search("^likely_pathogenic$", item.lower()):
-                hasPathogenicClassification = True
-            if re.search("^probable_pathogenic$", item.lower()):
-                hasPathogenicClassification = True
-            if re.search("^benign$", item.lower()):
-                hasBenignClassification = True
-            if re.search("^probably_not_pathogenic$", item.lower()):
-                hasBenignClassification = True
-            if re.search("^likely_benign$", item.lower()):
-                hasBenignClassification = True
-            if re.search("^no_known_pathogenicity$", item.lower()):
-                hasBenignClassification = True
-            if re.search("^variant_of_unknown_significance$", item.lower()):
-                hasBenignClassification = True
-            if re.search("^uncertain_significance$", item.lower()):
-                hasBenignClassification = True
-    if hasPathogenicClassification and hasBenignClassification:
-        return "Discordant"
-    else:
-        return "Concordant"
 
 
 def setSourceUrls(row):
