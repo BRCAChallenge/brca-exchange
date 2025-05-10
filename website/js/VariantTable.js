@@ -494,7 +494,6 @@ const researchModeColumns = [
     {title: 'Date last evaluated (ENIGMA)', prop: 'Date_last_evaluated_ENIGMA'},
     {title: 'Date last updated (ClinVar)', prop: 'Date_Last_Updated_ClinVar'},
     {title: 'Date Significance Last Evaluated (ClinVar)', prop: 'DateSignificanceLastEvaluated_ClinVar'},
-    {title: 'Has Discordant Evidence', prop: 'Discordant'},
     {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
     {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
     {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar'},
