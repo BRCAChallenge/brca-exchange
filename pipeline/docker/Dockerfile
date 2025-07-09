@@ -44,6 +44,12 @@ RUN wget https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools
 RUN tar zxf vcftools*.tar.gz
 RUN cd vcftools* && ./configure && make && make install && cd .. && rm -r vcftools*
 
+# install BCFTools
+RUN apt-get install -y bcftools
+#RUN wget https://github.com/samtools/bcftools/releases/download/1.3.1/bcftools-1.3.1.tar.bz2 -O bcftools.tar.bz2
+#RUN tar -xjvf bcftools.tar.bz2
+#RUN cd bcftools* && make && make prefix=/usr/local/bin install && cd .. && rm -r bcftools
+
 # install tabix
 RUN wget https://downloads.sourceforge.net/project/samtools/tabix/tabix-0.2.6.tar.bz2
 RUN tar jxf tabix*.tar.bz2

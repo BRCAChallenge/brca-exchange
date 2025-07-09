@@ -6,6 +6,8 @@ from luigi.util import requires
 from workflow import pipeline_utils
 from workflow.pipeline_common import DefaultPipelineTask
 
+import pdb
+
 ###############################################
 #                  gnomAD                     #
 ###############################################
@@ -92,7 +94,7 @@ class SortGnomADData(GnomADTask):
             pipeline_utils.run_process(args, redirect_stdout_path=self.output()[key].path)
             pipeline_utils.check_file_for_contents(self.output()[key].path)
 
-
+            
 class DownloadStaticGnomADVCF(GnomADTask):
     gnomAD_v2_static_vcf_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/gnomADv2.sorted.hg38.vcf',
                                                description='URL to download static gnomAD v2 vcf from')
@@ -109,3 +111,14 @@ class DownloadStaticGnomADVCF(GnomADTask):
         self._download_file(self.gnomAD_v3_static_data_url, self.output()["v3"].path)
 
 
+class DownloadGnomADv4(GnomADTask):
+    def output(self):
+        return luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomADv4.sorted.hg38.vcf") 
+
+    def run(self):
+        os.chdir(gnomAD_method_dir)
+        args = ["python", "download_gnomad_fourpointone.py",
+                "-g", self.cfg.gene_config_path,
+                "-o", self.output().path]
+        pipeline_utils.run_process(args)
+        pipeline_utils.check_file_for_contents(self.output().path)

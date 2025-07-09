@@ -81,13 +81,18 @@ def main():
                              output_vcf, logger)
             tmp_fp.write(output_vcf + "\n")
     merge_cmd = ["bcftools", "merge", "--file-list", tmp.name,
-                    "-Ov", "-o", args.output]
+                    "-Ov", "-o", "unsorted.vcf"]
     subprocess.run(merge_cmd)
+    sort_cmd = ["bcftools", "sort", "unsorted.vcf",
+                "-Ov", "-o", args.output]
+    subprocess.run(sort_cmd)
+    
     
     #
     # Clean up the individual files and their indices
     for thisfile in glob.glob("*.vcf.gz*"):
         os.remove(thisfile)
+    os.remove("unsorted.vcf")
 
 
     

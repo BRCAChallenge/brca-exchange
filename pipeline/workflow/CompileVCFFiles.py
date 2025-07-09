@@ -571,6 +571,8 @@ class MergeVCFsIntoTSVFile(DefaultPipelineTask):
                                                     esp_processing.DownloadStaticESPData())
         yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
                                                     gnomad_processing.DownloadStaticGnomADVCF())
+        yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
+                                                    gnomad_processing.DownloadGnomADv4())
         yield CopyClinvarVCFToOutputDir()
         yield CopyBICOutputToOutputDir()
         yield CopyG1KOutputToOutputDir()
