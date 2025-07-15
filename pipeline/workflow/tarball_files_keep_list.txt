@@ -7,6 +7,7 @@
 ./exLOVD_brca12.sorted.hg38.vcf
 ./gnomADv2.sorted.hg38.vcf
 ./gnomADv3.sorted.hg38.vcf
+./gnomADv4.sorted.hg38.vcf
 ./ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf
 ./md5sums.txt
 ./README.txt
