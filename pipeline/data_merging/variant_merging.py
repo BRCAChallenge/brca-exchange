@@ -431,6 +431,7 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
                    "BIC": BIC_FILE,
                    "GnomAD": GNOMAD_V2_FILE,
                    "GnomADv3": GNOMAD_V3_FILE,
+                   "GnomADv4": GNOMAD_V4_FILE,
                    "ENIGMA_BRCA12_Functional_Assays": FUNCTIONAL_ASSAYS_SCORES_FILE
                    }
     print("\n" + input_dir + ":")
@@ -450,15 +451,15 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
         f_in = open(os.path.join(input_dir, file_name), "r")
         f_out = open(os.path.join(output_dir, source_name + ".vcf"), "w")
         # Individual reports (lines in VCF/TSV) are given ids as part of the one_variant_transform method.
-        one_variant_transform(f_in, f_out, source_name)
+        one_variant_transform_and_standardize(f_in, f_out, source_name)
         f_in.close()
         f_out.close()
 
         print("merge repetitive variants within ", source_name)
-        f_in = open(os.path.join(output_dir, source_name + ".vcf"), "r")
-        f_out = open(os.path.join(output_dir, source_name + "ready.vcf"), "w")
-        repeat_merging(f_in, f_out)
-        source_dict[source_name] = f_out.name
+        vcf_in = os.path.join(output_dir, source_name + ".vcf")
+        vcf_out = os.path.join(output_dir, source_name + "ready.vcf")
+        repeat_merging(vcf_in, vcf_out)
+        source_dict[source_name] = vcf_out
 
     print("-------check if genomic coordinates are correct----------")
     (columns, variants) = save_enigma_to_dict(os.path.join(input_dir, ENIGMA_FILE), output_dir, seq_provider, gene_regions_trees)
@@ -497,17 +498,39 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
     return new_source_dict, columns, variants
 
 
-def repeat_merging(f_in, f_out):
+def repeat_merging(vcf_in, vcf_out):
     """takes a vcf file, collapses repetitive variant rows and write out
         to a new vcf file (without header)"""
+    #
+    # Step 1: read through the file to determine if it has repeats.
+    # If it has no repeats (i.e. if each line is a distinct variant),
+    # then it can be processed in a manner that's quicker and less
+    # memory intensive.
+    has_repeats = False
+    unique_variant_list = {}
+    with open(vcf_in, "r") as f_in:
+        vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
+        for record in vcf_reader:
+            genome_coor = "chr{0}:{1}:{2}>{3}".format(record.CHROM, str(record.POS),
+                                                      record.REF, record.ALT[0])
+            if genome_coor in unique_variant_list:
+                has_repeats = True
+            else:
+                unique_variant_list[genome_coor] = 1
+    f_in = open(vcf_in, "r")
+    f_out = open(vcf_out, "w")
     vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
+    vcf_writer = vcf.Writer(f_out, vcf_reader)
     variant_dict = {}  # str -> Record
     num_repeats = 0
     for record in vcf_reader:
         genome_coor = "chr{0}:{1}:{2}>{3}".format(
             record.CHROM, str(record.POS), record.REF, record.ALT[0])
         if genome_coor not in variant_dict.keys():
-            variant_dict[genome_coor] = deepcopy(record)
+            if has_repeats:
+                variant_dict[genome_coor] = deepcopy(record)
+            else:
+                vcf_writer.write_record(record)
         else:
             num_repeats += 1
             for key in record.INFO:
@@ -547,9 +570,10 @@ def repeat_merging(f_in, f_out):
                         merged_value = [_f for _f in merged_value if _f]
                         variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
     print("number of repeat records: ", num_repeats, "\n")
-    vcf_writer = vcf.Writer(f_out, vcf_reader)
-    for record in variant_dict.values():
-        vcf_writer.write_record(record)
+    print("number of repeat records: ", num_repeats, "has repeats", has_repeats, "\n" )
+    if has_repeats:
+        for record in variant_dict.values():
+            vcf_writer.write_record(record)
     f_in.close()
     f_out.close()
 
@@ -562,7 +586,7 @@ def get_header(f):
     return header
 
 
-def one_variant_transform(f_in, f_out, source_name):
+def one_variant_transform_and_standardize(f_in, f_out, source_name):
     """takes a vcf file, read each row, if the ALT field contains more than
        one item, create multiple variant row based on that row. also adds
        ids to all individual reports (each line in the vcf). writes new vcf"""
@@ -570,6 +594,7 @@ def one_variant_transform(f_in, f_out, source_name):
     vcf_writer = vcf.Writer(f_out, vcf_reader)
     count = 1
     for record in vcf_reader:
+        record.CHROM = re.sub("^chr", "", record.CHROM)
         n = len(record.ALT)
         if n == 1:
             if source_name == "ExAC":
@@ -622,7 +647,7 @@ def write_new_tsv(filename, columns, variants):
     merged_file.write("\t".join(columns)+"\n")
     for key, variant in sorted(variants.items()):
         if len(variant) != len(columns):
-            raise Exception("mismatching number of columns in head and row")
+            raise Exception("mismatching number of columns in head (%s) and row (%s)" % (len(columns), len(variant)))
         for ii in range(len(variant)):
             if type(variant[ii]) == list:
                 comma_delimited_string = ",".join(str(xx) for xx in variant[ii])
@@ -656,12 +681,12 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
             try:
                 variants[genome_coor].append(record.INFO[value])
             except KeyError:
-                logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
-                if source == "BIC":
-                    variants[genome_coor].append(DEFAULT_CONTENTS)
-                    logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
-                else:
-                    raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
+                logging.warning("KeyError appending VCF record.INFO[value] to variant. Source: %s, variant: %s, value: %s", source, genome_coor, value)
+                #if source == "BIC":
+                variants[genome_coor].append(DEFAULT_CONTENTS)
+                logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
+                #else:
+                #    raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
     for value in variants.values():
