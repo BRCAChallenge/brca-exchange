@@ -22,6 +22,8 @@ from data_merging import utilities
 from data_merging import variant_equivalence
 from data_merging.variant_merging_constants import *
 
+import pdb
+
 DISCARDED_REPORTS_WRITER = None
 
 def options(parser):
@@ -43,7 +45,7 @@ def main():
     args = parser.parse_args()
 
     gene_config_df = config.load_config(args.config)
-
+    gene_symbols = config.get_gene_symbols(gene_config_df)
     gene_regions_dict = config.extract_gene_regions_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
 
     gene_regions_trees = seq_utils.build_interval_trees_by_chr(gene_regions_dict.keys(), lambda c,s,e: None)
@@ -68,32 +70,51 @@ def main():
     DISCARDED_REPORTS_WRITER = csv.DictWriter(discarded_reports_file, delimiter="\t", fieldnames=fieldnames)
     DISCARDED_REPORTS_WRITER.writeheader()
 
-    # merge repeats within data sources before merging between data sources
-    source_dict, columns, variants = preprocessing(args.input, args.output, seq_provider, gene_regions_trees)
-
+    symbol_level_source_dict = preprocess_vcfs(args.input, args.output, seq_provider,
+                                               gene_regions_trees,
+                                               genome_regions_symbol_dict,
+                                               gene_symbols)
+    print("---------------------------------------------------------")
+    print("ENIGMA: {0}".format(ENIGMA_FILE))
+    (initial_columns, variants_per_gene) = save_enigma_to_dict(os.path.join(args.input, ENIGMA_FILE),
+                                                               args.output, seq_provider,
+                                                               gene_regions_trees,
+                                                               genome_regions_symbol_dict,
+                                                               gene_symbols)
     # merges repeats from different data sources, adds necessary columns and data
+    # Do this once per gene
     print("\n------------merging different datasets------------------------------")
-    for source_name, file in source_dict.items():
-        (columns, variants) = add_new_source(columns, variants, source_name,
-                                             file, FIELD_DICT[source_name], genome_regions_symbol_dict)
-
-    # standardizes genomic coordinates for variants
-    print("\n------------standardizing genomic coordinates-------------")
-    variants = variant_standardize(columns, seq_provider, gene_regions_trees, variants=variants)
-
-    # compare dna sequence results of variants and merge if equivalent
-    print("------------dna sequence comparison merge-------------------------------")
-    variants = string_comparison_merge(variants, seq_provider)
-
-    # write final output to file
-    write_new_tsv(args.output + "merged.tsv", columns, variants)
-
+    first_symbol = True
+    for this_symbol in gene_symbols:
+        columns = deepcopy(initial_columns)
+        variants = variants_per_gene[this_symbol]
+        logging.info("Initial number of variants %d and columns %d for gene %s"
+                     % (len(variants), len(columns), this_symbol))
+        for source_name, vcf_files_dict in symbol_level_source_dict.items():
+            vcf_file = vcf_files_dict[this_symbol]
+            logging.info("Reading data to be merged for gene %s, VCF file %s" % (this_symbol, vcf_file))
+            (columns, variants) = add_new_source(columns, variants, source_name,
+                                                 vcf_file, FIELD_DICT[source_name],
+                                                 genome_regions_symbol_dict)
+            logging.info("After adding new source %s, number of variants %d, columns %d"
+                         % (source_name, len(variants), len(columns)) )
+        # standardizes genomic coordinates for variants
+        print("\n------------standardizing genomic coordinates: symbol %s -------------" % this_symbol)
+        variants = variant_standardize(columns, seq_provider, gene_regions_trees, variants=variants)
+        # compare dna sequence results of variants and merge if equivalent
+        print("------------dna sequence comparison merge: symbol %s -------------------------------"
+              % (this_symbol))
+        variants = string_comparison_merge(variants, seq_provider)
+        logging.info("Number of variants post-merge: %d" %len(variants))
+        # write final output to file
+        write_new_tsv(args.output + "merged.tsv", columns,
+                      variants, first_symbol)
+        first_symbol = False
+    # write reports to reports file
+    aggregate_reports.write_reports_tsv(args.output + "reports.tsv", columns, args.output,
+                                        genome_regions_symbol_dict)
     # copy enigma file to artifacts directory along with other ready files
     copy(os.path.join(args.input, ENIGMA_FILE), args.output)
-
-    # write reports to reports file
-    aggregate_reports.write_reports_tsv(args.output + "reports.tsv", columns, args.output, genome_regions_symbol_dict)
-
     discarded_reports_file.close()
 
     print("final number of variants: %d" % len(variants))
@@ -419,9 +440,10 @@ def string_comparison_merge(variants, seq_wrapper):
     return variants
 
 
-def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
+def preprocess_vcfs(input_dir, output_dir, seq_provider, gene_regions_trees,
+                  genome_regions_symbol_dict, gene_symbols):
     # Preprocessing variants:
-    source_dict = {
+    overall_source_dict = {
                    "1000_Genomes": GENOME1K_FILE + "for_pipeline",
                    "ClinVar": CLINVAR_FILE,
                    "LOVD": LOVD_FILE,
@@ -436,8 +458,7 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
                    }
     print("\n" + input_dir + ":")
     print("---------------------------------------------------------")
-    print("ENIGMA: {0}".format(ENIGMA_FILE))
-    for source_name, file_name in source_dict.items():
+    for source_name, file_name in overall_source_dict.items():
         print(source_name, ":", file_name)
     print("\n------------preprocessing--------------------------------")
     print("remove sample columns and two erroneous rows from 1000 Genome file")
@@ -446,7 +467,7 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
        ["bash", "1000g_preprocess.sh", os.path.join(input_dir, GENOME1K_FILE)], stdout=f_1000G)
 
     # merge multiple variant per vcf into multiple lines
-    for source_name, file_name in source_dict.items():
+    for source_name, file_name in overall_source_dict.items():
         print("convert to one variant per line in ", source_name)
         f_in = open(os.path.join(input_dir, file_name), "r")
         f_out = open(os.path.join(output_dir, source_name + ".vcf"), "w")
@@ -457,28 +478,32 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
 
         print("merge repetitive variants within ", source_name)
         vcf_in = os.path.join(output_dir, source_name + ".vcf")
-        vcf_out = os.path.join(output_dir, source_name + "ready.vcf")
+        vcf_out = os.path.join(output_dir, source_name + ".no_dups.vcf")
         repeat_merging(vcf_in, vcf_out)
-        source_dict[source_name] = vcf_out
+        overall_source_dict[source_name] = vcf_out
 
     print("-------check if genomic coordinates are correct----------")
-    (columns, variants) = save_enigma_to_dict(os.path.join(input_dir, ENIGMA_FILE), output_dir, seq_provider, gene_regions_trees)
 
-    new_source_dict = {}
-    for source_name, file_name in source_dict.items():
+    symbol_level_source_dict = {}
+    for source_name, file_name in overall_source_dict.items():
         f = open(file_name, "r")
         d_wrong = output_dir + "wrong_genome_coors/"
         if not os.path.exists(d_wrong):
             os.makedirs(d_wrong)
         f_wrong = open(output_dir + "wrong_genome_coors/" +
                        source_name + "_wrong_genome_coor.vcf", "w")
-        f_right = open(output_dir+ "right" + source_name, "w")
 
-        new_source_dict[source_name] = f_right.name
 
         vcf_reader = vcf.Reader(f, strict_whitespace=True)
         vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
-        vcf_right_writer = vcf.Writer(f_right, vcf_reader)
+        vcf_right_writer = dict()
+        symbol_level_source_dict[source_name] = {}
+        f_right = dict()
+        for symbol in gene_symbols:
+            f_right[symbol] = open("%sright%s_%s.vcf" % (output_dir, symbol,
+                                                         source_name), "w")
+            symbol_level_source_dict[source_name][symbol] = f_right[symbol].name
+            vcf_right_writer[symbol] = vcf.Writer(f_right[symbol], vcf_reader)
         n_wrong, n_total = 0, 0
         for record in vcf_reader:
             ref = record.REF.replace("-", "")
@@ -489,13 +514,16 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
                 vcf_wrong_writer.write_record(record)
                 n_wrong += 1
             else:
-                vcf_right_writer.write_record(record)
+                gene_symbol = chrom_pos_to_symbol(record.CHROM, record.POS, genome_regions_symbol_dict)
+                vcf_right_writer[gene_symbol].write_record(record)
             n_total += 1
-        f_right.close()
+        for symbol in gene_symbols:
+            f_right[symbol].close()
         f_wrong.close()
         print("in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total))
 
-    return new_source_dict, columns, variants
+    return symbol_level_source_dict
+
 
 
 def repeat_merging(vcf_in, vcf_out):
@@ -642,9 +670,12 @@ def append_exac_allele_frequencies(record, new_record=None, i=None):
         return new_record
 
 
-def write_new_tsv(filename, columns, variants):
-    merged_file = open(filename, "w")
-    merged_file.write("\t".join(columns)+"\n")
+def write_new_tsv(filename, columns, variants, first_execution):
+    if not first_execution:
+        merged_file = open(filename, "a")
+    else:
+        merged_file = open(filename, "w")
+        merged_file.write("\t".join(columns)+"\n")
     for key, variant in sorted(variants.items()):
         if len(variant) != len(columns):
             raise Exception("mismatching number of columns in head (%s) and row (%s)" % (len(columns), len(variant)))
@@ -684,7 +715,6 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
                 logging.warning("KeyError appending VCF record.INFO[value] to variant. Source: %s, variant: %s, value: %s", source, genome_coor, value)
                 #if source == "BIC":
                 variants[genome_coor].append(DEFAULT_CONTENTS)
-                logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
                 #else:
                 #    raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
     # for those enigma record that doesn't have a hit with new genome coordinate
@@ -695,34 +725,36 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
     print("number of variants in " + source + " is ", variants_num)
     print("overlap with previous dataset: ", overlap)
     print("number of total variants with the addition of " + source + " is: ", len(variants), "\n")
-    for index, value in variants.items():
-        if len(value) != len(columns):
-            raise Exception("mismatching number of columns in head and row")
+    #for index, value in variants.items():
+    #    if len(value) != len(columns):
+    #        raise Exception("mismatching number of columns in head (%d) and row (%d)",
+    #                        len(value), len(columns))
     return (columns, variants)
+
+def chrom_pos_to_symbol(chrom, pos, genome_regions_symbol_dict):
+    # Given a coordinate, return the gene symbol
+    chr_tree = genome_regions_symbol_dict.get(int(chrom))
+    if not chr_tree:
+        raise Exception(
+            "In gene symbol dict, did find data for chromosome {}".format(chrom))
+    symbols = list(chr_tree.at(int(pos)))
+    assert len(symbols) == 1, "Expect exactly one symbol at a given position, but got {} for chr {} pos {}".format(len(symbols), chrom, pos)
+    (start_pos, end_pos, gene_symbol) = symbols[0]
+    return(gene_symbol)
 
 
 def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor, genome_regions_symbol_dict):
     # places genomic coordinate data in correct positions to align with relevant columns in output tsv file.
     item = ['-'] * column_num
     item[COLUMN_SOURCE] = source
-
     item[COLUMN_GENOMIC_HGVS] = genome_coor
     item[COLUMN_VCF_CHR] = line.CHROM
     item[COLUMN_VCF_POS] = line.POS
     item[COLUMN_VCF_REF] = line.REF
     item[COLUMN_VCF_ALT] = str(line.ALT[0])
-
-    chr_tree = genome_regions_symbol_dict.get(int(item[COLUMN_VCF_CHR]))
-
-    if not chr_tree:
-        raise Exception(
-            "Did find data for chromosome {}".format(int(item[COLUMN_VCF_CHR])))
-
-    symbols = list(chr_tree.at(int(item[COLUMN_VCF_POS])))
-    assert len(symbols) == 1, "Expect exactly one symbol at a given position, but got {} for chr {} pos {}".format(len(symbols), item[COLUMN_VCF_CHR], item[COLUMN_VCF_POS])
-
-    _, _, item[COLUMN_GENE] = symbols[0] # don't care about start and end of genomic position
-
+    symbol = chrom_pos_to_symbol(int(re.sub("^chr", "", line.CHROM)), int(line.POS),
+                                      genome_regions_symbol_dict)
+    item[COLUMN_GENE] = symbol
     return item
 
 
@@ -755,11 +787,14 @@ def add_columns_to_enigma_data(line):
     return columns
 
 
-def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees):
+def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees,
+                        genome_regions_symbols_dict, gene_symbols):
     global DISCARDED_REPORTS_WRITER
 
     enigma_file = open(path, "r")
-    variants = dict()
+    variants_per_gene = dict()
+    for symbol in gene_symbols:
+        variants_per_gene[symbol] = dict()
     line_num = 0
     f_wrong = open(output_dir + "ENIGMA_wrong_genome.txt", "w")
     n_wrong, n_total = 0, 0
@@ -776,9 +811,11 @@ def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees):
             (items, chrom, pos, ref, alt) = associate_chr_pos_ref_alt_with_enigma_item(line)
             bx_id = items[bx_id_column_index]
             hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
+            symbol = chrom_pos_to_symbol(chrom, pos, genome_regions_symbols_dict)
 
             if ref_correct(chrom, pos, ref, alt, seq_provider) and not is_outside_boundaries(chrom, pos, gene_regions_trees):
-                variants = add_variant_to_dict(variants, hgvs, items)
+                
+                variants_per_gene[symbol] = add_variant_to_dict(variants_per_gene[symbol], hgvs, items)
             elif pos == 'None':
                 logging.warning("Position is none for Enigma report, throwing away: %s", line)
                 log_discarded_reports("ENIGMA", bx_id, hgvs, "None position")
@@ -794,7 +831,7 @@ def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees):
 
     f_wrong.close()
     print("in ENIGMA, wrong: {0}, total: {1}".format(n_wrong, n_total))
-    return (columns, variants)
+    return (columns, variants_per_gene)
 
 
 def is_outside_boundaries(c, pos, gene_regions_trees):

@@ -47,8 +47,8 @@ def main():
     parser.add_argument("-o", "--output",
                         default="/hive/groups/cgl/brca/release1.0/aggregated.csv")
     args = parser.parse_args()
-
     csvIn = csv.DictReader(open(args.input, "r"), delimiter='\t')
+    print("reading from input", args.input, "preparing output", args.output, "fieldnames", csvIn.fieldnames, "fields to remove", FIELDS_TO_REMOVE, "add", FIELDS_TO_ADD, "rename", FIELDS_TO_RENAME)
     outputColumns = setOutputColumns(csvIn.fieldnames, FIELDS_TO_REMOVE,
                                      FIELDS_TO_ADD, FIELDS_TO_RENAME)
     csvOut = csv.DictWriter(open(args.output, "w"), delimiter='\t',
