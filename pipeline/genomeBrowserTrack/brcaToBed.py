@@ -78,21 +78,21 @@ def main():
         print("Reading %s..." % ifh.name)
 
         headers = ifh.readline().rstrip("\n").rstrip("\r").strip().split("\t")
-        rowRec = namedtuple("rec", headers)
+        #rowRec = dict(zip(headers, values))
 
         _write_auto_sql_file(args.auto_sql_file)
 
         for line in ifh:
             row = line.rstrip("\n").rstrip("\r").split("\t")
-            rec = rowRec(*row)
+            #rec = rowRec(*row)
             rd = OrderedDict(zip(headers, row)) # row as dict
 
-            if int(rec.Hg38_End) - int(rec.Hg38_Start) < args.length_threshold:
-                write_track_item(rec, str(int(rec.pyhgvs_Hg37_Start)-1), rec.pyhgvs_Hg37_End, ofhg19v)
-                write_track_item(rec, str(int(rec.Hg38_Start)-1), rec.Hg38_End, ofhg38v)
+            if int(rd["Hg38_End"]) - int(rd["Hg38_Start"]) < args.length_threshold:
+                write_track_item(rec, str(int(rd["pyhgvs_Hg37_Start"])-1), rd["pyhgvs_Hg37_End"], ofhg19v)
+                write_track_item(rec, str(int(rd["Hg38_Start"])-1), rd["Hg38_End"], ofhg38v)
             else:
-                write_track_item(rec, str(int(rec.pyhgvs_Hg37_Start)-1), rec.pyhgvs_Hg37_End, ofhg19sv)
-                write_track_item(rec, str(int(rec.Hg38_Start)-1), rec.Hg38_End, ofhg38sv)
+                write_track_item(rec, str(int(rd["pyhgvs_Hg37_Start"])-1), rd["pyhgvs_Hg37_End"], ofhg19sv)
+                write_track_item(rec, str(int(rd["Hg38_Start"])-1), rd["Hg38_End"], ofhg38sv)
                 
 
         print("wrote to %s, %s, %s and %s" % (ofhg19v.name, ofhg38v.name, ofhg19sv.name, ofhg38sv.name))
