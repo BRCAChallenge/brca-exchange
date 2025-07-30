@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
 import genomeBrowserUtils
 
 
@@ -78,13 +78,10 @@ def main():
         print("Reading %s..." % ifh.name)
 
         headers = ifh.readline().rstrip("\n").rstrip("\r").strip().split("\t")
-        #rowRec = dict(zip(headers, values))
-
         _write_auto_sql_file(args.auto_sql_file)
 
         for line in ifh:
             row = line.rstrip("\n").rstrip("\r").split("\t")
-            #rec = rowRec(*row)
             rd = OrderedDict(zip(headers, row)) # row as dict
 
             if int(rd["Hg38_End"]) - int(rd["Hg38_Start"]) < args.length_threshold:
