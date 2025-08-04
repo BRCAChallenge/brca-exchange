@@ -5,6 +5,7 @@ it also merges equivalent variants together
 """
 import argparse
 import csv
+import glob
 import logging
 import os
 import pickle
@@ -16,8 +17,8 @@ from shutil import copy
 
 import vcf
 
-from data_merging import aggregate_reports
 from common import seq_utils, config
+from data_merging import aggregate_reports
 from data_merging import utilities
 from data_merging import variant_equivalence
 from data_merging.variant_merging_constants import *
@@ -26,7 +27,8 @@ import pdb
 
 DISCARDED_REPORTS_WRITER = None
 
-def options(parser):
+def parse_args():
+    parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", help="Input VCF directory",
                         default="/home/brca/pipeline-data/pipeline-input/")
     parser.add_argument("-o", "--output",
@@ -34,15 +36,14 @@ def options(parser):
     parser.add_argument("-c", "--config")
     parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
-
+    args = parser.parse_args()
+    return(args)
+    
 
 def main():
     global DISCARDED_REPORTS_WRITER
 
-    parser = argparse.ArgumentParser()
-    options(parser)
-
-    args = parser.parse_args()
+    args = parse_args()
 
     gene_config_df = config.load_config(args.config)
     gene_symbols = config.get_gene_symbols(gene_config_df)
@@ -117,6 +118,11 @@ def main():
     copy(os.path.join(args.input, ENIGMA_FILE), args.output)
     discarded_reports_file.close()
 
+    # clean up the temp files
+    temp_files_to_delete = glob.glob('right*.vcf')
+    for this_file in temp_files_to_delete:
+        os.remove(this_file)
+        
     print("final number of variants: %d" % len(variants))
     print("Done")
 
@@ -160,7 +166,7 @@ def variant_standardize(columns, seq_provider, gene_regions_tree, variants="pick
         # If the reference is wrong, remove the variant
         reason_for_discard = ""
 
-        if is_outside_boundaries(chr, pos, gene_regions_tree):
+        if utilities.is_outside_boundaries(chr, pos, gene_regions_tree):
             reason_for_discard = "Reference outside boundaries"
         elif not ref_correct(chr, pos, ref, alt, seq_provider):
             reason_for_discard = "Incorrect Reference"
@@ -508,13 +514,14 @@ def preprocess_vcfs(input_dir, output_dir, seq_provider, gene_regions_trees,
         for record in vcf_reader:
             ref = record.REF.replace("-", "")
             v = [record.CHROM, record.POS, ref, "dummy"]
-            if not ref_correct(record.CHROM, record.POS, record.REF, record.ALT, seq_provider) or is_outside_boundaries(record.CHROM, record.POS, gene_regions_trees):
+            if (not ref_correct(record.CHROM, record.POS, record.REF, record.ALT, seq_provider) 
+                or utilities.is_outside_boundaries(record.CHROM, record.POS, gene_regions_trees)):
                 logging.warning("Reference incorrect for Chrom: %s, Pos: %s, Ref: %s, and Alt: %s",
                                 record.CHROM, record.POS, record.REF, record.ALT)
                 vcf_wrong_writer.write_record(record)
                 n_wrong += 1
             else:
-                gene_symbol = chrom_pos_to_symbol(record.CHROM, record.POS, genome_regions_symbol_dict)
+                gene_symbol = utilities.chrom_pos_to_symbol(record.CHROM, record.POS, genome_regions_symbol_dict)
                 vcf_right_writer[gene_symbol].write_record(record)
             n_total += 1
         for symbol in gene_symbols:
@@ -707,7 +714,8 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
                 variants[genome_coor][COLUMN_SOURCE] = [variants[genome_coor][COLUMN_SOURCE]]
             variants[genome_coor][COLUMN_SOURCE].append(source)
         else:
-            variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor, genome_regions_symbol_dict)
+            variants[genome_coor] = utilities.associate_chr_pos_ref_alt_with_item(record, old_column_num, source,
+                                                                                  genome_coor, genome_regions_symbol_dict)
         for value in source_dict.values():
             try:
                 variants[genome_coor].append(record.INFO[value])
@@ -731,60 +739,8 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
     #                        len(value), len(columns))
     return (columns, variants)
 
-def chrom_pos_to_symbol(chrom, pos, genome_regions_symbol_dict):
-    # Given a coordinate, return the gene symbol
-    chr_tree = genome_regions_symbol_dict.get(int(chrom))
-    if not chr_tree:
-        raise Exception(
-            "In gene symbol dict, did find data for chromosome {}".format(chrom))
-    symbols = list(chr_tree.at(int(pos)))
-    assert len(symbols) == 1, "Expect exactly one symbol at a given position, but got {} for chr {} pos {}".format(len(symbols), chrom, pos)
-    (start_pos, end_pos, gene_symbol) = symbols[0]
-    return(gene_symbol)
 
 
-def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor, genome_regions_symbol_dict):
-    # places genomic coordinate data in correct positions to align with relevant columns in output tsv file.
-    item = ['-'] * column_num
-    item[COLUMN_SOURCE] = source
-    item[COLUMN_GENOMIC_HGVS] = genome_coor
-    item[COLUMN_VCF_CHR] = line.CHROM
-    item[COLUMN_VCF_POS] = line.POS
-    item[COLUMN_VCF_REF] = line.REF
-    item[COLUMN_VCF_ALT] = str(line.ALT[0])
-    symbol = chrom_pos_to_symbol(int(re.sub("^chr", "", line.CHROM)), int(line.POS),
-                                      genome_regions_symbol_dict)
-    item[COLUMN_GENE] = symbol
-    return item
-
-
-def associate_chr_pos_ref_alt_with_enigma_item(line):
-    # places source and genomic coordinate data in correct positions to align with enigma columns
-    items = line.strip().split("\t")
-    items.insert(COLUMN_SOURCE, "ENIGMA")
-    v = items[COLUMN_GENOMIC_HGVS].replace("-", "").replace("chr", "").replace(">", ":")
-    (chrom, pos, ref, alt) = v.split(":")
-    items.insert(COLUMN_VCF_CHR, chrom)
-    items.insert(COLUMN_VCF_POS, pos)
-    items.insert(COLUMN_VCF_REF, ref)
-    items.insert(COLUMN_VCF_ALT, alt)
-    for ii in range(len(items)):
-        if items[ii] is None or items[ii] == '':
-            items[ii] = DEFAULT_CONTENTS
-    return (items, chrom, pos, ref, alt)
-
-
-def add_columns_to_enigma_data(line):
-    # adds necessary columns to enigma data
-    columns = line.strip().split("\t")
-    columns = [c + "_ENIGMA" for c in columns if c != "Genomic_Coordinate"]
-    columns.insert(COLUMN_SOURCE, "Source")
-    columns.insert(COLUMN_GENOMIC_HGVS, "Genomic_Coordinate")
-    columns.insert(COLUMN_VCF_CHR, "Chr")
-    columns.insert(COLUMN_VCF_POS, "Pos")
-    columns.insert(COLUMN_VCF_REF, "Ref")
-    columns.insert(COLUMN_VCF_ALT, "Alt")
-    return columns
 
 
 def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees,
@@ -802,18 +758,21 @@ def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees,
     for line in enigma_file:
         line_num += 1
         if line_num == 1:
-            columns = add_columns_to_enigma_data(line)
+            columns = utilities.add_columns_to_enigma_data(line)
             for i, column in enumerate(columns):
                 if "BX_ID" in column:
                     bx_id_column_index = i
             f_wrong.write(line)
         else:
-            (items, chrom, pos, ref, alt) = associate_chr_pos_ref_alt_with_enigma_item(line)
+            (items, chrom, pos, ref, alt) = utilities.associate_chr_pos_ref_alt_with_enigma_item(line)
             bx_id = items[bx_id_column_index]
             hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
-            symbol = chrom_pos_to_symbol(chrom, pos, genome_regions_symbols_dict)
+            symbol = utilities.chrom_pos_to_symbol(chrom, pos,
+                                                   genome_regions_symbols_dict)
 
-            if ref_correct(chrom, pos, ref, alt, seq_provider) and not is_outside_boundaries(chrom, pos, gene_regions_trees):
+            if (ref_correct(chrom, pos, ref, alt, seq_provider)
+                and not utilities.is_outside_boundaries(chrom, pos,
+                                                        gene_regions_trees)):
                 
                 variants_per_gene[symbol] = add_variant_to_dict(variants_per_gene[symbol], hgvs, items)
             elif pos == 'None':
@@ -823,7 +782,7 @@ def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees,
                 f_wrong.write(line)
             else:
                 logging.warning("Ref incorrect for Enigma report, throwing away: %s", line)
-                log_discarded_reports("ENIGMA", bx_id, hgvs, "Incorrect Reference. Is outside Boundaries {}".format(is_outside_boundaries(chrom, pos, gene_regions_trees)))
+                log_discarded_reports("ENIGMA", bx_id, hgvs, "Incorrect Reference. Is outside Boundaries {}".format(utilities.is_outside_boundaries(chrom, pos, gene_regions_trees)))
                 n_wrong += 1
                 f_wrong.write(line)
 
@@ -834,16 +793,6 @@ def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees,
     return (columns, variants_per_gene)
 
 
-def is_outside_boundaries(c, pos, gene_regions_trees):
-    c = int(c)
-    pos = int(pos)
-
-    if c not in gene_regions_trees.keys():
-        return(True)
-
-
-    chr_regions = gene_regions_trees[c]
-    return len(chr_regions.at(pos)) == 0
 
 
 def ref_correct(chr, pos, ref, alt, seq_provider):
