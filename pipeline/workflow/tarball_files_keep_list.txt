@@ -34,6 +34,7 @@
 ./release/artifacts/wrong_genome_coors/ENIGMA_BRCA12_Functional_Assays_wrong_genome_coor.vcf
 ./release/artifacts/wrong_genome_coors/GnomAD_wrong_genome_coor.vcf
 ./release/artifacts/wrong_genome_coors/GnomADv3_wrong_genome_coor.vcf
+./release/artifacts/wrong_genome_coors/GnomADv4_wrong_genome_coor.vcf
 ./release/artifacts/wrong_genome_coors/LOVD_wrong_genome_coor.vcf
 ./release/built_final.tsv
 ./release/built_with_change_types.tsv
