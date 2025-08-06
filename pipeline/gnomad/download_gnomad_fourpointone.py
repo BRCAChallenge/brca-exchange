@@ -5,10 +5,12 @@ import csv
 import glob
 import logging
 import os
+import re
 import shutil
 import subprocess
 import tempfile
 from urllib.request import urlretrieve
+import pysam
 
 """
 Description:
@@ -62,6 +64,35 @@ def process_one_gene(chrom, start_coord, end_coord, output_vcf, logger):
     os.remove(local_file_vcf)
     os.remove(local_file_tbi)
 
+def postprocess(input_vcf, output_vcf):
+    """ Postprocess the gnomAD file by adding some key fileds not provided
+    in the download VCF, such as the variant ID
+    """
+    reader = pysam.VariantFile(input_vcf, 'r')
+    reader.header.info.add("variant_id", number=1, type="String",
+                           description="gnomAD-style variant ID")
+    reader.header.info.add("flags", number=1, type="String",
+                           description="gnomAD flags, from the FILTER field")
+    writer = pysam.VariantFile(output_vcf, 'w', header=header)
+    for record in reader:
+        #
+        # Set the INFO field 'flags' to the filter value
+        if record.filter.keys()[0] == "PASS":
+            record.info['flags'] = "-"
+        else:
+            record.info['flags'] = ','.join(record.filter.keys())
+        #
+        # Set the INFO field 'variant_id' to the concatenation of chrom,
+        # pos, ref, and alt.  Note that gnomAD VCFs have only one alt per
+        # row, so it's safe to just take the first alt.
+        alt = record.alts[0] 
+        var_id = "%s-%s-%s-%s" % (re.sub("^chr", "", record.chrom),
+                                  str(record.pos),record.ref, alt)
+        record.info['variant_id'] = var_id
+        bytes_written = writer.write(record)
+    reader.close()
+    writer.close()
+
     
 def main():
     args = parse_args()
@@ -84,15 +115,16 @@ def main():
                     "-Ov", "-o", "unsorted.vcf"]
     subprocess.run(merge_cmd)
     sort_cmd = ["bcftools", "sort", "unsorted.vcf",
-                "-Ov", "-o", args.output]
+                "-Ov", "-o", "sorted.vcf"]
     subprocess.run(sort_cmd)
+    postprocess("sorted.vcf", args.output)
     
     
     #
     # Clean up the individual files and their indices
-    for thisfile in glob.glob("*.vcf.gz*"):
-        os.remove(thisfile)
-    os.remove("unsorted.vcf")
+    #for thisfile in glob.glob("*.vcf.gz*"):
+    #    os.remove(thisfile)
+    #os.remove("unsorted.vcf")
 
 
     

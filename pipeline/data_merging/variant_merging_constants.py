@@ -363,8 +363,8 @@ GNOMAD_V3_SUBPOPULATIONS = ["AFR", "AMR", "ASJ", "EAS", "FIN", "NFE",
                             "OTH", "SAS", "MID", "AMI"]
 
 GNOMAD_V4_FIELDS = {
-                 #"Flags": "flags",
-                 #"Variant_id": "variant_id",
+                 "Flags": "flags",
+                 "Variant_id": "variant_id",
 
                  "faf95_popmax_joint": "fafmax_faf95_max_joint",
                  "faf95_popmax_population_joint": "fafmax_faf95_max_gen_anc_joint",
@@ -400,7 +400,7 @@ GNOMAD_V4_FIELDS = {
                  "Allele_frequency_joint_NFE": "AF_joint_nfe",
 
                  "Allele_count_joint_remaining": "AC_joint_remaining",
-                 "Allele_count_hom_joint_OTH": "nhomalt_joint_remaining",
+                 "Allele_count_hom_joint_remaining": "nhomalt_joint_remaining",
                  "Allele_number_joint_remaining": "AN_joint_remaining",
                  "Allele_frequency_joint_remaining": "AF_joint_remaining",
 
