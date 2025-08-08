@@ -73,7 +73,7 @@ def postprocess(input_vcf, output_vcf):
                            description="gnomAD-style variant ID")
     reader.header.info.add("flags", number=1, type="String",
                            description="gnomAD flags, from the FILTER field")
-    writer = pysam.VariantFile(output_vcf, 'w', header=header)
+    writer = pysam.VariantFile(output_vcf, 'w', header=reader.header)
     for record in reader:
         #
         # Set the INFO field 'flags' to the filter value
@@ -122,9 +122,10 @@ def main():
     
     #
     # Clean up the individual files and their indices
-    #for thisfile in glob.glob("*.vcf.gz*"):
-    #    os.remove(thisfile)
-    #os.remove("unsorted.vcf")
+    for thisfile in glob.glob("*.gnomADv4.1*vcf.gz*"):
+        os.remove(thisfile)
+    os.remove("unsorted.vcf")
+    os.remove("sorted.vcf")
 
 
     
