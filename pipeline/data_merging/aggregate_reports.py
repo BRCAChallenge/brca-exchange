@@ -17,22 +17,33 @@ from data_merging.variant_merging_constants import (
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input_dir", help="Directory with input VCF files")
-    parser.add_argument("-o", "--output_file", help="Output filename")
     parser.add_argument("-c", "--config", help="Pathname of the config file")
+    parser.add_argument("-i", "--input_dir", help="Directory with input VCF files")
+    parser.add_argument("-l", "--log_file", help="Pathname of the log file", default="aggregate_reports.log")
     parser.add_argument("-m", "--merged_file", help="Pathname of the file with merged variants")
-    parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
+    parser.add_argument("-o", "--output_file", help="Output filename")
+    parser.add_argument("-v", "--verbose", action="count", default=True, help="determines logging")
     args = parser.parse_args()
     return(args)
     
 
 def main():
     args = parse_args()
+    if args.verbose:
+        logging_level = logging.DEBUG
+    else:
+        logging_level = logging.CRITICAL
+    logging.basicConfig(filename=args.log_file, filemode="w", level=logging_level,
+                        format=' %(asctime)s %(filename)-15s %(message)s')
     gene_config_df = config.load_config(args.config)
     genome_regions_symbol_dict = config.get_genome_regions_symbol_dict(gene_config_df, 'start_hg38_legacy_variants', 'end_hg38_legacy_variants')
+    #
+    # Read the first line to get the list of columns
     with open(args.merged_file, "r") as fp:
         line = fp.readline().strip()
         columns = re.split('\t', line)
+    #
+    # Process subsequent lines
     write_reports_tsv(args.output_file, columns, args.input_dir, genome_regions_symbol_dict)
     
 
@@ -55,9 +66,8 @@ def write_reports_tsv(filename, columns, ready_files_dir,
                 if len(this_report) != len(columns):
                     this_report += [DEFAULT_CONTENTS] * len(FIELD_DICT[source])
             write_report(this_report, columns, reports_output_fp)
-        logging.info("finished normalizing %s" % (file))
+        logging.info("finished normalizing %s with %d reports" % (file, len(reports)))
     reports_output_fp.close()
-    logging.info("final number of reports: %d" % len(reports))
     logging.info("Done")
 
 

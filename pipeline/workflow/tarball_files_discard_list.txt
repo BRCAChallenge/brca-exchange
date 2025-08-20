@@ -28,6 +28,8 @@
 ./release/artifacts/GnomAD.vcf
 ./release/artifacts/GnomADv3.no_dups.vcf
 ./release/artifacts/GnomADv3.vcf
+./release/artifacts/GnomADv4.no_dups.vcf
+./release/artifacts/GnomADv4.vcf
 ./release/artifacts/LOVD.no_dups.vcf
 ./release/artifacts/LOVD.vcf
 ./release/artifacts/ready_for_priors.tsv
