@@ -301,10 +301,10 @@ Allele_count_joint_NFE_GnomADv4	Allele Frequency	#COPY	"Count of observed altern
 Allele_count_hom_joint_NFE_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous Non-Finnish European Populations, per gnomAD v3 (gnomAD v4.1)"
 Allele_number_joint_NFE_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of Non-Finnish European Populations (gnomAD v4.1)
 Allele_frequency_joint_NFE_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of Non-Finnish European Populations (gnomAD v4.1)
-Allele_count_joint_remaining_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of Remaining Populations, per gnomAD (gnomAD v4.1)"
-Allele_count_hom_joint_remaining_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous Remaining Populations, per gnomAD v3 (gnomAD v4.1)"
-Allele_number_joint_remaining_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of Remaining Populations (gnomAD v4.1)
-Allele_frequency_joint_remaining_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of Remaining Populations (gnomAD v4.1)
+Allele_count_joint_remaining_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of Remaining (Other) Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_remaining_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous Remaining (Other) Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_remaining_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of Remaining (Other) Populations (gnomAD v4.1)
+Allele_frequency_joint_remaining_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of Remaining (Other) Populations (gnomAD v4.1)
 Allele_count_joint_SAS_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of South Asian Populations, per gnomAD (gnomAD v4.1)"
 Allele_count_hom_joint_SAS_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous South Asian Populations, per gnomAD v3 (gnomAD v4.1)"
 Allele_number_joint_SAS_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of South Asian Populations (gnomAD v4.1)
