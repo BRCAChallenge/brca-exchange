@@ -5,7 +5,6 @@
 ./release/artifacts/bayesdel.vcf
 ./release/artifacts/BICready.vcf
 ./release/artifacts/BIC.vcf
-./release/artifacts/variants_with_splice_ai.vcf
 ./release/artifacts/built.tsv
 ./release/artifacts/built_with_bayesdel.tsv
 ./release/artifacts/built_with_spliceai.tsv
@@ -31,6 +30,7 @@
 ./release/artifacts/GnomADv3.vcf
 ./release/artifacts/LOVDready.vcf
 ./release/artifacts/LOVD.vcf
+./release/artifacts/ready_for_priors.tsv
 ./release/artifacts/releaseDiff.log
 ./release/artifacts/right1000_Genomes
 ./release/artifacts/rightBIC
@@ -40,6 +40,7 @@
 ./release/artifacts/rightexLOVD
 ./release/artifacts/rightENIGMA_BRCA12_Functional_Assays
 ./release/artifacts/
+./release/artifacts/ready_for_priors.tsv
 ./release/artifacts/rightGnomAD
 ./release/artifacts/rightGnomADv3
 ./release/artifacts/rightLOVD
@@ -142,3 +143,10 @@
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.start
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.stop
 ./release/artifacts/victor_wdir/slurm.annotate.run_1.version
+./release/artifacts/analysis/df_cov_v2.parquet
+./release/artifacts/analysis/df_cov_v3.parquet
+./release/artifacts/analysis/brca.gnomAD.2.1.1.hg19.flags.tsv
+./release/artifacts/analysis/brca.gnomAD.3.1.1.hg38.flags.tsv
+./release/artifacts/built_with_popfreq.tsv
+./release/artifacts/built_with_bioinfo_pred.tsv
+./release/artifacts/built_with_priors_postprocessed.tsv

@@ -13,7 +13,7 @@ from luigi.util import requires
 
 luigi.auto_namespace(scope=__name__)
 
-from workflow import bayesdel_processing, esp_processing, gnomad_processing, pipeline_common, pipeline_utils
+from workflow import analysis, esp_processing, gnomad_processing, pipeline_common, pipeline_utils
 from workflow.pipeline_common import DefaultPipelineTask, clinvar_method_dir, lovd_method_dir, \
     functional_assays_method_dir, data_merging_method_dir, priors_method_dir, priors_filter_method_dir, \
     utilities_method_dir, vr_method_dir, splice_ai_method_dir, field_metadata_path, field_metadata_path_additional
@@ -33,12 +33,12 @@ luigi_dir = os.getcwd()
 
 class DownloadLatestClinvarData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.clinvar_file_dir + "/ClinVarFullRelease_00-latest.xml.gz")
+        return luigi.LocalTarget(self.clinvar_file_dir + "/ClinVarVCVRelease_00-latest.xml.gz")
 
     def run(self):
         os.chdir(self.clinvar_file_dir)
 
-        clinvar_data_url = "ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarFullRelease_00-latest.xml.gz"
+        clinvar_data_url = "ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarVCVRelease_00-latest.xml.gz"
         pipeline_utils.download_file_and_display_progress(clinvar_data_url)
 
 
@@ -49,10 +49,12 @@ class ConvertLatestClinvarDataToXML(DefaultPipelineTask):
 
     def run(self):
         os.chdir(clinvar_method_dir)
-        genes_opts = [ s for g in self.cfg.gene_metadata['symbol'] for s in ['--gene', g]]
+        genes_opts = [ s for g in self.cfg.gene_metadata['symbol']
+                       for s in ['--gene', g]]
 
-        pipeline_utils.run_process(["python", "filter_clinvar.py", self.input().path,
-                                    self.output().path] + genes_opts)
+        pipeline_utils.run_process(["python", "filter_clinvar.py",
+                                    "-i", self.input().path,
+                                    "-o", self.output().path] + genes_opts)
 
         pipeline_utils.check_file_for_contents(self.output().path)
 
@@ -566,9 +568,11 @@ class CopyFunctionalAssaysOutputToOutputDir(DefaultPipelineTask):
 class MergeVCFsIntoTSVFile(DefaultPipelineTask):
     def requires(self):
         yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
-                                                    esp_processing.SortConcatenatedESPData())
+                                                    esp_processing.DownloadStaticESPData())
         yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
-                                                    gnomad_processing.SortGnomADData())
+                                                    gnomad_processing.DownloadStaticGnomADVCF())
+        yield pipeline_common.CopyOutputToOutputDir(self.cfg.output_dir,
+                                                    gnomad_processing.DownloadGnomADv4())
         yield CopyClinvarVCFToOutputDir()
         yield CopyBICOutputToOutputDir()
         yield CopyG1KOutputToOutputDir()
@@ -687,6 +691,22 @@ class AppendMupitStructure(DefaultPipelineTask):
 
 
 @requires(AppendMupitStructure)
+class RemoveProblemVariant(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir,
+                                              "ready_for_priors.tsv"))
+
+    def run(self):
+        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
+        os.chdir(artifacts_dir)
+        cmd = 'grep -v "chr13:g.32398769:A>G" built_with_mupit.tsv | grep -v "chr13:g.32398768:T>G"| awk \'BEGIN {OFS=FS="\t"} { sub(/\.4$/, ".3", $337); print}\''
+        pipeline_utils.run_process(cmd,
+                                   redirect_stdout_path='ready_for_priors.tsv',
+                                   shell=True)
+
+
+
+@requires(RemoveProblemVariant)
 class CalculatePriors(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_priors.tsv"))
@@ -696,7 +716,7 @@ class CalculatePriors(DefaultPipelineTask):
         os.chdir(priors_method_dir)
 
         args = ['bash', 'calcpriors.sh', self.cfg.priors_references_dir,
-                artifacts_dir_host, 'built_with_mupit.tsv',
+                artifacts_dir_host, 'ready_for_priors.tsv',
                 'built_with_priors.tsv', self.cfg.priors_docker_image_name]
 
         pipeline_utils.run_process(args)
@@ -704,6 +724,9 @@ class CalculatePriors(DefaultPipelineTask):
         pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
             self.input().path,
             self.output().path)
+
+        os.chdir(self.artifacts_dir)
+        os.remove("ready_for_priors.tsv")
 
 
 @requires(CalculatePriors)
@@ -727,23 +750,37 @@ class FilterBlacklistedPriors(DefaultPipelineTask):
             self.input().path,
             self.output().path)
 
-
 @requires(FilterBlacklistedPriors)
+class PostProcessPriors(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_priors_postprocessed.tsv"))
+
+    def run(self):
+        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
+        os.chdir(artifacts_dir)
+
+        cmd = 'cat built_with_priors.tsv | awk \' BEGIN {FS=OFS="\t"} { sub(/\.3$/, ".4", $337); print}\''
+        pipeline_utils.run_process(cmd,
+                                   redirect_stdout_path='built_with_priors_postprocessed.tsv',
+                                   shell=True)
+        
+
+        
+@requires(PostProcessPriors)
 class AppendVRId(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_vr_ids.tsv"))
 
     def run(self):
-        artifacts_dir_host = self.cfg.output_dir_host + "/release/artifacts/"
+        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
         os.chdir(vr_method_dir)
 
         args = [
             'bash', 'appendvrids.sh',
-            artifacts_dir_host,
-            'built_with_priors_clean.tsv',
+            artifacts_dir,
+            'built_with_priors_postprocessed.tsv',
             'built_with_vr_ids.tsv',
-            self.cfg.vr_docker_image_name,
-            self.cfg.seq_repo_dir
+             self.cfg.seq_repo_dir
         ]
 
         pipeline_utils.run_process(args)
@@ -754,7 +791,7 @@ class AppendVRId(DefaultPipelineTask):
             self.output().path)
 
 
-@requires(bayesdel_processing.AddBayesdelScores)
+@requires(analysis.runPopfreqAssessment)
 class FindMissingReports(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "missing_reports.log"))
@@ -771,7 +808,7 @@ class FindMissingReports(DefaultPipelineTask):
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
-@requires(bayesdel_processing.AddBayesdelScores)
+@requires(analysis.runBioinfoPred)
 class RunDiffAndAppendChangeTypesToOutput(DefaultPipelineTask):
     def _extract_release_date(self, version_json):
         with open(version_json, 'r') as f:

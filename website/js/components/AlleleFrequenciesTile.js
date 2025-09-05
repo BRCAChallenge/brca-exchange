@@ -9,7 +9,8 @@ import GroupHelpButton from './GroupHelpButton';
 
 const _ = require('underscore');
 
-
+// Includes the Allele Frequency fields.
+// when true, the field starts in the expanded state.
 const fieldsOfInterest = {
     'gnomAD V2.1 Exomes, Non-Cancer (Graphical)': true,
     'gnomAD V2.1 Exomes, Non-Cancer (Numerical)': false,
@@ -66,8 +67,7 @@ export default class AlleleFrequenciesTile extends React.Component {
                                 return dd.source === "GnomADv3 Genomes";
                             }).data, "gnomAD V3.1 Genomes, Non-Cancer (Numerical)"];
 
-        const alleleFrequencyFields = [gnomadExomeGraph, gnomadExomeData, gnomadGenomeGraph,
-                                       gnomadGenomeData];
+        const alleleFrequencyFields = [gnomadExomeGraph, gnomadExomeData, gnomadGenomeGraph, gnomadGenomeData];
 
         const renderedAlleleFrequencyFields = alleleFrequencyFields.map((field, idx) => {
             let fieldValue = field[0];

@@ -7,6 +7,7 @@
 ./exLOVD_brca12.sorted.hg38.vcf
 ./gnomADv2.sorted.hg38.vcf
 ./gnomADv3.sorted.hg38.vcf
+./gnomADv4.sorted.hg38.vcf
 ./ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf
 ./md5sums.txt
 ./README.txt
@@ -22,6 +23,7 @@
 ./release/artifacts/missing_reports.log
 ./release/artifacts/reports.tsv
 ./release/artifacts/variant_merging.log
+./release/artifacts/variants_with_splice_ai.vcf
 ./release/artifacts/victor_annotation.log
 ./release/artifacts/wrong_genome_coors/1000_Genomes_wrong_genome_coor.vcf
 ./release/artifacts/wrong_genome_coors/BIC_wrong_genome_coor.vcf

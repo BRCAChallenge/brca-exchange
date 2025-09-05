@@ -1,5 +1,8 @@
 import os
+import shutil
 import subprocess
+import tempfile
+
 from pathlib import Path
 
 import luigi
@@ -32,13 +35,25 @@ class GenerateSpliceAIData(DefaultPipelineTask):
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
-        os.chdir(data_merging_method_dir)
-
-        args = ["spliceai", "-I", self.input().path, "-O", self.output().path,
-                "-R", brca_resources_dir + "/hg38.fa", "-A", "grch38"]
-
+        os.chdir(splice_ai_method_dir)
+              
+        #
+        # Extract the spliceAI output VCF from the previous release to identify
+        # any new variants.  Score the new variants in batches.  Merge the
+        # old and new score sets to generate a score set for the
+        # current variants
+        tmp_dir = tempfile.mkdtemp()
+        previous_vcf_path = pipeline_utils.extract_file(
+            self.cfg.previous_release_tar, tmp_dir,
+            'output/release/artifacts/variants_with_splice_ai.vcf')
+        args = ["python", "add_spliceai_scores_for_new_variants.py",
+                "-a", self.input().path, "-b", "1000", "-d", "4999",
+                "-f", brca_resources_dir + "/hg38.fa", "-g", "grch38",
+                "-o", self.output().path, "-s", previous_vcf_path,
+                "-t", tmp_dir]
         pipeline_utils.run_process(args)
-
+        shutil.rmtree(tmp_dir)  
+                
 
 @requires(GenerateSpliceAIData)
 class AddSpliceAI(DefaultPipelineTask):

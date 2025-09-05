@@ -9,6 +9,7 @@ import LiteratureTable from "./components/LiteratureTable";
 import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
 import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
 import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
+import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
 import MupitStructure from './MupitStructure';
 
 // shims for older browsers
@@ -32,6 +33,7 @@ var {NavBarNew} = require('./NavBarNew');
 var Rx = require('rx');
 require('rx-dom');
 var moment = require('moment');
+var DonationBar = require('./components/DonationBar');
 
 
 // faisal: includes for masonry/isotope
@@ -79,12 +81,6 @@ if (typeof console === "undefined") {
     };
 }
 
-// add react-ga tracking code to track each pageview
-import ReactGA from 'react-ga';
-if (window.config.analytics) {
-    ReactGA.initialize(window.config.analytics, { standardImplementation: true });
-}
-
 function isEmptyVal(val) {
     if ((typeof val === 'string' || val instanceof String) && val.trim() === '') {
             return true;
@@ -117,7 +113,6 @@ var Footer = React.createClass({
                         <li><a href="/">Home</a></li>
                         <li><a href="/about/history">About</a></li>
                         <li><a href="/variants">Variants</a></li>
-                        <li><a href="/about/app">Mobile App</a></li>
                         <li><a href="/about/api">API</a></li>
                         <li><a href="https://brcaexchange.org/blog">Blog</a></li>
                     </ul>
@@ -139,7 +134,7 @@ var Footer = React.createClass({
                             </a>
                         </li>
                         <li>
-                            <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=BRCA Exchange website">
+                            <a href="mailto:brcaexchange@gmail.com?subject=BRCA Exchange website">
                                 Contact us
                             </a>
                         </li>
@@ -232,7 +227,7 @@ var Home = React.createClass({
                     {notCurrentSupporterLogoItems}
                 </Row>
                 <Row className="logo-block">
-                    <h3 className="logo-header">Currently Supported By:</h3>
+                    {currentSupporterLogoItems.length ? (<h3 className="logo-header">Currently Supported By:</h3>) : '' }
                     {currentSupporterLogoItems}
                 </Row>
                 <Row className="logo-block">
@@ -278,7 +273,7 @@ var About = React.createClass({
                         {notCurrentSupporterLogoItems}
                     </Row>
                     <Row className="logo-block">
-                        <h3 className="logo-header">Currently Supported By:</h3>
+                        {currentSupporterLogoItems.length ? (<h3 className="logo-header">Currently Supported By:</h3>) : '' }
                         {currentSupporterLogoItems}
                     </Row>
                 </Grid>
@@ -620,17 +615,27 @@ var VariantDetail = React.createClass({
             });
         }
 
-        // ensure that we're viewing the latest version of the variant, and redirect if we're not,
+        // ensure that we're viewing the latest version of the variant, with the stable CA_ID URL.
+        // and redirect if we're not,
         // unless the querystring param 'noRedirect=true' is specified, in which case we stay here.
+        // In the rare case there is no CA_ID, redirect to the latest version by numeric ID instead.
         // (if someone *really* wants to link to the old variant, they may also specify 'noRedirectMsg=true'
         // to silence the warning at the top of the page, too.)
         const { data } = nextState;
-
-        if (data && parseInt(this.props.params.id) !== data[0].id) {
-            // if the variant we're requesting isn't the newest version, we need to redirect to it
+        if (data && this.props.params.id !== data[0].CA_ID) {
             const { noRedirect } = this.getQuery();
             if (noRedirect !== "true") {
-                this.replaceWith(`/variant/:id`, { id: data[0].id }, { redirectedFrom: this.props.params.id });
+                // Redirect to CA_ID if it exists, or the latest numeric id if CA_ID doesn't exist.
+                const redirectToID = data[0].CA_ID  || data[0].id ;
+
+                // If we were already at the latest numeric ID, redirect without a redirectedFrom message.
+                if (parseInt(this.props.params.id) === data[0].id) {
+                    this.replaceWith(`/variant/:id`, { id: redirectToID }, {});
+                }
+                // Otherwise include redirectedFrom.
+                else {
+                    this.replaceWith(`/variant/:id`, { id: redirectToID }, { redirectedFrom: this.props.params.id });
+                }
             }
         }
     },
@@ -811,11 +816,13 @@ var VariantDetail = React.createClass({
             };
         });
     },
+    // render for VariantDetail
     render: function () {
         const {data, error} = this.state;
         if (!data) {
             return <div />;
         }
+
 
         const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
         const variant = data[variantVersionIdx] || data[0];
@@ -957,13 +964,19 @@ var VariantDetail = React.createClass({
                 );
             }
 
-            // remove the BIC classification and importance fields unless the classification is 1 or 5
-            if (groupTitle === 'Clinical Significance (BIC)') {
-                const bicClass = variant['Clinical_classification_BIC'];
+            if (groupTitle === "ACMG Variant Evidence Codes, Provisional Assignment") {
+                return (
+                    <ProvisionalEvidenceTile
+                        groupTitle={groupTitle}
+                        onChangeGroupVisibility={this.onChangeGroupVisibility}
+                        relayoutGrid={this.relayoutGrid}
+                        helpSection="acmg-variant-evidence-codes-provisional-assignment"
+                        showHelp={this.showHelp}
+                        variant={variant}
+                        innerGroups={innerGroups}
+                    />
 
-                if (bicClass !== 'Class 1' && bicClass !== 'Class 5') {
-                    innerCols = innerCols.filter(x => x.prop !== 'Clinical_classification_BIC' && x.prop !== 'Clinical_importance_BIC');
-                }
+                );
             }
 
             // now map the group's columns to a list of row objects
@@ -1061,28 +1074,6 @@ var VariantDetail = React.createClass({
                 </Table>
             );
 
-            const bicTileTable = (
-                <div>
-                    <div className="tile-disclaimer">
-                        <div>
-                            Please note that the BIC database is no longer actively curated. A copy of all BIC data has
-                            been shared with several other variation databases.
-                        </div>
-                        <div>
-                            Though the National Human Genome Research Institute recommends using ClinVar or BRCA Exchange for
-                            updated information on BRCA1 and BRCA2 variants, the BIC database will be maintained to allow
-                            historical studies and other uses.
-                        </div>
-                    </div>
-
-                    <Table>
-                        <tbody>
-                            {rows}
-                        </tbody>
-                    </Table>
-                </div>
-            );
-
             return (
                 <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
                     <Panel
@@ -1103,7 +1094,7 @@ var VariantDetail = React.createClass({
                             onExited={this.relayoutGrid}
                         >
                             <Panel.Body>
-                            {groupTitle === "Clinical Significance (BIC)" ? bicTileTable : tileTable}
+                                {tileTable}
                             </Panel.Body>
                         </Panel.Collapse>
                     </Panel>
@@ -1275,13 +1266,14 @@ var VariantDetail = React.createClass({
                     }
 
                     {
-                        (variantVersionIdx !== 0 && noRedirectMsg !== "true") && (
+                        (variant.id !== data[0].id && noRedirectMsg !== "true") && (
+                        // if we're not on the latest variant version, show a message with link
                           <Col xs={12} classname="vcenterblock">
                               <div className="variant-message outdated-variant-message panel panel-danger">
                                   <div className="panel-body panel-danger">
                                       <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
 
-                                      The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].id}`}>Click here for updated data on this variant.</a>
+                                      The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].CA_ID}`}>Click here for updated data on this variant.</a>
                                   </div>
                               </div>
                           </Col>
@@ -1444,18 +1436,10 @@ var Application = React.createClass({
     },
     render: function () {
         const path = this.getPath().slice(1);
-
-        // logs the full path, including the hash, to google analytics (if analytics is enabled)
-        if (window.config.analytics) {
-            const fullHref = window.location.href;
-            const origin = window.location.origin;
-            const fullPathWithHash = fullHref.startsWith(origin) ? fullHref.slice(origin.length) : fullHref;
-            ReactGA.ga('send', 'pageview', fullPathWithHash);
-        }
-
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
+                <DonationBar />
                 <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
                 <Database
                     mode={this.state.mode}

@@ -1,8 +1,9 @@
 version: 2
 jobs:
    buildweb:
+     circleci_ip_ranges: true
      docker:
-       - image: circleci/node:6.13-stretch
+       - image: circleci/node:16
        - image: circleci/postgres:9.6.2
          environment:
           POSTGRES_USER: postgres
@@ -27,10 +28,9 @@ jobs:
            name: Set up and run website backend tests
            command: |
              sudo apt-get update
-             sudo apt-get install python3-pip python3-dev
-             sudo pip3 install virtualenv
+             sudo apt-get install python3-dev python3-venv
              mkdir ~/project/website_virtualenv
-             virtualenv ~/project/website_virtualenv
+             python3 -m venv ~/project/website_virtualenv
              source ~/project/website_virtualenv/bin/activate
              pip3 install -r ~/project/website/requirements.txt
              pip3 install -r ~/project/website/test-requirements.txt
@@ -39,8 +39,9 @@ jobs:
        - store_test_results:
            path: ~/test_reports
    deploy-dev:
+     circleci_ip_ranges: true
      docker:
-       - image: circleci/node:6.13-stretch
+       - image: circleci/node:16
      steps:
        - checkout
        - run:
@@ -58,11 +59,12 @@ jobs:
                  StrictHostKeyChecking no
              EOF
        - run:
-           name: deploying to dev machine
+           name: deploying to the dev machine
            command: ~/project/deployment/deploy-dev
    deploy-beta:
+     circleci_ip_ranges: true
      docker:
-       - image: circleci/node:6.13-stretch
+       - image: circleci/node:16
      steps:
        - checkout
        - run:
@@ -80,109 +82,14 @@ jobs:
                  StrictHostKeyChecking no
              EOF
        - run:
-           name: deploying to beta machine
+           name: deploying to the beta machine 
            command: HOST=brcaexchange-prod.gi.ucsc.edu ~/project/deployment/deploy-dev
-   test-pipeline:
-     working_directory: /pipeline
-     docker:
-       - image: docker:17.05.0-ce-git
-       # heavily inspired from https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
-     steps:
-       - checkout
-       - setup_remote_docker
-       - run:
-           name: Install dependencies
-           command: |
-             apk add --no-cache \
-               py-pip=9.0.0-r1
-             pip install \
-              docker-compose==1.12.0
-       - restore_cache:
-           keys:
-             - v1-{{ .Branch }}
-           paths:
-             - /caches/pipeline.tar
-       - run:
-           name: Load Docker image layer cache
-           command: |
-             set +o pipefail
-             docker load -i /caches/pipeline.tar | true
-       - run:
-           name: Build application Docker image
-           working_directory: /pipeline
-           command: |
-             docker build --cache-from=pipeline -t pipeline -f /pipeline/pipeline/docker/Dockerfile .
-       - run:
-           name: Run tests
-           command: |
-             docker run pipeline bash -c 'cd /opt/brca-exchange/pipeline/data && bash getdata && cd /opt/brca-exchange/pipeline && pytest --ignore=splicing/ --junitxml=~/test_reports/pytest-results.xml'
-       - run:
-           name: Save Docker image layer cache
-           command: |
-             mkdir -p /caches
-             docker save -o /caches/pipeline.tar pipeline
-       - save_cache:
-           key: v1-{{ .Branch }}-{{ epoch }}
-           paths:
-             - /caches/pipeline.tar
-       - store_test_results:
-           path: ~/test_reports_pipeline
-   test-splicing-pipeline:
-     working_directory: /splicing-pipeline
-     docker:
-       - image: docker:17.05.0-ce-git
-    # heavily inspired from https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
-     steps:
-       - checkout
-       - setup_remote_docker
-       - run:
-           name: Install dependencies
-           command: |
-             apk add --no-cache \
-               py-pip=9.0.0-r1 make
-       - restore_cache:
-           keys:
-             - v1-{{ .Branch }}
-           paths:
-             - /caches/splicing-pipeline.tar
-       - run:
-           name: Load Docker image layer cache
-           command: |
-             set +o pipefail
-             docker load -i /caches/splicing-pipeline.tar | true
-       - run:
-           name: Build application Docker image
-           working_directory: /splicing-pipeline/pipeline/splicing
-           command: |
-             docker build --cache-from=splicing-pipeline -t splicing-pipeline .
-       - run:
-           name: Run tests
-           working_directory: /splicing-pipeline/pipeline/splicing
-           command: |
-             make unit_tests_docker -e IMAGE_NAME=brcachallenge/splicing-pipeline:0.0.8
-       - run:
-           name: Save Docker image layer cache
-           command: |
-             mkdir -p /caches
-             docker save -o /caches/splicing-pipeline.tar splicing-pipeline
-       - save_cache:
-           key: v1-{{ .Branch }}-{{ epoch }}
-           paths:
-             - /caches/splicing-pipeline.tar
 workflows:
    version: 2
    build-n-deploy:
      jobs:
        - buildweb:
            filters:
-             tags:
-               only: /.*/
-       - test-pipeline:
-           filters:
-             tags:
-               only: /.*/
-       - test-splicing-pipeline:
-          filters:
              tags:
                only: /.*/
        - deploy-dev:

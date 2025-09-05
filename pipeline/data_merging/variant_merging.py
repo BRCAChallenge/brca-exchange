@@ -515,7 +515,9 @@ def repeat_merging(f_in, f_out):
                     variant_dict[genome_coor].INFO[key] = deepcopy(record.INFO[key])
                 else:
                     new_value = deepcopy(record.INFO[key])
+                    new_value = [xx for xx in new_value if xx is not None]
                     old_value = deepcopy(variant_dict[genome_coor].INFO[key])
+                    old_value = [xx for xx in old_value if xx is not None]
 
                     if type(new_value) != list:
                         new_value = [new_value]
@@ -775,7 +777,8 @@ def is_outside_boundaries(c, pos, gene_regions_trees):
     pos = int(pos)
 
     if c not in gene_regions_trees.keys():
-        raise ValueError("No relevant genes on chromosome {}".format(c))
+        return(True)
+
 
     chr_regions = gene_regions_trees[c]
     return len(chr_regions.at(pos)) == 0

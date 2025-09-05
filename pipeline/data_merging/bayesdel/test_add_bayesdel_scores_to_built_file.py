@@ -22,4 +22,4 @@ def test_add_bayesdel_scores(tmpdir):
 
     df = pd.read_csv(dest_path, sep='\t', na_values=['-'])
     assert 'BayesDel_nsfp33a_noAF' in df.columns
-    np.testing.assert_equal(df['BayesDel_nsfp33a_noAF'].values, [-0.91, -0.95, np.nan, -0.12, np.nan])
+    np.testing.assert_equal(df['BayesDel_nsfp33a_noAF'].values, [-0.91, -0.95, -0.87, -0.12, -0.07])

@@ -86,7 +86,7 @@ const researchModeGroups = [
         {title: 'Genome (GRCh37)', prop: 'Genomic_Coordinate_hg37'},
         {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
         {title: 'Beacons', core: true},
-        {title: 'GA4GH VRS Identifier', prop: 'VR_ID'},
+        {title: 'GA4GH VRS Identifier (hg38)', prop: 'VR_ID'},
         {title: 'Synonyms', prop: 'Synonyms'}
     ]},
 
@@ -169,14 +169,6 @@ const researchModeGroups = [
         }
     },
 
-    {groupTitle: 'Clinical Significance (BIC)', internalGroupName: 'Significance (BIC)', innerCols: [
-        {title: 'Patient Nationality', prop: 'Patient_nationality_BIC'},
-        {title: 'Ethnicity', prop: 'Ethnicity_BIC'},
-        {title: 'Family members carrying this variant', prop: 'Number_of_family_member_carrying_mutation_BIC'},
-        {title: 'Literature Reference', prop: 'Literature_citation_BIC', core: true},
-        {title: 'Allele Origin', prop: 'Germline_or_Somatic_BIC'},
-    ]},
-
     {groupTitle: 'Computational Predictions', internalGroupName: 'Computational Predictions', innerGroups: [
         {
             source: "BayesDel",
@@ -243,6 +235,25 @@ const researchModeGroups = [
             },
         ]
     },
+
+    {groupTitle: 'ACMG Variant Evidence Codes, Provisional Assignment',
+        innerGroups: [
+            {
+                source: "Population Frequency",
+                data: [
+                    {title: "Provisionally Assigned", prop: "Provisional_Evidence_Code_Popfreq", core: true},
+                    {title: "Description", prop: "Provisional_Evidence_Description_Popfreq", core: true}
+                ]
+            },
+            {
+                source: "Computational Prediction",
+                data: [
+                    {title: "Provisionally Assigned", prop: "Provisional_Evidence_Code_Bioinfo", core: true},
+                    {title: "Description", prop: "Provisional_Evidence_Description_Bioinfo", core: true}
+                ]
+            }]
+    },
+
 
     {groupTitle: 'Multifactorial Likelihood Analysis', internalGroupName: 'Multifactorial Likelihood Analysis', innerCols: [
         {title: 'Posterior probability of pathogenicity', prop: 'Posterior_probability_exLOVD', core: true},
@@ -483,7 +494,6 @@ const researchModeColumns = [
     {title: 'Date last evaluated (ENIGMA)', prop: 'Date_last_evaluated_ENIGMA'},
     {title: 'Date last updated (ClinVar)', prop: 'Date_Last_Updated_ClinVar'},
     {title: 'Date Significance Last Evaluated (ClinVar)', prop: 'DateSignificanceLastEvaluated_ClinVar'},
-    {title: 'Has Discordant Evidence', prop: 'Discordant'},
     {title: 'Functional Analysis Result (LOVD)', prop: 'Functional_analysis_result_LOVD'},
     {title: 'Functional Analysis Method (LOVD)', prop: 'Functional_analysis_technique_LOVD'},
     {title: 'Analysis Method (ClinVar)', prop: 'Method_ClinVar'},

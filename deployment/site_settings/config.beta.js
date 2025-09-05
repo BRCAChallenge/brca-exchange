@@ -1,7 +1,12 @@
-'use strict';
+<script>
+    'use strict';
 
-module.exports = {
-    captcha_key: '', /* enter captcha key here "*/
-    backend_url: 'http://brcaexchange-prod.gi.ucsc.edu/backend',
-    environment: 'beta'
-};
+    window.config = {
+        baseurl: '/',
+        captcha_key: '', /* reCAPTCHA API key */
+        maps_key: '', /* Google maps javascript API key */
+        backend_url: 'https://brcaexchange-prod.gi.ucsc.edu/backend',
+        analytics: null,
+        environment: 'beta'
+    };
+</script>

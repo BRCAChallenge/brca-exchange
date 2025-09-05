@@ -1,4 +1,4 @@
-FROM python:3.8-buster
+FROM python:3.9-buster
 
 RUN chmod 1777 /tmp
 
@@ -31,7 +31,7 @@ COPY pipeline/requirements.txt .
 COPY test-requirements.txt .
 
 # pip 20.3+ uses strict dependency resolver that causes biocommons/bioutils and hgvs/ipython errors
-RUN pip install pip==20.2
+RUN pip install pip==24.0
 
 # install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
 RUN pip install $(grep numpy requirements.txt)
@@ -43,6 +43,12 @@ RUN pip install -r requirements.txt -r test-requirements.txt
 RUN wget https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz
 RUN tar zxf vcftools*.tar.gz
 RUN cd vcftools* && ./configure && make && make install && cd .. && rm -r vcftools*
+
+# install BCFTools
+RUN apt-get install -y bcftools
+#RUN wget https://github.com/samtools/bcftools/releases/download/1.3.1/bcftools-1.3.1.tar.bz2 -O bcftools.tar.bz2
+#RUN tar -xjvf bcftools.tar.bz2
+#RUN cd bcftools* && make && make prefix=/usr/local/bin install && cd .. && rm -r bcftools
 
 # install tabix
 RUN wget https://downloads.sourceforge.net/project/samtools/tabix/tabix-0.2.6.tar.bz2
