@@ -59,6 +59,34 @@ IARC_class_exLOVD	Evidence	#COPY	IARC class corresponding the the posterior prob
 Literature_source_exLOVD	Provenance	#COPY	Literature reference for the BRCA ExUV /exLOVD data analyses 	Easton et al. 2007
 BX_ID_exLOVD	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	162
 Allele_frequency_ExAC	Allele Frequency	#SKIP	"Minor allele frequency, per ExAC (excluding TCGA data)"	9.42E-05
+Allele_count_AFR_ExAC	Allele Frequency	#SKIP	Number of chromosomes with this variant in African populations	1
+Allele_number_AFR_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in African/African American populations 	8978
+Allele_frequency_AFR_ExAC	Allele Frequency	#SKIP	"Allele frequency in African/African American populations, per ExAC"	0.000111
+Homozygous_count_AFR_ExAC	Allele Frequency	#SKIP	Number of homozygotes with the variant in African populations	0
+Allele_count_AMR_ExAC	Allele Frequency	#SKIP	Count of observed alternate alleles (variant) in Admixed American/Latino Populations	7
+Allele_number_AMR_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in Admixed American/Latino populations 	11154
+Allele_frequency_AMR_ExAC	Allele Frequency	#SKIP	"Allele frequency in Admixed American/Latino populations, per ExAC"	0.000628
+Homozygous_count_AMR_ExAC	Allele Frequency	#SKIP	Number of homozygotes with the allele in Admixed American/Latino Populations	0
+Allele_count_EAS_ExAC	Allele Frequency	#SKIP	Count of observed alternate alleles (variant) in East Asian Populations	0
+Allele_number_EAS_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in East Asian populations 	7818
+Allele_frequency_EAS_ExAC	Allele Frequency	#SKIP	"Allele frequency in East Asian populations, per ExAC"	0
+Homozygous_count_EAS_ExAC	Allele Frequency	#SKIP	Number of homozygotes with hte variant in East Asian populations	0
+Allele_count_FIN_ExAC	Allele Frequency	#SKIP	Number of chromosomes with the variant in Finnish populations	0
+Allele_number_FIN_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in Finnish populations	6584
+Allele_frequency_FIN_ExAC	Allele Frequency	#SKIP	"Allele frequency in Finnish populations, per ExAC and separated from European because of an enriched data set"	0
+Homozygous_count_FIN_ExAC	Allele Frequency	#SKIP	Number of homozgotes with the allele in Finnish populations	0
+Allele_count_NFE_ExAC	Allele Frequency	#SKIP	Count of observed alternate alleles (variant) in Non-Finish  Populations	2
+Allele_number_NFE_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in Non-Finnish European populations 	53530
+Allele_frequency_NFE_ExAC	Allele Frequency	#SKIP	"Allele frequency in Non-Finnish European populations, per ExAC (Allele Count/Alle Number)"	3.74E-05
+Homozygous_count_NFE_ExAC	Allele Frequency	#SKIP	Number of homozygotes with the allele in Non-Finnish European populations	0
+Allele_count_OTH_ExAC	Allele Frequency	#SKIP	Number of chromosomes with this variant in Other populations	0
+Allele_number_OTH_ExAC	Allele Frequency	#SKIP	"Number of total chromosomes studied (for this variant) in populations other than those provided, per ExAC"	694
+Allele_frequency_OTH_ExAC	Allele Frequency	#SKIP	"Allele frequency in populations other than those provided, per ExAC"	0
+Homozygous_count_OTH_ExAC	Allele Frequency	#SKIP	Number of homozygotes with the allele in Other Populations	0
+Allele_count_SAS_ExAC	Allele Frequency	#SKIP	Count of observed alternate alleles (variant) in South Asian Populations	0
+Allele_number_SAS_ExAC	Allele Frequency	#SKIP	Number of total chromosomes studied (for this variant) in South Asian populations	16260
+Allele_frequency_SAS_ExAC	Allele Frequency	#SKIP	"Allele frequency in South Asian populations, per ExAC"	0
+Homozygous_count_SAS_ExAC	Allele Frequency	#SKIP	Number of homozygotes with the allele in South Asian Populations	0
 BX_ID_ExAC	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation"	2281
 Minor_allele_frequency_percent_ESP	Allele Frequency	#SKIP	"Percent minor allele frequency for EA, AA, and overall, from ESP"	"0.0233,0.0,0.0154"
 EA_Allele_Frequency_ESP	Allele Frequency	#SKIP	"Allele frequency in European-American populations, per ESP"	0.000233
