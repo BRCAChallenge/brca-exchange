@@ -43,6 +43,13 @@ jobs:
      docker:
        - image: circleci/node:16
      steps:
+       - run:
+           name: Fix apt sources for buster
+           command: |
+             sudo sed -i 's|deb.debian.org/debian|archive.debian.org/debian|g' /etc/apt/sources.list
+             sudo sed -i '/security.debian.org/s|deb.debian.org|archive.debian.org|g' /etc/apt/sources.list
+             sudo sed -i '/buster-updates/d' /etc/apt/sources.list
+             sudo apt-get update
        - checkout
        - run:
            name: Setup npm
