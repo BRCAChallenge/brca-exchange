@@ -1,7 +1,7 @@
 version: 2
 jobs:
   test-pipeline:
-    working_directory: /pipeline
+    working_directory: ~/pipeline
     docker:
       - image: cimg/base:stable
     steps:
@@ -24,9 +24,9 @@ jobs:
             docker load -i ~/caches/pipeline.tar | true
       - run:
           name: Build application Docker image
-          working_directory: /pipeline
+          working_directory: ~/pipeline
           command: |
-            docker build --cache-from=pipeline -t pipeline -f /pipeline/pipeline/docker/Dockerfile .
+            docker build --cache-from=pipeline -t pipeline -f ~/pipeline/pipeline/docker/Dockerfile .
       - run:
           name: Run tests
           command: |
