@@ -16,12 +16,12 @@ jobs:
           keys:
             - v1-{{ .Branch }}
           paths:
-            - /caches/pipeline.tar
+            - ~/caches/pipeline.tar
       - run:
           name: Load Docker image layer cache
           command: |
             set +o pipefail
-            docker load -i /caches/pipeline.tar | true
+            docker load -i ~/caches/pipeline.tar | true
       - run:
           name: Build application Docker image
           working_directory: /pipeline
@@ -34,12 +34,12 @@ jobs:
       - run:
           name: Save Docker image layer cache
           command: |
-            mkdir -p /caches
-            docker save -o /caches/pipeline.tar pipeline
+            mkdir -p ~/caches
+            docker save -o ~/caches/pipeline.tar pipeline
       - save_cache:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
-            - /caches/pipeline.tar
+            - ~/caches/pipeline.tar
       - store_test_results:
           path: ~/test_reports_pipeline
 
@@ -59,12 +59,12 @@ jobs:
           keys:
             - v1-{{ .Branch }}
           paths:
-            - /caches/splicing-pipeline.tar
+            - ~/caches/splicing-pipeline.tar
       - run:
           name: Load Docker image layer cache
           command: |
             set +o pipefail
-            docker load -i /caches/splicing-pipeline.tar | true
+            docker load -i ~/caches/splicing-pipeline.tar | true
       - run:
           name: Build application Docker image
           working_directory: ~/splicing-pipeline/pipeline/splicing
@@ -78,12 +78,12 @@ jobs:
       - run:
           name: Save Docker image layer cache
           command: |
-            mkdir -p /caches
-            docker save -o /caches/splicing-pipeline.tar splicing-pipeline
+            mkdir -p ~/caches
+            docker save -o ~/caches/splicing-pipeline.tar splicing-pipeline
       - save_cache:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
-            - /caches/splicing-pipeline.tar
+            - ~/caches/splicing-pipeline.tar
 
 workflows:
   version: 2
