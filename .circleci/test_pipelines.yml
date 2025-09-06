@@ -3,7 +3,7 @@ jobs:
   test-pipeline:
     working_directory: ~/pipeline
     docker:
-      - image: cimg/base:stable
+      - image: cimg/base:current
     steps:
       - checkout
       - setup_remote_docker
@@ -46,7 +46,7 @@ jobs:
   test-splicing-pipeline:
     working_directory: ~/splicing-pipeline
     docker:
-      - image: cimg/base:stable
+      - image: cimg/base:current
     steps:
       - checkout
       - setup_remote_docker
