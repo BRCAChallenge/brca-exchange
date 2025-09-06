@@ -44,7 +44,7 @@ jobs:
           path: ~/test_reports_pipeline
 
   test-splicing-pipeline:
-    working_directory: /splicing-pipeline
+    working_directory: ~/splicing-pipeline
     docker:
       - image: cimg/base:stable
     steps:
@@ -67,12 +67,12 @@ jobs:
             docker load -i /caches/splicing-pipeline.tar | true
       - run:
           name: Build application Docker image
-          working_directory: /splicing-pipeline/pipeline/splicing
+          working_directory: ~/splicing-pipeline/pipeline/splicing
           command: |
             docker build --cache-from=splicing-pipeline -t splicing-pipeline .
       - run:
           name: Run tests
-          working_directory: /splicing-pipeline/pipeline/splicing
+          working_directory: ~/splicing-pipeline/pipeline/splicing
           command: |
             make unit_tests_docker -e IMAGE_NAME=brcachallenge/splicing-pipeline:0.0.8
       - run:
