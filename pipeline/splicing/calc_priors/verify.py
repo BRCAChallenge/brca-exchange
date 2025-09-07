@@ -1,7 +1,7 @@
 import pyhgvs
 
 from calcMaxEntScanMeanStd import fetch_gene_coordinates
-from calc_priors.constants import brca1CIDomains, brca2CIDomains, greyZones,
+from calc_priors.constants import brca1CIDomains, brca2CIDomains, greyZones, \
 BRCA1_RefSeq, BRCA2_RefSeq
 
 # Fetch transcript data for BRCA1/BRCA2 RefSeq transcripts

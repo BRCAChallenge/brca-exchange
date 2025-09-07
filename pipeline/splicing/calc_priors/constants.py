@@ -51,8 +51,8 @@ STD_DE_NOVO_LENGTH = 10
 STD_DE_NOVO_OFFSET = STD_DE_NOVO_LENGTH - STD_EXONIC_PORTION
 
 # Canonical BRCA transcripts in RefSeq nomenclature
-BRCA1_RefSeq = "NM_007294.4"
-BRCA2_RefSeq = "NM_000059.4"
+BRCA1_RefSeq = "NM_007294.3"
+BRCA2_RefSeq = "NM_000059.3"
 
 # Probability constants from SVT and MP valid as of 5/24/18
 LOW_PROBABILITY = 0.02
