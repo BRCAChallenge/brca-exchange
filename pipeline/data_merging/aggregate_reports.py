@@ -12,7 +12,8 @@ from data_merging.variant_merging_constants import (
     DEFAULT_CONTENTS,
     FIELD_DICT,
     ENIGMA_FILE,
-    COLUMN_SOURCE
+    COLUMN_SOURCE,
+    VARIANT_REPORT_FILES
 )
 
 def parse_args():
@@ -54,6 +55,7 @@ def write_reports_tsv(filename, columns, ready_files_dir,
     reports_output_fp = open(filename, "w")
     reports_output_fp.write("\t".join(columns)+"\n")
     reports_files = [ready_files_dir + r for r in get_reports_files(ready_files_dir)]
+    print("Reports files", reports_files)
     for file in reports_files:
         source_file = os.path.basename(file)
         source_name = re.split("\.", source_file)
@@ -74,8 +76,10 @@ def write_reports_tsv(filename, columns, ready_files_dir,
 def get_reports_files(input_directory):
     reports_files = []
     for f in os.listdir(input_directory):
-        filename, file_extension = os.path.splitext(f)
-        if (filename in FIELD_DICT and file_extension == ".vcf") or f == ENIGMA_FILE:
+        filename = os.path.basename(f)
+        print("Considering", filename)
+        if (filename in VARIANT_REPORT_FILES): 
+            print("Adding", f, "to the queue")
             reports_files.append(f)
     return reports_files
 
@@ -101,7 +105,9 @@ def normalize_vcf_reports(file, columns, filename, file_extension, genome_region
     reader = vcf.Reader(open(file, "r"), strict_whitespace=strict_whitespace)
     count = 0
     source_suffix = ".vcf"
-    source = os.path.basename(file)[:-len(source_suffix)]
+    basename = os.path.basename(file)[:-len(source_suffix)]
+    source = basename.split(".")[0]
+    print("filename", filename, "source", source)
     for record in reader:
         count += 1
         genome_coor = ("chr" + str(record.CHROM) + ":g." + str(record.POS) + ":" +

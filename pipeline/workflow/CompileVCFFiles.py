@@ -109,14 +109,14 @@ class CopyClinvarVCFToOutputDir(DefaultPipelineTask):
 
 class DownloadBICData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.bic_file_dir + "/bic_brca12.sorted.hg38.vcf")
+        return luigi.LocalTarget(self.bic_file_dir + "/BIC.brca12.sorted.hg38.vcf")
 
     def run(self):
         os.chdir(self.bic_file_dir)
 
         brca1_data_url = "https://brcaexchange.org/backend/downloads/bic_brca12.sorted.hg38.vcf"
         pipeline_utils.download_file_and_display_progress(brca1_data_url)
-
+        os.rename("bic_brca12.sorted.hg38.vcf", self.output().path)
 
 @requires(DownloadBICData)
 class CopyBICOutputToOutputDir(DefaultPipelineTask):
@@ -213,7 +213,7 @@ class ConcatenateEXLOVDVCFFiles(DefaultPipelineTask):
 @requires(ConcatenateEXLOVDVCFFiles)
 class CrossmapConcatenatedEXLOVDData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.ex_lovd_file_dir + "/exLOVD_brca12.hg38.vcf")
+        return luigi.LocalTarget(self.ex_lovd_file_dir + "/exLOVD.brca12.hg38.vcf")
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
@@ -334,7 +334,7 @@ class CombineEquivalentLOVDSubmissions(DefaultPipelineTask):
 @requires(CombineEquivalentLOVDSubmissions)
 class ConvertSharedLOVDToVCF(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(f"{self.lovd_file_dir}/sharedLOVD.hg19.vcf")
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/LOVD.hg19.vcf")
 
     def run(self):
         os.chdir(lovd_method_dir)
@@ -349,7 +349,7 @@ class ConvertSharedLOVDToVCF(DefaultPipelineTask):
 @requires(ConvertSharedLOVDToVCF)
 class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(f"{self.lovd_file_dir}/sharedLOVD.hg38.vcf")
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/LOVD.hg38.vcf")
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
@@ -366,7 +366,7 @@ class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
 @requires(CrossmapConcatenatedSharedLOVDData)
 class SortSharedLOVDOutput(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(f"{self.lovd_file_dir}/sharedLOVD.sorted.hg38.vcf")
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/LOVD.sorted.hg38.vcf")
 
     def run(self):
         args = ["vcf-sort", self.input().path]
@@ -377,7 +377,7 @@ class SortSharedLOVDOutput(DefaultPipelineTask):
 @requires(SortSharedLOVDOutput)
 class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(f"{self.cfg.output_dir}/sharedLOVD.sorted.hg38.vcf")
+        return luigi.LocalTarget(f"{self.cfg.output_dir}/LOVD.sorted.hg38.vcf")
 
     def run(self):
         copy(self.input().path, self.cfg.output_dir)
@@ -391,19 +391,20 @@ class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
 
 class DownloadStaticG1KData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(f"{self.g1k_file_dir}/1000G.sorted.hg38.vcf")
+        return luigi.LocalTarget(f"{self.g1k_file_dir}/1000_Genomes.sorted.hg38.vcf")
 
     def run(self):
         os.chdir(self.g1k_file_dir)
 
         g1k_vcf_url = "https://brcaexchange.org/backend/downloads/1000G.sorted.hg38.vcf"
-        pipeline_utils.download_file_and_display_progress(g1k_vcf_url)
+        pipeline_utils.download_file_and_display_progress(g1k_vcf_url,
+                                                          self.output().path)
 
 
 @requires(DownloadStaticG1KData)
 class CopyG1KOutputToOutputDir(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(f"{self.cfg.output_dir}/1000G.sorted.hg38.vcf")
+        return luigi.LocalTarget(f"{self.cfg.output_dir}/1000_Genomes.sorted.hg38.vcf")
 
     def run(self):
         copy(self.input().path, self.cfg.output_dir)
@@ -431,7 +432,7 @@ class DownloadStaticExACData(DefaultPipelineTask):
 class CopyEXACOutputToOutputDir(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(
-            self.cfg.output_dir + "/exac.brca12.sorted.hg38.vcf")
+            self.cfg.output_dir + "/ExAC.brca12.sorted.hg38.vcf")
 
     def run(self):
         copy(self.input().path,
@@ -553,7 +554,7 @@ class SortFunctionalAssays(DefaultPipelineTask):
 @requires(SortFunctionalAssays)
 class CopyFunctionalAssaysOutputToOutputDir(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.cfg.output_dir, "ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.cfg.output_dir, "ENIGMA_BRCA12_functional_assays.sorted.hg38.vcf"))
 
     def run(self):
         copy(self.input().path, self.cfg.output_dir)

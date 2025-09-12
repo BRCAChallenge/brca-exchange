@@ -17,7 +17,7 @@ def is_outside_boundaries(c, pos, gene_regions_trees):
     # Return a flag indicating if the chromosome contains none  of the
     # gene regions of interest, or if the chromosome contains a region
     # of interest but the variant falls outside of it.
-    c = int(c)
+    c = int(re.sub("^chr", "", c))
     pos = int(pos)
     if c not in gene_regions_trees.keys():
         return(True)

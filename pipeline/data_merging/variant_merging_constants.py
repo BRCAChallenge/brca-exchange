@@ -510,18 +510,34 @@ LIST_TYPE_FIELDS = {
 
 ENIGMA_FILE = "enigma_from_clinvar.tsv"
 
-GENOME1K_FILE = "1000G.sorted.hg38.vcf"
+GENOME1K_FILE = "1000_Genomes.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVar.vcf"
-LOVD_FILE = "sharedLOVD.sorted.hg38.vcf"
-EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
-BIC_FILE = "bic_brca12.sorted.hg38.vcf"
-EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
-ESP_FILE = "esp.sorted.hg38.vcf"
-GNOMAD_V2_FILE = "gnomADv2.sorted.hg38.vcf"
-GNOMAD_V3_FILE = "gnomADv3.sorted.hg38.vcf"
-GNOMAD_V4_FILE = "gnomADv4.sorted.hg38.vcf"
+LOVD_FILE = "LOVD.sorted.hg38.vcf"
+EX_LOVD_FILE = "exLOVD.brca12.sorted.hg38.vcf"
+BIC_FILE = "BIC.brca12.sorted.hg38.vcf"
+EXAC_FILE = "ExAC.brca12.sorted.hg38.vcf"
+ESP_FILE = "ESP.sorted.hg38.vcf"
+GNOMAD_V2_FILE = "GnomAD.sorted.hg38.vcf"
+GNOMAD_V3_FILE = "GnomADv3.sorted.hg38.vcf"
+GNOMAD_V4_FILE = "GnomADv4.sorted.hg38.vcf"
 
 # Functional Assays
-FUNCTIONAL_ASSAYS_SCORES_FILE = "ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf"
+FUNCTIONAL_ASSAYS_SCORES_FILE = "ENIGMA_BRCA12_functional_assays.sorted.hg38.vcf"
+
+VARIANT_REPORT_FILES = {
+    ENIGMA_FILE,
+    GENOME1K_FILE,
+    CLINVAR_FILE,
+    LOVD_FILE,
+    EX_LOVD_FILE,
+    BIC_FILE,
+    EXAC_FILE,
+    ESP_FILE,
+    GNOMAD_V2_FILE,
+    GNOMAD_V3_FILE,
+    GNOMAD_V4_FILE,
+    FUNCTIONAL_ASSAYS_SCORES_FILE
+    }
+    
 
 VCFVariant = namedtuple("VCFVariant", "chr,pos,ref,alt")
