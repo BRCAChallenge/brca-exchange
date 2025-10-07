@@ -1,1 +1,0 @@
-# Software prototypes for rendering allele frequency data
