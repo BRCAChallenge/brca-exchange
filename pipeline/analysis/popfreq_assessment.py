@@ -75,7 +75,7 @@ def read_flags(flag_data):
     return(flags)
     
 
-def estimate_coverage(start, end, chrom, df_cov, debug=False):
+def estimate_coverage(start, end, chrom, df_cov, debug=False, use_median=False):
     positions = list(range(start, end+1))
     coverage_this_chrom = df_cov.loc[df_cov["chrom"] == int(chrom)]
     positions_this_variant = coverage_this_chrom[coverage_this_chrom["pos"].isin(positions)]
@@ -86,7 +86,10 @@ def estimate_coverage(start, end, chrom, df_cov, debug=False):
         coverage = 0
     else:
         observable = True
-        coverage = min(meanval, medianval)
+        if use_median:
+            coverage = min(meanval, medianval)
+        else:
+            coverage = meanval
     if debug:
         print("coverage assessment: observable:", observable, "meanval:",
               meanval, "medianval:", medianval, "coverage", coverage)
