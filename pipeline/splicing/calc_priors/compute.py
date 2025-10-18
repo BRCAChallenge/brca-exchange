@@ -407,7 +407,7 @@ def getMaxMaxEntScanScoreSlidingWindowSNS(variant, exonicPortionSize, deNovoLeng
                 # acceptorEnd + deNovoOffset because genomic position decreases from left to right on minus strand, refSeq reduced to correct length
                 refSpliceSeq = extract.getFastaSeq(extract.getVarChrom(variant), refSpliceBounds["acceptorStart"],
                                            (refSpliceBounds["acceptorEnd"] + deNovoOffset), plusStrandSeq=False)
-        for position, seqs in slidingWindowInfo["windowSeqs"].iteritems():
+        for position, seqs in slidingWindowInfo["windowSeqs"].items():
             if seqs["refSeq"] == refSpliceSeq:
                 refSpliceWindow = position
                 # removes reference splice window so it is not considered for de novo splicing

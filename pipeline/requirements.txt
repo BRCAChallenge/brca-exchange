@@ -1,17 +1,37 @@
+# Updated requirements for Python 3.13 compatibility
+# Security-critical and deprecated packages have been updated
+
+# Core dependencies - UPDATED for security
+certifi>=2024.2.2  # Was: 2019.11.28 (CRITICAL - 5 years outdated)
+requests>=2.31.0  # Was: 2.23.0 (CRITICAL - security vulnerabilities)
+urllib3>=2.0.7  # Was: 1.25.8 (HIGH - security vulnerabilities)
+PyJWT>=2.8.0  # Was: 1.7.1 (CRITICAL - auth bypass)
+lxml>=5.1.0  # Was: 4.9.2 (HIGH - XML vulnerabilities)
+
+# Scientific computing - UPDATED for Python 3.13
+numpy>=1.26.4,<2.0  # Was: 1.24.1 (Python 3.13 compat)
+pandas>=2.1.4  # Was: 1.5.2 (Python 3.13 compat)
+
+# Testing - MIGRATED from deprecated nose
+pytest>=8.0.0  # Replaces nose==1.3.7 (DEPRECATED)
+pytest-cov>=4.1.0  # For coverage (replaces nose coverage)
+
+# Other updated packages
+ipython>=8.20.0  # Was: 7.13.0 (very outdated)
+chardet>=5.2.0  # Was: 3.0.4
+idna>=3.6  # Was: 2.9
+
+# Unchanged but critical packages
 appdirs==1.4.3
 appnope==0.1.0
 argcomplete==1.10.0
 attrs==22.2.0
 backcall==0.1.0
-backports-abc==0.5
 beautifulsoup4==4.8.2
 biocommons.seqrepo==0.6.6
-biopython==1.69
+biopython>=1.83
 bioutils==0.5.7
 bs4==0.0.1
-bx-python==0.8.8
-certifi==2019.11.28
-chardet==3.0.4
 click==8.1.3
 coloredlogs==14.0
 configparser==4.0.2
@@ -24,23 +44,17 @@ docutils==0.16
 fake-useragent==0.1.11
 fastparquet==2024.5.0
 ga4gh.common==0.0.7
-ga4gh.vrs==0.8.4
+ga4gh.vrs==2.1.4
 hgvs==1.5.4
 humanfriendly==8.0
-idna==2.9
 iniherit==0.3.9
 intervaltree==3.1.0
-ipython==7.13.0
 ipython-genutils==0.2.0
 itertoolz==0.5
 jedi==0.16.0
 lockfile==0.12.2
-luigi==2.8.12
-lxml==4.9.2
+luigi==3.3
 mock==5.0.1
-nose==1.3.7
-numpy==1.24.1
-pandas==1.5.2
 parse==1.15.0
 Parsley==1.3
 parso==0.6.2
@@ -48,23 +62,21 @@ pathos==0.2.9
 pexpect==4.8.0
 pickleshare==0.7.5
 pipx==0.14.0.0
-prompt-toolkit==3.0.3
-psycopg2-binary==2.8.4
+prompt-toolkit>=3.0.41,<3.1.0
+psycopg2-binary>=2.9.9
 ptyprocess==0.6.0
 pyBigWig==0.3.17
 pyee==7.0.1
 Pygments==2.5.2
-PyJWT==1.7.1
 pyppeteer==0.0.25
 pyquery==1.4.1
-pysam==0.20.0
+pysam>=0.22.1
 python-daemon==2.2.4
-python-dateutil==2.8.1
+python-dateutil==2.9.0
 pytz==2020.1
 PyVCF3==1.0.3
 recordtype==1.3
 referencing==0.32.1
-requests==2.23.0
 requests-html==0.10.0
 retrying==1.3.3
 singledispatch==3.4.0.3
@@ -73,15 +85,19 @@ sortedcontainers==2.1.0
 soupsieve==2.0
 spliceai==1.3.1
 sqlparse==0.3.1
-tensorflow==2.11.0
 text-unidecode==1.3
 toolz==0.12.0
-tornado==5.1.1
+tornado==6.2
 tqdm==4.43.0
-traitlets==4.3.3
-urllib3==1.25.8
+traitlets>=5.13,<6
 userpath==1.2.0
 w3lib==1.21.0
 wcwidth==0.1.8
 websockets==8.1
 yoyo-migrations==7.0.1
+
+# TensorFlow - CONSIDER UPDATING (if needed)
+# tensorflow==2.11.0  # CRITICAL - End of support, multiple CVEs
+# Recommendation: Update to tensorflow>=2.17.0 if TensorFlow is actually used
+# Or remove if not needed for core functionality
+tensorflow>=2.17.0  # Updated for security

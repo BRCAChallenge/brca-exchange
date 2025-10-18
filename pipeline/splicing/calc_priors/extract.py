@@ -314,7 +314,7 @@ def getVarSeqIndexSNS(refSeq, altSeq):
     For example if the refSeq is ACTG and altSeq is AGTG, returns 1
     """
     if len(refSeq) == len(altSeq):
-        for index in xrange(len(refSeq)):
+        for index in range(len(refSeq)):
             if refSeq.lower()[index] != altSeq.lower()[index]:
                 return index
             else:
