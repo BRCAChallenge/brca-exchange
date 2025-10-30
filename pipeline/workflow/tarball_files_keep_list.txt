@@ -2,6 +2,7 @@
 ./BIC.brca12.sorted.hg38.vcf
 ./ClinVar.vcf
 ./enigma_from_clinvar.tsv
+<<<<<<< HEAD
 ./ESP.sorted.hg38.vcf
 ./ExAC.brca12.sorted.hg38.vcf
 ./exLOVD.brca12.sorted.hg38.vcf
@@ -10,6 +11,15 @@
 ./GnomADv4.sorted.hg38.vcf
 ./LOVD.sorted.hg38.vcf
 ./ENIGMA_BRCA12_Functional_Assays.scores.sorted.hg38.vcf 
+=======
+./esp.sorted.hg38.vcf
+./exac.brca12.sorted.hg38.vcf
+./exLOVD_brca12.sorted.hg38.vcf
+./gnomADv2.sorted.hg38.vcf
+./gnomADv3.sorted.hg38.vcf
+./gnomADv4.sorted.hg38.vcf
+./ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf
+>>>>>>> origin/master
 ./md5sums.txt
 ./README.txt
 ./release/artifacts/brca-pseudonym-generator.log
