@@ -4,7 +4,7 @@
   "description": "brca variant browser",
   "main": "index.js",
   "engines": {
-    "node": ">=18.12.0"
+    "node": ">=22.21.1"
   },
   "browserslist": {
     "production": [
@@ -50,7 +50,7 @@
     "jsverify": "^0.8.4",
     "loader-utils": "^3.3.1",
     "mark.js": "^8.11.1",
-    "mocha": "^10.8.2",
+    "mocha": "^11.7.4",
     "raw-loader": "^4.0.2",
     "rimraf": "^6.0.1",
     "sass": "^1.81.0",
