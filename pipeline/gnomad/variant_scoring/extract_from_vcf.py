@@ -7,10 +7,13 @@ Description:
 
 import argparse
 from pysam import VariantFile
+import re
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Parse a gnomAD VCF for the BRCA Exchange pipeline")
     parser.add_argument('-i', '--input', help="Input VCF file, from gnomAD")
+    parser.add_argument('-f', '--fourpointone', help="Special functionality for gnomAD version 4.1",
+                        default=False)
     parser.add_argument('-v', '--verbose', action='count', default=False, help='determines logging')
     options = parser.parse_args()
     return options
@@ -26,8 +29,12 @@ def main():
             all_filters = all_filters + delim + this_filter
             delim = ","
         for this_alt in record.alts:
-            print("%s-%s-%s-%s\t%s\t%d" % (record.chrom, record.pos, record.ref, this_alt,
-                                           all_filters, record.info["lcr"]))        
+            if args.fourpointone:
+                print("%s-%s-%s-%s\t%s" % (re.sub("chr", "", record.chrom),
+                                           record.pos, record.ref, this_alt, all_filters))
+            else:
+                print("%s-%s-%s-%s\t%s\t%d" % (record.chrom, record.pos, record.ref, this_alt,
+                                               all_filters, record.info["lcr"]))        
     
 if __name__ == "__main__":
     main()
