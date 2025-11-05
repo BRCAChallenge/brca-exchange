@@ -3,8 +3,8 @@
 'use strict';
 
 import React from "react";
-import {Panel} from 'react-bootstrap';
-import {AlleleFrequencyField} from "./AlleleFrequencyField";
+import { Card, Collapse } from 'react-bootstrap';
+import { AlleleFrequencyField } from "./AlleleFrequencyField";
 import GroupHelpButton from './GroupHelpButton';
 
 const _ = require('underscore');
@@ -22,19 +22,24 @@ export default class AlleleFrequenciesTile extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = fieldsOfInterest;
+        // seed group collapsed/expanded from localStorage (same as old defaultExpanded)
+        const groupTitle = `source-panel-${props.sourceName}`;
+        const defaultExpanded = localStorage.getItem("collapse-group_" + groupTitle) !== "true";
+
+        this.state = { ...fieldsOfInterest, groupOpen: defaultExpanded };
 
         this.fieldToggled = this.fieldToggled.bind(this);
         this.setAllFieldsExpansion = this.setAllFieldsExpansion.bind(this);
+        this.toggleGroupOpen = this.toggleGroupOpen.bind(this);
     }
 
     setAllFieldsExpansion(e, newExpansion) {
         e.stopPropagation();
 
-        this.setState(function() {
+        this.setState(function () {
             // updates all values in fieldsOfInterest to match newExpansion
             let updatedFieldsOfInterest = _.clone(fieldsOfInterest);
-            Object.keys(updatedFieldsOfInterest).forEach( function(key) {
+            Object.keys(updatedFieldsOfInterest).forEach(function (key) {
                 updatedFieldsOfInterest[key] = newExpansion;
             });
             return updatedFieldsOfInterest;
@@ -47,25 +52,34 @@ export default class AlleleFrequenciesTile extends React.Component {
         });
     }
 
+    toggleGroupOpen(event) {
+        // keep parent behavior (they likely handle localStorage write)
+        const groupTitle = `source-panel-${this.props.sourceName}`;
+        if (this.props.onChangeGroupVisibility) {
+            this.props.onChangeGroupVisibility(groupTitle, event);
+        }
+        this.setState(prev => ({ groupOpen: !prev.groupOpen }));
+    }
+
     render() {
         const variant = this.props.variant;
         const data = this.props.alleleFrequencyData;
 
-        const gnomadExomeGraph = [_.find(data, function(dd) {
-                                return dd.source === "GnomAD Exomes";
-                            }).chart[0], "gnomAD V2.1 Exomes, Non-Cancer (Graphical)"];
+        const gnomadExomeGraph = [_.find(data, function (dd) {
+            return dd.source === "GnomAD Exomes";
+        }).chart[0], "gnomAD V2.1 Exomes, Non-Cancer (Graphical)"];
 
-        const gnomadExomeData = [_.find(data, function(dd) {
-                                return dd.source === "GnomAD Exomes";
-                            }).data, "gnomAD V2.1 Exomes, Non-Cancer (Numerical)"];
+        const gnomadExomeData = [_.find(data, function (dd) {
+            return dd.source === "GnomAD Exomes";
+        }).data, "gnomAD V2.1 Exomes, Non-Cancer (Numerical)"];
 
-        const gnomadGenomeGraph = [_.find(data, function(dd) {
-                                return dd.source === "GnomADv3 Genomes";
-                            }).chart[0], "gnomAD V3.1 Genomes, Non-Cancer (Graphical)"];
+        const gnomadGenomeGraph = [_.find(data, function (dd) {
+            return dd.source === "GnomADv3 Genomes";
+        }).chart[0], "gnomAD V3.1 Genomes, Non-Cancer (Graphical)"];
 
-        const gnomadGenomeData = [_.find(data, function(dd) {
-                                return dd.source === "GnomADv3 Genomes";
-                            }).data, "gnomAD V3.1 Genomes, Non-Cancer (Numerical)"];
+        const gnomadGenomeData = [_.find(data, function (dd) {
+            return dd.source === "GnomADv3 Genomes";
+        }).data, "gnomAD V3.1 Genomes, Non-Cancer (Numerical)"];
 
         const alleleFrequencyFields = [gnomadExomeGraph, gnomadExomeData, gnomadGenomeGraph, gnomadGenomeData];
 
@@ -96,66 +110,74 @@ export default class AlleleFrequenciesTile extends React.Component {
         // create the source panel itself now
         const groupTitle = `source-panel-${this.props.sourceName}`;
 
-        // return <div />;
-
         return (
-            <div key={`group_collection-${groupTitle}`} className={ allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group" }>
-                <Panel
-                    collapsible={true}
-                    defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
-                    hideEmptyItems={this.props.hideEmptyItems}
-                >
-                    <Panel.Heading>
-                        <Panel.Title componentClass="h3">
-                            <Panel.Toggle componentClass="a" className="title"
-                                onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event)}
-                            >
-                                {this.props.groupTitle}
-                            </Panel.Toggle>
+            <div
+                key={`group_collection-${groupTitle}`}
+                className={allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group"}
+            >
+                <Card className="mb-3">
+                    <Card.Header as="h3" className="d-flex align-items-center">
+                        <a
+                            role="button"
+                            className="title text-decoration-none flex-grow-1"
+                            onClick={this.toggleGroupOpen}
+                            aria-expanded={this.state.groupOpen}
+                        >
+                            {this.props.groupTitle}
+                        </a>
 
-                            <a title='collapse all fields'
-                                className="toggle-subfields"
-                                onClick={(event) => this.setAllFieldsExpansion(event, false)}
-                                style={{cursor: 'pointer', marginRight: '10px'}}>
-                                <i className="fa fa-angle-double-up" aria-hidden="true" />
-                            </a>
+                        <a
+                            title="collapse all fields"
+                            className="toggle-subfields"
+                            onClick={(event) => this.setAllFieldsExpansion(event, false)}
+                            style={{ cursor: 'pointer', marginRight: '10px' }}
+                        >
+                            <i className="fa fa-angle-double-up" aria-hidden="true" />
+                        </a>
 
-                            <a title='expand all fields'
-                                className="toggle-subfields"
-                                onClick={(event) => this.setAllFieldsExpansion(event, true)}
-                                style={{cursor: 'pointer'}}>
-                                <i className="fa fa-angle-double-down" aria-hidden="true" />
-                            </a>
+                        <a
+                            title="expand all fields"
+                            className="toggle-subfields"
+                            onClick={(event) => this.setAllFieldsExpansion(event, true)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            <i className="fa fa-angle-double-down" aria-hidden="true" />
+                        </a>
 
-                            {
-                                this.props.helpSection &&
-                                <GroupHelpButton group={this.props.helpSection}
-                                    onClick={(event) => {
-                                        this.props.showHelp(event, this.props.helpSection);
-                                        return true;
-                                    }}
-                                />
-                            }
-                        </Panel.Title>
-                    </Panel.Heading>
-                    <Panel.Collapse
+                        {
+                            this.props.helpSection &&
+                            <GroupHelpButton
+                                group={this.props.helpSection}
+                                onClick={(event) => {
+                                    this.props.showHelp(event, this.props.helpSection);
+                                    return true;
+                                }}
+                            />
+                        }
+                    </Card.Header>
+
+                    <Collapse
+                        in={this.state.groupOpen}
                         onEntered={this.props.relayoutGrid}
                         onExited={this.props.relayoutGrid}
                     >
-                        <Panel.Body>
-                            <div className="tile-disclaimer">
-                                <div>
-                                    The gnomAD data sets used by BRCA Exchange are the “non-cancer” subsets
-                                    of these sources. Data from <a href="https://tcga-data.nci.nih.gov/docs/publications/tcga/about.html">TCGA</a>
-                                    &nbsp;and other cancer cohorts are excluded to ensure that the frequencies used
-                                    to assess pathogenicity represent individuals not affected by cancer.
+                        <div>
+                            <Card.Body>
+                                <div className="tile-disclaimer">
+                                    <div>
+                                        The gnomAD data sets used by BRCA Exchange are the “non-cancer” subsets
+                                        of these sources. Data from <a href="https://tcga-data.nci.nih.gov/docs/publications/tcga/about.html">TCGA</a>
+                                        &nbsp;and other cancer cohorts are excluded to ensure that the frequencies used
+                                        to assess pathogenicity represent individuals not affected by cancer.
+                                    </div>
                                 </div>
-                            </div>
-                            {renderedAlleleFrequencyFields}
-                        </Panel.Body>
-                    </Panel.Collapse>
-                </Panel>
+                                {renderedAlleleFrequencyFields}
+                            </Card.Body>
+                        </div>
+                    </Collapse>
+                </Card>
             </div>
         );
     }
 };
+
