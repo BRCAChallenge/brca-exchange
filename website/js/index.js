@@ -23,7 +23,7 @@ var ReactDOM = require('react-dom');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 var DisclaimerModal = require('./DisclaimerModal');
 var RawHTML = require('./RawHTML');
-require('bootstrap/dist/css/bootstrap.css');
+import 'bootstrap/dist/css/bootstrap.min.css';
 require('font-awesome-webpack');
 require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
 require('css/custom.css');
