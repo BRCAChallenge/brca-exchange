@@ -11,11 +11,6 @@ import ComputationalPredictionTile from "./components/computationalprediction/Co
 import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
 import MupitStructure from './MupitStructure';
 
-// shims for older browsers
-require('babel/polyfill');
-require('es5-shim');
-require('es5-shim/es5-sham');
-
 require('./favicons');
 var React = require('react');
 var ReactDOM = require('react-dom');
@@ -25,7 +20,7 @@ var RawHTML = require('./RawHTML');
 
 // Keep your existing CSS includes
 require('bootstrap/dist/css/bootstrap.css');
-require('font-awesome-webpack');
+import 'font-awesome/css/font-awesome.css';
 require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
 require('css/custom.css');
 
