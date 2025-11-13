@@ -26,6 +26,15 @@ module.exports = {
 
   module: {
     rules: [
+      // Add fix for manifest.json
+      {
+        test: /manifest\.json$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'img/favicons/[name][ext]'
+        }
+      },
+
       // replaces "imports?define=>false"
       {
         test: /rx-dom/,

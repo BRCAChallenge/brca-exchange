@@ -1,11 +1,11 @@
 'use strict';
 
-var React = require('react');
-var moment = require('moment');
-var _ = require('underscore');
+import React from 'react';
+import moment from 'moment';
+import _ from 'underscore';
 
 // keys that contain date values that need reformatting for the ui
-const dateKeys = [
+export const dateKeys = [
     "Date_Last_Updated_ClinVar",
     "DateSignificanceLastEvaluated_ClinVar",
     "Date_last_evaluated_ENIGMA",
@@ -39,7 +39,7 @@ const AminoAcids = {
 };
 
 
-function isEmptyField(value) {
+export function isEmptyField(value) {
     if (Array.isArray(value)) {
         value = value[0];
     }
@@ -52,15 +52,15 @@ function isEmptyField(value) {
     return v === '' || v === '-' || v === 'None';
 }
 
-function isNumeric(n) {
+export function isNumeric(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-function sentenceCase(str) {
+export function sentenceCase(str) {
     return str.replace(/\b\S/g, (t) => t.toUpperCase() );
 }
 
-function capitalize(w) {
+export function capitalize(w) {
     return w.charAt(0).toUpperCase() + w.substr(1);
 }
 
@@ -73,7 +73,7 @@ function extractValInsideParens(str) {
 // attempts to parse the given date string using a variety of formats,
 // returning the formatted result as something like '08 September 2016'.
 // just returns the input if every pattern fails to match
-function normalizeDateFieldDisplay(value) {
+export function normalizeDateFieldDisplay(value) {
     // extend this if there are more formats in the future
     const formats = ["MM/DD/YYYY", "YYYY-MM-DD"];
 
@@ -91,7 +91,7 @@ function normalizeDateFieldDisplay(value) {
 
 // replaces commas with comma-spaces to wrap long lines better, removes blank entries from comma-delimited lists,
 // and normalizes blank/null values to a single hyphen
-function normalizedFieldDisplay(value, prop) {
+export function normalizedFieldDisplay(value, prop) {
     if (value) {
         // leave underscores in Refence Sequence field
         if (prop !== "Reference_Sequence" && prop !== "VR_ID") {
@@ -118,7 +118,7 @@ function normalizedFieldDisplay(value, prop) {
 }
 
 
-function generateLinkToGenomeBrowser(prop, value, hgvs) {
+export function generateLinkToGenomeBrowser(prop, value, hgvs) {
     let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
     let genomicCoordinate = value;
     let genomicCoordinateElements = genomicCoordinate.split(':');
@@ -135,7 +135,7 @@ function generateLinkToGenomeBrowser(prop, value, hgvs) {
 }
 
 
-function reformatDate(date) { //handles single dates or an array of dates
+export function reformatDate(date) { //handles single dates or an array of dates
     if (isEmptyField(date)) {
         return date;
     }
@@ -163,7 +163,7 @@ function formatConditionLink(db, id) {
 }
 
 
-function getFormattedFieldByProp(prop, variant) {
+export function getFormattedFieldByProp(prop, variant) {
     let rowItem;
 
     if (prop === "Gene_Symbol") {
@@ -293,14 +293,14 @@ function getFormattedFieldByProp(prop, variant) {
 }
 
 
-function abbreviatedSubmitter(originalSubmitter) {
+export function abbreviatedSubmitter(originalSubmitter) {
     return originalSubmitter
         .replace('Evidence-based Network for the Interpretation of Germline Mutant Alleles (ENIGMA)', 'ENIGMA')
         .replace('Breast Cancer Information Core (BIC)', 'BIC');
 }
 
 
-function getAminoAcidCode(hgvsProtein) {
+export function getAminoAcidCode(hgvsProtein) {
     let trimmedHgvs = hgvsProtein.replace(/[0-9()]/g, '');
     if (trimmedHgvs.length < 3) {
         return false;
@@ -314,7 +314,8 @@ function getAminoAcidCode(hgvsProtein) {
     }
 }
 
-module.exports = {
+// For backward compatibility with code that uses require()
+export default {
     getAminoAcidCode,
     isEmptyField,
     isNumeric,
