@@ -27,8 +27,9 @@ require('css/custom.css');
 var _ = require('underscore');
 var backend = require('./backend');
 var {NavBarNew} = require('./NavBarNew');
-var Rx = require('rx');
-require('rx-dom');
+// RxJS 6+ imports
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 var moment = require('moment');
 var DonationBar = require('./components/DonationBar');
 
@@ -51,7 +52,7 @@ import {Splicing} from'./Splicing';
 var databaseKey = require('../databaseKey');
 var util = require('./util');
 
-// ⬇️ React-Bootstrap v2+ imports (alias Container→Grid to minimize JSX churn)
+// React-Bootstrap v2+ imports (Bootstrap 5)
 import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } from 'react-bootstrap';
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
@@ -179,7 +180,7 @@ var Home = React.createClass({
         return (
             <Grid id="main-grid" className='home'>
                 <Row>
-                    <Col smOffset={2} sm={8}>
+                    <Col sm={{ span: 8, offset: 2 }}>
                         <VariantSearch
                             id='home-search'
                             onSearch={this.onSearch}/>
@@ -192,9 +193,9 @@ var Home = React.createClass({
                 </Row>
 
                 <Row>
-                    <Col lg={4} lgOffset={1} md={8} mdOffset={2} xs={12}>
-                        <div className="embed-responsive embed-responsive-16by9">
-                            <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/199396428" webkitallowfullscreen mozallowfullscreen allowFullScreen />
+                    <Col lg={{ span: 4, offset: 1 }} md={{ span: 8, offset: 2 }} xs={12}>
+                        <div className="ratio ratio-16x9">
+                            <iframe className="vimeo-video" src="https://player.vimeo.com/video/199396428" allowFullScreen />
                         </div>
                         <div className="homepage-under-image-text-container center-block">
                             <div className="homepage-caption">
@@ -206,9 +207,9 @@ var Home = React.createClass({
                         </div>
                     </Col>
 
-                    <Col lg={4} lgOffset={2} md={8} mdOffset={2} xs={12}>
-                        <div className="embed-responsive embed-responsive-16by9">
-                            <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/351028818" webkitallowfullscreen mozallowfullscreen allowFullScreen />
+                    <Col lg={{ span: 4, offset: 2 }} md={{ span: 8, offset: 2 }} xs={12}>
+                        <div className="ratio ratio-16x9">
+                            <iframe className="vimeo-video" src="https://player.vimeo.com/video/351028818" allowFullScreen />
                         </div>
                         <div className="homepage-under-image-text-container center-block">
                             <div className="homepage-caption">
@@ -262,7 +263,7 @@ var About = React.createClass({
             return (
                 <Grid id="main-grid" className="main-grid">
                     <Row>
-                        <Col smOffset={1} sm={10}>
+                        <Col sm={{ span: 10, offset: 1 }}>
                             <RawHTML html={content.pages[page]} />
                         </Col>
                     </Row>
@@ -279,7 +280,7 @@ var About = React.createClass({
             return (
                 <Grid id="main-grid" className="main-grid">
                     <Row>
-                        <Col smOffset={1} sm={10}>
+                        <Col sm={{ span: 10, offset: 1 }}>
                             <RawHTML html={content.pages[page]} />
                         </Col>
                     </Row>
@@ -375,11 +376,12 @@ var Database = React.createClass({
         this.transitionTo(`/help#${slugify(title)}`);
     },
     componentDidMount: function () {
-        var q = this.urlq = new Rx.Subject();
-        this.subs = q.debounce(500).subscribe(this.onChange);
+        // Updated RxJS 6+ syntax
+        var q = this.urlq = new Subject();
+        this.subs = q.pipe(debounceTime(500)).subscribe(this.onChange);
     },
     componentWillUnmount: function () {
-        this.subs.dispose();
+        this.subs.unsubscribe();
     },
     restoreDefaults: function(callback) {
         this.setState({restoringDefaults: true}, function() {
@@ -426,7 +428,7 @@ var Database = React.createClass({
 					{...params}
 					fetch={backend.data}
 					url={backend.url}
-					onChange={s => this.urlq.onNext(s)}
+					onChange={s => this.urlq.next(s)}
 					onToggleMode={this}
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
@@ -445,7 +447,7 @@ var Database = React.createClass({
 					{...params}
 					fetch={backend.data}
 					url={backend.url}
-					onChange={s => this.urlq.onNext(s)}
+					onChange={s => this.urlq.next(s)}
 					onToggleMode={this}
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
@@ -477,11 +479,13 @@ var Database = React.createClass({
 					{
 					    this.props.mode === 'default' && this.state.showModal &&
                         <Modal show={true} onHide={() => this.setState({ showModal: false })}>
-                            <RawHTML html={content.pages.researchWarning}/>
-                            <div className="p-3">
-                                <Button variant="primary" onClick={() => {this.toggleMode();}}>Yes</Button>{' '}
+                            <Modal.Body>
+                                <RawHTML html={content.pages.researchWarning}/>
+                            </Modal.Body>
+                            <Modal.Footer>
+                                <Button variant="primary" onClick={() => {this.toggleMode();}}>Yes</Button>
                                 <Button variant="secondary" onClick={() => this.setState({ showModal: false })}>No</Button>
-                            </div>
+                            </Modal.Footer>
                         </Modal>
 					}
 				</Col>
@@ -669,7 +673,7 @@ var VariantDetail = React.createClass({
         this.setState({ openGroups: { ...this.state.openGroups, [key]: nowOpen } });
     },
     determineDiffRowColor: function(highlightRow) {
-        return highlightRow ? 'danger' : '';
+        return highlightRow ? 'table-danger' : '';
     },
     getPathogenicity: function(version, isReport) {
         if (isReport) {
@@ -730,7 +734,7 @@ var VariantDetail = React.createClass({
                             diffHTML.push(
                                 <span>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
-                                    <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                    <span className='badge bg-success'><span className='glyphicon glyphicon-star'></span> New</span>
                                     &nbsp;{`${added}`}
                                 </span>, <br />
                             );
@@ -1088,7 +1092,7 @@ var VariantDetail = React.createClass({
                             <h4>Previous Versions of this Submission (since {util.reformatDate(oldestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
-                                    <tr className='active'>
+                                    <tr className='table-active'>
                                         <th>Release Date</th>
                                         <th>Clinical Significance</th>
                                         <th>Changes</th>
@@ -1117,7 +1121,7 @@ var VariantDetail = React.createClass({
                             <h4>Previous Versions of this Submission (since {util.normalizeDateFieldDisplay(oldestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
-                                    <tr className='active'>
+                                    <tr className='table-active'>
                                         <th>Release Date</th>
                                         <th>Clinical Significance</th>
                                         <th>Changes</th>
@@ -1169,7 +1173,7 @@ var VariantDetail = React.createClass({
                                 </span>
                             )
                             : (
-                                <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
+                                <Col xs={4} sm={{ span: 4, offset: 4 }} md={{ span: 4, offset: 4 }} className="vcenterblock">
                                     <div className='text-center Variant-detail-title'>
                                         <h3>Variant Details</h3>
                                     </div>
@@ -1200,11 +1204,9 @@ var VariantDetail = React.createClass({
                     {
                         (variant.id !== data[0].id && noRedirectMsg !== "true") && (
                           <Col xs={12} classname="vcenterblock">
-                              <div className="variant-message outdated-variant-message panel panel-danger">
-                                  <div className="panel-body panel-danger">
-                                      <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
-                                      The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].CA_ID}`}>Click here for updated data on this variant.</a>
-                                  </div>
+                              <div className="variant-message outdated-variant-message alert alert-danger">
+                                  <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
+                                  The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].CA_ID}`}>Click here for updated data on this variant.</a>
                               </div>
                           </Col>
                         )
@@ -1213,14 +1215,12 @@ var VariantDetail = React.createClass({
                     {
                         redirectedFromVariant && (
                           <Col xs={12} classname="vcenterblock">
-                              <div className="variant-message redirected-variant-msg panel panel-primary">
-                                  <div className="panel-body panel-primary">
-                                      <h3 style={{marginTop: 0}}>You are viewing the most recent data on this variant.</h3>
-                                      The variant url you requested only has data up to {util.reformatDate(redirectedFromVariant.Data_Release.date)}. You have been automatically redirected to the newest data.<br />
-                                      <a href={`/variant/${redirectedFrom}?noRedirect=true`}>
-                                          Click here to view variant data from {util.reformatDate(redirectedFromVariant.Data_Release.date)} (Release {redirectedFromVariant.Data_Release.name}).
-                                      </a>
-                                  </div>
+                              <div className="variant-message redirected-variant-msg alert alert-primary">
+                                  <h3 style={{marginTop: 0}}>You are viewing the most recent data on this variant.</h3>
+                                  The variant url you requested only has data up to {util.reformatDate(redirectedFromVariant.Data_Release.date)}. You have been automatically redirected to the newest data.<br />
+                                  <a href={`/variant/${redirectedFrom}?noRedirect=true`}>
+                                      Click here to view variant data from {util.reformatDate(redirectedFromVariant.Data_Release.date)} (Release {redirectedFromVariant.Data_Release.name}).
+                                  </a>
                               </div>
                           </Col>
                         )
@@ -1302,7 +1302,7 @@ var VariantDetail = React.createClass({
                         <p>Variant nomenclature may change between releases, please review submission history below for further details.</p>
                         <Table className='variant-history nopointer' responsive bordered>
                             <thead>
-                                <tr className='active'>
+                                <tr className='table-active'>
                                     <th>Release Date</th>
                                     <th>Clinical Significance</th>
                                     <th>Changes</th>
@@ -1320,7 +1320,7 @@ var VariantDetail = React.createClass({
                 {this.props.mode === "research_mode" ? lovdDiffRows : ''}
 
                 <Row>
-                    <Col md={12} mdOffset={0}>
+                    <Col md={{ span: 12, offset: 0 }}>
                         <DisclaimerModal buttonModal onToggleMode={this.props.toggleMode} text="Show Detail View for this Variant"/>
                     </Col>
                 </Row>
@@ -1402,4 +1402,3 @@ var main = document.getElementById('main');
 run(routes, HistoryLocation, (Root) => {
   ReactDOM.render(<Root/>, main);
 });
-

@@ -2,8 +2,9 @@
 'use strict';
 
 var React = require('react');
-var Rx = require('rx');
-require('rx/dist/rx.time');
+// RxJS 7 imports - CHANGED
+const { Subject } = require('rxjs');
+const { map, debounceTime, switchMap } = require('rxjs/operators');
 var {Table, Pagination} = require('react-data-components-brcaex');
 var {Button, Row, Col} = require('react-bootstrap');
 var VariantSearch = require('./VariantSearch');
@@ -97,14 +98,20 @@ var DataTable = React.createClass({
         );
     },
     componentWillMount: function () {
-        var q = this.fetchq = new Rx.Subject();
-        this.subs = q.map(this.props.fetch).debounce(100).switchLatest().subscribe(
+        // CHANGED: Use new Subject() and pipe with operators
+        var q = this.fetchq = new Subject();
+        this.subs = q.pipe(
+            map(this.props.fetch),
+            debounceTime(100),
+            switchMap(obs => obs)  // switchMap replaces switchLatest
+        ).subscribe(
             resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
             () => this.setState({error: 'Problem connecting to server'}));
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', this.handleResize);
-        this.subs.dispose();
+        // CHANGED: dispose() -> unsubscribe()
+        this.subs.unsubscribe();
     },
     componentDidMount: function () {
         window.addEventListener('resize', this.handleResize);
@@ -177,7 +184,8 @@ var DataTable = React.createClass({
         var {pageLength, search, page, sortBy,
             filterValues, columnSelection, sourceSelection,
             release, changeTypes, showDeleted, mode} = state;
-        this.fetchq.onNext(merge({
+        // CHANGED: onNext() -> next()
+        this.fetchq.next(merge({
             release,
             changeTypes,
             showDeleted,

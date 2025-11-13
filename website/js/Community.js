@@ -12,7 +12,10 @@ var {Pagination} = require('react-data-components-brcaex');
 var _ = require('underscore');
 var placeholder = require('./img/placeholder.png');
 var auth = require('./auth');
-var Rx = require('rx');
+
+// RxJS 7 imports - CHANGED
+const { Subject } = require('rxjs');
+const { debounceTime } = require('rxjs/operators');
 
 var Community = React.createClass({
     mixins: [PureRenderMixin, Navigation],
@@ -61,11 +64,15 @@ var Community = React.createClass({
         this.forceUpdate();
     },
     componentDidMount() {
-        var searchq = this.searchq = new Rx.Subject();
-        this.subs = searchq.debounce(500).subscribe(this.onChangeSearch);
+        // CHANGED: Use new Subject() and pipe with debounceTime
+        var searchq = this.searchq = new Subject();
+        this.subs = searchq.pipe(
+            debounceTime(500)
+        ).subscribe(this.onChangeSearch);
     },
     componentWillUnmount() {
-        this.subs.dispose();
+        // CHANGED: dispose() -> unsubscribe()
+        this.subs.unsubscribe();
     },
     render: function () {
         var queryParams = this.context.router.getCurrentQuery();
@@ -146,7 +153,7 @@ var Community = React.createClass({
                             <h4>Search for a community member:</h4>
                         </Col>
                         <Col sm={6} lg={7}>
-                            <CommunitySearch ref="community-search" onChange={s => this.searchq.onNext(s)}/>
+                            <CommunitySearch ref="community-search" onChange={s => this.searchq.next(s)}/>
                         </Col>
                     </Col>
                 </Row>
@@ -186,7 +193,8 @@ var CommunityMap = React.createClass({
         var roles = this.state.roles.slice();
         roles[role] = !roles[role];
         this.setState({ roles: roles });
-        this.filterSub.onNext(role);
+        // CHANGED: onNext() -> next()
+        this.filterSub.next(role);
     },
     componentDidMount: function() {
 
@@ -307,8 +315,11 @@ var CommunityMap = React.createClass({
                 infowindow = undefined;
             }).bind(this);
             this.updateMap();
-            var filterSub = this.filterSub = new Rx.Subject();
-            this.subs = filterSub.debounce(500).subscribe(this.updateMap);
+            // CHANGED: Use new Subject() and pipe with debounceTime
+            var filterSub = this.filterSub = new Subject();
+            this.subs = filterSub.pipe(
+                debounceTime(500)
+            ).subscribe(this.updateMap);
         };
 
 
@@ -318,7 +329,13 @@ var CommunityMap = React.createClass({
     componentDidUpdate: function() {
         this.updateMap();
     },
-    componentWillUnmount: function() { window.removeEventListener('resize', this.handleResize); },
+    componentWillUnmount: function() { 
+        window.removeEventListener('resize', this.handleResize);
+        // CHANGED: Add unsubscribe for filterSub if it exists
+        if (this.subs) {
+            this.subs.unsubscribe();
+        }
+    },
 
     render: function() {
         return <div id="communityMap"></div>;
