@@ -15,5 +15,6 @@ require('copy!./img/favicons/favicon-96x96.png');
 require('copy!./img/favicons/android-chrome-192x192.png');
 require('copy!./img/favicons/favicon-16x16.png');
 require('copy!./img/favicons/favicon.ico');
-require('copy!./img/favicons/manifest.json');
+// Let webpack 5 asset modules emit the manifest once:
+import './img/favicons/manifest.json';
 require('copy!./img/favicons/browserconfig.xml');
