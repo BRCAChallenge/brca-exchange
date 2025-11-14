@@ -16,27 +16,8 @@ var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = requir
 var {State} = require('react-router');
 var alleleFrequencyCharts = require('./AlleleFrequencyCharts');
 
-require('react-data-components-brcaex/css/table-twbs.css');
-
-function buildHeader(onClick, title) {
-    return (
-        <span>
-            {title}
-            <span onClick={ev => {ev.stopPropagation(); onClick(title); }}
-                  className='help glyphicon glyphicon-question-sign superscript'/>
-        </span>
-    );
-}
-
-function renderCell(val) {
-    return <span>{val}</span>;
-}
-
-const filterColumns = [
-    {name: 'Gene', prop: 'Gene_Symbol', values: ['BRCA1', 'BRCA2']},
-    {name: 'Pathogenicity', prop: 'Pathogenicity_expert', values: ['Pathogenic', 'Likely Pathogenic', 'Benign / Little Clinical Significance', 'Likely Benign', 'Not Yet Reviewed']}
-];
-
+// TODO: Re-enable or replace after upgrading react-data-components-brcaex
+// require('react-data-components-brcaex/css/table-twbs.css');
 const expertModeGroups = [
     {groupTitle: 'Variant Names', internalGroupName: 'Variant Nomenclature', innerCols: [
         {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
@@ -899,4 +880,3 @@ module.exports = {
     researchModeGroups: researchModeGroups,
     expertModeGroups: expertModeGroups
 };
-

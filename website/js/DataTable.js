@@ -1,19 +1,22 @@
 /*global module: false, require: false, URL: false, Blob: false */
 'use strict';
 
-var React = require('react');
-// RxJS 7 imports - CHANGED
-const { Subject } = require('rxjs');
-const { map, debounceTime, switchMap } = require('rxjs/operators');
-var {Table, Pagination} = require('react-data-components-brcaex');
-var {Button, Row, Col} = require('react-bootstrap');
-var VariantSearch = require('./VariantSearch');
-var SelectField = require('./SelectField');
-var _ = require('underscore');
-var cx = require('classnames');
-var hgvs = require('./hgvs');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var util = require('./util');
+import React from 'react';
+// RxJS imports
+import { Subject } from 'rxjs';
+import { map, debounceTime, switchMap } from 'rxjs/operators';
+
+// TODO: Uncomment when react-data-components-brcaex is updated/replaced
+// import { Table, Pagination } from 'react-data-components-brcaex';
+
+import { Button, Row, Col, Table as BootstrapTable } from 'react-bootstrap';
+import VariantSearch from './VariantSearch';
+import SelectField from './SelectField';
+import _ from 'underscore';
+import cx from 'classnames';
+import hgvs from './hgvs';
+import PureRenderMixin from './PureRenderMixin'; // deep-equals version of PRM
+import util from './util';
 
 var filterDisplay = v => v == null ? 'Any' : v;
 var filterAny = v => v === 'Any' ? null : v;
@@ -35,6 +38,9 @@ function setPages({data, count, deletedCount, synonyms, releaseName}, pageLength
     };
 }
 
+// TODO: Uncomment when react-data-components-brcaex is updated/replaced
+// This is the original FastTable that wraps the Table from react-data-components-brcaex
+/*
 // Wrap Table with a version having PureRenderMixin
 var FastTable = React.createClass({
     mixins: [PureRenderMixin],
@@ -68,6 +74,99 @@ var FastTable = React.createClass({
         return <Table {...props} dataArray={dataArray}/>;
     }
 });
+*/
+
+// TEMPORARY: Simple table component until react-data-components-brcaex is available
+var FastTable = React.createClass({
+    mixins: [PureRenderMixin],
+    normalizeGenomicCoordinate: function(field, hgvsValue, variantData) {
+        if (!util.isEmptyField(hgvsValue)) {
+            variantData[field] = hgvsValue;
+        } else {
+            if (variantData[field] && variantData[field].length > 35) {
+                variantData[field] = variantData[field].substring(0, 35) + "...";
+            }
+        }
+        return variantData;
+    },
+    determineGenomicCoordinates: function(variantData) {
+        let field = "Genomic_Coordinate_hg37";
+        let hgvsValue = variantData.Genomic_HGVS_37;
+        variantData = this.normalizeGenomicCoordinate(field, hgvsValue, variantData);
+
+        field = "Genomic_Coordinate_hg38";
+        hgvsValue = variantData.Genomic_HGVS_38;
+        variantData = this.normalizeGenomicCoordinate(field, hgvsValue, variantData);
+        return variantData;
+    },
+    onSort: function(column) {
+        if (this.props.onSort) {
+            const currentSort = this.props.sortBy;
+            const newOrder = (currentSort && currentSort.prop === column.prop && currentSort.order === 'asc') ? 'desc' : 'asc';
+            this.props.onSort({prop: column.prop, order: newOrder});
+        }
+    },
+    render: function () {
+        var {dataArray, columns, className, buildRowOptions, onRowClick, buildHeader, sortBy} = this.props;
+        
+        if (dataArray.length > 0) {
+            dataArray = _.map(dataArray, function(variantData) {
+                return this.determineGenomicCoordinates(variantData);
+            }, this);
+        }
+
+        return (
+            <BootstrapTable className={className} striped bordered hover>
+                <thead>
+                    <tr>
+                        {columns.map((column, idx) => {
+                            const isSorted = sortBy && sortBy.prop === column.prop;
+                            const sortIcon = isSorted ? (sortBy.order === 'asc' ? ' ▲' : ' ▼') : '';
+                            
+                            return (
+                                <th 
+                                    key={idx}
+                                    onClick={() => this.onSort(column)}
+                                    style={{cursor: 'pointer'}}
+                                >
+                                    {buildHeader ? buildHeader(column) : column.title}
+                                    {sortIcon}
+                                </th>
+                            );
+                        })}
+                    </tr>
+                </thead>
+                <tbody>
+                    {dataArray.length === 0 ? (
+                        <tr>
+                            <td colSpan={columns.length} style={{textAlign: 'center', padding: '20px'}}>
+                                No variants found
+                            </td>
+                        </tr>
+                    ) : (
+                        dataArray.map((row, rowIdx) => {
+                            const rowOptions = buildRowOptions ? buildRowOptions(row) : {};
+                            return (
+                                <tr 
+                                    key={rowIdx} 
+                                    onClick={(e) => onRowClick && onRowClick(row, e)}
+                                    style={{cursor: onRowClick ? 'pointer' : 'default'}}
+                                    {...rowOptions}
+                                >
+                                    {columns.map((column, colIdx) => (
+                                        <td key={colIdx}>
+                                            {column.render ? column.render(row[column.prop], row) : row[column.prop]}
+                                        </td>
+                                    ))}
+                                </tr>
+                            );
+                        })
+                    )}
+                </tbody>
+            </BootstrapTable>
+        );
+    }
+});
 
 // Merge new state (e.g. initialState) with existing state,
 // deep-merging fields that are objects.
@@ -98,19 +197,17 @@ var DataTable = React.createClass({
         );
     },
     componentWillMount: function () {
-        // CHANGED: Use new Subject() and pipe with operators
         var q = this.fetchq = new Subject();
         this.subs = q.pipe(
             map(this.props.fetch),
             debounceTime(100),
-            switchMap(obs => obs)  // switchMap replaces switchLatest
+            switchMap(obs => obs)
         ).subscribe(
             resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
             () => this.setState({error: 'Problem connecting to server'}));
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', this.handleResize);
-        // CHANGED: dispose() -> unsubscribe()
         this.subs.unsubscribe();
     },
     componentDidMount: function () {
@@ -184,7 +281,6 @@ var DataTable = React.createClass({
         var {pageLength, search, page, sortBy,
             filterValues, columnSelection, sourceSelection,
             release, changeTypes, showDeleted, mode} = state;
-        // CHANGED: onNext() -> next()
         this.fetchq.next(merge({
             release,
             changeTypes,
@@ -352,11 +448,38 @@ var DataTable = React.createClass({
                         />
                     </Col>
                     <Col sm={6}>
+                        {/* TODO: Uncomment when react-data-components-brcaex is updated/replaced */}
+                        {/*
                         <Pagination
                             className="pagination pull-right-sm"
                             currentPage={page}
                             totalPages={totalPages}
                             onChangePage={this.onChangePage} />
+                        */}
+                        
+                        {/* TEMPORARY: Basic pagination buttons until Pagination component is available */}
+                        <div className="pagination pull-right-sm" style={{display: 'inline-block', float: 'right'}}>
+                            <Button 
+                                variant="secondary"
+                                size="sm"
+                                disabled={page === 0} 
+                                onClick={() => this.onChangePage(page - 1)}
+                                style={{marginRight: '5px'}}
+                            >
+                                Previous
+                            </Button>
+                            <span style={{padding: '0 10px', display: 'inline-block', lineHeight: '31px'}}>
+                                Page {page + 1} of {totalPages}
+                            </span>
+                            <Button 
+                                variant="secondary"
+                                size="sm"
+                                disabled={page >= totalPages - 1} 
+                                onClick={() => this.onChangePage(page + 1)}
+                            >
+                                Next
+                            </Button>
+                        </div>
                     </Col>
                 </Row>
                 <Row>
@@ -386,4 +509,4 @@ var DataTable = React.createClass({
     }
 });
 
-module.exports = DataTable;
+export default DataTable;

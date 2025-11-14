@@ -1,21 +1,22 @@
 'use strict';
 
-var React = require('react');
-var ReactDOMServer = require('react-dom/server');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
-var backend = require('backend');
-var config  = require('./config');
-var {Role} = require('./Signup');
-var {Navigation, Link} = require('react-router');
-var {Pagination} = require('react-data-components-brcaex');
-var _ = require('underscore');
-var placeholder = require('./img/placeholder.png');
-var auth = require('./auth');
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+import PureRenderMixin from './PureRenderMixin'; // deep-equals version of PRM
+import { Container as Grid, Col, Row, Button, Table } from 'react-bootstrap';
+import backend from './backend';
+import config from './config';
+import { Role } from './Signup';
+import { Navigation, Link } from 'react-router';
+// TODO: Uncomment when react-data-components-brcaex is updated/replaced
+// import { Pagination } from 'react-data-components-brcaex';
+import _ from 'underscore';
+import placeholder from './img/placeholder.png';
+import auth from './auth';
 
-// RxJS 7 imports - CHANGED
-const { Subject } = require('rxjs');
-const { debounceTime } = require('rxjs/operators');
+// RxJS imports
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 var Community = React.createClass({
     mixins: [PureRenderMixin, Navigation],
@@ -64,14 +65,12 @@ var Community = React.createClass({
         this.forceUpdate();
     },
     componentDidMount() {
-        // CHANGED: Use new Subject() and pipe with debounceTime
         var searchq = this.searchq = new Subject();
         this.subs = searchq.pipe(
             debounceTime(500)
         ).subscribe(this.onChangeSearch);
     },
     componentWillUnmount() {
-        // CHANGED: dispose() -> unsubscribe()
         this.subs.unsubscribe();
     },
     render: function () {
@@ -125,17 +124,17 @@ var Community = React.createClass({
             <Grid id="main-grid">
                 <Row id="message"> {message} </Row>
                 <Row>
-                    <Col md={10} mdOffset={1} sm={12}>
+                    <Col md={{ span: 10, offset: 1 }} sm={12}>
                         <p className="community-message">The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our global community!  By showing your support, you will help us demonstrate the value of this resource, which will help keep it freely available to all.</p>
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={10} mdOffset={1} sm={12}>
+                    <Col md={{ span: 10, offset: 1 }} sm={12}>
                         <CommunityMap onFilterRole={this.onFilterRole} search={this.state.search}/>
                     </Col>
                 </Row>
                 <Row>
-                    <Col className="text-center" md={10} mdOffset={1} sm={12}>
+                    <Col className="text-center" md={{ span: 10, offset: 1 }} sm={12}>
                         <Link to="/signup"><Button disabled={config.environment === 'beta'}>Join the community</Button></Link>&nbsp;
                         <p className="community-disclaimer">We will add you to the BRCA Exchange News mailing list. You can unsubscribe at any time.</p>
                         <p>To update or remove your profile, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=Update Personal Information">contact us</a>.</p>
@@ -148,7 +147,7 @@ var Community = React.createClass({
 
                 </Row>
                 <Row>
-                    <Col className="btm-buffer" md={10} mdOffset={1} sm={12}>
+                    <Col className="btm-buffer" md={{ span: 10, offset: 1 }} sm={12}>
                         <Col sm={6} lg={5} style={{paddingRight: "0"}}>
                             <h4>Search for a community member:</h4>
                         </Col>
@@ -158,7 +157,7 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={10} mdOffset={1} sm={12}>
+                    <Col md={{ span: 10, offset: 1 }} sm={12}>
                         <Table className="community" striped bordered>
                             <tbody>
                                 {rows}
@@ -167,16 +166,43 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={10} mdOffset={1} sm={12}>
+                    <Col md={{ span: 10, offset: 1 }} sm={12}>
                         <p style={{verticalAlign: 'bottom', display: 'inline-block'}}>
                         {`${(this.state.page * this.state.pageLength) + 1}-${Math.min((this.state.page + 1) * this.state.pageLength, this.state.count)} out of ${this.state.count} members`}
                         </p>
 
+                        {/* TODO: Uncomment when react-data-components-brcaex is updated/replaced */}
+                        {/*
                         <Pagination
                             className="pagination pull-right-sm"
                             currentPage={page}
                             totalPages={totalPages}
                             onChangePage={this.onChangePage} />
+                        */}
+                        
+                        {/* TEMPORARY: Basic pagination buttons until Pagination component is available */}
+                        <div className="pagination pull-right-sm" style={{display: 'inline-block', marginLeft: '20px'}}>
+                            <Button 
+                                variant="secondary"
+                                size="sm"
+                                disabled={page === 0} 
+                                onClick={() => this.onChangePage(page - 1)}
+                                style={{marginRight: '5px'}}
+                            >
+                                Previous
+                            </Button>
+                            <span style={{padding: '0 10px'}}>
+                                Page {page + 1} of {totalPages}
+                            </span>
+                            <Button 
+                                variant="secondary"
+                                size="sm"
+                                disabled={page >= totalPages - 1} 
+                                onClick={() => this.onChangePage(page + 1)}
+                            >
+                                Next
+                            </Button>
+                        </div>
                     </Col>
                 </Row>
             </Grid>
@@ -193,7 +219,6 @@ var CommunityMap = React.createClass({
         var roles = this.state.roles.slice();
         roles[role] = !roles[role];
         this.setState({ roles: roles });
-        // CHANGED: onNext() -> next()
         this.filterSub.next(role);
     },
     componentDidMount: function() {
@@ -315,7 +340,6 @@ var CommunityMap = React.createClass({
                 infowindow = undefined;
             }).bind(this);
             this.updateMap();
-            // CHANGED: Use new Subject() and pipe with debounceTime
             var filterSub = this.filterSub = new Subject();
             this.subs = filterSub.pipe(
                 debounceTime(500)
@@ -331,7 +355,6 @@ var CommunityMap = React.createClass({
     },
     componentWillUnmount: function() { 
         window.removeEventListener('resize', this.handleResize);
-        // CHANGED: Add unsubscribe for filterSub if it exists
         if (this.subs) {
             this.subs.unsubscribe();
         }
@@ -385,4 +408,4 @@ var CommunitySearch = React.createClass({
     }
 });
 
-module.exports = Community;
+export default Community;
