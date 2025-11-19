@@ -349,16 +349,16 @@ def analyze_variant(variant, coverage_v2, coverage_v3, coverage_v4,
         if observable_in_v3:
             variant_v3_code_id = PM2_SUPPORTING
         else:
-            variant_v3_code_id = FAIL_QC
+            variant_v3_code_id = NO_CODE
         if observable_in_v4:
             variant_v4_code_id = PM2_SUPPORTING
         else:
-            variant_v4_code_ID = FAIL_QC
+            variant_v4_code_id = NO_CODE
     else:
         variant_v2_code_id = NO_CODE_NON_SNV
         variant_v3_code_id = NO_CODE_NON_SNV
         variant_v4_code_id = NO_CODE_NON_SNV
-
+    
     if debug:
         print("variant", variant["pyhgvs_cDNA"], " is snv:", is_snv, "preliminary codes", variant_v2_code_id,
               variant_v3_code_id, "observable", observable_in_v2, observable_in_v3)
@@ -422,8 +422,7 @@ def analyze_variant(variant, coverage_v2, coverage_v3, coverage_v4,
                                                             variant["faf95_popmax_genome_GnomADv3"],
                                                             variant["faf95_popmax_population_genome_GnomADv3"],
                                                             variant_in_v3, is_snv, debug)
-    if variant_in_v4:
-        variant["V4_Popfreq"] = variant_v4_code_id
+    variant["V4_Popfreq"] = variant_v4_code_id
     if debug:
         print("variant", variant["pyhgvs_cDNA"], "consensus code:", variant[POPFREQ_CODE_ID], "msg",
               variant[POPFREQ_CODE_DESCR], "v2 code", variant_v2_code_id,
