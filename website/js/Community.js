@@ -7,7 +7,7 @@ import { Container as Grid, Col, Row, Button, Table } from 'react-bootstrap';
 import backend from './backend';
 import config from './config';
 import { Role } from './Signup';
-import { Navigation, Link } from 'react-router';
+import { Link, withRouter } from 'react-router-dom';
 // TODO: Uncomment when react-data-components-brcaex is updated/replaced
 // import { Pagination } from 'react-data-components-brcaex';
 import _ from 'underscore';
@@ -19,7 +19,7 @@ import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 var Community = React.createClass({
-    mixins: [PureRenderMixin, Navigation],
+    mixins: [PureRenderMixin],
     componentWillMount: function () {
         this.fetch(this.state);
     },
@@ -74,21 +74,21 @@ var Community = React.createClass({
         this.subs.unsubscribe();
     },
     render: function () {
-        var queryParams = this.context.router.getCurrentQuery();
+        const query = new URLSearchParams(this.props.location?.search || "");
         var message;
-        if (queryParams.registrationSuccess === "true") {
+        if (query.get("registrationSuccess") === "true") {
             message = (
 				<div className="alert alert-success">
 					<p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration. After you complete your registration our administrator will confirm your profile and it will appear on the Community Pages.</p>
 				</div>);
-        } else if (queryParams.updateSuccess === "true") {
+        } else if (query.get("updateSuccess") === "true") {
             message = (
                 <div className="alert alert-success">
-                    {queryParams.subscribe === "true" &&
+                    {query.get("subscribe") === "true" &&
                         <p>Your profile has been edited successfully, and you have been added to the mailing list.</p>}
-                    {queryParams.subscribe === "false" &&
+                    {query.get("subscribe") === "false" &&
                         <p>Your profile has been edited successfully, and you have been removed from the mailing list.</p>}
-                    {queryParams.subscribe === undefined &&
+                    {!query.has("subscribe") &&
                         <p>Your profile has been edited successfully.</p>}
                 </div>);
         }
@@ -408,4 +408,4 @@ var CommunitySearch = React.createClass({
     }
 });
 
-export default Community;
+export default withRouter(Community);
