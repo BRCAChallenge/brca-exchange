@@ -4,7 +4,7 @@
 
 import React from "react";
 import { Card, Collapse } from 'react-bootstrap';
-import { AlleleFrequencyField } from "./AlleleFrequencyField";
+import AlleleFrequencyField from "./AlleleFrequencyField";
 import GroupHelpButton from './GroupHelpButton';
 
 const _ = require('underscore');

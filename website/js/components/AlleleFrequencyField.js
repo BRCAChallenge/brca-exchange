@@ -226,7 +226,7 @@ const AlleleFrequencyField = React.createClass({
                             <div>
                                 Additional data for this variant, including detailed
                                 populations, quality scores, and flags relative to other transcripts,
-                                <a href={gnomadLink} target="_blank">&nbsp;are available at gnomAD</a>.
+                                <a href={gnomadLink} target="_blank" rel="noopener noreferrer">&nbsp;are available at gnomAD</a>.
                             </div>
                         </div>
                         <Table key={`allele-frequency-name-${fieldName}`} >
@@ -251,6 +251,6 @@ const AlleleFrequencyField = React.createClass({
     }
 });
 
-module.exports = {
-    AlleleFrequencyField,
-};
+// Provide both default and named exports so either import style works
+export default AlleleFrequencyField;
+export { AlleleFrequencyField };

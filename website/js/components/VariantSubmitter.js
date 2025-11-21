@@ -18,7 +18,7 @@ const marksToReviewStatuses = {
     0: ['no_assertion_criteria_provided', 'no_assertion_provided'],
 };
 
-function computeReviewStatusScore(status) {
+export function computeReviewStatusScore(status) {
     // determine how many marks correspond to this review status
     for (let marksStatus of Object.entries(marksToReviewStatuses)) {
         if (marksStatus[1].includes(status)) {
@@ -50,7 +50,7 @@ function getMarksForReviewStatus(status) {
     );
 }
 
-const VariantSubmitter = React.createClass({
+export const VariantSubmitter = React.createClass({
     onHandleToggle: function(e) {
         e.preventDefault();
 
@@ -164,8 +164,3 @@ const VariantSubmitter = React.createClass({
         );
     }
 });
-
-module.exports = {
-    VariantSubmitter,
-    computeReviewStatusScore
-};
