@@ -1,6 +1,6 @@
 'use strict';
 import React from 'react';
-import * as d3 from "d3";
+import * as d3 from 'd3';
 
 const _ = require('underscore');
 
@@ -39,7 +39,7 @@ export default class FunctionalAssayTile extends React.Component {
             return !util.isEmptyField(val);
         });
 
-        const impactScale = d3.scale.threshold()
+        const impactScale = d3.scaleThreshold()
             .domain(impacts[1].range)
             .range(impacts);
 
@@ -77,16 +77,16 @@ export default class FunctionalAssayTile extends React.Component {
                         if (k === "Publication") {
                             // grab just the pmid for display
                             let splitText = v.split('/');
-                            v = (<a href={v} target='_blank'>PMID:{splitText[splitText.length - 1]}</a>);
+                            v = (<a href={v} target='_blank' rel="noopener noreferrer">PMID:{splitText[splitText.length - 1]}</a>);
                         } else if (k === "Previous Publications") {
                             let pmids = v.split(',');
                             let length = pmids.length;
                             let links = pmids.map( (pmid, idx) => {
                                 pmid = pmid.split(':')[1];
                                 if (idx < length - 1) {
-                                    return (<span><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>PMID:{pmid}</a>, </span>);
+                                    return (<span><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank' rel="noopener noreferrer">PMID:{pmid}</a>, </span>);
                                 }
-                                return (<span><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>PMID:{pmid}</a></span>);
+                                return (<span><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank' rel="noopener noreferrer">PMID:{pmid}</a></span>);
                             });
                             v = links;
                         }
@@ -180,7 +180,7 @@ export default class FunctionalAssayTile extends React.Component {
         return (
             <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <div className="tile-disclaimer">
-                    Assays were selected by the ENIGMA consortium as high quality assays that met internal standards permitting estimation of sensitivity and specificity, using approaches as described in <a href="https://pubmed.ncbi.nlm.nih.gov/31131967/" target='_blank'>Parsons 2019</a>.
+                    Assays were selected by the ENIGMA consortium as high quality assays that met internal standards permitting estimation of sensitivity and specificity, using approaches as described in <a href="https://pubmed.ncbi.nlm.nih.gov/31131967/" target='_blank' rel="noopener noreferrer">Parsons 2019</a>.
                     <ul>
                         <li>Genetic variation can impact RNA transcripts and/or protein function or abundance. Assays labeled with a <b>P</b> measure the impact of genetic variation at the protein level. Assays labeled with a <b>R/P</b> measure impact at both the RNA and protein level.</li>
                         <li><b>Reports</b>, or the authors’ interpretation of the functional impact of each variant, are presented as they appear in the publications. A report of ‘Many Provided’ means that the authors performed more than one assay for each variant but provided no overall report of functional impact.</li>
