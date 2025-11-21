@@ -5,10 +5,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import slugify from './slugify';
-import {Navigation} from 'react-router';
+import { withRouter } from 'react-router-dom';
 import AutoSuggest from 'react-autosuggest';
-import * as _ from 'underscore';
-import * as $ from 'jquery';
+import _ from 'underscore';
+import $ from 'jquery';
 import config from './config';
 
 import './css/Autosuggest.css';
@@ -44,8 +44,7 @@ function renderSuggestion(suggestion, { query }) {
     );
 }
 
-var VariantSearch = React.createClass({
-    mixins: [Navigation],
+var VariantSearchInner = React.createClass({
     onClick: function (ev) {
         ev.stopPropagation();
         var value = ReactDOM.findDOMNode(this.refs.input).value;
@@ -57,7 +56,7 @@ var VariantSearch = React.createClass({
     },
 
     showHelp: function (title) {
-        this.transitionTo(`/help#${slugify(title)}`);
+        this.props.history.push(`/help#${slugify(title)}`);
     },
 
     onChange: function (event, { newValue: value }) {
@@ -157,4 +156,4 @@ var VariantSearch = React.createClass({
     },
 });
 
-module.exports = VariantSearch;
+export default withRouter(VariantSearchInner);
