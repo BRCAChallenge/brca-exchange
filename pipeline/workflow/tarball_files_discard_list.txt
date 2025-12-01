@@ -5,6 +5,7 @@
 ./release/artifacts/bayesdel.vcf
 ./release/artifacts/BICready.vcf
 ./release/artifacts/BIC.vcf
+./release/artifacts/BRCA.ann.all.vcf
 ./release/artifacts/built.tsv
 ./release/artifacts/built_with_bayesdel.tsv
 ./release/artifacts/built_with_spliceai.tsv
