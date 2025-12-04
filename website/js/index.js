@@ -2,6 +2,7 @@
 /*global require: false */
 'use strict';
 
+/*
 import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
 import LiteratureTable from "./components/LiteratureTable";
@@ -10,13 +11,14 @@ import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTil
 import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
 import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
 import MupitStructure from './MupitStructure';
+*/
 
 require('./favicons');
 var React = require('react');
-var ReactDOM = require('react-dom');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var DisclaimerModal = require('./DisclaimerModal');
-var RawHTML = require('./RawHTML');
+import { createRoot } from 'react-dom/client';
+//var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
+//var DisclaimerModal = require('./DisclaimerModal');
+import RawHTML from './RawHTML';
 
 // Keep your existing CSS includes
 require('bootstrap/dist/css/bootstrap.css');
@@ -26,12 +28,12 @@ require('css/custom.css');
 
 var _ = require('underscore');
 var backend = require('./backend');
-var {NavBarNew} = require('./NavBarNew');
+//var {NavBarNew} = require('./NavBarNew');
 // RxJS 6+ imports
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 var moment = require('moment');
-var DonationBar = require('./components/DonationBar');
+//var DonationBar = require('./components/DonationBar');
 
 // masonry/isotope
 var Isotope = require('isotope-layout');
@@ -43,35 +45,34 @@ var logos = require('./logos');
 var slugify = require('./slugify');
 
 import content, {parseTooltips} from './content';
-var Community = require('./Community');
-var FactSheet = require('./FactSheet');
-var WhyDonate = require('./WhyDonate');
-var FundraisingDetails = require('./FundraisingDetails');
-import {Splicing} from'./Splicing';
+//var Community = require('./Community');
+//var FactSheet = require('./FactSheet');
+//var WhyDonate = require('./WhyDonate');
+//var FundraisingDetails = require('./FundraisingDetails');
+//import {Splicing} from'./Splicing';
+import { withRouter, BrowserRouter, Switch, Route, Link } from 'react-router-dom';
 
-var databaseKey = require('../databaseKey');
-var util = require('./util');
+//var databaseKey = require('../databaseKey');
+//var util = require('./util');
 
 // React-Bootstrap v2+ imports (Bootstrap 5)
 import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } from 'react-bootstrap';
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
-var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
-var {Signup} = require('./Signup');
-var {Signin, ResetPassword} = require('./Signin');
-var {ConfirmEmail} = require('./ConfirmEmail');
-var {ChangePassword} = require('./ChangePassword');
-var {Profile} = require('./Profile');
-var VariantSearch = require('./VariantSearch');
-var {Navigation, State, Route, RouteHandler,
-    HistoryLocation, run, DefaultRoute, Link} = require('react-router');
-var {Releases, Release} = require('./Releases.js');
-var Help = require('./Help.js');
+//var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
+//var {Signup} = require('./Signup');
+//var {Signin, ResetPassword} = require('./Signin');
+//var {ConfirmEmail} = require('./ConfirmEmail');
+//var {ChangePassword} = require('./ChangePassword');
+//var {Profile} = require('./Profile');
+import VariantSearch from './VariantSearch';
+//var {Releases, Release} = require('./Releases.js');
+//var Help = require('./Help.js');
 
-var KeyInline = require('./components/KeyInline');
-var GroupHelpButton = require('./components/GroupHelpButton');
+//var KeyInline = require('./components/KeyInline');
+//var GroupHelpButton = require('./components/GroupHelpButton');
 
-var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
+//var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 
 if (typeof console === "undefined") {
     window.console = {
@@ -100,7 +101,7 @@ function clean(obj) {
         }
     }
 }
-
+/*
 var Footer = React.createClass({
     mixins: [PureRenderMixin],
     render: function() {
@@ -143,20 +144,22 @@ var Footer = React.createClass({
         );
     }
 });
-
-var Home = React.createClass({
-    mixins: [Navigation],
-    getInitialState() {
-        return {
+*/
+class HomeRaw extends React.Component {
+    constructor(props) {
+        super(props);
+	this.state = {
             index: 0,
             direction: null,
             showModal: false
         };
-    },
+	this.onSearch = this.onSearch.bind(this);
+    }
     onSearch(value) {
-        this.transitionTo('/variants', null, {search: value});
-    },
-    render: function() {
+	const query = value ? `?search=${encodeURIComponent(value)}` : '';
+        this.props.history.push(`/variants${query}`);
+    }
+    render() {
         let currentSupporters = _.filter(logos, function(logo) {
                                     return logo.currentSupporter;
                                 });
@@ -181,9 +184,9 @@ var Home = React.createClass({
             <Grid id="main-grid" className='home'>
                 <Row>
                     <Col sm={{ span: 8, offset: 2 }}>
-                        <VariantSearch
-                            id='home-search'
-                            onSearch={this.onSearch}/>
+                       <VariantSearch
+                           id='home-search'
+                           onSearch={this.onSearch}/>
                     </Col>
                 </Row>
                 <Row>
@@ -234,8 +237,9 @@ var Home = React.createClass({
             </Grid>
         );
     }
-});
-
+}
+const Home = withRouter(HomeRaw);
+/*
 var About = React.createClass({
     render: function() {
         let {page} = this.props.params;
@@ -649,7 +653,7 @@ var VariantDetail = React.createClass({
             this.isogrid.relayout(fullRefresh);
         }
     }, 100),
-    relayoutOnCollapsed: function(/* collapser */) {
+    relayoutOnCollapsed: function(/* collapser *//*) {
         console.warn("Deprecated relayoutOnCollapsed; replace relayoutOnCollapsed handlers w/direct calls to relayoutGrid() in your collapsing components");
     },
     // legacy API kept for callers; now just flips storage and local openGroups
@@ -1373,32 +1377,37 @@ var Application = React.createClass({
         );
     }
 });
-
-var routes = (
-    <Route handler={Application}>
-        <DefaultRoute handler={Home}/>
-        <Route path='about/:page' handler={About}/>
-        <Route path='factsheet' handler={FactSheet}/>
-        <Route path='whydonate' handler={WhyDonate}/>
-        <Route path='fundraisingdetails' handler={FundraisingDetails}/>
-        <Route path='help' handler={Help}/>
-        <Route path='community' handler={Community}/>
-        <Route path='signup' handler={Signup}/>
-        <Route path='signin' handler={Signin}/>
-        <Route path='reset_password' handler={ResetPassword}/>
-        <Route path='profile' handler={Profile}/>
-        <Route path='confirm/:activationCode' handler={ConfirmEmail}/>
-        <Route path='reset/:resetToken' handler={ChangePassword}/>
-        <Route path='variants' />
-        <Route path='variant/:id' handler={VariantDetail}/>
-        <Route path='variant_literature/:id' handler={LiteratureTable}/>
-        <Route path='releases' handler={Releases}/>
-        <Route path='release/:id' handler={Release}/>
-    </Route>
+*/
+const routes = (
+    <Switch>
+        <Route exact path='/' component={Home}/>
+	{/*
+	<Route path='about/:page' component={About}/>
+        <Route path='factsheet' component={FactSheet}/>
+        <Route path='whydonate' component={WhyDonate}/>
+        <Route path='fundraisingdetails' component={FundraisingDetails}/>
+        <Route path='help' component={Help}/>
+        <Route path='community' component={Community}/>
+        <Route path='signup' component={Signup}/>
+        <Route path='signin' component={Signin}/>
+        <Route path='reset_password' component={ResetPassword}/>
+        <Route path='profile' component={Profile}/>
+        <Route path='confirm/:activationCode' component={ConfirmEmail}/>
+        <Route path='reset/:resetToken' component={ChangePassword}/>
+        // TODO: wire this to your variants page component
+        // <Route path='variants' />
+        <Route path='variant/:id' component={VariantDetail}/>
+        <Route path='variant_literature/:id' component={LiteratureTable}/>
+        <Route path='releases' component={Releases}/>
+        <Route path='release/:id' component={Release}/>
+	*/}
+    </Switch>
 );
 
-var main = document.getElementById('main');
-
-run(routes, HistoryLocation, (Root) => {
-  ReactDOM.render(<Root/>, main);
-});
+const container = document.getElementById('main');
+const root = createRoot(container);
+root.render(
+    <BrowserRouter>
+	{routes}
+    </BrowserRouter>
+);
