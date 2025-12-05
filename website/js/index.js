@@ -17,7 +17,7 @@ require('./favicons');
 var React = require('react');
 import { createRoot } from 'react-dom/client';
 //var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-//var DisclaimerModal = require('./DisclaimerModal');
+import DisclaimerModal from './DisclaimerModal';
 import RawHTML from './RawHTML';
 
 // Keep your existing CSS includes
@@ -28,12 +28,12 @@ require('css/custom.css');
 
 var _ = require('underscore');
 var backend = require('./backend');
-//var {NavBarNew} = require('./NavBarNew');
+import NavBarNew from './NavBarNew';
 // RxJS 6+ imports
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 var moment = require('moment');
-//var DonationBar = require('./components/DonationBar');
+import DonationBar from './components/DonationBar';
 
 // masonry/isotope
 var Isotope = require('isotope-layout');
@@ -101,10 +101,9 @@ function clean(obj) {
         }
     }
 }
-/*
-var Footer = React.createClass({
-    mixins: [PureRenderMixin],
-    render: function() {
+
+class Footer extends React.PureComponent {
+    render() {
         return (
             <div className="container footer">
                 <div className="col-sm-5 left-footer">
@@ -143,8 +142,8 @@ var Footer = React.createClass({
             </div>
         );
     }
-});
-*/
+}
+
 class HomeRaw extends React.Component {
     constructor(props) {
         super(props);
@@ -239,11 +238,14 @@ class HomeRaw extends React.Component {
     }
 }
 const Home = withRouter(HomeRaw);
-/*
-var About = React.createClass({
-    render: function() {
-        let {page} = this.props.params;
-        if (page === "thisSite") {
+
+class About extends React.Component {
+    render() {
+        const { page } =
+		(this.props.match && this.props.match.params) ||
+ 	      	this.props.params ||
+		{};
+	if (page === "thisSite") {
             let currentSupporters = _.filter(logos, function(logo) {
                                         return logo.currentSupporter;
                                     });
@@ -292,8 +294,8 @@ var About = React.createClass({
             );
         }
     }
-});
-
+}
+/*
 function toNumber(v) {
     return _.isString(v) ? parseInt(v) : v;
 }
@@ -1332,27 +1334,31 @@ var VariantDetail = React.createClass({
         );
     }
 });
+*/
+class Application extends React.Component {
+    constructor(props){
+	super(props);
+	this.state = {
+	    mode: localStorage.getItem('research-mode') === 'true' ? 'research_mode' : 'default',
+	};
+    }
 
-var Application = React.createClass({
-    mixins: [State],
-    onChildToggleMode: function() {
+	onChildToggleMode = () => {
         this.toggleMode();
-    },
-    getInitialState: function () {
-        return {
-            mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default',
-        };
-    },
+    };
+
     componentDidUpdate() {
-        let localStorageMode = (localStorage.getItem("research-mode") === "true") ? "research_mode" : "default";
+        const localStorageMode = localStorage.getItem("research-mode") === "true" ? "research_mode" : "default";
         if (localStorageMode !== this.state.mode) {
             this.setMode();
         }
-    },
-    setMode: function () {
-        this.setState({mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default'});
-    },
-    toggleMode: function () {
+    }
+
+    setMode = () => {
+        this.setState({mode: localStorage.getItem("research-mode") === 'true' ? 'research_mode' : 'default'});
+    };
+
+    toggleMode = () => {
         if (this.state.mode === 'research_mode') {
             localStorage.setItem('research-mode', false);
             this.setState({mode: 'default'});
@@ -1360,30 +1366,38 @@ var Application = React.createClass({
             localStorage.setItem('research-mode', true);
             this.setState({mode: 'research_mode'});
         }
-    },
-    render: function () {
-        const path = this.getPath().slice(1);
+    };
+
+    render() {
+        const path = (this.props.location && this.props.location.pathname ? this.props.location.pathname : '/').slice(1);
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
                 <DonationBar />
-                <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
-                <Database
+                {/* If children are rendered here via a parent Route, pass props along */}
+         	{this.props.children &&
+           		React.cloneElement(this.props.children, {
+             			toggleMode: this.onChildToggleMode,
+             			mode: this.state.mode,
+           	})}
+		{path.indexOf('variants') === 0 && (
+		<Database
                     mode={this.state.mode}
                     toggleMode={this.onChildToggleMode}
-                    show={path.indexOf('variants') === 0} />
+                    show={path.indexOf('variants') === 0} /> 
+		)}
                 <Footer />
             </div>
         );
     }
-});
-*/
+}
+
 const routes = (
     <Switch>
         <Route exact path='/' component={Home}/>
-	{/*
 	<Route path='about/:page' component={About}/>
-        <Route path='factsheet' component={FactSheet}/>
+	{/*
+	<Route path='factsheet' component={FactSheet}/>
         <Route path='whydonate' component={WhyDonate}/>
         <Route path='fundraisingdetails' component={FundraisingDetails}/>
         <Route path='help' component={Help}/>
@@ -1408,6 +1422,8 @@ const container = document.getElementById('main');
 const root = createRoot(container);
 root.render(
     <BrowserRouter>
-	{routes}
+	<Application>
+		{routes}
+	</Application>
     </BrowserRouter>
 );

@@ -1,31 +1,34 @@
 /*global module: false, require: false */
 'use strict';
 
-var React = require('react');
-var {Modal, Button} = require('react-bootstrap');
-var RawHTML = require('./RawHTML');
-var content = require('./content');
+import React from 'react';
+import { Modal, Button } from 'react-bootstrap';
+import RawHTML from './RawHTML';
+import content from './content';
 
-var DisclaimerModal = React.createClass({
-    getInitialState() {
-        return { showModal: false };
-    },
-    close() {
+class DisclaimerModal extends React.Component {
+    state = { showModal: false };
+    
+    close = () => {
         this.setState({ showModal: false });
-    },
-    open() {
+    };
+
+    open = () => {
         this.setState({ showModal: true });
-    },
-    disableResearchMode() {
-        this.props.onToggleMode();
+    };
+
+    disableResearchMode = () => {
+        if(this.props.onToggleMode) this.props.onToggleMode();
         localStorage.setItem('research-mode', false);
-    },
-    agree() {
-        this.props.onToggleMode();
+    };
+
+    agree = () => {
+        if (this.props.onToggleMode) this.props.onToggleMode();
         localStorage.setItem('research-mode', true);
         this.close();
-    },
-    buttonModal() {
+    };
+
+    buttonModal = () => {
         if(localStorage.getItem('research-mode') === 'true') {
             return (
                 <div className="form-group">
@@ -48,21 +51,22 @@ var DisclaimerModal = React.createClass({
                 </div>
             );
         }
-    },
-    linkModal() {
+    };
+
+    linkModal = () => {
         return (
             <span>
                 <a style={{cursor: "pointer"}} onClick={this.open}>{this.props.text}</a>
-                {
-                    this.state.showModal &&
+		{this.state.showModal && (
                     <Modal show={true} onHide={this.close}>
                         <RawHTML html={content.pages.disclaimer} />
                         <Button onClick={this.close}>OK</Button>
                     </Modal>
-                }
+		)}
             </span>
         );
-    },
+    };
+
     render() {
         if(this.props.buttonModal) {
             return this.buttonModal();
@@ -70,6 +74,6 @@ var DisclaimerModal = React.createClass({
             return this.linkModal();
         }
     }
-});
+}
 
-module.exports = DisclaimerModal;
+export default DisclaimerModal;
