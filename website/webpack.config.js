@@ -94,7 +94,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: 'Template Project',
       filename: 'index.html',
-      template: 'page.template'
+      template: 'page.template',
+      inject: 'body'
     })
     // new ESLintPlugin({ extensions: ['js','jsx'], context: path.resolve(__dirname, 'js') })
   ],

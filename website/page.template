@@ -70,8 +70,5 @@
 	</head>
 	<body id="body">
 		<div id="main"></div>
-		{% for (var a in o.htmlWebpackPlugin.files.js) { %}
-			<script src="..{%=o.htmlWebpackPlugin.files.js[a]%}"></script>
-		{% } %}
 	</body>
 </html>
