@@ -10,6 +10,7 @@ import sys
 csv.field_size_limit(sys.maxsize)
 
 POPFREQ_CODE_ID = "Provisional_Evidence_Code_Popfreq"
+POPFREQ_V4_CODE_ID = "Provisional_Evidence_Code_Gnomad_V4"
 POPFREQ_CODE_DESCR = "Provisional_Evidence_Description_Popfreq"
 
 
@@ -26,7 +27,6 @@ FAIL_NEEDS_SOFTWARE_REVIEW = "No code met (needs software review)"
 
 READ_DEPTH_THRESHOLD_FREQUENT_VARIANT = 20
 READ_DEPTH_THRESHOLD_RARE_VARIANT = 25
-SMALL_INDEL_SIZE_THRESHOLD = 20
 
 BA1_MSG = "The highest non-cancer, non-founder population filter allele frequency in gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥20) or gnomAD v3.1 (non-cancer subset, read depth ≥20) is %s in the %s population, which is above the ENIGMA BRCA1/2 VCEP threshold (>0.001) for BA1 (BA1 met)."
 BS1_MSG = "The highest non-cancer, non-founder population filter allele frequency in gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥20) or gnomAD v3.1 (non-cancer subset, read depth ≥20) is %s in the %s population, which is above the ENIGMA BRCA1/2 VCEP threshold (>0.0001) for BS1, and below the BA1 threshold (>0.001) (BS1 met)."
@@ -54,18 +54,12 @@ MESSAGES_PER_CODE = {
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", default="test_build.tsv",
+    parser.add_argument("-i", "--input", default="built_final.tsv",
                         help="Input file with variant data")
-    parser.add_argument("-o", "--output", default="test_out.tsv",
+    parser.add_argument("-o", "--output", default="built_with_popfreq.tsv",
                         help="Output file with new columns")
-    parser.add_argument("-d", "--data_dir", default="/Users/melissacline/Desktop/gnomAD/output",
+    parser.add_argument("-d", "--data_dir", default="./processed_brca",
                         help="Directory with the processed files")
-#    parser.add_argument("-i", "--input", default="built_final.tsv",
-#                        help="Input file with variant data")
-#    parser.add_argument("-o", "--output", default="built_with_popfreq.tsv",
-#                        help="Output file with new columns")
-#    parser.add_argument("-d", "--data_dir", default="./processed_brca",
-#                        help="Directory with the processed files")
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Print debugging info")
     args = parser.parse_args()
@@ -153,7 +147,7 @@ def initialize_output_file(input_file, output_filename):
     """
     Create an empty output file with the new columns
     """
-    new_columns = [POPFREQ_CODE_ID, POPFREQ_CODE_DESCR, "V4_Popfreq"]
+    new_columns = [POPFREQ_CODE_ID, POPFREQ_CODE_DESCR, POPFREQ_V4_CODE_ID]
     input_header_row = input_file.fieldnames
     if "change_type" in input_header_row:
         idx = input_header_row.index("change_type")
@@ -177,7 +171,7 @@ def field_defined(field):
     
 
 def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv,
-                        read_depth, vcf_filter_flag, debug=True, test_coverage=True):
+                        read_depth, vcf_filter_flag, allele_count_threshold=1, debug=True):
     #
     # Get the coverage data.  Rule out error conditions: low coverage, VCF filter flag.
     rare_variant = False
@@ -210,21 +204,22 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
             return(BS1)
         elif faf > 0.00001:
             return(BS1_SUPPORTING)
-    if rare_variant:
-        if debug:
-            print("Rare variant.  Allele count", allele_count, "SNV", is_snv)
-        if not field_defined(allele_count):
-            return(NO_CODE)
-        elif int(allele_count) > 0:
-            return(NO_CODE)
         else:
-            if debug:
-                print("Returning PM2_supporting or no code: is_snv", is_snv)
-            if is_snv:
-                return(PM2_SUPPORTING)
-            else:
-                return(NO_CODE_NON_SNV)
-    return(NEEDS_REVIEW)
+            return(NO_CODE)
+    if debug:
+        print("Rare variant.  Allele count", allele_count, "SNV", is_snv)
+    if not field_defined(allele_count):
+        meets_allele_count_threshold = False
+    elif int(allele_count) <= allele_count_threshold:
+        meets_allele_count_threshold = False
+    else:
+        meets_allele_count_threshold = True
+    if meets_allele_count_threshold:
+        return(NO_CODE)
+    elif is_snv:
+        return(PM2_SUPPORTING)
+    else:
+        return(NO_CODE_NON_SNV)
 
 
 def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
@@ -318,13 +313,9 @@ def analyze_variant(variant, coverage_v2, coverage_v3, coverage_v4,
     """
     Analyze a single variant, adding the output columns
     """
-    # Initialize the output columns.  First, check the read depth.
-    # to see if the variant could have been observed (exception: non-exomic
-    # regions for an exomic dataset).  Check to see if the variant was a SNV.
-    # If the variant is observable and a SNV, initialize to PM2_Supporting
-    # If it's observable and not a SNV, initialze to NO_CODE_NON_SNV
-    # If it's not observable, initialize to FAIL_QC
-    # If not observable and not a SNV, initialize to NO_CODE_NON_SNV
+    #
+    # First, determine if it can be observed in each version, what the coverage is,
+    # and whether or not the variant is a SNV (or small indel in gnomAD v4)
     (observable_in_v2,
      read_depth_v2) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
                                         int(variant["pyhgvs_Hg37_End"]),
@@ -340,102 +331,103 @@ def analyze_variant(variant, coverage_v2, coverage_v3, coverage_v4,
                                         int(variant["Hg38_End"]),
                                         int(variant["Chr"]),coverage_v4,
                                         debug=debug)
-    snv_or_small_indel = ((variant["Hg38_Start"] == variant["Hg38_End"]
-                           and len(variant["Ref"]) == 1
-                           and len(variant["Alt"]) == 1)
-                          or (int(variant["Hg38_End"])
-                              - int(variant["Hg38_Start"])
-                              < SMALL_INDEL_SIZE_THRESHOLD))
-    if snv_or_small_indel:
-        if observable_in_v2:
-            variant_v2_code_id = PM2_SUPPORTING
-        else:
-            variant_v2_code_id = FAIL_QC
-        if observable_in_v3:
-            variant_v3_code_id = PM2_SUPPORTING
-        else:
-            variant_v3_code_id = NO_CODE
-        if variant["Allele_count_joint_GnomADv4"] == "-":
-            allele_count_v4 = 0
-        else:
-            allele_count_v4 = int(variant["Allele_count_joint_GnomADv4"])
-        if observable_in_v4 and allele_count_v4 > 1:
-            variant_v4_code_id = NO_CODE
-        else:
-            variant_v4_code_id = PM2_SUPPORTING
-    else:
-        variant_v2_code_id = NO_CODE_NON_SNV
-        variant_v3_code_id = NO_CODE_NON_SNV
-        variant_v4_code_id = NO_CODE_NON_SNV
-    
+    is_snv = (variant["Hg38_Start"] == variant["Hg38_End"]
+                           and len(variant["Ref"]) == 1 and len(variant["Alt"]) == 1)
+    snv_or_small_indel = (is_snv
+                          or (int(variant["Hg38_End"]) - int(variant["Hg38_Start"]) < 20))
+
     if debug:
-        print("variant", variant["pyhgvs_cDNA"], " is snv:", snv_or_small_indel, "preliminary codes", variant_v2_code_id,
-              variant_v3_code_id, "observable", observable_in_v2, observable_in_v3)
+        print("variant", variant["pyhgvs_cDNA"], " snv or small indel:", snv_or_small_indel)
     #
     # the gnomAD v2 variant ID is set when the variant is in the genome
     # OR exome portion of gnomAD. Focus on variants that are in the exome
     # data by making sure that the allele count is defined.  The allele
     # count is the total number of observations of the variant in the gnomAD
     # dataset
-    variant_in_v2 = False
-    if (field_defined(variant["Variant_id_GnomAD"])
-        and field_defined(variant["Allele_count_exome_GnomAD"])
-        and observable_in_v2):
-        variant_in_v2 = True 
+    if not (observable_in_v2 and field_defined(variant["Allele_count_exome_GnomAD"])):
+        variant_v2_code_id = FAIL_QC
+        if debug:
+            print("Not observable in V2")
+        variant_in_v2 = False
+    elif (observable_in_v2 and not field_defined(variant["Allele_count_exome_GnomAD"])):
+        variant_v2_code_id = PM2_SUPPORTING
+        variant_in_v2 = False
+    else:
+        variant_in_v2 = True
         variant_v2_code_id = analyze_one_dataset(variant["faf95_popmax_exome_GnomAD"],
-                                                         variant["faf95_popmax_population_exome_GnomAD"],
-                                                         variant["Allele_count_exome_GnomAD"],
-                                                         snv_or_small_indel, read_depth_v2,
-                                                         variant_is_flagged(variant["Variant_id_GnomAD"],
-                                                                            flags_v2), debug)
+                                                 variant["faf95_popmax_population_exome_GnomAD"],
+                                                 variant["Allele_count_exome_GnomAD"],
+                                                 is_snv, read_depth_v2,
+                                                 variant_is_flagged(variant["Variant_id_GnomAD"],
+                                                                    flags_v2),
+                                                 allele_count_threshold=0, debug=debug)
         if debug:
             print("gnomAD V2 variant", variant["Variant_id_GnomAD"],
                   "popmax", variant["faf95_popmax_exome_GnomAD"],
                   "allele count", variant["Allele_count_exome_GnomAD"],
-                  "read depth", read_depth_v2, "snv", snv_or_small_indel,
+                  "read depth", read_depth_v2, "snv", is_snv,
                   "V2 code", variant_v2_code_id)
-    variant_in_v3 = False
-    if (field_defined(variant["Variant_id_GnomADv3"]) and observable_in_v3):
+    if not (observable_in_v3 and field_defined(variant["Allele_count_genome_GnomADv3"])):
+        variant_in_v3 = False
+        if is_snv:
+            variant_v3_code_id = PM2_SUPPORTING
+        else:
+            variant_v3_code_id = NO_CODE_NON_SNV
+        if debug:
+            print("Not observable in V3: code", variant_v3_code_id)
+    else:
         variant_in_v3 = True
         variant_v3_code_id = analyze_one_dataset(variant["faf95_popmax_genome_GnomADv3"],
-                                                         variant["faf95_popmax_population_genome_GnomADv3"],
-                                                         variant["Allele_count_genome_GnomADv3"],
-                                                         snv_or_small_indel, read_depth_v3,
-                                                         variant_is_flagged(variant["Variant_id_GnomADv3"],
-                                                                            flags_v3), debug)
+                                                 variant["faf95_popmax_population_genome_GnomADv3"],
+                                                 variant["Allele_count_genome_GnomADv3"],
+                                                 is_snv, read_depth_v3,
+                                                 variant_is_flagged(variant["Variant_id_GnomADv3"],
+                                                                    flags_v3),
+                                                 allele_count_threshold=0, debug=debug)
         if debug:
             print("gnomAD V3 variant", variant["Variant_id_GnomADv3"],
                   "popmax", variant["faf95_popmax_genome_GnomADv3"],
                   "allele count", variant["Allele_count_genome_GnomADv3"],
-                  "read depth", read_depth_v3, "snv", snv_or_small_indel,
+                  "read depth", read_depth_v3, "snv", is_snv,
                   "V3 code", variant_v3_code_id)
-    variant_in_v4 = False
-    if (field_defined(variant["Variant_id_GnomADv4"])):
-        variant_in_v4 = True
-        variant_v4_code_id = analyze_one_dataset(variant["faf95_popmax_joint_GnomADv4"],
-                                                         variant["faf95_popmax_population_joint_GnomADv4"],
-                                                         variant["Allele_count_joint_GnomADv4"],
-                                                         snv_or_small_indel, read_depth_v4,
-                                                         variant_is_flagged(variant["Variant_id_GnomADv4"],
-                                                                            flags_v4), debug)
-        if debug:
-            print("gnomAD V4 variant", variant["Variant_id_GnomADv4"],
-                  "popmax", variant["faf95_popmax_joint_GnomADv4"],
-                  "allele count", variant["Allele_count_joint_GnomADv4"],
-                  "read depth", read_depth_v4, "snv", snv_or_small_indel,
-                  "V4 code", variant_v4_code_id, "V4 code", variant_v4_code_id)
     (variant[POPFREQ_CODE_ID],
      variant[POPFREQ_CODE_DESCR]) = analyze_across_datasets(variant_v2_code_id,variant["faf95_popmax_exome_GnomAD"],
                                                             variant["faf95_popmax_population_exome_GnomAD"],
                                                             variant_in_v2, variant_v3_code_id, 
                                                             variant["faf95_popmax_genome_GnomADv3"],
                                                             variant["faf95_popmax_population_genome_GnomADv3"],
-                                                            variant_in_v3, snv_or_small_indel, debug)
-    variant["V4_Popfreq"] = variant_v4_code_id
+                                                            variant_in_v3, snv_or_small_indel,
+                                                            debug=debug)
+
+    if not (observable_in_v4 and field_defined(variant["Allele_count_joint_GnomADv4"])):
+        variant_in_v4 = False
+        if snv_or_small_indel:
+            variant_v4_code_id = PM2_SUPPORTING
+        else:
+            variant_v4_code_id = NO_CODE_NON_SNV
+        if debug:
+            print("Not observable in V4: code", variant_v4_code_id)
+    else:
+        variant_in_v4 = True
+        variant_v4_code_id = analyze_one_dataset(variant["faf95_popmax_joint_GnomADv4"],
+                                                 variant["faf95_popmax_population_joint_GnomADv4"],
+                                                 variant["Allele_count_joint_GnomADv4"],
+                                                 snv_or_small_indel, read_depth_v4,
+                                                 variant_is_flagged(variant["Variant_id_GnomADv4"],
+                                                                    flags_v4),
+                                                 allele_count_threshold=1,
+                                                 debug=debug)
+        if debug:
+            print("gnomAD V4 variant", variant["Variant_id_GnomADv4"],
+                  "popmax", variant["faf95_popmax_joint_GnomADv4"],
+                  "allele count", variant["Allele_count_joint_GnomADv4"],
+                  "read depth", read_depth_v4, "snv", snv_or_small_indel,
+                  "V4 code", variant_v4_code_id, "V4 code", variant_v4_code_id)
+    variant[POPFREQ_V4_CODE_ID] = variant_v4_code_id
     if debug:
         print("variant", variant["pyhgvs_cDNA"], "consensus code:", variant[POPFREQ_CODE_ID], "msg",
               variant[POPFREQ_CODE_DESCR], "v2 code", variant_v2_code_id,
-              "v3 code", variant_v3_code_id)
+              "v3 code", variant_v3_code_id, "v4 code", variant_v4_code_id)
     return()
 
 
