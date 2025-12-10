@@ -43,7 +43,7 @@ function intronSizeTx() {
     return intronWidth;
 }
 
-function variantInfo(variant) {
+export function variantInfo(variant) {
     // let [before, after] = _.map(variant.Genomic_Coordinate_hg38.split(':').pop().split('>'), e => e.length);
     let before = variant.Ref.length, after = variant.Alt.length;
 
@@ -63,7 +63,7 @@ function sortCoords([a, b]) {
 }
 
 // given the intervals (a: [a1, a2], b: [b1, b2]), return true if the two overlap (inclusive)
-function overlaps(a, b) {
+export function overlaps(a, b) {
     // ensure the pairs are internally sorted
     const as = (a[0] <= a[1]) ? a : [a[1], a[0]];
     const bs = (b[0] <= b[1]) ? b : [b[1], b[0]];
@@ -76,7 +76,7 @@ function overlaps(a, b) {
 
 // given an array, returns pairs of successive elements; e.g. [1,2,3] produces [[1,2],[2,3]]
 // (used to create introns between pairs of exons later in the code)
-function pairwise(seq) {
+export function pairwise(seq) {
     return _.zip(_.take(seq, seq.length - 1), _.tail(seq));
 }
 
@@ -623,7 +623,7 @@ const SettingsPanel = React.createClass({
                     onEntered={this.props.relayoutGrid}
                     onExited={this.props.relayoutGrid}
                 >
-                {settings}
+                    <div>{settings}</div>
                 </Collapse>
             </div>
         );
@@ -631,7 +631,7 @@ const SettingsPanel = React.createClass({
 });
 
 
-class Splicing extends React.Component {
+export class Splicing extends React.Component {
     constructor(props) {
         super(props);
 
@@ -916,7 +916,8 @@ class Splicing extends React.Component {
     }
 }
 
-module.exports = {
+// Default export for backward compatibility
+export default {
     Splicing,
     variantInfo,
     overlaps,

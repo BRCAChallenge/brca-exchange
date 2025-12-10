@@ -1,7 +1,7 @@
 /*global module: false, require: false */
 'use strict';
 
-import {FormGroup, ControlLabel, FormControl} from 'react-bootstrap';
+import { FormGroup, FormLabel, FormSelect } from 'react-bootstrap';
 
 var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
@@ -15,18 +15,19 @@ var SelectField = React.createClass({
     },
 
     render: function () {
-        const {options, label, value} = this.props;
-        const opels = _.map(options, v => <option key={v} value={v}>{v}</option>);
+        const { options, label, value } = this.props;
+        const opels = _.map(options, v => <option key={String(v)} value={v}>{v}</option>);
 
         return (
             <FormGroup controlId="formControlsSelect">
-                <ControlLabel>{label}</ControlLabel>
-                <FormControl value={value} componentClass="select" onChange={this.onChange} placeholder="select">
+                {label ? <FormLabel>{label}</FormLabel> : null}
+                <FormSelect value={value} onChange={this.onChange}>
                     {opels}
-                </FormControl>
+                </FormSelect>
             </FormGroup>
         );
     },
 });
 
-module.exports = SelectField;
+export default SelectField;
+

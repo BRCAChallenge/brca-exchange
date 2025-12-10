@@ -5,14 +5,14 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var content = require('./content');
 var RawHTML = require('./RawHTML');
-var countries = require('raw!../content/countries.txt').split("\n");
+var countries = require('raw-loader!../content/countries.txt').default.split("\n");
 var $ = require('jquery');
 var _ = require('underscore');
 var config  = require('./config');
-var {Grid, Row, Col, Button} = require('react-bootstrap');
-var {Navigation} = require('react-router');
+const { Container: Grid, Row, Col, Button} = require('react-bootstrap');
+const { withRouter } = require('react-router-dom');
 
-var Role = {
+export const Role = {
     ROLE_DATA_PROVIDER: 12,
     options: [
         // [ id, dropdown text, community page text ]
@@ -33,8 +33,7 @@ var Role = {
     get: function(id) { return this.options.find(role => role[0] === parseInt(id)); }
 };
 
-var Signup = React.createClass({
-    mixins: [Navigation],
+var SignupInner = React.createClass({
     getInitialState: function () {
         return {
             submitted: null,
@@ -86,7 +85,9 @@ var Signup = React.createClass({
 
     handleSubmit: function () {
         var self = this;
-        var showSuccess = () => {this.transitionTo('/community', null, {registrationSuccess: true});};
+        var showSuccess = () => {
+		this.props.history.push({ pathname: '/community', search: '?registrationSuccess=true' });
+	};
         var showFailure = msg => {this.setState({error: msg});};
         var address = '';
 
@@ -178,7 +179,7 @@ var Signup = React.createClass({
     }
 });
 
-function $c(staticClassName, conditionalClassNames) {
+export function $c(staticClassName, conditionalClassNames) {
     var classNames = [];
     if (typeof conditionalClassNames === 'undefined') {
         conditionalClassNames = staticClassName;
@@ -201,7 +202,7 @@ var SignupForm = React.createClass({
     componentDidMount: function () {
         var me = this;
         window.onRecaptchaLoad(function () {
-            grecaptcha.render(me.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key, callback: function(resp) {
+	    grecaptcha.render(ReactDOM.findDOMNode(me.refs.signupCAPTCHA), {sitekey: config.captcha_key, callback: function(resp) {
                 me.setState({captcha: resp});
             }});
         });
@@ -209,7 +210,7 @@ var SignupForm = React.createClass({
     getFormErrors: function () {
         var errors = {};
         if (ReactDOM.findDOMNode(this.refs.role).value === "NONE") {
-            errors.role = <span>Please select a <strong>Roll</strong></span>;
+            errors.role = <span>Please select a <strong>Role</strong></span>;
         }
         if (ReactDOM.findDOMNode(this.refs.email).value !== ReactDOM.findDOMNode(this.refs.email_confirm).value) {
             errors["email_confirm"] = <span>The <strong>emails</strong> don't match</span>;
@@ -418,8 +419,6 @@ var SignupForm = React.createClass({
     }
 });
 
-module.exports = ({
-    Signup: Signup,
-    Role: Role,
-    $c: $c
-});
+const Signup = withRouter(SignupInner);
+export { Signup };
+export default Signup;

@@ -1,12 +1,3 @@
-// A table for variants.
-//
-// The intent here was to split the generic table code
-// in DataTable from the variant domain knowledge, which
-// would be here. That division has broken down due to
-// peculiarities of react-data-components DataMixin, and
-// time pressure. Knowledge about variants is in both files.
-// This needs to be revisited.
-
 /*global module: false, require: false, window: false */
 'use strict';
 
@@ -16,33 +7,17 @@ var React = require('react');
 var PureRenderMixin = require('./PureRenderMixin');
 var DataTable = require('./DataTable');
 var _ = require('underscore');
-var {Col, Panel, Button, Checkbox} = require('react-bootstrap');
+
+// React-Bootstrap v2 replacements
+import { Card, Col, Collapse, Form, Button } from 'react-bootstrap';
+
 var ColumnCheckbox = require('./ColumnCheckbox');
 var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
 var {State} = require('react-router');
 var alleleFrequencyCharts = require('./AlleleFrequencyCharts');
 
-require('react-data-components-brcaex/css/table-twbs.css');
-
-function buildHeader(onClick, title) {
-    return (
-        <span>
-            {title}
-            <span onClick={ev => {ev.stopPropagation(); onClick(title); }}
-                  className='help glyphicon glyphicon-question-sign superscript'/>
-        </span>
-    );
-}
-
-function renderCell(val) {
-    return <span>{val}</span>;
-}
-
-const filterColumns = [
-    {name: 'Gene', prop: 'Gene_Symbol', values: ['BRCA1', 'BRCA2']},
-    {name: 'Pathogenicity', prop: 'Pathogenicity_expert', values: ['Pathogenic', 'Likely Pathogenic', 'Benign / Little Clinical Significance', 'Likely Benign', 'Not Yet Reviewed']}
-];
-
+// TODO: Re-enable or replace after upgrading react-data-components-brcaex
+// require('react-data-components-brcaex/css/table-twbs.css');
 const expertModeGroups = [
     {groupTitle: 'Variant Names', internalGroupName: 'Variant Nomenclature', innerCols: [
         {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
@@ -593,11 +568,6 @@ const researchModeColumns = [
     {title: 'Delta Position Acceptor Loss SpliceAI', prop: 'DP_AL_spliceAI'},
     {title: 'Delta Position Donor Gain SpliceAI', prop: 'DP_DG_spliceAI'},
     {title: 'Delta Position Donor Loss SpliceAI', prop: 'DP_DL_spliceAI'}
-
-
-
-
-
 ];
 
 
@@ -712,10 +682,18 @@ var ResearchVariantTableSupplier = function (Component) {
                 }
             }
 
+            // initialize open state for each sub-column panel from localStorage (RB0.33 defaultExpanded logic)
+            const openSubcols = {};
+            subColumns.forEach(({ subColTitle }) => {
+                const key = "collapse-subcol_" + subColTitle;
+                openSubcols[subColTitle] = localStorage.getItem(key) !== "true";
+            });
+
             return {
                 sourceSelection: selectedSources,
                 columnSelection: selectedColumns,
-                changeInProgress: false
+                changeInProgress: false,
+                openSubcols
             };
         },
         componentWillReceiveProps: function() {
@@ -744,45 +722,44 @@ var ResearchVariantTableSupplier = function (Component) {
                 <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop || title} label={prop || title} title={title}
                                 initialCheck={columnSelection}/>);
         },
-        onChangeSubcolVisibility(subColTitle, event) {
-            // stop the page from scrolling to the top (due to navigating to the fragment '#')
-            event.preventDefault();
-
-            const collapsingElem = event.target;
-
-            // FIXME: there must be a better way to get at the panel's state than reading the class
-            // maybe we'll subclass Panel and let it handle its own visibility persistence
-
-            const isCollapsed = (collapsingElem.getAttribute("class") === "collapsed");
-            localStorage.setItem("collapse-subcol_" + subColTitle, !isCollapsed);
+        toggleSubcolOpen(subColTitle) {
+            const key = "collapse-subcol_" + subColTitle;
+            const isOpen = !!this.state.openSubcols[subColTitle];
+            const nextOpen = !isOpen;
+            // store "true" when collapsed (matches old defaultExpanded semantics)
+            localStorage.setItem(key, nextOpen ? "false" : "true");
+            this.setState({ openSubcols: { ...this.state.openSubcols, [subColTitle]: nextOpen } });
         },
         getColumnSelectors() {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
                 <Col sm={6} md={4} key={subColTitle}>
-                    <Panel
-                        collapsible={true}
-                        defaultExpanded={localStorage.getItem("collapse-subcol_" + subColTitle) !== "true"}
-                        onSelect={(event) => this.onChangeSubcolVisibility(subColTitle, event)}>
-                        <Panel.Heading>
-                            <Panel.Title>{subColTitle}</Panel.Title>
-                        </Panel.Heading>
-                        <Panel.Collapse>
-                            <Panel.Body>
-                            {this.filterFormCols(subColList, this.state.columnSelection)}
-                            </Panel.Body>
-                        </Panel.Collapse>
-                    </Panel>
+                    <Card className="mb-3">
+                        <Card.Header
+                            onClick={() => this.toggleSubcolOpen(subColTitle)}
+                            role="button"
+                            aria-expanded={!!this.state.openSubcols[subColTitle]}
+                            className="d-flex justify-content-between align-items-center"
+                        >
+                            <span>{subColTitle}</span>
+                            <i className={`fa fa-chevron-${this.state.openSubcols[subColTitle] ? 'down' : 'right'}`} aria-hidden="true" />
+                        </Card.Header>
+                        <Collapse in={!!this.state.openSubcols[subColTitle]}>
+                            <div>
+                                <Card.Body>
+                                    {this.filterFormCols(subColList, this.state.columnSelection)}
+                                </Card.Body>
+                            </div>
+                        </Collapse>
+                    </Card>
                 </Col>
             );
             return (<label className='control-label'>
-                <Panel>
-                    <Panel.Heading>
-                        <Panel.Title>Column Selection</Panel.Title>
-                    </Panel.Heading>
-                    <Panel.Body>
+                <Card>
+                    <Card.Header>Column Selection</Card.Header>
+                    <Card.Body>
                     {filterFormSubCols}
-                    </Panel.Body>
-                </Panel>
+                    </Card.Body>
+                </Card>
             </label>);
         },
         getSourceName: function(name) {
@@ -807,25 +784,25 @@ var ResearchVariantTableSupplier = function (Component) {
         getFilters: function() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
                 <Col sm={6} md={3} key={name}>
-                    <Checkbox
+                    <Form.Check
+                        type="checkbox"
                         onChange={v => this.setSource(name, v)}
                         checked={value > 0}
-                    >{this.getSourceName(name)}</Checkbox>
+                        label={this.getSourceName(name)}
+                    />
                 </Col>
             );
             return (<label className='control-label source-filters'>
-                <Panel className="top-buffer">
-                    <Panel.Heading>
-                        <Panel.Title>Source Selection</Panel.Title>
-                    </Panel.Heading>
-                    <Panel.Body>
+                <Card className="top-buffer">
+                    <Card.Header>Source Selection</Card.Header>
+                    <Card.Body>
                     {sourceCheckboxes}
-                    </Panel.Body>
-                </Panel>
+                    </Card.Body>
+                </Card>
             </label>);
         },
         getDownloadButton: function (callback) {
-            return <Button className="btn-default rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
+            return <Button variant="secondary" className="rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
         },
         getColumns: function () {
             return researchModeColumns;

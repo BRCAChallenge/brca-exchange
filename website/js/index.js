@@ -2,7 +2,7 @@
 /*global require: false */
 'use strict';
 
-
+/*
 import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
 import LiteratureTable from "./components/LiteratureTable";
@@ -11,32 +11,31 @@ import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTil
 import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
 import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
 import MupitStructure from './MupitStructure';
-
-// shims for older browsers
-require('babel/polyfill');
-require('es5-shim');
-require('es5-shim/es5-sham');
+*/
 
 require('./favicons');
 var React = require('react');
-var ReactDOM = require('react-dom');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var DisclaimerModal = require('./DisclaimerModal');
-var RawHTML = require('./RawHTML');
+import { createRoot } from 'react-dom/client';
+//var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
+import DisclaimerModal from './DisclaimerModal';
+import RawHTML from './RawHTML';
+
+// Keep your existing CSS includes
 require('bootstrap/dist/css/bootstrap.css');
-require('font-awesome-webpack');
+import 'font-awesome/css/font-awesome.css';
 require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
 require('css/custom.css');
+
 var _ = require('underscore');
 var backend = require('./backend');
-var {NavBarNew} = require('./NavBarNew');
-var Rx = require('rx');
-require('rx-dom');
+import NavBarNew from './NavBarNew';
+// RxJS 6+ imports
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 var moment = require('moment');
-var DonationBar = require('./components/DonationBar');
+import DonationBar from './components/DonationBar';
 
-
-// faisal: includes for masonry/isotope
+// masonry/isotope
 var Isotope = require('isotope-layout');
 require('isotope-packery');
 import debounce from 'lodash/debounce';
@@ -46,34 +45,34 @@ var logos = require('./logos');
 var slugify = require('./slugify');
 
 import content, {parseTooltips} from './content';
-var Community = require('./Community');
-var FactSheet = require('./FactSheet');
-var WhyDonate = require('./WhyDonate');
-var FundraisingDetails = require('./FundraisingDetails');
-import {Splicing} from'./Splicing';
+//var Community = require('./Community');
+//var FactSheet = require('./FactSheet');
+//var WhyDonate = require('./WhyDonate');
+//var FundraisingDetails = require('./FundraisingDetails');
+//import {Splicing} from'./Splicing';
+import { withRouter, BrowserRouter, Switch, Route, Link } from 'react-router-dom';
 
-var databaseKey = require('../databaseKey');
-var util = require('./util');
+//var databaseKey = require('../databaseKey');
+//var util = require('./util');
 
-var {Grid, Col, Row, Table, Button, Modal, Panel} = require('react-bootstrap');
+// React-Bootstrap v2+ imports (Bootstrap 5)
+import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } from 'react-bootstrap';
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
-var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
-var {Signup} = require('./Signup');
-var {Signin, ResetPassword} = require('./Signin');
-var {ConfirmEmail} = require('./ConfirmEmail');
-var {ChangePassword} = require('./ChangePassword');
-var {Profile} = require('./Profile');
-var VariantSearch = require('./VariantSearch');
-var {Navigation, State, Route, RouteHandler,
-    HistoryLocation, run, DefaultRoute, Link} = require('react-router');
-var {Releases, Release} = require('./Releases.js');
-var Help = require('./Help.js');
+//var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
+//var {Signup} = require('./Signup');
+//var {Signin, ResetPassword} = require('./Signin');
+//var {ConfirmEmail} = require('./ConfirmEmail');
+//var {ChangePassword} = require('./ChangePassword');
+//var {Profile} = require('./Profile');
+import VariantSearch from './VariantSearch';
+//var {Releases, Release} = require('./Releases.js');
+//var Help = require('./Help.js');
 
-var KeyInline = require('./components/KeyInline');
-var GroupHelpButton = require('./components/GroupHelpButton');
+//var KeyInline = require('./components/KeyInline');
+//var GroupHelpButton = require('./components/GroupHelpButton');
 
-var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
+//var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 
 if (typeof console === "undefined") {
     window.console = {
@@ -103,9 +102,8 @@ function clean(obj) {
     }
 }
 
-var Footer = React.createClass({
-    mixins: [PureRenderMixin],
-    render: function() {
+class Footer extends React.PureComponent {
+    render() {
         return (
             <div className="container footer">
                 <div className="col-sm-5 left-footer">
@@ -144,21 +142,23 @@ var Footer = React.createClass({
             </div>
         );
     }
-});
+}
 
-var Home = React.createClass({
-    mixins: [Navigation],
-    getInitialState() {
-        return {
+class HomeRaw extends React.Component {
+    constructor(props) {
+        super(props);
+	this.state = {
             index: 0,
             direction: null,
             showModal: false
         };
-    },
+	this.onSearch = this.onSearch.bind(this);
+    }
     onSearch(value) {
-        this.transitionTo('/variants', null, {search: value});
-    },
-    render: function() {
+	const query = value ? `?search=${encodeURIComponent(value)}` : '';
+        this.props.history.push(`/variants${query}`);
+    }
+    render() {
         let currentSupporters = _.filter(logos, function(logo) {
                                     return logo.currentSupporter;
                                 });
@@ -182,10 +182,10 @@ var Home = React.createClass({
         return (
             <Grid id="main-grid" className='home'>
                 <Row>
-                    <Col smOffset={2} sm={8}>
-                        <VariantSearch
-                            id='home-search'
-                            onSearch={this.onSearch}/>
+                    <Col sm={{ span: 8, offset: 2 }}>
+                       <VariantSearch
+                           id='home-search'
+                           onSearch={this.onSearch}/>
                     </Col>
                 </Row>
                 <Row>
@@ -195,9 +195,9 @@ var Home = React.createClass({
                 </Row>
 
                 <Row>
-                    <Col lg={4} lgOffset={1} md={8} mdOffset={2} xs={12}>
-                        <div className="embed-responsive embed-responsive-16by9">
-                            <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/199396428" webkitallowfullscreen mozallowfullscreen allowFullScreen />
+                    <Col lg={{ span: 4, offset: 1 }} md={{ span: 8, offset: 2 }} xs={12}>
+                        <div className="ratio ratio-16x9">
+                            <iframe className="vimeo-video" src="https://player.vimeo.com/video/199396428" allowFullScreen />
                         </div>
                         <div className="homepage-under-image-text-container center-block">
                             <div className="homepage-caption">
@@ -209,9 +209,9 @@ var Home = React.createClass({
                         </div>
                     </Col>
 
-                    <Col lg={4} lgOffset={2} md={8} mdOffset={2} xs={12}>
-                        <div className="embed-responsive embed-responsive-16by9">
-                            <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/351028818" webkitallowfullscreen mozallowfullscreen allowFullScreen />
+                    <Col lg={{ span: 4, offset: 2 }} md={{ span: 8, offset: 2 }} xs={12}>
+                        <div className="ratio ratio-16x9">
+                            <iframe className="vimeo-video" src="https://player.vimeo.com/video/351028818" allowFullScreen />
                         </div>
                         <div className="homepage-under-image-text-container center-block">
                             <div className="homepage-caption">
@@ -236,12 +236,16 @@ var Home = React.createClass({
             </Grid>
         );
     }
-});
+}
+const Home = withRouter(HomeRaw);
 
-var About = React.createClass({
-    render: function() {
-        let {page} = this.props.params;
-        if (page === "thisSite") {
+class About extends React.Component {
+    render() {
+        const { page } =
+		(this.props.match && this.props.match.params) ||
+ 	      	this.props.params ||
+		{};
+	if (page === "thisSite") {
             let currentSupporters = _.filter(logos, function(logo) {
                                         return logo.currentSupporter;
                                     });
@@ -265,7 +269,7 @@ var About = React.createClass({
             return (
                 <Grid id="main-grid" className="main-grid">
                     <Row>
-                        <Col smOffset={1} sm={10}>
+                        <Col sm={{ span: 10, offset: 1 }}>
                             <RawHTML html={content.pages[page]} />
                         </Col>
                     </Row>
@@ -282,7 +286,7 @@ var About = React.createClass({
             return (
                 <Grid id="main-grid" className="main-grid">
                     <Row>
-                        <Col smOffset={1} sm={10}>
+                        <Col sm={{ span: 10, offset: 1 }}>
                             <RawHTML html={content.pages[page]} />
                         </Col>
                     </Row>
@@ -290,8 +294,8 @@ var About = React.createClass({
             );
         }
     }
-});
-
+}
+/*
 function toNumber(v) {
     return _.isString(v) ? parseInt(v) : v;
 }
@@ -378,11 +382,12 @@ var Database = React.createClass({
         this.transitionTo(`/help#${slugify(title)}`);
     },
     componentDidMount: function () {
-        var q = this.urlq = new Rx.Subject();
-        this.subs = q.debounce(500).subscribe(this.onChange);
+        // Updated RxJS 6+ syntax
+        var q = this.urlq = new Subject();
+        this.subs = q.pipe(debounceTime(500)).subscribe(this.onChange);
     },
     componentWillUnmount: function () {
-        this.subs.dispose();
+        this.subs.unsubscribe();
     },
     restoreDefaults: function(callback) {
         this.setState({restoringDefaults: true}, function() {
@@ -394,15 +399,6 @@ var Database = React.createClass({
             setTimeout(callback, 0);
         });
     },
-    // XXX An oddity of the state flow here: we update the url when table settings
-    // change, so the page can be bookmarked, and forward/back buttons work. We
-    // do it on a timeout so we don't generate history entries for every keystroke,
-    // which would be bad for the user. Changing the url causes a re-render, passing
-    // in new props, which causes DataTable to overwrite its state with the
-    // same state that caused us to update the url. It's a bit circular.
-    // It would be less confusing if DataTable did not hold these params in state,
-    // but just read them from props, and all updates to the props occurred via
-    // transitionTo(). Consider for a later refactor.
     onChange: function (state) {
         if (this.props.show) {
             var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
@@ -411,10 +407,8 @@ var Database = React.createClass({
                 d3TipDiv[0].style.pointerEvents = 'none';
             }
             if (!this.state.showModal && !this.state.restoringDefaults) {
-                // Don't change url if modal is open -- user is still deciding whether to change modes.
                 this.transitionTo('/variants', {}, urlFromDatabase(state));
             } else if (this.state.restoringDefaults) {
-                // If restoring defaults, transition to is already being called with different params.
                 this.setState({restoringDefaults: false});
             }
         }
@@ -426,7 +420,6 @@ var Database = React.createClass({
     render: function () {
         var {show} = this.props,
             params = databaseParams(this.getQuery());
-        // XXX is 'keys' used?
         var table, message;
         if (this.state.restoringDefaults) {
             params.columnSelection = {};
@@ -441,7 +434,7 @@ var Database = React.createClass({
 					{...params}
 					fetch={backend.data}
 					url={backend.url}
-					onChange={s => this.urlq.onNext(s)}
+					onChange={s => this.urlq.next(s)}
 					onToggleMode={this}
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
@@ -460,7 +453,7 @@ var Database = React.createClass({
 					{...params}
 					fetch={backend.data}
 					url={backend.url}
-					onChange={s => this.urlq.onNext(s)}
+					onChange={s => this.urlq.next(s)}
 					onToggleMode={this}
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
@@ -482,19 +475,23 @@ var Database = React.createClass({
 				<Col className="jumbotron colorized-jumbo">
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
 					<RawHTML ref='content' html={message}/>
-					{this.props.mode === 'research_mode' && <Button className="btn-default" onClick={this.toggleMode}>
+					{this.props.mode === 'research_mode' && <Button variant="secondary" onClick={this.toggleMode}>
 						Show Summary Data Only
 					</Button>}
 					{this.props.mode === 'default' &&
-					<Button className="btn-default" onClick={() =>this.setState({showModal: true})}>
+					<Button variant="secondary" onClick={() =>this.setState({showModal: true})}>
 						Show Detail View
 					</Button>}
 					{
 					    this.props.mode === 'default' && this.state.showModal &&
                         <Modal show={true} onHide={() => this.setState({ showModal: false })}>
-                            <RawHTML html={content.pages.researchWarning}/>
-                            <Button onClick={() => {this.toggleMode();}}>Yes</Button>
-                            <Button onClick={() => this.setState({ showModal: false })}>No</Button>
+                            <Modal.Body>
+                                <RawHTML html={content.pages.researchWarning}/>
+                            </Modal.Body>
+                            <Modal.Footer>
+                                <Button variant="primary" onClick={() => {this.toggleMode();}}>Yes</Button>
+                                <Button variant="secondary" onClick={() => this.setState({ showModal: false })}>No</Button>
+                            </Modal.Footer>
                         </Modal>
 					}
 				</Col>
@@ -502,10 +499,7 @@ var Database = React.createClass({
     }
 });
 
-// get display name for a given key from VariantTable.js column specification,
-// if we are in summary view mode, search summary view names then fall back to
-// all data, otherwise go straight to all data. Finally, if key is not found, replace
-// _ with space in the key and return that.
+// get display name for a given key from VariantTable.js column specification
 function getDisplayName(key) {
     const researchMode = (localStorage.getItem("research-mode") === 'true');
     let displayName;
@@ -513,12 +507,10 @@ function getDisplayName(key) {
         displayName = columns.find(e => e.prop === key);
         displayName = displayName && displayName.title;
     }
-    // we are not in summary view anymore, or key wasn't found in summary view columns
     if (displayName === undefined) {
         displayName = researchModeColumns.find(e => e.prop === key);
         displayName = displayName && displayName.title;
     }
-    // key was not found at all
     if (displayName === undefined) {
         displayName = key.replace(/_/g, " ");
     }
@@ -531,8 +523,6 @@ function isEmptyDiff(value) {
 
 const IsoGrid = React.createClass({
     displayName: 'IsoGrid',
-
-    // wraps contents in a masonry-managed container
     render: function () {
         const children = this.props.children;
         return (
@@ -541,8 +531,6 @@ const IsoGrid = React.createClass({
             </div>
         );
     },
-
-    // create masonry object to manage children's positions
     componentDidMount: function() {
         if (!this.masonry) {
             this.masonry = new Isotope('.isogrid', {
@@ -555,30 +543,34 @@ const IsoGrid = React.createClass({
             });
         }
     },
-
     relayout: function(fullRefresh) {
         if (!this.masonry) {
             return;
         }
-
         if (fullRefresh) {
             this.masonry.reloadItems();
         }
-
         this.masonry.arrange();
     }
 });
+
+// Helpers for new Card/Collapse behavior
+function isOpenFromStorage(key) {
+    // legacy semantics: localStorage "true" means collapsed
+    return localStorage.getItem(key) !== "true";
+}
 
 var VariantDetail = React.createClass({
     mixins: [Navigation, State],
     showHelp: function (event, title) {
         event.preventDefault();
-
         this.transitionTo(`/help#${slugify(title)}`);
     },
     getInitialState: () => ({
         hideEmptyItems: (localStorage.getItem("hide-empties") === 'true'),
-        tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true')
+        tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true'),
+        // track open/closed state for cards (keyed by localStorage key)
+        openGroups: {}
     }),
     componentWillMount: function () {
         backend.variant(this.props.params.id).subscribe(
@@ -594,9 +586,7 @@ var VariantDetail = React.createClass({
 
         backend.variantReports(this.props.params.id).subscribe(
             resp => {
-                // we always want reports grouped by source, so we'll do so centrally here
                 const groupedReports = _.groupBy(resp.data, 'Source');
-
                 this.setState({reports: groupedReports, error: null}, () => {
                     this.relayoutGrid();
                 });
@@ -608,52 +598,36 @@ var VariantDetail = React.createClass({
 
     },
     componentWillUpdate: function(nextProps, nextState) {
-        // reparse the tooltips since they're mode-specific
         if (nextProps.mode !== this.props.mode) {
             this.setState({
                 tooltips: parseTooltips(nextProps.mode === 'research_mode')
             });
         }
 
-        // ensure that we're viewing the latest version of the variant, with the stable CA_ID URL.
-        // and redirect if we're not,
-        // unless the querystring param 'noRedirect=true' is specified, in which case we stay here.
-        // In the rare case there is no CA_ID, redirect to the latest version by numeric ID instead.
-        // (if someone *really* wants to link to the old variant, they may also specify 'noRedirectMsg=true'
-        // to silence the warning at the top of the page, too.)
         const { data } = nextState;
         if (data && this.props.params.id !== data[0].CA_ID) {
             const { noRedirect } = this.getQuery();
             if (noRedirect !== "true") {
-                // Redirect to CA_ID if it exists, or the latest numeric id if CA_ID doesn't exist.
                 const redirectToID = data[0].CA_ID  || data[0].id ;
-
-                // If we were already at the latest numeric ID, redirect without a redirectedFrom message.
                 if (parseInt(this.props.params.id) === data[0].id) {
                     this.replaceWith(`/variant/:id`, { id: redirectToID }, {});
                 }
-                // Otherwise include redirectedFrom.
                 else {
                     this.replaceWith(`/variant/:id`, { id: redirectToID }, { redirectedFrom: this.props.params.id });
                 }
             }
         }
     },
-
     componentDidUpdate: function(prevProps, prevState) {
         if (prevProps.mode !== this.props.mode) {
-            // if the mode changed, we have to relayout the page on the next available frame
             setTimeout(() => {
                 this.relayoutGrid(true);
             }, 0);
         }
-
-        // update the title only when the variant info is first populated
         if (!prevState.data && this.state.data) {
             const data = this.state.data;
             const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
             const variant = data[variantVersionIdx] || data[0];
-
             document.title = `${variant['HGVS_cDNA'].split(":")[1]} (${variant['Gene_Symbol']}) - BRCA Exchange`;
         }
     },
@@ -662,7 +636,6 @@ var VariantDetail = React.createClass({
     },
     setEmptyRowVisibility: function(hideEmptyItems) {
         localStorage.setItem('hide-empties', hideEmptyItems);
-
         this.setState({
             hideEmptyItems: hideEmptyItems
         }, () => {
@@ -682,32 +655,31 @@ var VariantDetail = React.createClass({
             this.isogrid.relayout(fullRefresh);
         }
     }, 100),
-    relayoutOnCollapsed: function(/* collapser */) {
+    relayoutOnCollapsed: function(/* collapser *//*) {
         console.warn("Deprecated relayoutOnCollapsed; replace relayoutOnCollapsed handlers w/direct calls to relayoutGrid() in your collapsing components");
-
-        // migration path:
-        // 1. remove references to bootstrap's deprecated CollapsableMixin
-        // 2. replace collapsible elements (i.e., ones that implement getCollapsableDOMNode,
-        //    getCollapsableDimensionValue) with the Collapse element. remove those functions.
-        // 3. instead of references to relayoutOnCollapsed, pass refs to this.relayoutGrid down to
-        //    collapsible components.
-        // 4. call this.relayoutGrid() in Collapse's onEntered, onExited events.
     },
+    // legacy API kept for callers; now just flips storage and local openGroups
     onChangeGroupVisibility(groupTitle, event) {
-        // stop the page from scrolling to the top (due to navigating to the fragment '#')
         event.preventDefault();
-
-        // if there's no existing key or if it's not true, this group is visible and thus collapsing
-        const willBeCollapsed = localStorage.getItem("collapse-group_" + groupTitle) !== "true";
-        localStorage.setItem("collapse-group_" + groupTitle, willBeCollapsed ? "true" : "false");
-
-        // this.relayoutOnCollapsed(collapser);
-        // this.relayoutGrid();
-        // note: anything listening to the localstorage setting above should relayout the grid
-        // itself, now that collapsing is handled by Collapse elements.
+        const key = "collapse-group_" + groupTitle;
+        const willBeCollapsed = localStorage.getItem(key) !== "true";
+        localStorage.setItem(key, willBeCollapsed ? "true" : "false");
+        const willBeOpen = !willBeCollapsed;
+        this.setState({ openGroups: { ...this.state.openGroups, [key]: willBeOpen } });
+    },
+    isGroupOpenLS(key) {
+        // local state wins, otherwise read from storage (for initial render)
+        if (this.state.openGroups.hasOwnProperty(key)) { return !!this.state.openGroups[key]; }
+        return isOpenFromStorage(key);
+    },
+    toggleCard(key) {
+        const nowOpen = !this.isGroupOpenLS(key);
+        // store "true" when collapsed (legacy semantics)
+        localStorage.setItem(key, nowOpen ? "false" : "true");
+        this.setState({ openGroups: { ...this.state.openGroups, [key]: nowOpen } });
     },
     determineDiffRowColor: function(highlightRow) {
-        return highlightRow ? 'danger' : '';
+        return highlightRow ? 'table-danger' : '';
     },
     getPathogenicity: function(version, isReport) {
         if (isReport) {
@@ -717,14 +689,11 @@ var VariantDetail = React.createClass({
                 return util.getFormattedFieldByProp("Classification_LOVD", version);
             }
         } else {
-            // Only concerned about expert pathogenicity for diff
             return util.getFormattedFieldByProp("Pathogenicity_expert", version);
         }
     },
     generateDiffRows: function(cols, data, isReports) {
         var diffRows = [];
-
-        // In research_mode, only show research_mode changes.
         var relevantFieldsToDisplayChanges = cols.map(function(col) {
             return col.prop;
         });
@@ -771,7 +740,7 @@ var VariantDetail = React.createClass({
                             diffHTML.push(
                                 <span>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
-                                    <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                    <span className='badge bg-success'><span className='glyphicon glyphicon-star'></span> New</span>
                                     &nbsp;{`${added}`}
                                 </span>, <br />
                             );
@@ -807,10 +776,7 @@ var VariantDetail = React.createClass({
     },
     toggleSubmitterGroup: function(sourceName, submitter) {
         this.setState((pstate) => {
-            // the key under the state collection for the visibility of this source-submitter group
             const k = `submitter-group-${sourceName}-${submitter}`;
-
-            // if the key doesn't exist, set it to false; otherwise, invert it
             return {
                 [k]: !(!pstate.hasOwnProperty(k) || pstate[k])
             };
@@ -822,7 +788,6 @@ var VariantDetail = React.createClass({
         if (!data) {
             return <div />;
         }
-
 
         const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
         const variant = data[variantVersionIdx] || data[0];
@@ -840,24 +805,16 @@ var VariantDetail = React.createClass({
             groups = expertModeGroups;
         }
 
-        // FAISAL: rather than directly map cols, we create a higher-level groups structure
-        // the higher-level groups structure maps a subset of columns to that group
         let groupsEmpty = 0;
         let totalRowsEmpty = 0;
 
         const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding, alleleFrequencies, inSilicoPred, innerGroups }) => {
             let rowsEmpty = 0;
 
-            // if it's a report source (i.e. the key reportSource is defined), then we defer
-            // to our custom nested-report-rendering method to generate this entire group
             if (reportSource) {
-                // hide this panel if we have no reports, or specifically none for this source
                 if (!this.state.reports || !this.state.reports[reportSource]) {
                     return null;
                 }
-
-                // also hide this reportSource, but with a warning, if we don't have metadata for that source
-                // (we expect to have metadata for the source, since we both request the source and define its meta)
                 if (!reportBinding) {
                     console.warn("Source report rendering requested for source with missing metadata: ", reportSource);
                     return null;
@@ -975,11 +932,10 @@ var VariantDetail = React.createClass({
                         variant={variant}
                         innerGroups={innerGroups}
                     />
-
                 );
             }
 
-            // now map the group's columns to a list of row objects
+            // standard 2-column table tile
             const rows = _.map(innerCols, (rowDescriptor) => {
                 let {prop, title, noHelpLink} = rowDescriptor;
                 let rowItem;
@@ -988,25 +944,15 @@ var VariantDetail = React.createClass({
                     title = "Abbreviated AA Change";
                 }
 
-                // get mupit structures if they're available
                 if (prop === "Mupit_Structure") {
                     rowItem = <MupitStructure variant={variant} prop={prop} onLoad={() => this.relayoutGrid()} />;
-
-                    /*
-                    Don't display mupit structures if they don't have an associated Amino Acid change.
-                    Note that there shouldn't be mupit structures for these variants in the first place,
-                    but there may be as getAminoAcidCode may change after the database is populated
-                    */
                     if (util.getAminoAcidCode(variant["HGVS_Protein"]) === false) {
                         rowsEmpty += 1;
                         rowItem = false;
                     }
-
-                    // mupit structures are not displayed if they're empty
                     if (rowItem === false) {
                         return false;
                     }
-
                     if (!variant[prop]) {
                         rowsEmpty += 1;
                         return false;
@@ -1059,9 +1005,7 @@ var VariantDetail = React.createClass({
                 );
             });
 
-            // check if all our rows are empty, in which case our group should be flagged as empty
             const allEmpty = rowsEmpty >= rows.length;
-
             if (allEmpty) {
                 groupsEmpty += 1;
             }
@@ -1074,30 +1018,32 @@ var VariantDetail = React.createClass({
                 </Table>
             );
 
+            const storageKey = "collapse-group_" + groupTitle;
+            const isOpen = this.isGroupOpenLS(storageKey);
+
             return (
                 <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
-                    <Panel
-                        defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
-                    >
-                        <Panel.Heading>
-                            <Panel.Title componentClass="h3">
-                                <Panel.Toggle componentClass="a" className="title"
-                                    onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}
-                                >
-                                    {groupTitle}
-                                </Panel.Toggle>
-                                <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
-                            </Panel.Title>
-                        </Panel.Heading>
-                        <Panel.Collapse
-                            onEntered={this.relayoutGrid}
-                            onExited={this.relayoutGrid}
+                    <Card>
+                        <Card.Header
+                            role="button"
+                            aria-expanded={isOpen}
+                            className="d-flex justify-content-between align-items-center"
+                            onClick={(event) => { event.preventDefault(); this.toggleCard(storageKey); this.onChangeGroupVisibility(groupTitle, event); }}
                         >
-                            <Panel.Body>
-                                {tileTable}
-                            </Panel.Body>
-                        </Panel.Collapse>
-                    </Panel>
+                            <span className="title">{groupTitle}</span>
+                            <span className="d-flex align-items-center">
+                                <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
+                                <i className={`fa fa-chevron-${isOpen ? 'down' : 'right'} ms-2`} aria-hidden="true" />
+                            </span>
+                        </Card.Header>
+                        <Collapse in={isOpen} onEntered={this.relayoutGrid} onExited={this.relayoutGrid}>
+                            <div>
+                                <Card.Body>
+                                    {tileTable}
+                                </Card.Body>
+                            </div>
+                        </Collapse>
+                    </Card>
                 </div>
             );
         });
@@ -1109,12 +1055,10 @@ var VariantDetail = React.createClass({
         if (this.state.reports !== undefined) {
             let sortedSubmissions = {'ClinVar': {}, 'LOVD': {}};
 
-            // get all versions of clinvar submissions organized by accession number
             if (this.state.reports.hasOwnProperty('ClinVar')) {
                 let clinvarSubmissions = this.state.reports.ClinVar;
                 for (var i = 0; i < clinvarSubmissions.length; i++) {
                     if (clinvarSubmissions[i].Diff === null || clinvarSubmissions[i].Diff === undefined) {
-                        // don't show empty diffs for reports
                         continue;
                     }
                     let key = clinvarSubmissions[i].SCV_ClinVar;
@@ -1126,13 +1070,10 @@ var VariantDetail = React.createClass({
                 }
             }
 
-
-            // get all versions of lovd submissions organized by submission id
             if (this.state.reports.hasOwnProperty('LOVD')) {
                 let lovdSubmissions = this.state.reports.LOVD;
                 for (var j = 0; j < lovdSubmissions.length; j++) {
                     if (lovdSubmissions[j].Diff === null || lovdSubmissions[j].Diff === undefined) {
-                        // don't show empty diffs for reports
                         continue;
                     }
                     let key = lovdSubmissions[j].Submission_ID_LOVD;
@@ -1157,7 +1098,7 @@ var VariantDetail = React.createClass({
                             <h4>Previous Versions of this Submission (since {util.reformatDate(oldestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
-                                    <tr className='active'>
+                                    <tr className='table-active'>
                                         <th>Release Date</th>
                                         <th>Clinical Significance</th>
                                         <th>Changes</th>
@@ -1186,7 +1127,7 @@ var VariantDetail = React.createClass({
                             <h4>Previous Versions of this Submission (since {util.normalizeDateFieldDisplay(oldestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
-                                    <tr className='active'>
+                                    <tr className='table-active'>
                                         <th>Release Date</th>
                                         <th>Clinical Significance</th>
                                         <th>Changes</th>
@@ -1208,13 +1149,16 @@ var VariantDetail = React.createClass({
             : `col-xs-12 col-md-6 col-lg-6 col-xl-4`;
         const splicingTileSizeClassse = 'col-xs-12 col-md-12 col-lg-12 col-xl-8';
 
+        // splicing panel open state
+        const splicingKey = "collapse-group_transcript-visualization";
+        const splicingOpen = this.isGroupOpenLS(splicingKey);
+
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
                     {
                         (this.props.mode !== "research_mode")
                             ? (
-                                /* display new header w/genomic coordinates in expert-reviewed mode */
                                 <span>
                                     <Col md={2}>
                                         <h3>Variant Details</h3>
@@ -1225,7 +1169,6 @@ var VariantDetail = React.createClass({
                                             <div><i>or</i></div>
                                             <h3 style={{marginTop: 10}}>
                                                 {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
-
                                                 {
                                                     (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
                                                         " " + variant['HGVS_Protein'].split(":")[1]
@@ -1236,8 +1179,7 @@ var VariantDetail = React.createClass({
                                 </span>
                             )
                             : (
-                                /* display old header if we're in research mode */
-                                <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
+                                <Col xs={4} sm={{ span: 4, offset: 4 }} md={{ span: 4, offset: 4 }} className="vcenterblock">
                                     <div className='text-center Variant-detail-title'>
                                         <h3>Variant Details</h3>
                                     </div>
@@ -1248,7 +1190,7 @@ var VariantDetail = React.createClass({
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                bsStyle={"default"}>
+                                variant="secondary">
                                 { this.state.hideEmptyItems ?
                                     <span>Show Empty Items</span> :
                                     <span>Hide Empty Items</span>
@@ -1267,14 +1209,10 @@ var VariantDetail = React.createClass({
 
                     {
                         (variant.id !== data[0].id && noRedirectMsg !== "true") && (
-                        // if we're not on the latest variant version, show a message with link
                           <Col xs={12} classname="vcenterblock">
-                              <div className="variant-message outdated-variant-message panel panel-danger">
-                                  <div className="panel-body panel-danger">
-                                      <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
-
-                                      The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].CA_ID}`}>Click here for updated data on this variant.</a>
-                                  </div>
+                              <div className="variant-message outdated-variant-message alert alert-danger">
+                                  <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
+                                  The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].CA_ID}`}>Click here for updated data on this variant.</a>
                               </div>
                           </Col>
                         )
@@ -1283,15 +1221,12 @@ var VariantDetail = React.createClass({
                     {
                         redirectedFromVariant && (
                           <Col xs={12} classname="vcenterblock">
-                              <div className="variant-message redirected-variant-msg panel panel-primary">
-                                  <div className="panel-body panel-primary">
-                                      <h3 style={{marginTop: 0}}>You are viewing the most recent data on this variant.</h3>
-
-                                      The variant url you requested only has data up to {util.reformatDate(redirectedFromVariant.Data_Release.date)}. You have been automatically redirected to the newest data.<br />
-                                      <a href={`/variant/${redirectedFrom}?noRedirect=true`}>
-                                          Click here to view variant data from {util.reformatDate(redirectedFromVariant.Data_Release.date)} (Release {redirectedFromVariant.Data_Release.name}).
-                                      </a>
-                                  </div>
+                              <div className="variant-message redirected-variant-msg alert alert-primary">
+                                  <h3 style={{marginTop: 0}}>You are viewing the most recent data on this variant.</h3>
+                                  The variant url you requested only has data up to {util.reformatDate(redirectedFromVariant.Data_Release.date)}. You have been automatically redirected to the newest data.<br />
+                                  <a href={`/variant/${redirectedFrom}?noRedirect=true`}>
+                                      Click here to view variant data from {util.reformatDate(redirectedFromVariant.Data_Release.date)} (Release {redirectedFromVariant.Data_Release.name}).
+                                  </a>
                               </div>
                           </Col>
                         )
@@ -1304,41 +1239,35 @@ var VariantDetail = React.createClass({
                             <div className={`isogrid-sizer ${tileSizeClasses}`} />
 
                             {
-                                // show the splicing vis if we're in research mode
                                 this.props.mode === "research_mode" && (
                                     <Col key="splicing_vis"
                                         className={`variant-detail-group isogrid-item ${splicingTileSizeClassse}`}>
-                                        <Panel
-                                            collapsible={true}
-                                            defaultExpanded={localStorage.getItem("collapse-group_transcript-visualization") !== "true"}
-                                        >
-                                            <Panel.Heading>
-                                                <Panel.Title componentClass="h3">
-                                                    <Panel.Toggle componentClass="a" className="title"
-                                                        onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event)}
-                                                    >
-                                                        {`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}
-                                                    </Panel.Toggle>
-                                                    <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />
-                                                </Panel.Title>
-                                            </Panel.Heading>
-                                            <Panel.Collapse
-                                                onEntered={this.relayoutGrid}
-                                                onExited={this.relayoutGrid}
+                                        <Card>
+                                            <Card.Header
+                                                role="button"
+                                                aria-expanded={splicingOpen}
+                                                className="d-flex justify-content-between align-items-center"
+                                                onClick={(e) => { e.preventDefault(); this.toggleCard(splicingKey); this.onChangeGroupVisibility("transcript-visualization", e); }}
                                             >
-                                                <Panel.Body>
-                                                    <Splicing variant={variant}
-                                                        relayoutGrid={this.relayoutGrid}
-                                                    />
-                                                </Panel.Body>
-                                            </Panel.Collapse>
-                                        </Panel>
+                                                <span className="title">{`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}</span>
+                                                <span className="d-flex align-items-center">
+                                                    <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />
+                                                    <i className={`fa fa-chevron-${splicingOpen ? 'down' : 'right'} ms-2`} aria-hidden="true" />
+                                                </span>
+                                            </Card.Header>
+                                            <Collapse in={splicingOpen} onEntered={this.relayoutGrid} onExited={this.relayoutGrid}>
+                                                <div>
+                                                    <Card.Body>
+                                                        <Splicing variant={variant} relayoutGrid={this.relayoutGrid} />
+                                                    </Card.Body>
+                                                </div>
+                                            </Collapse>
+                                        </Card>
                                     </Col>
                                 )
                             }
 
                             {
-                                // we're mapping each group into a column so we can horizontally stack them
                                 groupTables.map((x, i) => {
                                     return (
                                         <Col key={"group_col-" + i}
@@ -1379,7 +1308,7 @@ var VariantDetail = React.createClass({
                         <p>Variant nomenclature may change between releases, please review submission history below for further details.</p>
                         <Table className='variant-history nopointer' responsive bordered>
                             <thead>
-                                <tr className='active'>
+                                <tr className='table-active'>
                                     <th>Release Date</th>
                                     <th>Clinical Significance</th>
                                     <th>Changes</th>
@@ -1397,7 +1326,7 @@ var VariantDetail = React.createClass({
                 {this.props.mode === "research_mode" ? lovdDiffRows : ''}
 
                 <Row>
-                    <Col md={12} mdOffset={0}>
+                    <Col md={{ span: 12, offset: 0 }}>
                         <DisclaimerModal buttonModal onToggleMode={this.props.toggleMode} text="Show Detail View for this Variant"/>
                     </Col>
                 </Row>
@@ -1405,27 +1334,31 @@ var VariantDetail = React.createClass({
         );
     }
 });
+*/
+class Application extends React.Component {
+    constructor(props){
+	super(props);
+	this.state = {
+	    mode: localStorage.getItem('research-mode') === 'true' ? 'research_mode' : 'default',
+	};
+    }
 
-var Application = React.createClass({
-    mixins: [State],
-    onChildToggleMode: function() {
+	onChildToggleMode = () => {
         this.toggleMode();
-    },
-    getInitialState: function () {
-        return {
-            mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default',
-        };
-    },
+    };
+
     componentDidUpdate() {
-        let localStorageMode = (localStorage.getItem("research-mode") === "true") ? "research_mode" : "default";
+        const localStorageMode = localStorage.getItem("research-mode") === "true" ? "research_mode" : "default";
         if (localStorageMode !== this.state.mode) {
             this.setMode();
         }
-    },
-    setMode: function () {
-        this.setState({mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default'});
-    },
-    toggleMode: function () {
+    }
+
+    setMode = () => {
+        this.setState({mode: localStorage.getItem("research-mode") === 'true' ? 'research_mode' : 'default'});
+    };
+
+    toggleMode = () => {
         if (this.state.mode === 'research_mode') {
             localStorage.setItem('research-mode', false);
             this.setState({mode: 'default'});
@@ -1433,49 +1366,64 @@ var Application = React.createClass({
             localStorage.setItem('research-mode', true);
             this.setState({mode: 'research_mode'});
         }
-    },
-    render: function () {
-        const path = this.getPath().slice(1);
+    };
+
+    render() {
+        const path = (this.props.location && this.props.location.pathname ? this.props.location.pathname : '/').slice(1);
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
                 <DonationBar />
-                <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
-                <Database
+                {/* If children are rendered here via a parent Route, pass props along */}
+         	{this.props.children &&
+           		React.cloneElement(this.props.children, {
+             			toggleMode: this.onChildToggleMode,
+             			mode: this.state.mode,
+           	})}
+		{path.indexOf('variants') === 0 && (
+		<Database
                     mode={this.state.mode}
                     toggleMode={this.onChildToggleMode}
-                    show={path.indexOf('variants') === 0} />
+                    show={path.indexOf('variants') === 0} /> 
+		)}
                 <Footer />
             </div>
         );
     }
-});
+}
 
-var routes = (
-    <Route handler={Application}>
-        <DefaultRoute handler={Home}/>
-        <Route path='about/:page' handler={About}/>
-        <Route path='factsheet' handler={FactSheet}/>
-        <Route path='whydonate' handler={WhyDonate}/>
-        <Route path='fundraisingdetails' handler={FundraisingDetails}/>
-        <Route path='help' handler={Help}/>
-        <Route path='community' handler={Community}/>
-        <Route path='signup' handler={Signup}/>
-        <Route path='signin' handler={Signin}/>
-        <Route path='reset_password' handler={ResetPassword}/>
-        <Route path='profile' handler={Profile}/>
-        <Route path='confirm/:activationCode' handler={ConfirmEmail}/>
-        <Route path='reset/:resetToken' handler={ChangePassword}/>
-        <Route path='variants' />
-        <Route path='variant/:id' handler={VariantDetail}/>
-        <Route path='variant_literature/:id' handler={LiteratureTable}/>
-        <Route path='releases' handler={Releases}/>
-        <Route path='release/:id' handler={Release}/>
-    </Route>
+const routes = (
+    <Switch>
+        <Route exact path='/' component={Home}/>
+	<Route path='about/:page' component={About}/>
+	{/*
+	<Route path='factsheet' component={FactSheet}/>
+        <Route path='whydonate' component={WhyDonate}/>
+        <Route path='fundraisingdetails' component={FundraisingDetails}/>
+        <Route path='help' component={Help}/>
+        <Route path='community' component={Community}/>
+        <Route path='signup' component={Signup}/>
+        <Route path='signin' component={Signin}/>
+        <Route path='reset_password' component={ResetPassword}/>
+        <Route path='profile' component={Profile}/>
+        <Route path='confirm/:activationCode' component={ConfirmEmail}/>
+        <Route path='reset/:resetToken' component={ChangePassword}/>
+        // TODO: wire this to your variants page component
+        // <Route path='variants' />
+        <Route path='variant/:id' component={VariantDetail}/>
+        <Route path='variant_literature/:id' component={LiteratureTable}/>
+        <Route path='releases' component={Releases}/>
+        <Route path='release/:id' component={Release}/>
+	*/}
+    </Switch>
 );
 
-var main = document.getElementById('main');
-
-run(routes, HistoryLocation, (Root) => {
-  ReactDOM.render(<Root/>, main);
-});
+const container = document.getElementById('main');
+const root = createRoot(container);
+root.render(
+    <BrowserRouter>
+	<Application>
+		{routes}
+	</Application>
+    </BrowserRouter>
+);

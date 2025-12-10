@@ -1,6 +1,6 @@
 'use strict';
 import React from 'react';
-import d3 from 'd3';
+import * as d3 from 'd3';
 
 import varScoresArray from './mockdata/funcscores_array';
 import {impacts} from "./FunctionalAssayTile";
@@ -31,39 +31,36 @@ export default class FuncClassSubtile extends React.Component {
 
         const max = d3.max(values);
         const min = d3.min(values);
-        const x = d3.scale.linear()
+        const x = d3.scaleLinear()
             .domain([min, max])
             .range([0, width])
             .clamp(true);
 
         // Generate a histogram using twenty uniformly-spaced bins.
-        const data = d3.layout.histogram()
-            .bins(x.ticks(40))
+        const data = d3.histogram()
+            .domain(x.domain())
+	    .thresholds(x.ticks(40))
             (values);
 
         const yMax = d3.max(data, d => d.length);
         // const yMin = d3.min(data, d => d.length);
 
-        const y = d3.scale.linear()
+        const y = d3.scaleLinear()
             .domain([0, yMax])
             .range([height, 0]);
 
-        const xAxis = d3.svg.axis()
-            .scale(x)
-            .ticks(20)
-            .orient("bottom");
+        const xAxis = d3.axisBottom(x)
+	    .ticks(20);
 
-        const yAxis = d3.svg.axis()
-            .scale(y)
+        const yAxis = d3.axisLeft(y)
             .ticks(4)
-            .tickSize(0)
-            .orient("left");
+            .tickSize(0);
 
-        // FIXME: instead of duplicating the axis object, figure out how to clone yAxis
-        const yAxis2 = d3.svg.axis()
-            .scale(y)
+        // gridlines along y (separate axis instance with extended tickSize)
+        const yAxisGrid = d3.axisLeft(y)
             .ticks(4)
-            .orient("left");
+	    .tickSize(-width)
+            .tickFormat(() => "");
 
         // const svgElem = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         const svg = d3.select("#func-assay-obj")
@@ -74,21 +71,18 @@ export default class FuncClassSubtile extends React.Component {
         // add horizontal grid lines
         svg.append("g")
             .attr("class", "grid")
-            .call(yAxis2
-                .tickSize(-width)
-                .tickFormat("")
-            );
+            .call(yAxisGird);
 
         // draw histogram bars
         const bar = svg.selectAll(".bar")
             .data(data)
             .enter().append("g")
             .attr("class", "bar")
-            .attr("transform", d => "translate(" + x(d.x) + "," + y(d.y) + ")");
+            .attr("transform", d => "translate(" + x(d.x0) + "," + y(d.length) + ")");
         bar.append("rect")
             .attr("x", 1)
-            .attr("width", (x(data[0].dx) - x(0)) - 1)
-            .attr("height", d => height - y(d.y))
+            .attr("width", d => (x(d.x1) - x(d.x0)) - 1)
+            .attr("height", d => height - y(d.length))
             .attr("fill", "#7eb6ea");
 
         // draw the x-axis...
@@ -100,7 +94,7 @@ export default class FuncClassSubtile extends React.Component {
             .attr("class", "axis-label")
             .attr("y", 35)
             .attr("x", 170)
-            .style("text-anchor", "center")
+            .style("text-anchor", "middle")
             .text("Function Score");
 
         // ...and the y-axis
@@ -112,7 +106,7 @@ export default class FuncClassSubtile extends React.Component {
             .attr("transform", "rotate(-90)")
             .attr("y", -30)
             .attr("x", -70)
-            .style("text-anchor", "center")
+            .style("text-anchor", "middle")
             .text("SNVs");
 
         // draw classification regions below chart
@@ -150,8 +144,7 @@ export default class FuncClassSubtile extends React.Component {
             .attr("stroke-width", 1)
             .attr("fill", "black")
             .attr("y", 0)
-            .attr("y2", -yMax)
-            .attr("points", "0,0 5,10 -5,10");
+            .attr("y2", -yMax);
 
     }
 

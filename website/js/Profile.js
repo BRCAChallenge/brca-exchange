@@ -9,7 +9,7 @@ var {Grid, Row, Col, Button} = require('react-bootstrap');
 var {Navigation} = require('react-router');
 var auth = require('./auth');
 var {Role, $c} = require('./Signup');
-var countries = require('raw!../content/countries.txt').split('\n');
+var countries = require('raw-loader!../content/countries.txt').default.split('\n');
 
 var Profile = React.createClass({
     statics: {
