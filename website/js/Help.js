@@ -2,7 +2,6 @@
 'use strict';
 
 import React from "react";
-import ReactDOM from "react-dom";
 import update from 'immutability-helper';
 import BetaTag from "./components/BetaTag";
 import { debounce } from "lodash";
@@ -10,7 +9,7 @@ import { Container, Row, Col, Card, ListGroup, Collapse } from 'react-bootstrap'
 import SearchController, { EXTRA_SEARCH_PADDING } from "./components/help/SearchController";
 import HardlinkHelper, { idHelpClicked } from "./components/help/HardlinkHelper";
 
-const RawHTML = require('./RawHTML'); // keep CJS require if RawHTML uses module.exports
+import RawHTML from './RawHTML'; // keep CJS require if RawHTML uses module.exports
 const $ = require('jquery');
 const slugify = require('./slugify');
 const content = require('./content');
@@ -230,8 +229,8 @@ class Help extends React.Component {
         )}
 
         <Row
-          ref={(me) => {
-            if (me) { this.headerElem = $(ReactDOM.findDOMNode(me)); }
+          ref={(node) => {
+            if (node) { this.headerElem = $(node); }
           }}
           className="header-sticky"
         >
@@ -255,5 +254,5 @@ class Help extends React.Component {
   }
 }
 
-module.exports = Help;
+export default Help;
 

@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import Mark from "mark.js";
 import {debounce} from "lodash";
 import {navbarHeight} from "../../Help";
@@ -17,15 +18,17 @@ export const EXTRA_SEARCH_PADDING = 8;
  *
  * When the site's mode is toggled, search results will be cleared since they won't be valid for the new text anyway.
  */
-const SearchController = React.createClass({
-    getInitialState() {
-        return {
-            searchTerm: '',
-            searching: false,
-            matched: 0,
-            currentMark: null
-        };
-    },
+class SearchController extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { searchTerm: '', searching: false, matched: 0, currentMark: null };
+        this.searcher = new Mark(this.props.target);
+        this.debouncedSearchResponse = debounce(this.searchResponse.bind(this), 300);
+        this.searchChanged = this.searchChanged.bind(this);
+        this.navMarks = this.navMarks.bind(this);
+        this.navForward = this.navMarks.bind(this, true);
+        this.navBackward = this.navMarks.bind(this, false);
+    }
 
     searchChanged(e) {
         this.setState({
@@ -34,7 +37,7 @@ const SearchController = React.createClass({
         }, () => {
             this.debouncedSearchResponse();
         });
-    },
+    }
 
     searchResponse() {
         if (!this.state.searchTerm || this.state.searchTerm === '') {
@@ -95,10 +98,10 @@ const SearchController = React.createClass({
                 });
             }
         });
-    },
+    }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.researchMode !== this.props.researchMode) {
+    componentDidUpdate(nextProps) {
+        if (prevProps.researchMode !== this.props.researchMode) {
             // reinitialize if they've switched help page modes
             this.setState({
                 searchTerm: '',
@@ -114,15 +117,7 @@ const SearchController = React.createClass({
                 }
             });
         }
-    },
-
-    componentWillMount() {
-        this.searcher = new Mark(this.props.target);
-        this.debouncedSearchResponse = debounce(this.searchResponse, 300);
-
-        this.navForward = this.navMarks.bind(this, true);
-        this.navBackward = this.navMarks.bind(this, false);
-    },
+    }
 
     navMarks(forward) {
         const $highlightSet = $('.highlighted').removeClass("focused");
@@ -151,7 +146,7 @@ const SearchController = React.createClass({
                 behavior: 'smooth'
             });
         });
-    },
+    }
 
     render() {
         return (
@@ -179,10 +174,12 @@ const SearchController = React.createClass({
             </div>
         );
     }
-});
+}
 SearchController.propTypes = {
-    target: React.PropTypes.string.isRequired,
-    setExpansion: React.PropTypes.func.isRequired
+    target: PropTypes.string.isRequired,
+    setExpansion: PropTypes.func.isRequired,
+    researchMode: PropTypes.any,
+    headerElem: PropTypes.object
 };
 
 export default SearchController;

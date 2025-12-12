@@ -67,7 +67,7 @@ import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } fro
 //var {Profile} = require('./Profile');
 import VariantSearch from './VariantSearch';
 //var {Releases, Release} = require('./Releases.js');
-//var Help = require('./Help.js');
+import Help from './Help.js';
 
 //var KeyInline = require('./components/KeyInline');
 //var GroupHelpButton = require('./components/GroupHelpButton');
@@ -1397,12 +1397,12 @@ const routes = (
         <Route exact path='/' component={Home}/>
 	<Route path='about/:page' component={About}/>
 	<Route path='/community' component={Community}/>
+	<Route path='/help' component={Help}/>
 	{/*
 	<Route path='factsheet' component={FactSheet}/>
         <Route path='whydonate' component={WhyDonate}/>
         <Route path='fundraisingdetails' component={FundraisingDetails}/>
         <Route path='help' component={Help}/>
-        <Route path='community' component={Community}/>
         <Route path='signup' component={Signup}/>
         <Route path='signin' component={Signin}/>
         <Route path='reset_password' component={ResetPassword}/>

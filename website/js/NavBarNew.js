@@ -27,26 +27,19 @@ class ModeButton extends React.PureComponent {
     render() {
         const {mode, toggleMode} = this.props;
 
-        const popper = (mode === 'research_mode')
-        ? (
+        const popper = (
             <Popover id="change-view-popover">
 		<Popover.Header as="h3">Change View</Popover.Header>
 		<Popover.Body>
-            	    The BRCA Exchange Detail View shows information drawn from multiple databases and is intended to provide professional users a set of annotations which is as comprehensive as possible. For summary information with expert interpretations, click this button to switch to the Summary View.
+		{mode === 'research_mode'
+            	  ?  'The BRCA Exchange Detail View shows information drawn from multiple databases and is intended to provide professional users a set of annotations which is as comprehensive as possible. For summary information with expert interpretations, click this button to switch to the Summary View.'
+		  : 'The BRCA Exchange Summary View shows the clinical significance as reviewed by the expert ENIGMA consortium. For additional variant information, click this button to switch to the Detail View.'}
                 </Popover.Body>
-	    </Popover>
-        )
-        : (
-            <Popover id="change-view-popover">
-		<Popover.Header as="h3">Change View</Popover.Header>
-		<Popover.Body>
-            The BRCA Exchange Summary View shows the clinical significance as reviewed by the expert ENIGMA consortium. For additional variant information, click this button to switch to the Detail View.
-            	</Popover.Body>
 	    </Popover>
         );
 
         return (
-            <OverlayTrigger placement='bottom' delay={{ show: 300}} overlay={popper}>
+            <OverlayTrigger placement='bottom' delay={{ show: 300, hide: 0 }} overlay={popper}>
                 <span id="research-label" className="label label-info" style={{cursor: 'help'}} onClick={toggleMode}>
                     {`${mode === 'research_mode' ? "Detail" : "Summary"} View`}
                 </span>
