@@ -100,7 +100,6 @@ class NavBarNew extends React.Component {
         const {path} = this.props;
         const brand = (
 	    <span className="branding-clickable">
-            	<a href="/">
                 <img alt="BRCA Exchange Logo" className="logo-img" src={brcaHeaderLogo} height="40" />
 
                 <div className="brand-collapser">
@@ -111,7 +110,6 @@ class NavBarNew extends React.Component {
 
                     <ModeButton mode={this.props.mode} toggleMode={this.toggleMode} />
                 </div>
-            	</a>
 	     </span>
         );
 
