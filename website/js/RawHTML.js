@@ -19,7 +19,7 @@ class RawHTML extends React.Component {
 
         // make all the anchor tags use scrollToFragment, if it was specified
         if (scrollToFragment) {
-            $(".markdown a").click(function() {
+            $("a", this.meRef.current).on("click", function() {
                 const fragment = this.getAttribute("href").slice(1);
                 scrollToFragment(fragment);
                 history.replaceState(undefined, undefined, '#' + fragment);
@@ -45,9 +45,9 @@ class RawHTML extends React.Component {
     }
 
     render() {
-        var {html, ...otherProps} = this.props;
+        const {html, hardlinks, ...rest} = this.props;
         return (
-	    <span style={{display: 'block'}} ref={this.meRef} className='markdown' {...otherProps} dangerouslySetInnerHTML={{__html: html}} />
+	    <span style={{display: 'block'}} ref={this.meRef} className='markdown' {...rest} dangerouslySetInnerHTML={{__html: html}} />
         );
     }
 }

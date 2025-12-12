@@ -100,7 +100,7 @@ class SearchController extends React.Component {
         });
     }
 
-    componentDidUpdate(nextProps) {
+    componentDidUpdate(prevProps) {
         if (prevProps.researchMode !== this.props.researchMode) {
             // reinitialize if they've switched help page modes
             this.setState({

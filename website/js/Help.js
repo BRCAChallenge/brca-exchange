@@ -32,7 +32,7 @@ class CollapsableListItem extends React.Component {
   }
 
   render() {
-    const { header, id, expanded, children, ...rest } = this.props;
+    const { header, id, expanded, children, setExpansion, ...rest } = this.props;
 
     return (
       <ListGroup.Item {...rest}>
