@@ -45,7 +45,7 @@ var logos = require('./logos');
 var slugify = require('./slugify');
 
 import content, {parseTooltips} from './content';
-//var Community = require('./Community');
+import Community from './Community';
 //var FactSheet = require('./FactSheet');
 //var WhyDonate = require('./WhyDonate');
 //var FundraisingDetails = require('./FundraisingDetails');
@@ -1396,6 +1396,7 @@ const routes = (
     <Switch>
         <Route exact path='/' component={Home}/>
 	<Route path='about/:page' component={About}/>
+	<Route path='/community' component={Community}/>
 	{/*
 	<Route path='factsheet' component={FactSheet}/>
         <Route path='whydonate' component={WhyDonate}/>

@@ -33,14 +33,13 @@ export const Role = {
     get: function(id) { return this.options.find(role => role[0] === parseInt(id)); }
 };
 
-var SignupInner = React.createClass({
-    getInitialState: function () {
-        return {
-            submitted: null,
-            success: null
-        };
-    },
-    render: function () {
+class SignupInner extends React.Component {
+    state = {
+        submitted: null,
+        success: null
+    };
+
+    render() {
         var message;
         if (this.state.error != null) {
             let fieldErrors = _.map(this.state.fieldErrors, err => (<li>{err}</li>));
@@ -75,15 +74,15 @@ var SignupInner = React.createClass({
                     </Col>
                 </Row>
             </Grid>);
-    },
+    }
 
-    handleChange: function (field, e) {
+    handleChange = (field, e) => {
         var nextState = {};
         nextState[field] = e.target.checked;
         this.setState(nextState);
-    },
+    };
 
-    handleSubmit: function () {
+    handleSubmit = () => {
         var self = this;
         var showSuccess = () => {
 		this.props.history.push({ pathname: '/community', search: '?registrationSuccess=true' });
@@ -177,7 +176,7 @@ var SignupInner = React.createClass({
             this.setState({error: <strong>Some information was missing:</strong>, fieldErrors: formErrors });
         }
     }
-});
+}
 
 export function $c(staticClassName, conditionalClassNames) {
     var classNames = [];
@@ -195,19 +194,19 @@ export function $c(staticClassName, conditionalClassNames) {
     return classNames.join(' ');
 }
 
-var SignupForm = React.createClass({
-    getInitialState: function () {
-        return {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherRole: false};
-    },
-    componentDidMount: function () {
+class SignupForm extends React.Component {
+    state = {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherRole: false};
+    
+    componentDidMount() {
         var me = this;
         window.onRecaptchaLoad(function () {
 	    grecaptcha.render(ReactDOM.findDOMNode(me.refs.signupCAPTCHA), {sitekey: config.captcha_key, callback: function(resp) {
                 me.setState({captcha: resp});
             }});
         });
-    },
-    getFormErrors: function () {
+    }
+
+    getFormErrors() {
         var errors = {};
         if (ReactDOM.findDOMNode(this.refs.role).value === "NONE") {
             errors.role = <span>Please select a <strong>Role</strong></span>;
@@ -234,8 +233,9 @@ var SignupForm = React.createClass({
         } else {
             return errors;
         }
-    },
-    getCompulsoryFields: function () {
+    }
+
+    getCompulsoryFields() {
         var fields = ['email', 'password', 'role'];
         if (!this.refs || !this.refs.role || parseInt(ReactDOM.findDOMNode(this.refs.role).value) !== Role.ROLE_DATA_PROVIDER) {
             fields.push('firstName', 'lastName');
@@ -244,8 +244,9 @@ var SignupForm = React.createClass({
             fields.push('role_other');
         }
         return fields;
-    },
-    getFormData: function () {
+    }
+
+    getFormData() {
         var title = ReactDOM.findDOMNode(this.refs.titlemd).checked && ReactDOM.findDOMNode(this.refs.titlemd).value ||
             ReactDOM.findDOMNode(this.refs.titlephd).checked && ReactDOM.findDOMNode(this.refs.titlephd).value ||
             ReactDOM.findDOMNode(this.refs.titleother).checked && ReactDOM.findDOMNode(this.refs.titlecustom).value;
@@ -271,8 +272,9 @@ var SignupForm = React.createClass({
             "captcha": this.state.captcha
         };
         return data;
-    },
-    handleImageChange(e) {
+    }
+
+    handleImageChange = (e) => {
         e.preventDefault();
 
         let reader = new FileReader();
@@ -293,8 +295,9 @@ var SignupForm = React.createClass({
             }
         };
         reader.readAsDataURL(file);
-    },
-    render: function () {
+    };
+
+    render() {
         var onChange = function() {
             var value = ReactDOM.findDOMNode(this.refs.role).value;
             this.setState({otherRole: Role.other(value)});
@@ -324,8 +327,8 @@ var SignupForm = React.createClass({
                 {this.renderCheckBox('hide_email', 'Hide my email address on this website')}
                 {this.renderCAPTCHA('captcha', 'CAPTCHA *')}
 			</div>);
-    },
-    renderImageUpload: function (id, label) {
+    }
+    renderImageUpload(id, label) {
         var {imagePreviewUrl, imageTooBig} = this.state;
         var imagePreview = null;
         var error = null;
@@ -341,23 +344,23 @@ var SignupForm = React.createClass({
                 {imagePreview}
                 {error}
             </div>);
-    },
-    renderTextInput: function (id, label) {
+    }
+    renderTextInput(id, label) {
         return this.renderField(id, label,
             <input type="text" className="form-control" id={id} ref={id}/>
         );
-    },
-    renderPassword: function (id, label) {
+    }
+    renderPassword(id, label) {
         return this.renderField(id, label,
             <input type="password" className="form-control" id={id} ref={id}/>
         );
-    },
-    renderTextarea: function (id, label) {
+    }
+    renderTextarea(id, label) {
         return this.renderField(id, label,
             <textarea className="form-control" id={id} ref={id}/>
         );
-    },
-    renderSelect: function(id, label, opts) {
+    }
+    renderSelect(id, label, opts) {
         var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={id}>
@@ -365,8 +368,8 @@ var SignupForm = React.createClass({
                 {options}
             </select>
         );
-    },
-    renderRoles: function () {
+    }
+    renderRoles() {
         var id = 'role';
         var options = Role.options.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, 'Role',
@@ -375,8 +378,8 @@ var SignupForm = React.createClass({
                 {options}
             </select>
         );
-    },
-    renderRadioInlines: function (id, label, kwargs) {
+    }
+    renderRadioInlines(id, label, kwargs) {
         var options = kwargs.values.map(function (value) {
             var defaultChecked = (value.name === kwargs.defaultCheckedValue);
             if (value.name === "Other") {
@@ -396,18 +399,18 @@ var SignupForm = React.createClass({
         });
         options = (<span className="col-xs-12">{options}</span>);
         return this.renderField(id, label, options);
-    },
-    renderCheckBox: function (id, label, defaultChecked = false) {
+    }
+    renderCheckBox(id, label, defaultChecked = false) {
         var checkbox = (<label className="radio-inline">
             <input type='checkbox' ref={id} defaultChecked={defaultChecked}/>
             {label}
         </label>);
         return this.renderField(id, "", checkbox);
-    },
-    renderCAPTCHA: function(id, label) {
+    }
+    renderCAPTCHA(id, label) {
         return this.renderField(id, label, <div ref="signupCAPTCHA"></div>);
-    },
-    renderField: function (id, label, field) {
+    }
+    renderField(id, label, field) {
         return (
 			<div className={$c('form-group', {'has-error': id in this.state.errors, 'required': this.getCompulsoryFields().includes(id)})}>
 				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
@@ -417,7 +420,7 @@ var SignupForm = React.createClass({
             </div>
         );
     }
-});
+}
 
 const Signup = withRouter(SignupInner);
 export { Signup };

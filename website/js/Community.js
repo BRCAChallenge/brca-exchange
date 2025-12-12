@@ -18,62 +18,71 @@ import auth from './auth';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
-var Community = React.createClass({
-    mixins: [PureRenderMixin],
-    componentWillMount: function () {
-        this.fetch(this.state);
-    },
-    getInitialState: function () {
-        return {
+class Community extends React.Component {
+    constructor(props) {
+	super(props);
+	this.state = {
             data: [],
             search: "",
             pageLength: 10,
             page: 0,
             totalPages: 1
         };
-    },
-    setPages: function({data, count}) {
+	this.communitySearchRef = React.createRef();
+    }
+
+    setPages = ({data, count}) => {
         return {
             data,
             count,
             totalPages: Math.ceil(count / this.state.pageLength)
         };
-    },
-    fetch: function (state) {
+    };
+
+    fetch = (state) => {
         backend.users(state).subscribe(
             resp => this.setState(this.setPages(resp)), // set data, count, totalPages
             () => this.setState({error: 'Problem connecting to server'}));
-    },
-    setStateFetch: function (opts) {
+    };
+
+    setStateFetch =(opts) => {
         var newState = {...this.state, ...opts};
         this.setState(newState);
         this.fetch(newState);
-    },
-    onChangePage: function (pageNumber) {
+    };
+
+    onChangePage = (pageNumber) => {
         this.setStateFetch({page: pageNumber});
-    },
-    onChangeSearch: function (search) {
+    };
+
+    onChangeSearch = (search) => {
         this.setStateFetch({search: search, page: 0});
-    },
-    onFilterRole: function (role) {
-        if (Role.get(role).length === 3) {
-            this.refs['community-search'].appendSearch(Role.get(role)[2]);
+    };
+
+    onFilterRole = (role) => {
+        if (Role.get(role).length === 3 && this.communitySearchRef.current) {
+            this.communitySearchRef.current.appendSearch(Role.get(role)[2]);
         }
-    },
-    logout: function() {
+    };
+
+    logout = () => {
         auth.logout();
         this.forceUpdate();
-    },
+    };
+
     componentDidMount() {
+	this.fetch(this.state);
         var searchq = this.searchq = new Subject();
         this.subs = searchq.pipe(
             debounceTime(500)
         ).subscribe(this.onChangeSearch);
-    },
+    };
+
     componentWillUnmount() {
         this.subs.unsubscribe();
-    },
-    render: function () {
+    }
+
+    render() {
         const query = new URLSearchParams(this.props.location?.search || "");
         var message;
         if (query.get("registrationSuccess") === "true") {
@@ -93,7 +102,7 @@ var Community = React.createClass({
                 </div>);
         }
         var {data, page, totalPages, error} = this.state;
-        var rows = _.map(data, row => {
+        var rows = _.map(data, (row, i) => {
 
             var avatar;
             if (row.has_image) {
@@ -106,7 +115,7 @@ var Community = React.createClass({
             var {city, state, country} = row;
             var locationString = _.values(_.pick({city, state, country}, v => v)).join(', ');
 
-            return (<tr>
+            return (<tr key={row.id ?? i}>
                 <td width="120px">
                     {avatar}
                 </td>
@@ -130,7 +139,8 @@ var Community = React.createClass({
                 </Row>
                 <Row>
                     <Col md={{ span: 10, offset: 1 }} sm={12}>
-                        <CommunityMap onFilterRole={this.onFilterRole} search={this.state.search}/>
+                        // <CommunityMap onFilterRole={this.onFilterRole} search={this.state.search}/>
+			<div style={{padding: 20, background: '#fafafa'}}>Community content loads without map.</div>
                     </Col>
                 </Row>
                 <Row>
@@ -152,7 +162,7 @@ var Community = React.createClass({
                             <h4>Search for a community member:</h4>
                         </Col>
                         <Col sm={6} lg={7}>
-                            <CommunitySearch ref="community-search" onChange={s => this.searchq.next(s)}/>
+                            <CommunitySearch ref={this.communitySearchRef} onChange={s => this.searchq.next(s)}/>
                         </Col>
                     </Col>
                 </Row>
@@ -208,20 +218,26 @@ var Community = React.createClass({
             </Grid>
         );
     }
-});
+}
 
-var CommunityMap = React.createClass({
-    getInitialState: () => ({ roles: [] }),
+class CommunityMap extends React.Component {
+    constructor(props) {
+	super(props);
+	this.state = { roles: [] };
+    }
+
     shouldComponentUpdate({search}) {
         return this.props.search !== search;
-    },
-    onFilterRole: function(role) {
+    }
+
+    onFilterRole = (role) => {
         var roles = this.state.roles.slice();
         roles[role] = !roles[role];
         this.setState({ roles: roles });
         this.filterSub.next(role);
-    },
-    componentDidMount: function() {
+    };
+
+    componentDidMount() {
 
         var initMap = function () {
             var self = this;
@@ -253,12 +269,12 @@ var CommunityMap = React.createClass({
 
             var legendControl = document.createElement('div');
             var roleMarkers = Role.options.map(role =>
-                <div className="map-legend-col" data-role={role[0]}>
+                <div key={`role-${role[0]}`} className="map-legend-col" data-role={role[0]}>
                     <img src={require(`./img/map/${role[0]}key.png`)} /> {role.length === 3 ? role[2] : role[1]}
                 </div>
             );
-            roleMarkers = _.values(_.groupBy(roleMarkers, (item, index) => index % 4)).map(group => <div className="map-legend-row">{group}</div>);
-            legendControl.innerHTML = ReactDOMServer.renderToStaticMarkup(
+            roleMarkers = _.values(_.groupBy(roleMarkers, (item, index) => index % 4)).map((group, i) => <div key={`legend-row-${i}`} className="map-legend-row">{group}</div>);
+	    legendControl.innerHTML = ReactDOMServer.renderToStaticMarkup(
                 <div>
                     <img src={require("./img/map/1.png")} className="map-legend-icon" />
                     <div className="map-legend-slide">
@@ -346,48 +362,57 @@ var CommunityMap = React.createClass({
             ).subscribe(this.updateMap);
         };
 
+	loadGoogleMaps(config.maps_key, initMap.bind(this));
+    }
 
-        google.load('maps', '3', {callback: initMap.bind(this), "other_params": "key=" + config.maps_key});
-    },
-
-    componentDidUpdate: function() {
+    componentDidUpdate() {
         this.updateMap();
-    },
-    componentWillUnmount: function() { 
+    }
+
+    componentWillUnmount() { 
         window.removeEventListener('resize', this.handleResize);
         if (this.subs) {
             this.subs.unsubscribe();
         }
-    },
+    }
 
-    render: function() {
+    render() {
         return <div id="communityMap"></div>;
     }
-});
+}
 
-var CommunitySearch = React.createClass({
-    getInitialState: () => ({
-        search: "",
-        placeholder: "name, organization, city, etc."
-     }),
-    onChange: function(e) {
+class CommunitySearch extends React.Component {
+    constructor(props) {
+	super(props);
+	this.state = {
+	    search: "",
+            placeholder: "name, organization, city, etc."
+	};
+    }
+
+    onChange = (e) => {
         this.setState({search: e.target.value});
         this.props.onChange(e.target.value);
-    },
-    onSubmit: function (ev) {
+    };
+
+    onSubmit = (ev) => {
         ev.preventDefault();
-    },
-    onBlur: function () {
+    };
+
+    onBlur = () => {
         this.setState({placeholder: "name, organization, city, etc."});
-    },
-    onFocus: function () {
+    };
+
+    onFocus = () => {
         this.setState({placeholder: ""});
-    },
-    appendSearch: function(term) {
+    };
+
+    appendSearch = (term) => {
         this.setState({search: `${this.state.search.trim()} ${term}`.trim()});
         this.props.onChange(this.state.search);
-    },
-    render: function() {
+    };
+
+    render() {
         return (<div className='search-box'>
             <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
                 <input type='submit' className='input-sm'style={{display: 'none'}} />
@@ -406,6 +431,27 @@ var CommunitySearch = React.createClass({
             </form>
         </div>);
     }
-});
+}
+
+// ---- Google Maps loader (async, no jsapi) ----
+function loadGoogleMaps(key, cb) {
+  if (!key) {
+    console.warn('Maps key missing; skipping map init');
+    return;
+  }
+  if (window.google && window.google.maps) {
+    cb();
+    return;
+  }
+  const script = document.createElement('script');
+  // async load + callback to your init function
+  window.__initMap = cb;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
+    key
+  )}&callback=__initMap&loading=async`;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+}
 
 export default withRouter(Community);
