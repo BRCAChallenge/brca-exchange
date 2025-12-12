@@ -1395,7 +1395,7 @@ class Application extends React.Component {
 const routes = (
     <Switch>
         <Route exact path='/' component={Home}/>
-	<Route path='about/:page' component={About}/>
+	<Route path='/about/:page' component={About}/>
 	<Route path='/community' component={Community}/>
 	<Route path='/help' component={Help}/>
 	{/*
