@@ -46,7 +46,7 @@ var slugify = require('./slugify');
 
 import content, {parseTooltips} from './content';
 import Community from './Community';
-//var FactSheet = require('./FactSheet');
+import FactSheet from './FactSheet';
 //var WhyDonate = require('./WhyDonate');
 //var FundraisingDetails = require('./FundraisingDetails');
 //import {Splicing} from'./Splicing';
@@ -1398,8 +1398,8 @@ const routes = (
 	<Route path='/about/:page' component={About}/>
 	<Route path='/community' component={Community}/>
 	<Route path='/help' component={Help}/>
+	<Route path='/factsheet' component={FactSheet}/>
 	{/*
-	<Route path='factsheet' component={FactSheet}/>
         <Route path='whydonate' component={WhyDonate}/>
         <Route path='fundraisingdetails' component={FundraisingDetails}/>
         <Route path='help' component={Help}/>
