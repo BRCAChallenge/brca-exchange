@@ -66,7 +66,7 @@ import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } fro
 //var {ChangePassword} = require('./ChangePassword');
 //var {Profile} = require('./Profile');
 import VariantSearch from './VariantSearch';
-//var {Releases, Release} = require('./Releases.js');
+import { Releases, Release } from './Releases.js';
 import Help from './Help.js';
 
 //var KeyInline = require('./components/KeyInline');
@@ -1399,6 +1399,8 @@ const routes = (
 	<Route path='/community' component={Community}/>
 	<Route path='/help' component={Help}/>
 	<Route path='/factsheet' component={FactSheet}/>
+	<Route path='/releases' component={Releases}/>
+        <Route path='/release/:id' component={Release}/>
 	{/*
         <Route path='whydonate' component={WhyDonate}/>
         <Route path='fundraisingdetails' component={FundraisingDetails}/>
