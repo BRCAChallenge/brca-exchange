@@ -60,6 +60,7 @@ def create_brca_exchange_lookup(brca_exchange_output_tsv):
         
         for row in reader:
             gene_symbol = row["Gene_Symbol"]
+            gnomADv4_id = row["Variant_id_GnomADv4"]
             pyhgvs_cdna = row["pyhgvs_cDNA"]
             v4_popfreq = row["Provisional_Evidence_Code_Gnomad_V4"]
             faf95_popmax_joint = row["faf95_popmax_joint_GnomADv4"]
@@ -78,12 +79,14 @@ def create_brca_exchange_lookup(brca_exchange_output_tsv):
                 parts = pyhgvs_cdna.split(':', 1)
                 join_key = f"{gene_symbol}:{parts[1]}"
                 lookup[join_key] = {
+                    'gnomADv4_id': gnomADv4_id if gnomADv4_id else '',
                     'v4_popfreq': v4_popfreq if v4_popfreq else '',
                     'faf95_popmax_joint': faf95_popmax_joint if faf95_popmax_joint else '',
                     'faf95_popmax_population': faf95_popmax_population if faf95_popmax_population else '',
                     'faf95_popmax_allele_count': faf95_popmax_allele_count,
                     'faf95_popmax_allele_number': faf95_popmax_allele_number
                 }
+
 
     return lookup
 
@@ -153,7 +156,7 @@ def merge_files(brca_exchange_output_tsv, enigma_tsv, output_file):
         # Trim trailing whitespace from column 12 (index 11) and replace spaces with underscores
         header = [field.rstrip().replace(' ', '_') if i >= 11 else field.replace(' ', '_')
                   for i, field in enumerate(header)]
-        header.extend(['faf95_popmax_joint_gnomADv4', 'faf95_popmax_population_joint_gnomADv4',
+        header.extend(['gnomADv4_id', 'faf95_popmax_joint_gnomADv4', 'faf95_popmax_population_joint_gnomADv4',
                       'faf95_popmax_allele_count_gnomADv4', 'faf95_popmax_allele_number_gnomADv4', 'V4_Popfreq'])
         writer.writerow(header)
 
@@ -179,6 +182,8 @@ def merge_files(brca_exchange_output_tsv, enigma_tsv, output_file):
 
             if variant_data:
                 matched += 1
+                gnomADv4_id = variant_data.get('gnomADv4_id', '')
+                print("Setting output variable to ", gnomADv4_id)
                 faf95_popmax_joint = variant_data.get('faf95_popmax_joint', '')
                 faf95_popmax_population = variant_data.get('faf95_popmax_population', '')
                 faf95_popmax_allele_count = variant_data.get('faf95_popmax_allele_count', '')
@@ -192,8 +197,9 @@ def merge_files(brca_exchange_output_tsv, enigma_tsv, output_file):
                 faf95_popmax_allele_number = ''
                 v4_popfreq = ''
 
-            row.extend([faf95_popmax_joint, faf95_popmax_population, faf95_popmax_allele_count,
-                       faf95_popmax_allele_number, v4_popfreq])
+            row.extend([gnomADv4_id, faf95_popmax_joint,
+                        faf95_popmax_population, faf95_popmax_allele_count,
+                        faf95_popmax_allele_number, v4_popfreq])
             writer.writerow(row)
 
     print(f"Complete! Output written to {output_file}")
