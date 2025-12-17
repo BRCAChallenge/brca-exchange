@@ -274,11 +274,11 @@ offending file, for future reference: website/node_modules/react-data-components
     margin-right: 6px;
 }
 
-.allele-frequency-gnomad-header .glyphicon-flag {
+.allele-frequency-gnomad-header .fa-flag {
     color: #C03657;
 }
 
-.gnomad-flag.glyphicon-flag {
+.gnomad-flag.fa-flag {
     text-align: left;
     color: #C03657;
     margin: 10px;
@@ -713,7 +713,7 @@ div#main {
     bottom: 1px;
 }
 
-.table th .glyphicon.help {
+.table th .fa.help {
     position: absolute;
 }
 
@@ -925,7 +925,7 @@ th[role='columnheader'] .help, .help-target .help {
     white-space: nowrap;
 }
 
-.glyphicon.help {
+.fa.help {
     margin: 3px;
     cursor: pointer;
     z-index: 10;
@@ -1654,7 +1654,7 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
 }
 
 /* generic styles for spinning glyphs, used in the help search bars' progress indicator */
-.glyphicon-spin {
+.fa-spin {
     animation: spin 1000ms infinite linear;
 }
 @keyframes spin {

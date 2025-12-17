@@ -152,7 +152,7 @@ class SearchController extends React.Component {
         return (
             <div className="input-group has-feedback has-search">
                 <div className="input-group-addon">
-                    <span className={`glyphicon ${this.state.searching ? "glyphicon-refresh glyphicon-spin" : "glyphicon-search"}`} />
+                    <span className={`fa ${this.state.searching ? "fa-refresh fa-spin" : "fa-search"}`} />
                 </div>
                 <input type="text" className="form-control" placeholder="Search" value={this.state.searchTerm} onChange={this.searchChanged} />
                 {
@@ -165,10 +165,10 @@ class SearchController extends React.Component {
                 }
                 <div className="input-group-btn">
                     <button type="button" disabled={this.state.matched <= 0} onClick={this.navForward} className="btn btn-default">
-                        <span className="glyphicon glyphicon-triangle-bottom" />
+                        <span className="fa fa-caret-down" />
                     </button>
                     <button type="button" disabled={this.state.matched <= 0} onClick={this.navBackward} className="btn btn-default">
-                        <span className="glyphicon glyphicon-triangle-top" />
+                        <span className="fa fa-caret-up" />
                     </button>
                 </div>
             </div>
