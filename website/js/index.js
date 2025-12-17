@@ -21,10 +21,10 @@ import DisclaimerModal from './DisclaimerModal';
 import RawHTML from './RawHTML';
 
 // Keep your existing CSS includes
-require('bootstrap/dist/css/bootstrap.css');
-import 'font-awesome/css/font-awesome.css';
-require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
-require('css/custom.css');
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'font-awesome/css/font-awesome.min.css';
+//import 'css/bootstrap-xlgrid.css'; // adds xl, xxl, xxxl grid sizes to bootstrap 3
+import 'css/custom.css';
 
 var _ = require('underscore');
 var backend = require('./backend');
@@ -106,7 +106,8 @@ class Footer extends React.PureComponent {
     render() {
         return (
             <div className="container footer">
-                <div className="col-sm-5 left-footer">
+		<div className = "row">
+                    <div className="col-sm-5 left-footer">
                     <ul>
                         <li><a href="/">Home</a></li>
                         <li><a href="/about/history">About</a></li>
@@ -114,11 +115,11 @@ class Footer extends React.PureComponent {
                         <li><a href="/about/api">API</a></li>
                         <li><a href="https://brcaexchange.org/blog">Blog</a></li>
                     </ul>
-                </div>
-                <div className="col-sm-2 logo-footer">
-                    <img href="#" src={brcaLogo} alt="brca exchange logo" />
-                </div>
-                <div className="col-sm-5 right-footer">
+                    </div>
+                    <div className="col-sm-2 logo-footer">
+                        <img src={brcaLogo} alt="brca exchange logo" />
+                    </div>
+                    <div className="col-sm-5 right-footer">
                     <ul>
                         <li>
                             <a href="/whydonate">Donate</a>
@@ -138,7 +139,8 @@ class Footer extends React.PureComponent {
                         </li>
                         <li><a href="/help">Help</a></li>
                     </ul>
-                </div>
+                    </div>
+		</div>
             </div>
         );
     }

@@ -113,13 +113,6 @@ offending file, for future reference: website/node_modules/react-data-components
     height: 125px;
 }
 
-.nav > li > a {
-    padding-left: 1em;
-    padding-right: 1em;
-    text-transform: uppercase;
-    font-weight: bold;
-}
-
 .navbar-brand {
     display: -ms-flexbox;
     display: flex;
@@ -127,7 +120,7 @@ offending file, for future reference: website/node_modules/react-data-components
     justify-content: center;
     align-items: center;
 
-    padding: 0 0 0 15px;
+    padding-left: var(--bs-gutter-x, .75rem);
 }
 
 .navbar-brand .brand-collapser {
@@ -137,7 +130,7 @@ offending file, for future reference: website/node_modules/react-data-components
     justify-content: center;
     align-items: center;
 
-    margin-left: 15px;
+    margin-left: var(--bs-gutter-x, .75rem);
 }
 
 .navbar-brand .logo-img {
@@ -211,20 +204,24 @@ offending file, for future reference: website/node_modules/react-data-components
 
 .navbar {
     min-height: 70px; /* XXX This value MUST match the setting in index.js */
-    padding-top: 10px
+    padding-top: 10px;
 }
-
-.navbar-default .navbar-nav > li > a.active {
-   color: #C03657;
-}
-
 
 .navbar-nav li.active span {
    color: #C03657;
 }
 
-.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
-    background-color: transparent;
+.navbar-nav .nav-link {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link[aria-current="page"] {
+  color: #C03657;
+  background-color: transparent;
 }
 
 /**************************************************************/
@@ -592,18 +589,33 @@ div.colorized-jumbo {
 /**************************************************************/
 /**********     Footer                    *********************/
 /**************************************************************/
+html, body { height: 100%; }
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 div#main {
-    padding-bottom: 120px;
-    border-bottom: 1px solid rgb(220,220,220);
+    flex: 1 0 auto;
+    padding-bottom: 0;
+    border-bottom: none;
 }
 
 .footer {
-    position: absolute;
-    margin-top: 120px;
-    height: 90px;
+    margin-top: auto;
+    position: static;
     width: 100%;
     text-align: center;
     font-size: 15px;
+    border-top: 1px solid rgb(220,220,220);
+    padding: 30px 0;
+}
+
+.footer ul {
+   padding: 0;
+   margin: 0;
 }
 
 .footer img {
@@ -756,10 +768,6 @@ table.community h3 {
 /**************************************************************/
 /**********     Other                     *********************/
 /**************************************************************/
-html {
-    font-size: 10px;
-}
-
 #main-grid li {
     font-size: 18px;
     font-weight: 200;
@@ -861,10 +869,10 @@ th[role='columnheader'] .help, .help-target .help {
 	visibility: hidden;
 }
 
-.popover.bottom > .arrow::after {
+.bs-popover-bottom > .popover-arrow::after {
     border-bottom-color: #f7f7f7;
 }
-.popover.bottom.in {
+.bs-popover-bottom {
     padding-top: 0;
     margin-top: 12px;
 }
