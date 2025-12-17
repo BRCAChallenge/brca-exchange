@@ -133,17 +133,26 @@ offending file, for future reference: website/node_modules/react-data-components
     margin-left: var(--bs-gutter-x, .75rem);
 }
 
+.navbar-brand .branding-clickable {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* optional, just nicer spacing */
+}
+
 .navbar-brand .logo-img {
-    margin-bottom: 10px;
+    margin-bottom: 0;
+    display: block;
 }
 
 .navbar-brand h1 {
     display: inline-block;
     font-stretch: condensed;
-    margin: 0 10px 10px 0;
+    margin: 0 10px 0 0;
 
     /*font-family: 'Lato', sans-serif;*/
     font-family: sans-serif;
+    font-size: 22px;
+    line-height: 1;
     color: black;
 }
 
@@ -203,9 +212,14 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 .navbar {
-    min-height: 70px; /* XXX This value MUST match the setting in index.js */
+    min-height: 56px; /* XXX This value MUST match the setting in index.js */
     padding-top: 10px;
 }
+
+/* Prevent fixed-top navbar from covering content below it */
+/*body {
+    padding-top: 56px;
+}*/
 
 .navbar-nav li.active span {
    color: #C03657;

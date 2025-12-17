@@ -117,7 +117,7 @@ class NavBarNew extends React.Component {
               				<Nav.Link as={Link} to="/variants">Variants</Nav.Link>
               				<Nav.Link as={Link} to="/community">Community</Nav.Link>
               				<Nav.Link as={Link} to="/help">Help</Nav.Link>
-              				<NavDropdown id="about-dropdown" title="More" className={this.activePath(path || '', 'about')}>
+              				<NavDropdown id="about-dropdown" title="More" align="end" className={this.activePath(path || '', 'about')}>
                 			<NavDropdown.Item as={Link} to="/about/thisSite" onClick={this.close}>This Site</NavDropdown.Item>
                 			<NavDropdown.Item as={Link} to="/factsheet" onClick={this.close}>Facts &amp; Stats</NavDropdown.Item>
                 			<NavDropdown.Item as={Link} to="/releases" onClick={this.close}>Data Releases</NavDropdown.Item>
