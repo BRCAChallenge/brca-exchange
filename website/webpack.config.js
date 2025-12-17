@@ -7,6 +7,7 @@ const path = require('path');
 
 const databaseKey = require('./databaseKey');
 const keyParam = databaseKey.map(k => `key[]=${k}`).join('&');
+const mdih = require('./loaders/markdown-id-headers');
 
 const port = process.env.BRCAPORT || 8088;
 
@@ -75,8 +76,20 @@ module.exports = {
         exclude: [path.resolve(__dirname, 'js/img/favicon')]
       },
 
-      // Raw markdown
-      { test: /\.md$/, type: 'asset/source' },
+      // Markdown
+      {
+	test: /\.md$/,
+        use: [
+          {
+            loader: 'html-loader',
+            options: { esModule: false }
+          },
+          {
+            loader: 'markdown-it-loader',
+            options: { html: true, use: [mdih] }
+          }
+        ]
+      },
 
       // TSV → emitted compact JSON (keeps your custom pipeline intention)
       {
