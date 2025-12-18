@@ -6,10 +6,10 @@ import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
 import LiteratureTable from "./components/LiteratureTable";
 import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
-//import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
-//import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
-//import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
-//import MupitStructure from './MupitStructure';
+import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
+import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
+import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
+import MupitStructure from './MupitStructure';
 
 require('./favicons');
 var React = require('react');

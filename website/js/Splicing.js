@@ -550,15 +550,15 @@ class Zoom extends React.Component {
     }
 }
 
-const SettingsPanel = React.createClass({
-    onHandleToggle: function (e) {
+class SettingsPanel extends React.Component {
+    onHandleToggle = (e) => {
         e.preventDefault();
 
         // ask our parent to toggle us
         this.props.onToggled();
-    },
+    };
 
-    render: function() {
+    render() {
         const settings = (
             <div className="container-fluid">
                 <div className="row">
@@ -628,7 +628,7 @@ const SettingsPanel = React.createClass({
             </div>
         );
     }
-});
+}
 
 
 export class Splicing extends React.Component {
