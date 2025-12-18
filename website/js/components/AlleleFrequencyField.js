@@ -3,7 +3,6 @@
 'use strict';
 
 import React from "react";
-import ReactDOM from 'react-dom';
 import {Collapse, Table} from "react-bootstrap";
 import classNames from "classnames";
 import util from '../util';
@@ -12,41 +11,41 @@ import slugify from "../slugify";
 const _ = require('underscore');
 
 
-const AlleleFrequencyField = React.createClass({
+class AlleleFrequencyField extends React.PureComponent {
 
-    getInitialState: function () {
+    constructor(props) {
+	super(props);
         // identifies which subpopulation groups are expanded
-        return {
+        this.state = {
             'Allele_frequency_exome_NFE_GnomAD': false,
             'Allele_frequency_exome_EAS_GnomAD': false,
             'Allele_frequency_genome_NFE_GnomAD': false,
             'Allele_frequency_genome_EAS_GnomAD': false
         };
-    },
+	this.panelRef = React.createRef();
+    }
 
-    getCollapsableDOMNode: function() {
-        return ReactDOM.findDOMNode(this.refs.panel);
-    },
+    getCollapsableDOMNode() {
+        return this.panelRef.current;
+    }
 
-    getCollapsableDimensionValue: function() {
-        return ReactDOM.findDOMNode(this.refs.panel).scrollHeight;
-    },
+    getCollapsableDimensionValue() {
+        return this.panelRef.current ? this.panelRef.current.scrollHeight : 0;
+    }
 
-    handleToggle: function(e, fieldName) {
+    handleToggle = (e, fieldName) => {
         e.preventDefault();
 
         // ask our parent to toggle us
         this.props.onFieldToggled(fieldName);
-    },
+    };
 
-    fieldToggled: function(field) {
+    fieldToggled = (field) => {
         // handles toggling of subpopulation groups in gnomad numerical tables
-        this.setState({
-            [field]: !this.state[field]
-        });
-    },
+        this.setState((prev) => ({ [field]: !prev[field] }));
+    };
 
-    generateHeader: function(field, fieldName, flag) {
+    generateHeader(field, fieldName, flag) {
         let fnLower = fieldName.toLowerCase();
         let isGenome = false;
         let isGnomad = false;
@@ -63,8 +62,8 @@ const AlleleFrequencyField = React.createClass({
                     {
                         isGnomad
                             ? isGenome
-                                ? <span className="allele-frequency-gnomad-header"><span className="genome-header">G</span><span className="glyphicon glyphicon-flag" style={{display: flag && !util.isEmptyField(flag) ? '' : 'none'}}></span></span>
-                                : <span className="allele-frequency-gnomad-header"><span className="exome-header">E</span><span className="glyphicon glyphicon-flag" style={{display: flag && !util.isEmptyField(flag) ? '' : 'none'}}></span></span>
+                                ? <span className="allele-frequency-gnomad-header"><span className="genome-header">G</span><span className="fa fa-flag" style={{display: flag && !util.isEmptyField(flag) ? '' : 'none'}}></span></span>
+                                : <span className="allele-frequency-gnomad-header"><span className="exome-header">E</span><span className="fa fa-flag" style={{display: flag && !util.isEmptyField(flag) ? '' : 'none'}}></span></span>
                             : ''
                     }
                     {
@@ -77,9 +76,9 @@ const AlleleFrequencyField = React.createClass({
                 </div>
             </div>
         );
-    },
+    }
 
-    getPopMax: function(fieldName, variant) {
+    getPopMax(fieldName, variant) {
         /*eslint-disable camelcase*/
         if (fieldName.includes("Genomes, Non-Cancer (Graphical)")) {
             let popmax = parseFloat(variant.faf95_popmax_genome_GnomADv3) ? parseFloat(variant.faf95_popmax_genome_GnomADv3).toPrecision(4) : '-';
@@ -89,15 +88,15 @@ const AlleleFrequencyField = React.createClass({
             return popmax + ' (' + variant.faf95_popmax_population_exome_GnomAD + ')';
         }
         /*eslint-enable camelcase*/
-    },
+    }
 
-    cleanRowTitle: function (title) {
+    cleanRowTitle(title) {
         title = title.replace(" (gnomAD V2.1 Exomes)", "");
         title = title.replace(" (gnomAD V3.1 Genomes)", "");
         return title;
-    },
+    }
 
-    getRowsAndDetermineIfEmpty: function(source, data, variant) {
+    getRowsAndDetermineIfEmpty(source, data, variant) {
         let rowsEmpty = 0;
 
         const rows = _.map(data, (rowDescriptor) => {
@@ -137,9 +136,9 @@ const AlleleFrequencyField = React.createClass({
         }, this);
         const allEmpty = rowsEmpty >= data.length;
         return [rows, allEmpty];
-    },
+    }
 
-    render: function() {
+    render() {
         const {field, fieldName, variant, hideEmptyItems} = this.props;
         let renderedRows, flag, gnomadLink, chr, transcript, refSeqTranscript, lrgLink, variantId, dataset;
         let allEmpty = false;
@@ -206,9 +205,9 @@ const AlleleFrequencyField = React.createClass({
                     onEntered={this.props.relayoutGrid}
                     onExited={this.props.relayoutGrid}
                 >
-                    <div>
+                    <div ref={this.panelRef}>
                         {flag && flag !== '-'
-                            ? <div className="glyphicon glyphicon-flag gnomad-flag"><span style={{color: 'black', marginLeft: '6px'}}>{flag}</span></div>
+                            ? <div className="gnomad-flag"><i className="fa fa-flag" aria-hidden="true" /><span style={{color: 'black', marginLeft: '6px'}}>{flag}</span></div>
                             : ''
                         }
                         {flag && flag !== '-'
@@ -249,7 +248,7 @@ const AlleleFrequencyField = React.createClass({
             </div>
         );
     }
-});
+}
 
 // Provide both default and named exports so either import style works
 export default AlleleFrequencyField;

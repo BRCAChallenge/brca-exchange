@@ -50,16 +50,16 @@ function getMarksForReviewStatus(status) {
     );
 }
 
-export const VariantSubmitter = React.createClass({
-    onHandleToggle: function(e) {
+export class VariantSubmitter extends React.PureComponent {
+    onHandleToggle = (e) => {
         e.preventDefault();
 
         // ask our parent to toggle us
         this.props.onReportToggled(this.props.idx);
-    },
+    };
 
     // source-specific headers
-    generateHeader: function(source, submitter, data) {
+    generateHeader(source, submitter, data) {
         let extraHeaderItems = null;
 
         if (source === 'ClinVar') {
@@ -118,9 +118,9 @@ export const VariantSubmitter = React.createClass({
                 </div>
             </div>
         );
-    },
+    }
 
-    render: function() {
+    render() {
         const {submitter, cols, data} = this.props;
 
         // for each panel, construct key-value pairs as a row of the table
@@ -163,4 +163,4 @@ export const VariantSubmitter = React.createClass({
             </div>
         );
     }
-});
+}

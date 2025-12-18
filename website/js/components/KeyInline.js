@@ -5,14 +5,14 @@
 import React from "react";
 import {OverlayTrigger, Popover} from "react-bootstrap";
 
-const KeyInline = React.createClass({
-    getCaret: function() {
+class KeyInline extends React.PureComponent {
+    getCaret = () => {
         return (
             this.props.expanded
                 ? <i className="fa fa-caret-down gnomad-header-row" aria-hidden="true" />
                 : <i className="fa fa-caret-right gnomad-header-row" aria-hidden="true" />
         );
-    },
+    };
 
     render() {
         const { onClick, tableKey, tooltip, noHelpLink, headerGroup } = this.props;
@@ -22,8 +22,11 @@ const KeyInline = React.createClass({
         }
 
         const popper = (
-            <Popover id={`tooltip_${tableKey}`} title={tableKey}>
-                <span dangerouslySetInnerHTML={{__html: tooltip}} />
+	    <Popover id={`tooltip_${tableKey}`}>
+                <Popover.Header as="h3">{tableKey}</Popover.Header>
+                <Popover.Body>
+                    <span dangerouslySetInnerHTML={{__html: tooltip}} />
+                </Popover.Body>
             </Popover>
         );
 
@@ -35,6 +38,6 @@ const KeyInline = React.createClass({
             </td>
         );
     }
-});
+}
 
 export default KeyInline;

@@ -2,16 +2,14 @@
 /*global require: false */
 'use strict';
 
-/*
 import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
 import LiteratureTable from "./components/LiteratureTable";
 import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
-import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
-import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
-import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
-import MupitStructure from './MupitStructure';
-*/
+//import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
+//import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
+//import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
+//import MupitStructure from './MupitStructure';
 
 require('./favicons');
 var React = require('react');
@@ -1406,7 +1404,6 @@ const routes = (
         <Route path='/whydonate' component={WhyDonate}/>
         <Route path='/fundraisingdetails' component={FundraisingDetails}/>
 	{/*
-	<Route path='help' component={Help}/>
         <Route path='signup' component={Signup}/>
         <Route path='signin' component={Signin}/>
         <Route path='reset_password' component={ResetPassword}/>
@@ -1417,8 +1414,6 @@ const routes = (
         // <Route path='variants' />
         <Route path='variant/:id' component={VariantDetail}/>
         <Route path='variant_literature/:id' component={LiteratureTable}/>
-        <Route path='releases' component={Releases}/>
-        <Route path='release/:id' component={Release}/>
 	*/}
     </Switch>
 );
