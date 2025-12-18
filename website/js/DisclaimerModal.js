@@ -56,7 +56,7 @@ class DisclaimerModal extends React.Component {
     linkModal = () => {
         return (
             <span>
-                <a style={{cursor: "pointer"}} onClick={this.open}>{this.props.text}</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); this.open(); }}>{this.props.text}</a>
 		{this.state.showModal && (
                     <Modal show={true} onHide={this.close}>
                         <RawHTML html={content.pages.disclaimer} />
