@@ -48,7 +48,7 @@ import content, {parseTooltips} from './content';
 import Community from './Community';
 import FactSheet from './FactSheet';
 import WhyDonate from './WhyDonate';
-//var FundraisingDetails = require('./FundraisingDetails');
+import FundraisingDetails from './FundraisingDetails';
 //import {Splicing} from'./Splicing';
 import { withRouter, BrowserRouter, Switch, Route, Link } from 'react-router-dom';
 
@@ -1404,9 +1404,9 @@ const routes = (
 	<Route path='/releases' component={Releases}/>
         <Route path='/release/:id' component={Release}/>
         <Route path='/whydonate' component={WhyDonate}/>
+        <Route path='/fundraisingdetails' component={FundraisingDetails}/>
 	{/*
-        <Route path='fundraisingdetails' component={FundraisingDetails}/>
-        <Route path='help' component={Help}/>
+	<Route path='help' component={Help}/>
         <Route path='signup' component={Signup}/>
         <Route path='signin' component={Signin}/>
         <Route path='reset_password' component={ResetPassword}/>
