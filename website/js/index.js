@@ -344,18 +344,65 @@ function urlFromDatabase(state) {
     }, v => (!isEmptyVal(v)));
 
 }
-
-var Database = React.createClass({
+*/
+class Database extends React.Component {
     // Note this is not a pure component because of the calls to
     // getQuery().
-    mixins: [Navigation, State],
-    getInitialState: function () {
-        return {
-            showModal: false,
-            restoringDefaults: false
-        };
-    },
-    showVariant: function (row, event) {
+    constructor(props) {
+        super(props);
+        this.state = { showModal: false, restoringDefaults: false };
+
+        this.showVariant = this.showVariant.bind(this);
+        this.showHelp = this.showHelp.bind(this);
+        this.onChange = this.onChange.bind(this);
+        this.restoreDefaults = this.restoreDefaults.bind(this);
+        this.toggleMode = this.toggleMode.bind(this);
+    }
+
+    // replacement for react-router State mixin getQuery()
+    getQuery() {
+        const search = (this.props.location && this.props.location.search) || '';
+        const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+        const out = {};
+        params.forEach((v, k) => {
+            // preserve repeated keys as arrays
+            if (Object.prototype.hasOwnProperty.call(out, k)) {
+                out[k] = Array.isArray(out[k]) ? out[k].concat(v) : [out[k], v];
+            } else {
+                out[k] = v;
+            }
+        });
+        return out;
+    }
+
+    // replacement for react-router Navigation mixin transitionTo()
+    transitionTo(path, _params, query) { // _params kept for callsite compatibility
+        let search = '';
+        if (query && Object.keys(query).length) {
+	const sp = new URLSearchParams();
+            Object.entries(query).forEach(([k, v]) => {
+                if (v === undefined || v === null) return;
+                if (Array.isArray(v)) v.forEach(x => sp.append(k, String(x)));
+                else sp.set(k, String(v));
+            });
+            const qs = sp.toString();
+            search = qs ? `?${qs}` : '';
+        }
+
+        // support history/router injection patterns
+        const router = this.props.router || this.props.history || (this.context && this.context.router);
+        const nextLoc = { pathname: path, search };
+
+        if (router) {
+            if (typeof router.push === 'function') return router.push(nextLoc);
+            if (typeof router.transitionTo === 'function') return router.transitionTo(path, _params, query);
+        }
+
+        // last resort
+        window.location.assign(path + search);
+    }
+
+    showVariant(row, event) {
           var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
           if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
               d3TipDiv[0].style.opacity = '0';
@@ -371,34 +418,38 @@ var Database = React.createClass({
               // open it in the current window
               this.transitionTo(`/variant/${variantPathJoin(row)}`);
           }
-    },
-    showHelp: function (title) {
+    }
+
+    showHelp(title) {
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
         if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
             d3TipDiv[0].style.opacity = '0';
             d3TipDiv[0].style.pointerEvents = 'none';
         }
         this.transitionTo(`/help#${slugify(title)}`);
-    },
-    componentDidMount: function () {
-        // Updated RxJS 6+ syntax
-        var q = this.urlq = new Subject();
-        this.subs = q.pipe(debounceTime(500)).subscribe(this.onChange);
-    },
-    componentWillUnmount: function () {
-        this.subs.unsubscribe();
-    },
-    restoreDefaults: function(callback) {
-        this.setState({restoringDefaults: true}, function() {
-            this.transitionTo('/variants', null, null);
+    }
+
+    componentDidMount() {
+        this.urlq = new Subject();
+        this.subs = this.urlq.pipe(debounceTime(500)).subscribe(this.onChange);
+    }
+
+    componentWillUnmount() {
+        if (this.subs) this.subs.unsubscribe();
+    }
+
+    restoreDefaults(callback) {
+        this.setState({restoringDefaults: true}, () => {
+            this.transitionTo('/variants');
 
             // Callback resets filters in DataTable.
             // HACK: wrapped in setTimeout to ensure that it happens
             // after transitionTo is complete.
             setTimeout(callback, 0);
         });
-    },
-    onChange: function (state) {
+    }
+
+    onChange(state) {
         if (this.props.show) {
             var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
             if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
@@ -411,12 +462,14 @@ var Database = React.createClass({
                 this.setState({restoringDefaults: false});
             }
         }
-    },
-    toggleMode: function () {
+    }
+
+    toggleMode() {
         this.props.toggleMode();
         this.setState({ showModal: false });
-    },
-    render: function () {
+    }
+
+    render() {
         var {show} = this.props,
             params = databaseParams(this.getQuery());
         var table, message;
@@ -467,8 +520,9 @@ var Database = React.createClass({
                 {table}
             </Grid>
         );
-    },
-    renderMessage: function(message) {
+    }
+
+    renderMessage(message) {
         return  (
 			<Row>
 				<Col className="jumbotron colorized-jumbo">
@@ -496,8 +550,8 @@ var Database = React.createClass({
 				</Col>
 			</Row>);
     }
-});
-
+}
+/*
 // get display name for a given key from VariantTable.js column specification
 function getDisplayName(key) {
     const researchMode = (localStorage.getItem("research-mode") === 'true');
@@ -558,21 +612,106 @@ function isOpenFromStorage(key) {
     // legacy semantics: localStorage "true" means collapsed
     return localStorage.getItem(key) !== "true";
 }
+*/
+class VariantDetail extends React.Component {
+    constructor(props) {
+        super(props);
 
-var VariantDetail = React.createClass({
-    mixins: [Navigation, State],
-    showHelp: function (event, title) {
+        this.state = {
+            hideEmptyItems: (localStorage.getItem("hide-empties") === 'true'),
+            tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true'),
+            // track open/closed state for cards (keyed by localStorage key)
+            openGroups: {}
+        };
+
+        // bind methods passed as callbacks / props
+        this.showHelp = this.showHelp.bind(this);
+        this.relayoutOnCollapsed = this.relayoutOnCollapsed.bind(this);
+        this.onChangeGroupVisibility = this.onChangeGroupVisibility.bind(this);
+        this.isGroupOpenLS = this.isGroupOpenLS.bind(this);
+        this.toggleCard = this.toggleCard.bind(this);
+        this.setEmptyRowVisibility = this.setEmptyRowVisibility.bind(this);
+        this.determineDiffRowColor = this.determineDiffRowColor.bind(this);
+        this.getPathogenicity = this.getPathogenicity.bind(this);
+        this.generateDiffRows = this.generateDiffRows.bind(this);
+        this.toggleSubmitterGroup = this.toggleSubmitterGroup.bind(this);
+
+        // debounce relayout (same behavior as before)
+        this.relayoutGrid = debounce((fullRefresh) => {
+            if (this.isogrid) this.isogrid.relayout(fullRefresh);
+        }, 100);
+
+        this._subs = [];
+    }
+
+    // ---- router helpers (replace Navigation/State mixins) ----
+    getParamId() {
+        return (
+            (this.props.params && this.props.params.id) ||
+            (this.props.match && this.props.match.params && this.props.match.params.id)
+        );
+    }
+
+    getQuery() {
+        const search = (this.props.location && this.props.location.search) || '';
+        const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+        const out = {};
+        params.forEach((v, k) => {
+            if (Object.prototype.hasOwnProperty.call(out, k)) {
+                out[k] = Array.isArray(out[k]) ? out[k].concat(v) : [out[k], v];
+            } else {
+                out[k] = v;
+            }
+        });
+        return out;
+    }
+
+    buildURL(path, query) {
+        if (!query || !Object.keys(query).length) return path;
+        const [base, hash = ''] = path.split('#', 2);
+        const sp = new URLSearchParams();
+        Object.entries(query).forEach(([k, v]) => {
+            if (v === undefined || v === null) return;
+            if (Array.isArray(v)) v.forEach(x => sp.append(k, String(x)));
+            else sp.set(k, String(v));
+        });
+        const qs = sp.toString();
+        return base + (qs ? `?${qs}` : '') + (hash ? `#${hash}` : '');
+    }
+
+    transitionTo(path, _params, query) {
+        const url = this.buildURL(path, query);
+        const router = this.props.router || this.props.history || (this.context && this.context.router);
+        if (router) {
+            if (typeof router.push === 'function') return router.push(url);
+            if (typeof router.transitionTo === 'function') return router.transitionTo(path, _params, query);
+        }
+        window.location.assign(url);
+    }
+
+    replaceWith(pathTemplate, params, query) {
+        const path = params && params.id
+            ? pathTemplate.replace(':id', params.id)
+            : pathTemplate;
+        const url = this.buildURL(path, query);
+        const router = this.props.router || this.props.history || (this.context && this.context.router);
+        if (router) {
+            if (typeof router.replace === 'function') return router.replace(url);
+            if (typeof router.replaceWith === 'function') return router.replaceWith(pathTemplate, params, query);
+        }
+        window.location.replace(url);
+    }
+
+    showHelp(event, title) {
         event.preventDefault();
         this.transitionTo(`/help#${slugify(title)}`);
-    },
-    getInitialState: () => ({
-        hideEmptyItems: (localStorage.getItem("hide-empties") === 'true'),
-        tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true'),
-        // track open/closed state for cards (keyed by localStorage key)
-        openGroups: {}
-    }),
-    componentWillMount: function () {
-        backend.variant(this.props.params.id).subscribe(
+    }
+
+    componentDidMount() {
+        const id = this.getParamId();
+
+	this._subs.push(
+	    backend.variant(id).subscribe(
             resp => {
                 if (resp.hasOwnProperty('redirect') && resp.redirect === true) {
                     this.transitionTo('/variants', null, {search: resp.data});
@@ -581,82 +720,87 @@ var VariantDetail = React.createClass({
                 }
             },
             () => { this.setState({error: 'Problem connecting to server'}); }
+	    )
         );
 
-        backend.variantReports(this.props.params.id).subscribe(
-            resp => {
+        this._subs.push(
+            backend.variantReports(id).subscribe(
+	    resp => {
                 const groupedReports = _.groupBy(resp.data, 'Source');
                 this.setState({reports: groupedReports, error: null}, () => {
                     this.relayoutGrid();
                 });
-            }, () => {
+            }, 
+	    () => {
                 this.setState({reportError: 'Problem retrieving reports'});
                 console.warn("Couldn't retrieve reports!");
             }
+	    )
         );
 
-    },
-    componentWillUpdate: function(nextProps, nextState) {
-        if (nextProps.mode !== this.props.mode) {
-            this.setState({
-                tooltips: parseTooltips(nextProps.mode === 'research_mode')
-            });
+    }
+
+    componentWillUnmount() {
+        this._subs.forEach(s => s && typeof s.unsubscribe === 'function' && s.unsubscribe());
+        if (this.relayoutGrid && this.relayoutGrid.cancel) this.relayoutGrid.cancel();
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        // mode change => refresh tooltips + relayout
+        if (prevProps.mode !== this.props.mode) {
+            this.setState({ tooltips: parseTooltips(this.props.mode === 'research_mode') });
+            setTimeout(() => this.relayoutGrid(true), 0);
         }
 
-        const { data } = nextState;
-        if (data && this.props.params.id !== data[0].CA_ID) {
+        // redirect logic (moved from componentWillUpdate)
+        const { data } = this.state;
+        const currentId = this.getParamId();
+        if (data && data[0] && currentId !== data[0].CA_ID) {
             const { noRedirect } = this.getQuery();
             if (noRedirect !== "true") {
-                const redirectToID = data[0].CA_ID  || data[0].id ;
-                if (parseInt(this.props.params.id) === data[0].id) {
+                const redirectToID = data[0].CA_ID || data[0].id;
+                if (parseInt(currentId) === data[0].id) {
                     this.replaceWith(`/variant/:id`, { id: redirectToID }, {});
-                }
-                else {
-                    this.replaceWith(`/variant/:id`, { id: redirectToID }, { redirectedFrom: this.props.params.id });
+                } else if (!prevState.data || prevState.data !== data || prevProps.params?.id !== currentId) {
+                    this.replaceWith(`/variant/:id`, { id: redirectToID }, { redirectedFrom: currentId });
                 }
             }
         }
-    },
-    componentDidUpdate: function(prevProps, prevState) {
-        if (prevProps.mode !== this.props.mode) {
-            setTimeout(() => {
-                this.relayoutGrid(true);
-            }, 0);
-        }
+
+        // set document title once data arrives
         if (!prevState.data && this.state.data) {
-            const data = this.state.data;
-            const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
-            const variant = data[variantVersionIdx] || data[0];
+            const dataNow = this.state.data;
+            const variantVersionIdx = dataNow.findIndex(x => x.id === parseInt(this.getParamId()));
+            const variant = dataNow[variantVersionIdx] || dataNow[0];
             document.title = `${variant['HGVS_cDNA'].split(":")[1]} (${variant['Gene_Symbol']}) - BRCA Exchange`;
         }
-    },
-    pathogenicityChanged: function(pathogenicityDiff) {
+    }
+
+    pathogenicityChanged(pathogenicityDiff) {
         return (pathogenicityDiff.added || pathogenicityDiff.removed) ? true : false;
-    },
-    setEmptyRowVisibility: function(hideEmptyItems) {
+    }
+
+    setEmptyRowVisibility(hideEmptyItems) {
         localStorage.setItem('hide-empties', hideEmptyItems);
         this.setState({
             hideEmptyItems: hideEmptyItems
         }, () => {
             this.relayoutGrid();
         });
-    },
-    truncateData: function(field) {
+    }
+
+    truncateData(field) {
         const fieldsToTruncate = ["Genomic_Coordinate_hg38", "Genomic_Coordinate_hg37"];
         if (fieldsToTruncate.indexOf(field) > -1) {
             return true;
         } else {
             return false;
         }
-    },
-    relayoutGrid: debounce(function(fullRefresh) {
-        if (this.isogrid) {
-            this.isogrid.relayout(fullRefresh);
-        }
-    }, 100),
-    relayoutOnCollapsed: function(/* collapser *//*) {
+    }
+
+    relayoutOnCollapsed(/* collapser */) {
         console.warn("Deprecated relayoutOnCollapsed; replace relayoutOnCollapsed handlers w/direct calls to relayoutGrid() in your collapsing components");
-    },
+    }
     // legacy API kept for callers; now just flips storage and local openGroups
     onChangeGroupVisibility(groupTitle, event) {
         event.preventDefault();
@@ -665,22 +809,22 @@ var VariantDetail = React.createClass({
         localStorage.setItem(key, willBeCollapsed ? "true" : "false");
         const willBeOpen = !willBeCollapsed;
         this.setState({ openGroups: { ...this.state.openGroups, [key]: willBeOpen } });
-    },
+    }
     isGroupOpenLS(key) {
         // local state wins, otherwise read from storage (for initial render)
         if (this.state.openGroups.hasOwnProperty(key)) { return !!this.state.openGroups[key]; }
         return isOpenFromStorage(key);
-    },
+    }
     toggleCard(key) {
         const nowOpen = !this.isGroupOpenLS(key);
         // store "true" when collapsed (legacy semantics)
         localStorage.setItem(key, nowOpen ? "false" : "true");
         this.setState({ openGroups: { ...this.state.openGroups, [key]: nowOpen } });
-    },
-    determineDiffRowColor: function(highlightRow) {
+    }
+    determineDiffRowColor(highlightRow) {
         return highlightRow ? 'table-danger' : '';
-    },
-    getPathogenicity: function(version, isReport) {
+    }
+    getPathogenicity(version, isReport) {
         if (isReport) {
             if (version.Source === "ClinVar") {
                 return util.getFormattedFieldByProp("Clinical_Significance_ClinVar", version);
@@ -690,8 +834,8 @@ var VariantDetail = React.createClass({
         } else {
             return util.getFormattedFieldByProp("Pathogenicity_expert", version);
         }
-    },
-    generateDiffRows: function(cols, data, isReports) {
+    }
+    generateDiffRows(cols, data, isReports) {
         var diffRows = [];
         var relevantFieldsToDisplayChanges = cols.map(function(col) {
             return col.prop;
@@ -772,23 +916,25 @@ var VariantDetail = React.createClass({
         }
 
         return diffRows;
-    },
-    toggleSubmitterGroup: function(sourceName, submitter) {
+    }
+
+    toggleSubmitterGroup(sourceName, submitter) {
         this.setState((pstate) => {
             const k = `submitter-group-${sourceName}-${submitter}`;
             return {
                 [k]: !(!pstate.hasOwnProperty(k) || pstate[k])
             };
         });
-    },
+    }
+
     // render for VariantDetail
-    render: function () {
+    render() {
         const {data, error} = this.state;
         if (!data) {
             return <div />;
         }
 
-        const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
+        const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.getParamId()));
         const variant = data[variantVersionIdx] || data[0];
         const release = variant["Data_Release"];
         let cols, groups;
@@ -1332,8 +1478,8 @@ var VariantDetail = React.createClass({
             </Grid>
         );
     }
-});
-*/
+}
+
 class Application extends React.Component {
     constructor(props){
 	super(props);
@@ -1402,6 +1548,7 @@ const routes = (
         <Route path='/release/:id' component={Release}/>
         <Route path='/whydonate' component={WhyDonate}/>
         <Route path='/fundraisingdetails' component={FundraisingDetails}/>
+        <Route path='/variants' />
 	{/*
         <Route path='signup' component={Signup}/>
         <Route path='signin' component={Signin}/>
