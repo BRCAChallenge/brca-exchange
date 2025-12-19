@@ -1,11 +1,11 @@
 'use strict';
 
-var React = require('react'),
-    BarChart = require('./BarChart'),
-    util = require('./util'),
-    _ = require('lodash');
+import React from 'react';
+import BarChart from './BarChart';
+import util from './util';
+import _ from 'lodash';
 
-var alleleFrequencyCharts = function(variant, prop) {
+const alleleFrequencyCharts = function(variant, prop) {
     return <AlleleFrequencyCharts variant={variant} prop={prop} />;
 };
 
@@ -17,15 +17,17 @@ class AlleleFrequencyCharts extends React.Component {
         };
     }
     shouldComponentUpdate(nextProps, nextState) {
-        let {props, state, refs} = this;
-        if (props.variant !== nextProps.variant) {
+        if (this.props.variant !== nextProps.variant) {
             return true;
         }
 
-        if (state.scaleIndex !== nextState.scaleIndex) {
-            refs[`${props.prop}_alleleFreq2`].getChart().update({
-                yAxis: { max: this.scales[nextState.scaleIndex] }
-            });
+        if (this.state.scaleIndex !== nextState.scaleIndex) {
+            const chart = this.scaledChartRef.current && this.scaledChartRef.current.getChart
+		? this.scaledChartRef.current.getChart()
+		: null;
+            if (chart && chart.update) {
+		chart.update({ yAxis: { max: this.scales[nextState.scaleIndex] } });
+            }
         }
 
         return false;
@@ -35,7 +37,7 @@ class AlleleFrequencyCharts extends React.Component {
         let frequencyProps, title, pointFormat;
         if (prop === 'Allele_Frequency_Charts_Exome_GnomAD') {
             if (!variant['Variant_in_GnomAD']) {
-                return false;
+                return null;
             }
             frequencyProps = [
                 {label: 'AFR', prop: 'Allele_frequency_exome_AFR_GnomAD'},
@@ -52,7 +54,7 @@ class AlleleFrequencyCharts extends React.Component {
         }
         else if (prop === 'Allele_Frequency_Charts_Genome_GnomADv3') {
             if (!variant.Variant_in_GnomADv3) {
-                return false;
+                return null;
             }
             frequencyProps = [
                 {label: 'AFR', prop: 'Allele_frequency_genome_AFR_GnomADv3'},
@@ -69,12 +71,12 @@ class AlleleFrequencyCharts extends React.Component {
             title = 'gnomAD Genomes';
             pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
         } else {
-            return false;
+            return null;
         }
         // extract all frequencies specified in frequencyProps,
         // if they are all empty fields, do not display chart
         if (_.every(_.values(_.pick(variant, _.map(frequencyProps, e => e.prop))), util.isEmptyField)) {
-            return false;
+            return null;
         }
 
         let categories = [];
@@ -174,10 +176,10 @@ class AlleleFrequencyCharts extends React.Component {
                     <div className="alleleFrequencyChartOuterContainer">
                         <div className="alleleFrequencyChartContainer">
                             <div className='alleleFrequencyChart'>
-                                <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq1`} options={fullscaleChartOptions}/>
+                                <BarChart container={`${prop}_alleleFreq1`} options={fullscaleChartOptions}/>
                             </div>
-                            <div className='alleleFrequencyChart' onClick={this.toggleScale.bind(this, `${prop}_alleleFreq2`)}>
-                                <BarChart ref={`${prop}_alleleFreq2`} container={`${prop}_alleleFreq2`} options={scaledChartOptions} />
+                            <div className='alleleFrequencyChart' onClick={this.toggleScale}>
+                                <BarChart ref={this.scaledChartRef} container={`${prop}_alleleFreq2`} options={scaledChartOptions} />
                                 <div style={{textAlign: 'center', color: 'grey', fontSize: '12px'}}>(click chart to change scale)</div>
                             </div>
                         </div>
@@ -195,4 +197,4 @@ class AlleleFrequencyCharts extends React.Component {
     }
 }
 
-module.exports = alleleFrequencyCharts;
+export default alleleFrequencyCharts;

@@ -15,7 +15,6 @@ import SelectField from './SelectField';
 import _ from 'underscore';
 import cx from 'classnames';
 import hgvs from './hgvs';
-import PureRenderMixin from './PureRenderMixin'; // deep-equals version of PRM
 import util from './util';
 
 var filterDisplay = v => v == null ? 'Any' : v;
@@ -77,9 +76,8 @@ var FastTable = React.createClass({
 */
 
 // TEMPORARY: Simple table component until react-data-components-brcaex is available
-var FastTable = React.createClass({
-    mixins: [PureRenderMixin],
-    normalizeGenomicCoordinate: function(field, hgvsValue, variantData) {
+class FastTable extends React.Component {
+    normalizeGenomicCoordinate(field, hgvsValue, variantData) {
         if (!util.isEmptyField(hgvsValue)) {
             variantData[field] = hgvsValue;
         } else {
@@ -88,8 +86,8 @@ var FastTable = React.createClass({
             }
         }
         return variantData;
-    },
-    determineGenomicCoordinates: function(variantData) {
+    }
+    determineGenomicCoordinates(variantData) {
         let field = "Genomic_Coordinate_hg37";
         let hgvsValue = variantData.Genomic_HGVS_37;
         variantData = this.normalizeGenomicCoordinate(field, hgvsValue, variantData);
@@ -98,16 +96,16 @@ var FastTable = React.createClass({
         hgvsValue = variantData.Genomic_HGVS_38;
         variantData = this.normalizeGenomicCoordinate(field, hgvsValue, variantData);
         return variantData;
-    },
-    onSort: function(column) {
+    }
+    onSort =(column) => {
         if (this.props.onSort) {
             const currentSort = this.props.sortBy;
             const newOrder = (currentSort && currentSort.prop === column.prop && currentSort.order === 'asc') ? 'desc' : 'asc';
             this.props.onSort({prop: column.prop, order: newOrder});
         }
-    },
-    render: function () {
-        var {dataArray, columns, className, buildRowOptions, onRowClick, buildHeader, sortBy} = this.props;
+    };
+    render() {
+        let {dataArray, columns, className, buildRowOptions, onRowClick, buildHeader, sortBy} = this.props;
         
         if (dataArray.length > 0) {
             dataArray = _.map(dataArray, function(variantData) {
@@ -125,11 +123,11 @@ var FastTable = React.createClass({
                             
                             return (
                                 <th 
-                                    key={idx}
+                                    key={column.prop || idx}
                                     onClick={() => this.onSort(column)}
                                     style={{cursor: 'pointer'}}
                                 >
-                                    {buildHeader ? buildHeader(column) : column.title}
+                                    {buildHeader ? buildHeader(column.title) : column.title}
                                     {sortIcon}
                                 </th>
                             );
@@ -149,12 +147,16 @@ var FastTable = React.createClass({
                             return (
                                 <tr 
                                     key={rowIdx} 
-                                    onClick={(e) => onRowClick && onRowClick(row, e)}
-                                    style={{cursor: onRowClick ? 'pointer' : 'default'}}
+                                    onMouseUp={(e) => {
+                                        if (rowOptions.onMouseUp) return rowOptions.onMouseUp(e);
+                                        if (onRowClick) return onRowClick(row, e);
+                                        return null;
+                                    }}
+				    style={{cursor: (rowOptions.onMouseUp || onRowClick) ? 'pointer' : 'default'}}
                                     {...rowOptions}
                                 >
                                     {columns.map((column, colIdx) => (
-                                        <td key={colIdx}>
+                                        <td key={column.prop || colIdx}>
                                             {column.render ? column.render(row[column.prop], row) : row[column.prop]}
                                         </td>
                                     ))}
@@ -166,7 +168,7 @@ var FastTable = React.createClass({
             </BootstrapTable>
         );
     }
-});
+}
 
 // Merge new state (e.g. initialState) with existing state,
 // deep-merging fields that are objects.
@@ -178,8 +180,42 @@ function mergeState(state, newState) {
     return {...state, columnSelection: cs, sourceSelection: ss, filterValues: fv, ...otherProps};
 }
 
-var DataTable = React.createClass({
-    shouldComponentUpdate: function (nextProps, nextState) {
+class DataTable extends React.Component {
+    constructor(props) {
+        super(props);
+
+        let filterValues = JSON.parse(localStorage.getItem('filterValues'));
+	    if (filterValues === null || filterValues === undefined) {
+            filterValues = {};
+        }
+
+        this.state = mergeState({
+            data: [],
+            filtersOpen: false,
+            filterValues,
+            columnSelectorsOpen: false,
+            search: '',
+            mode: props.mode,
+            columnSelection: props.columnSelection,
+            sourceSelection: props.sourceSelection,
+            pageLength: 20,
+            page: 0,
+            totalPages: 0,
+            windowWidth: window.innerWidth
+        }, props.initialState);
+
+        this.fetchq = new Subject();
+        this.subs = this.fetchq.pipe(
+            map(props.fetch),
+            debounceTime(100),
+            switchMap(obs => obs)
+        ).subscribe(
+            resp => this.setState(setPages(resp, this.state.pageLength)),
+            () => this.setState({error: 'Problem connecting to server'})
+        );
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
         return (
             this.state.filtersOpen !== nextState.filtersOpen ||
             this.state.columnSelectorsOpen !== nextState.columnSelectorsOpen ||
@@ -195,65 +231,49 @@ var DataTable = React.createClass({
             !_.isEqual(this.state.filterColumns, nextState.filterColumns) ||
             !_.isEqual(_.map(this.state.data, r => r.id), _.map(nextState.data, r=> r.id))
         );
-    },
-    componentWillMount: function () {
-        var q = this.fetchq = new Subject();
-        this.subs = q.pipe(
-            map(this.props.fetch),
-            debounceTime(100),
-            switchMap(obs => obs)
-        ).subscribe(
-            resp => this.setState(setPages(resp, this.state.pageLength)), // set data, count, totalPages
-            () => this.setState({error: 'Problem connecting to server'}));
-    },
-    componentWillUnmount: function () {
-        window.removeEventListener('resize', this.handleResize);
-        this.subs.unsubscribe();
-    },
-    componentDidMount: function () {
+    }
+    componentDidMount() {
         window.addEventListener('resize', this.handleResize);
         this.fetch(this.state);
-    },
-    getInitialState: function () {
-        let filterValues = JSON.parse(localStorage.getItem('filterValues'));
-        if (filterValues === null || filterValues === undefined) {
-            filterValues = {};
-        }
-        return mergeState({
-            data: [],
-            filtersOpen: false,
-            filterValues: filterValues,
-            columnSelectorsOpen: false,
-            search: '',
-            mode: this.props.mode,
-            columnSelection: this.props.columnSelection,
-            sourceSelection: this.props.sourceSelection,
-            pageLength: 20,
-            page: 0,
-            totalPages: 0,
-            windowWidth: window.innerWidth
-        }, this.props.initialState);
-    },
-    componentWillReceiveProps: function(newProps) {
-        var newState = mergeState(this.state, newProps.initialState);
-        newState.sourceSelection = newProps.sourceSelection;
-        newState.columnSelection = newProps.columnSelection;
-        this.setState(newState);
-        if (newProps.changeInProgress === true) {
-            // if a change is made midway through the component
-            // tree, changes must propagate back up to the top before
-            // a new request is made
-            this.propagateChanges(newState);
-        } else {
-            this.fetch(newState);
-        }
-    },
-    handleResize: function() {
+    }
+
+    componentDidUpdate(prevProps) {
+        const propsChanged =
+            prevProps.initialState !== this.props.initialState ||
+            prevProps.mode !== this.props.mode ||
+            prevProps.changeInProgress !== this.props.changeInProgress ||
+            !_.isEqual(prevProps.sourceSelection, this.props.sourceSelection) ||
+            !_.isEqual(prevProps.columnSelection, this.props.columnSelection);
+
+        if (!propsChanged) return;
+
+        const nextState = mergeState(this.state, this.props.initialState || {});
+        nextState.sourceSelection = this.props.sourceSelection;
+        nextState.columnSelection = this.props.columnSelection;
+        nextState.mode = this.props.mode;
+
+        this.setState(nextState, () => {
+            if (this.props.changeInProgress === true) {
+                // mirrors old componentWillReceiveProps -> propagateChanges(newState)
+                this.props.onChange(this.state);
+            } else {
+                this.fetch(this.state);
+            }
+        });
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.handleResize);
+        this.subs.unsubscribe();
+    }
+    
+    handleResize() {
         this.setState({windowWidth: window.innerWidth});
-    },
-    setFilters: function (obj) {
-        let {filterValues} = this.state;
-        let newFilterValues = merge(filterValues, obj);
+    }
+
+    setFilters = (obj) => {
+        const {filterValues} = this.state;
+        const newFilterValues = merge(filterValues, obj);
 
         localStorage.setItem('filterValues', JSON.stringify(newFilterValues));
 
@@ -261,8 +281,9 @@ var DataTable = React.createClass({
           filterValues: newFilterValues,
           page: 0
         });
-    },
-    createDownload: function () {
+    };
+
+    createDownload = () => {
         var {release, changeTypes, search, sortBy, filterValues, columnSelection, sourceSelection} = this.state;
         return this.props.url(merge({
             format: 'tsv',
@@ -276,8 +297,9 @@ var DataTable = React.createClass({
             include: _.keys(_.pick(sourceSelection, v => v === 1)),
             exclude: _.keys(_.pick(sourceSelection, v => v === -1)),
             filterValues}, hgvs.filters(search, filterValues)));
-    },
-    fetch: function (state) {
+    };
+
+    fetch = (state) => {
         var {pageLength, search, page, sortBy,
             filterValues, columnSelection, sourceSelection,
             release, changeTypes, showDeleted, mode} = state;
@@ -294,60 +316,54 @@ var DataTable = React.createClass({
             include: _.keys(_.pick(sourceSelection, v => v === 1)),
             exclude: _.keys(_.pick(sourceSelection, v => v === -1)),
             filterValues}, hgvs.filters(search, filterValues)));
-    },
-    propagateChanges: function (opts) {
+    };
+
+    propagateChanges = (opts) => {
         // sends changes up to the top of the tree so the URL
         // can be updated. the update also triggers a new request
         // to the server in this.componentWillReceiveProps
         var newState = mergeState(this.state, opts);
         this.setState(newState);
         this.props.onChange(newState);
-    },
-    toggleFilters: function () {
-        this.setState({filtersOpen: !this.state.filtersOpen});
-    },
-    toggleColumnSelectors: function() {
-        this.setState({columnSelectorsOpen: !this.state.columnSelectorsOpen});
-    },
-    showDeleted: function () {
-        this.propagateChanges({showDeleted: true});
-    },
-    onChangePage: function (pageNumber) {
-        this.propagateChanges({page: pageNumber});
-    },
-    onSort: function(sortBy) {
-        this.propagateChanges({sortBy});
-    },
-    onPageLengthChange: function(txt) {
+    };
+
+    toggleFilters = () => this.setState({filtersOpen: !this.state.filtersOpen});
+    toggleColumnSelectors = () => this.setState({columnSelectorsOpen: !this.state.columnSelectorsOpen});
+    showDeleted = () => this.propagateChanges({showDeleted: true});
+    onChangePage = (pageNumber) => this.propagateChanges({page: pageNumber});
+    onSort = (sortBy) => this.propagateChanges({sortBy});
+
+    onPageLengthChange = (txt) => {
         var length = parseInt(txt),
             {page, pageLength} = this.state,
             newPage = Math.floor((page * pageLength) / length);
 
         this.propagateChanges({page: newPage, pageLength: length});
-    },
-    restoreDefaults: function() {
+    };
+
+    restoreDefaults = () => {
         // Clears local storage, resets filters/columns/sources/releases/changetypes,
         // and resets url to /variants (parent method uses a flag to ensure query params remain empty).
         delete localStorage.columnSelection;
         delete localStorage.filterValues;
         delete localStorage.sourceSelection;
-        let that = this;
-        let defaults = {filterValues: {},
+        const defaults = {filterValues: {},
                         release: undefined,
                         changeTypes: undefined,
                         showDeleted: undefined
                        };
         if (this.state.mode === 'default') {
-            this.props.expertVariantTableRestoreDefaults(function() {
-                that.setState(defaults, function() {that.propagateChanges(defaults);});
+            this.props.expertVariantTableRestoreDefaults(() => {
+                this.setState(defaults, () => this.propagateChanges(defaults));
             });
         } else {
-            this.props.researchVariantTableRestoreDefaults(function() {
-                that.setState(defaults, function() {that.propagateChanges(defaults);});
+            this.props.researchVariantTableRestoreDefaults(() => {
+                this.setState(defaults, () => this.propagateChanges(defaults));
             });
         }
-    },
-    render: function () {
+    };
+
+    render() {
         var {release, changeTypes, filterValues, filtersOpen, columnSelectorsOpen, search, data, columnSelection,
             page, totalPages, count, synonyms, error} = this.state;
         var {columns, filterColumns, className, columnSelectors, filters, downloadButton, mode} = this.props;
@@ -385,12 +401,15 @@ var DataTable = React.createClass({
                 <Row id="show-hide" className="btm-buffer">
                     <Col sm={12}>
                         <Button className="btn-default rgt-buffer"
+				variant = "secondary"
                                 onClick={this.toggleFilters}>{(filtersOpen ? 'Hide' : 'Show' ) + ' Filters'}
                         </Button>
                         {mode === "research_mode" && <Button className="btn-default rgt-buffer"
+				variant="secondary"
                                 onClick={this.toggleColumnSelectors}>{(columnSelectorsOpen ? 'Hide' : 'Show' ) + ' Column Selectors'}
                         </Button>}
                         <Button className="btn-default rgt-buffer"
+				variant="secondary"
                                 onClick={this.restoreDefaults}>Restore Defaults
                         </Button>
                     </Col>
@@ -507,6 +526,6 @@ var DataTable = React.createClass({
             </div>
         );
     }
-});
+}
 
 export default DataTable;

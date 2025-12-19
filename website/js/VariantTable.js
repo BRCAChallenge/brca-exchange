@@ -4,20 +4,28 @@
 var {computeReviewStatusScore} = require("./components/VariantSubmitter");
 
 var React = require('react');
-var PureRenderMixin = require('./PureRenderMixin');
-var DataTable = require('./DataTable');
+import DataTable from './DataTable';
 var _ = require('underscore');
 
 // React-Bootstrap v2 replacements
 import { Card, Col, Collapse, Form, Button } from 'react-bootstrap';
 
-var ColumnCheckbox = require('./ColumnCheckbox');
+import ColumnCheckbox from './ColumnCheckbox';
 var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
-var {State} = require('react-router');
 var alleleFrequencyCharts = require('./AlleleFrequencyCharts');
 
 // TODO: Re-enable or replace after upgrading react-data-components-brcaex
 // require('react-data-components-brcaex/css/table-twbs.css');
+
+function renderCell(val) {
+    return <span>{val}</span>;
+}
+
+const filterColumns = [
+    {name: 'Gene', prop: 'Gene_Symbol', values: ['BRCA1', 'BRCA2']},
+    {name: 'Pathogenicity', prop: 'Pathogenicity_expert', values: ['Pathogenic', 'Likely Pathogenic', 'Benign / Little Clinical Significance', 'Likely Benign', 'Not Yet Reviewed']}
+];
+
 const expertModeGroups = [
     {groupTitle: 'Variant Names', internalGroupName: 'Variant Nomenclature', innerCols: [
         {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
@@ -589,9 +597,8 @@ const researchModeColumns = [
 // text areas to look clickable instead of selectable..
 var hasSelection = () => !(window.getSelection && window.getSelection().isCollapsed);
 
-var Table = React.createClass({
-    mixins: [PureRenderMixin],
-    render: function () {
+class Table extends React.Component {
+    render() {
         // Expert portal always shows all sources and default columns
         var {data, onHeaderClick, onRowClick, hiddenSources, mode, columnSelection, sourceSelection, ...opts} = this.props;
         if (mode === "default") {
@@ -624,13 +631,11 @@ var Table = React.createClass({
                 mode={mode}/>
         );
     }
-});
+}
 
 var ResearchVariantTableSupplier = function (Component) {
-    var ResearchVariantTableComponent = React.createClass({
-        mixins: [State, PureRenderMixin],
-
-        getInitialState: function () {
+    class ResearchVariantTableComponent extends React.Component {
+        state = (() => {
             /*
             Selections take the following order of priority:
                 1. Query params in URL
@@ -695,20 +700,51 @@ var ResearchVariantTableSupplier = function (Component) {
                 changeInProgress: false,
                 openSubcols
             };
-        },
-        componentWillReceiveProps: function() {
+        })();
+        componentDidReceiveProps(prevProps) {
             // Change is now complete (has propagated all the way
             // down and back up through the parent component)
-            this.setState({changeInProgress: false});
-        },
-        toggleColumns: function (prop) {
+	    if (this.state.changeInProgress && prevProps !== this.props) {
+                this.setState({ changeInProgress: false });
+            }
+        }
+
+        getQuery = () => {
+            const search =
+                (this.props.location && this.props.location.search) ||
+                (typeof window !== "undefined" ? window.location.search : "") ||
+                "";
+
+            const params = new URLSearchParams(search);
+            const out = {};
+
+            const readMulti = (key) => {
+                const vals = params.getAll(key);
+                if (!vals || vals.length === 0) return null;
+                return vals
+                    .flatMap(v => String(v).split(','))
+                    .map(s => s.trim())
+                    .filter(Boolean);
+            };
+
+            const hide = readMulti("hide");
+            if (hide) out.hide = hide;
+
+            const hideSources = readMulti("hideSources");
+            if (hideSources) out.hideSources = hideSources;
+
+            return out;
+        };
+
+        toggleColumns = (prop) => {
             let {columnSelection} = this.state,
                 val = columnSelection[prop],
                 cs = {...columnSelection, [prop]: !val};
             localStorage.setItem('columnSelection', JSON.stringify(cs));
             this.setState({columnSelection: cs, changeInProgress: true});
-        },
-        setSource: function (prop, event) {
+        };
+
+        setSource = (prop, event) => {
             // this function uses 1, 0 and -1 to accommodate excluding sources as well as not-including them
             // currently only uses 1 and 0 because exclusion is not being used
             let {sourceSelection} = this.state;
@@ -716,20 +752,23 @@ var ResearchVariantTableSupplier = function (Component) {
             let ss = {...sourceSelection, [prop]: value};
             localStorage.setItem('sourceSelection', JSON.stringify(ss));
             this.setState({sourceSelection: ss, changeInProgress: true});
-        },
-        filterFormCols: function (subColList, columnSelection) {
+        };
+
+        filterFormCols = (subColList, columnSelection) => {
             return _.map(subColList, ({title, prop}) =>
                 <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop || title} label={prop || title} title={title}
                                 initialCheck={columnSelection}/>);
-        },
-        toggleSubcolOpen(subColTitle) {
+        };
+
+        toggleSubcolOpen = (subColTitle) => {
             const key = "collapse-subcol_" + subColTitle;
             const isOpen = !!this.state.openSubcols[subColTitle];
             const nextOpen = !isOpen;
             // store "true" when collapsed (matches old defaultExpanded semantics)
             localStorage.setItem(key, nextOpen ? "false" : "true");
             this.setState({ openSubcols: { ...this.state.openSubcols, [subColTitle]: nextOpen } });
-        },
+        };
+
         getColumnSelectors() {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
                 <Col sm={6} md={4} key={subColTitle}>
@@ -761,8 +800,9 @@ var ResearchVariantTableSupplier = function (Component) {
                     </Card.Body>
                 </Card>
             </label>);
-        },
-        getSourceName: function(name) {
+        }
+
+        getSourceName(name) {
             let source = name.substring(11).replace(/_/g, " ");
             if (source.toLowerCase() === "exlovd") {
                 source = "ExUV";
@@ -780,8 +820,9 @@ var ResearchVariantTableSupplier = function (Component) {
                 source = "1000 Genomes (deprecated)";
             }
             return source;
-        },
-        getFilters: function() {
+        }
+
+        getFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
                 <Col sm={6} md={3} key={name}>
                     <Form.Check
@@ -800,22 +841,27 @@ var ResearchVariantTableSupplier = function (Component) {
                     </Card.Body>
                 </Card>
             </label>);
-        },
-        getDownloadButton: function (callback) {
+        }
+
+        getDownloadButton(callback) {
             return <Button variant="secondary" className="rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
-        },
-        getColumns: function () {
+        }
+
+        getColumns() {
             return researchModeColumns;
-        },
-        getDefaultColumnSelections: function() {
+        }
+
+        getDefaultColumnSelections() {
             return _.object(_.map(researchModeColumns,
                 c => _.contains(getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
             );
-        },
-        getDefaultSourceSelections: function() {
+        }
+
+        getDefaultSourceSelections() {
             return getAllSources();
-        },
-        researchVariantTableRestoreDefaults: function(callback) {
+        }
+
+        researchVariantTableRestoreDefaults = (callback) => {
             const columnSelection = this.getDefaultColumnSelections();
             const sourceSelection = this.getDefaultSourceSelections();
             this.setState({columnSelection: columnSelection,
@@ -823,8 +869,9 @@ var ResearchVariantTableSupplier = function (Component) {
                            function() {
                                 this.props.restoreDefaults(callback);
                            });
-        },
-        render: function () {
+        };
+
+        render() {
             return (
                 <Component
                     {...this.props}
@@ -838,20 +885,19 @@ var ResearchVariantTableSupplier = function (Component) {
                     changeInProgress={this.state.changeInProgress}/>
             );
         }
-    });
+    }
     return ResearchVariantTableComponent;
 };
 
 var VariantTableSupplier = function (Component) {
-    var VariantTableComponent = React.createClass({
-        mixins: [PureRenderMixin],
-        getColumns: function () {
+    class VariantTableComponent extends React.PureComponent {
+        getColumns() {
             return columns;
-        },
-        expertVariantTableRestoreDefaults: function(callback) {
+        }
+        expertVariantTableRestoreDefaults = (callback) => {
             this.props.restoreDefaults(callback);
-        },
-        render: function () {
+        };
+        render() {
             let expertColumns = _.object(_.map(this.getColumns(),
                 c => _.contains(getDefaultExpertColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
             );
@@ -867,16 +913,18 @@ var VariantTableSupplier = function (Component) {
                     downloadButton={()=> null}/>
             );
         }
-    });
+    }
     return VariantTableComponent;
 };
 
+const VariantTable = VariantTableSupplier(Table);
+const ResearchVariantTable = ResearchVariantTableSupplier(Table);
 
-module.exports = {
-    VariantTable: VariantTableSupplier(Table),
-    ResearchVariantTable: ResearchVariantTableSupplier(Table),
-    researchModeColumns: researchModeColumns,
-    columns: columns,
-    researchModeGroups: researchModeGroups,
-    expertModeGroups: expertModeGroups
+export default {
+    VariantTable,
+    ResearchVariantTable,
+    researchModeColumns,
+    columns,
+    researchModeGroups,
+    expertModeGroups
 };

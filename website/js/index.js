@@ -12,9 +12,8 @@ import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
 import MupitStructure from './MupitStructure';
 
 require('./favicons');
-var React = require('react');
+import React from 'react';
 import { createRoot } from 'react-dom/client';
-//var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
 import DisclaimerModal from './DisclaimerModal';
 import RawHTML from './RawHTML';
 
@@ -47,17 +46,17 @@ import Community from './Community';
 import FactSheet from './FactSheet';
 import WhyDonate from './WhyDonate';
 import FundraisingDetails from './FundraisingDetails';
-//import {Splicing} from'./Splicing';
+import {Splicing} from'./Splicing';
 import { withRouter, BrowserRouter, Switch, Route, Link } from 'react-router-dom';
 
-//var databaseKey = require('../databaseKey');
-//var util = require('./util');
+var databaseKey = require('../databaseKey');
+var util = require('./util');
 
 // React-Bootstrap v2+ imports (Bootstrap 5)
 import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } from 'react-bootstrap';
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
-//var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
+var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
 //var {Signup} = require('./Signup');
 //var {Signin, ResetPassword} = require('./Signin');
 //var {ConfirmEmail} = require('./ConfirmEmail');
