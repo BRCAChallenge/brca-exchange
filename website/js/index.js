@@ -69,7 +69,7 @@ import Help from './Help.js';
 //var KeyInline = require('./components/KeyInline');
 //var GroupHelpButton = require('./components/GroupHelpButton');
 
-//var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
+var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 
 if (typeof console === "undefined") {
     window.console = {
@@ -294,7 +294,7 @@ class About extends React.Component {
         }
     }
 }
-/*
+
 function toNumber(v) {
     return _.isString(v) ? parseInt(v) : v;
 }
@@ -344,7 +344,7 @@ function urlFromDatabase(state) {
     }, v => (!isEmptyVal(v)));
 
 }
-*/
+
 class Database extends React.Component {
     // Note this is not a pure component because of the calls to
     // getQuery().
@@ -551,7 +551,7 @@ class Database extends React.Component {
 			</Row>);
     }
 }
-/*
+
 // get display name for a given key from VariantTable.js column specification
 function getDisplayName(key) {
     const researchMode = (localStorage.getItem("research-mode") === 'true');
@@ -574,19 +574,27 @@ function isEmptyDiff(value) {
     return value === null || value.length < 1;
 }
 
-const IsoGrid = React.createClass({
-    displayName: 'IsoGrid',
-    render: function () {
-        const children = this.props.children;
+class IsoGrid extends React.Component {
+    static displayName = 'IsoGrid';
+
+    constructor(props) {
+	super(props);
+	this._rootRef = React.createRef();
+	this.masonry = null;
+    }
+
+    render() {
         return (
-            <div className="isogrid">
-            {children}
+            <div className="isogrid" ref={this._rootRef}>
+            {this.props.children}
             </div>
         );
-    },
-    componentDidMount: function() {
-        if (!this.masonry) {
-            this.masonry = new Isotope('.isogrid', {
+    }
+
+    componentDidMount() {
+        const root= this._rootRef.current;
+	if (!root || !this.masonry) {
+            this.masonry = new Isotope(root, {
                 layoutMode: 'packery',
                 itemSelector: '.isogrid-item',
                 packery: {
@@ -595,8 +603,17 @@ const IsoGrid = React.createClass({
                 }
             });
         }
-    },
-    relayout: function(fullRefresh) {
+    }
+
+    componentWillUnmount() {
+	// prevent leaks / dangling observers
+	if (this.masonry && typeof this.masonry.destroy === 'function') {
+	    this.masonry.destroy();
+	}
+	this.masonry = null;
+    }
+
+    relayout(fullRefresh) {
         if (!this.masonry) {
             return;
         }
@@ -605,14 +622,14 @@ const IsoGrid = React.createClass({
         }
         this.masonry.arrange();
     }
-});
+}
 
 // Helpers for new Card/Collapse behavior
 function isOpenFromStorage(key) {
     // legacy semantics: localStorage "true" means collapsed
     return localStorage.getItem(key) !== "true";
 }
-*/
+
 class VariantDetail extends React.Component {
     constructor(props) {
         super(props);
@@ -1521,9 +1538,14 @@ class Application extends React.Component {
                 <DonationBar />
                 {/* If children are rendered here via a parent Route, pass props along */}
          	{this.props.children &&
-           		React.cloneElement(this.props.children, {
-             			toggleMode: this.onChildToggleMode,
-             			mode: this.state.mode,
+           		React.Children.map(this.props.children, child => {
+			    if (React.isValidElement(child)) {
+				return React.cloneElement(child, {
+             			   toggleMode: this.onChildToggleMode,
+             			   mode: this.state.mode,
+				});
+			    }
+			    return child;
            	})}
 		{path.indexOf('variants') === 0 && (
 		<Database
@@ -1549,6 +1571,8 @@ const routes = (
         <Route path='/whydonate' component={WhyDonate}/>
         <Route path='/fundraisingdetails' component={FundraisingDetails}/>
         <Route path='/variants' />
+        <Route path='/variant/:id' component={VariantDetail}/>
+        <Route path='/variant_literature/:id' component={LiteratureTable}/>
 	{/*
         <Route path='signup' component={Signup}/>
         <Route path='signin' component={Signin}/>
