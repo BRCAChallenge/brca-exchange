@@ -67,7 +67,8 @@ setup-files: ## setup various directories to run pipeline
 setup-lovd: ## setting up LOVD data via pipeline machine, if not running on pipeline machine, as the access is IP restricted. Requires access to main pipeline machine
 	if [ `hostname -s` != "brcaexchange-dev" ]; then
 		mkdir -p $(OUT_DIR)/LOVD
-		ssh brca@brcaexchange-dev.gi.ucsc.edu curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/LOVD/BRCA.txt
+		ssh brca@brcaexchange-dev.gi.ucsc.edu curl https://databases.lovd.nl/shared/export/BRCA > $(OUT_DIR)/LOVD/BRCA.txt || \
+		wget https://brcaexchange.org/backend/downloads/BRCA_from_LOVD.2025_11_11.txt -O $(OUT_DIR)/LOVD/BRCA.txt
 	fi
 
 
