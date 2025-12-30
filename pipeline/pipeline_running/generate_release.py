@@ -68,16 +68,24 @@ def clone_or_update_repo(code_base: Path, git_commit: str) -> None:
         code_base: Path where the code should be cloned
         git_commit: Git commit/branch/tag to checkout
     """
-    repo_url = "https://github.com/BRCAChallenge/brca-exchange.git"
+    repo_url = "https://github.com/BRCAChallenge/brca-exchange-kb.git"
 
     if not code_base.exists():
         print(f"Cloning repository to {code_base}...")
         run_command(["git", "clone", repo_url, str(code_base)])
     else:
         print(f"Repository already exists at {code_base}")
+        print("Fetching latest changes from remote...")
+        run_command(["git", "fetch", "origin"], cwd=code_base)
 
     print(f"Checking out {git_commit}...")
-    run_command(["git", "checkout", git_commit], cwd=code_base)
+    # Try to checkout directly first
+    try:
+        run_command(["git", "checkout", git_commit], cwd=code_base)
+    except subprocess.CalledProcessError:
+        # If direct checkout fails, try as a remote branch
+        print(f"Direct checkout failed, trying origin/{git_commit}...")
+        run_command(["git", "checkout", "-b", git_commit, f"origin/{git_commit}"], cwd=code_base)
 
 
 def generate_config(
@@ -143,6 +151,7 @@ def main() -> int:
 Example usage:
   %(prog)s /data/releases /data/credentials /data/previous_releases
   %(prog)s /data/releases /data/credentials /data/previous_releases gene_config_brca_hbop.txt v1.2.3
+  %(prog)s /data/releases /data/credentials /data/previous_releases gene_config_brca_only.txt my-feature-branch
         """
     )
 
@@ -177,7 +186,7 @@ Example usage:
         type=str,
         nargs='?',
         default="master",
-        help="Git commit/branch/tag to checkout (default: master)"
+        help="Git commit/branch/tag to checkout from GitHub (default: master)"
     )
 
     args = parser.parse_args()
