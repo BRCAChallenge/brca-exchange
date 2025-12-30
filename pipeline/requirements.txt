@@ -8,8 +8,8 @@ urllib3>=2.0.7  # Was: 1.25.8 (HIGH - security vulnerabilities)
 PyJWT>=2.8.0  # Was: 1.7.1 (CRITICAL - auth bypass)
 lxml>=5.1.0  # Was: 4.9.2 (HIGH - XML vulnerabilities)
 
-# Scientific computing - UPDATED for Python 3.13
-numpy>=1.26.4,<2.0  # Was: 1.24.1 (Python 3.13 compat)
+# Scientific computing - UPDATED for Python 3.12
+numpy>=1.24.3,<2.0
 pandas>=2.1.4  # Was: 1.5.2 (Python 3.13 compat)
 
 # Testing - MIGRATED from deprecated nose

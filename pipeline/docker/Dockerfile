@@ -32,9 +32,9 @@ COPY test-requirements.txt .
 RUN pip install --upgrade pip==24.3.1
 
 # install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
-RUN pip install $(grep numpy requirements.txt)
+RUN pip install $(grep "^numpy" requirements.txt)
 
-RUN pip install $(grep -i cython requirements.txt)
+RUN pip install $(grep "^cython" requirements.txt)
 RUN pip install -r requirements.txt -r test-requirements.txt
 
 # install vcf tools
