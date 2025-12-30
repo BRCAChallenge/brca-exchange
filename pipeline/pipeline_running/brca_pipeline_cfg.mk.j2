@@ -55,7 +55,7 @@ VR_IMAGE := {{ VR_IMAGE | default("brcachallenge/append-vr-ids:" + VR_IMAGE_DEFA
 UTA_RELEASE_DATE := {{ UTA_RELEASE_DATE }}
 UTA_DOCKER_IMAGE := {{ UTA_DOCKER_IMAGE | default("biocommons/uta:uta_" + UTA_RELEASE_DATE) }}
 UTA_CONTAINER := {{ UTA_CONTAINER | default("uta_" + UTA_RELEASE_DATE) }}
-{% set UTA_PG_PW = brca_2024 %}
+{% set UTA_PG_PW = UTA_PG_PW | default("POSTGRES_PASSWORD=brca_2024") %}
 UTA_PG_PW := {{ UTA_PG_PW }}
 {% set UTA_PORT =  UTA_PORT | default("50828")  %}
 UTA_PORT := {{ UTA_PORT }}
