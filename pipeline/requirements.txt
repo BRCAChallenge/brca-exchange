@@ -28,7 +28,7 @@ argcomplete==1.10.0
 attrs==22.2.0
 backcall==0.1.0
 beautifulsoup4==4.8.2
-biocommons.seqrepo==0.6.6
+biocommons.seqrepo>=0.6.9
 biopython>=1.83
 bioutils==0.5.7
 bs4==0.0.1
@@ -47,7 +47,6 @@ ga4gh.common==0.0.7
 ga4gh.vrs==2.1.4
 hgvs==1.5.4
 humanfriendly==8.0
-iniherit==0.3.9
 intervaltree==3.1.0
 ipython-genutils==0.2.0
 itertoolz==0.5
@@ -94,7 +93,7 @@ userpath==1.2.0
 w3lib==1.21.0
 wcwidth==0.1.8
 websockets==8.1
-yoyo-migrations==7.0.1
+yoyo-migrations>=9.0.0
 
 # TensorFlow - CONSIDER UPDATING (if needed)
 # tensorflow==2.11.0  # CRITICAL - End of support, multiple CVEs
