@@ -46,7 +46,7 @@ fastparquet==2024.5.0
 ga4gh.common==0.0.7
 ga4gh.vrs==2.1.4
 hgvs==1.5.4
-humanfriendly==8.0
+humanfriendly>=9.1
 intervaltree==3.1.0
 ipython-genutils==0.2.0
 itertoolz==0.5
