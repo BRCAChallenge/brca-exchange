@@ -31,6 +31,9 @@ COPY test-requirements.txt .
 # Using pip 24.3.1 for Python 3.12 compatibility
 RUN pip install --upgrade pip==24.3.1
 
+# install six first as it's a fundamental dependency for many packages
+RUN pip install $(grep "^six" requirements.txt)
+
 # install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
 RUN pip install $(grep "^numpy" requirements.txt)
 
