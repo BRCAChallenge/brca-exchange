@@ -52,7 +52,7 @@ start-local-uta: ## starting local uta docker container
 
 start-seqrepo-rest-service:
 	[ `docker ps -f name="seqrepo-rest-service" | wc -l` -gt 1 ] || \
-	utilities/lauch_seqrepo.sh
+	utilities/launch_seqrepo.sh
 
 .ONESHELL:
 setup-files: ## setup various directories to run pipeline
