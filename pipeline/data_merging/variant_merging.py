@@ -10,7 +10,6 @@ import os
 import pickle
 import re
 import subprocess
-from copy import deepcopy
 from numbers import Number
 from shutil import copy
 
@@ -504,16 +503,16 @@ def repeat_merging(input_file, output_file):
         genome_coor = "chr{0}:{1}:{2}>{3}".format(
             record.chrom, str(record.pos), record.ref, record.alts[0])
         if genome_coor not in variant_dict.keys():
-            variant_dict[genome_coor] = deepcopy(record)
+            variant_dict[genome_coor] = record.copy()
         else:
             num_repeats += 1
             for key in record.info:
                 if key not in variant_dict[genome_coor].info.keys():
-                    variant_dict[genome_coor].info[key] = deepcopy(record.info[key])
+                    variant_dict[genome_coor].info[key] = record.info[key]
                 else:
-                    new_value = deepcopy(record.info[key])
+                    new_value = record.info[key]
                     new_value = [xx for xx in new_value if xx is not None]
-                    old_value = deepcopy(variant_dict[genome_coor].info[key])
+                    old_value = variant_dict[genome_coor].info[key]
                     old_value = [xx for xx in old_value if xx is not None]
 
                     if type(new_value) != list:
@@ -542,7 +541,7 @@ def repeat_merging(input_file, output_file):
 
                         # Remove empty strings from list
                         merged_value = [_f for _f in merged_value if _f]
-                        variant_dict[genome_coor].info[key] = deepcopy(merged_value)
+                        variant_dict[genome_coor].info[key] = tuple(merged_value)
     print("number of repeat records: ", num_repeats, "\n")
     vcf_writer = pysam.VariantFile(output_file, 'w', header=vcf_reader.header)
     for record in variant_dict.values():
@@ -588,13 +587,13 @@ def one_variant_transform(input_file, output_file, source_name):
             vcf_writer.write(record)
         else:
             for i in range(n):
-                new_record = deepcopy(record)
-                new_record.alts = (deepcopy(record.alts[i]),)
+                new_record = record.copy()
+                new_record.alts = (record.alts[i],)
                 new_record.info['BX_ID'] = count
                 count += 1
                 for key in record.info.keys():
-                    value = deepcopy(record.info[key])
-                    if type(value) == list and len(value) == n:
+                    value = record.info[key]
+                    if type(value) == tuple and len(value) == n:
                         new_record.info[key] = (value[i],)
                 if source_name == "ExAC":
                     new_record = append_exac_allele_frequencies(record, new_record, i)
