@@ -5,7 +5,7 @@ import unittest
 import pytest
 
 import bioutils
-import vcf
+import pysam
 from hypothesis import given, assume, settings, HealthCheck
 from hypothesis.strategies import integers, tuples, sampled_from, lists
 from mock import patch
@@ -379,15 +379,24 @@ class TestVariantMerging(unittest.TestCase):
 
     def test_append_exac_allele_frequencies_rounds_to_three_sig_figs(self):
         EXAC_VCF_FILENAME = os.path.join(os.path.dirname(__file__), 'test_files/ExAC_AF.vcf')
-        for record in vcf.Reader(open(EXAC_VCF_FILENAME, 'r')):
+        reader = pysam.VariantFile(EXAC_VCF_FILENAME)
+
+        # Add AF_* header definitions for ExAC subpopulations
+        for subpopulation in EXAC_SUBPOPULATIONS:
+            af_key = "AF_" + subpopulation
+            if af_key not in reader.header.info:
+                reader.header.info.add(af_key, number=1, type='String', description=f'Allele frequency for {subpopulation} population')
+
+        for record in reader:
             record = append_exac_allele_frequencies(record, new_record=None, i=None)
             for subpopulation in EXAC_SUBPOPULATIONS:
-                val = record.INFO["AF_" + subpopulation]
+                val = record.info["AF_" + subpopulation]
                 try:
                     float_val = float(val)
                     self.assertEqual(float_val, round_sigfigs(float(val), 3))
                 except ValueError:
                     self.assertEqual(val, '-')
+        reader.close()
 
 def test_find_equivalent_variant(seq_fetcher):
     # mocking _fetch_seq method

@@ -40,9 +40,6 @@ RUN pip install $(grep "^numpy" requirements.txt)
 RUN pip install $(grep "^cython" requirements.txt)
 RUN pip install -r requirements.txt -r test-requirements.txt
 
-# Apply PyVCF3 patch for Python 3.12 compatibility (adds escapechar to csv.writer)
-RUN sed -i '/quoting=csv.QUOTE_NONE,/a\            escapechar="\\\\\\\\",' /usr/local/lib/python3.12/site-packages/vcf/parser.py
-
 # install vcf tools
 RUN wget https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz
 RUN tar zxf vcftools*.tar.gz

@@ -14,7 +14,7 @@ from copy import deepcopy
 from numbers import Number
 from shutil import copy
 
-import vcf
+import pysam
 
 from data_merging import aggregate_reports
 from common import seq_utils, config
@@ -475,21 +475,24 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
 
         new_source_dict[source_name] = f_right.name
 
-        vcf_reader = vcf.Reader(f, strict_whitespace=True)
-        vcf_wrong_writer = vcf.Writer(f_wrong, vcf_reader)
-        vcf_right_writer = vcf.Writer(f_right, vcf_reader)
+        vcf_reader = pysam.VariantFile(f)
+        vcf_wrong_writer = pysam.VariantFile(f_wrong, 'w', header=vcf_reader.header)
+        vcf_right_writer = pysam.VariantFile(f_right, 'w', header=vcf_reader.header)
         n_wrong, n_total = 0, 0
         for record in vcf_reader:
-            ref = record.REF.replace("-", "")
-            v = [record.CHROM, record.POS, ref, "dummy"]
-            if not ref_correct(record.CHROM, record.POS, record.REF, record.ALT, seq_provider) or is_outside_boundaries(record.CHROM, record.POS, gene_regions_trees):
+            ref = record.ref.replace("-", "")
+            v = [record.chrom, record.pos, ref, "dummy"]
+            if not ref_correct(record.chrom, record.pos, record.ref, record.alts, seq_provider) or is_outside_boundaries(record.chrom, record.pos, gene_regions_trees):
                 logging.warning("Reference incorrect for Chrom: %s, Pos: %s, Ref: %s, and Alt: %s",
-                                record.CHROM, record.POS, record.REF, record.ALT)
-                vcf_wrong_writer.write_record(record)
+                                record.chrom, record.pos, record.ref, record.alts)
+                vcf_wrong_writer.write(record)
                 n_wrong += 1
             else:
-                vcf_right_writer.write_record(record)
+                vcf_right_writer.write(record)
             n_total += 1
+        vcf_reader.close()
+        vcf_right_writer.close()
+        vcf_wrong_writer.close()
         f_right.close()
         f_wrong.close()
         print("in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total))
@@ -500,23 +503,23 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
 def repeat_merging(f_in, f_out):
     """takes a vcf file, collapses repetitive variant rows and write out
         to a new vcf file (without header)"""
-    vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
+    vcf_reader = pysam.VariantFile(f_in)
     variant_dict = {}  # str -> Record
     num_repeats = 0
     for record in vcf_reader:
         genome_coor = "chr{0}:{1}:{2}>{3}".format(
-            record.CHROM, str(record.POS), record.REF, record.ALT[0])
+            record.chrom, str(record.pos), record.ref, record.alts[0])
         if genome_coor not in variant_dict.keys():
             variant_dict[genome_coor] = deepcopy(record)
         else:
             num_repeats += 1
-            for key in record.INFO:
-                if key not in variant_dict[genome_coor].INFO.keys():
-                    variant_dict[genome_coor].INFO[key] = deepcopy(record.INFO[key])
+            for key in record.info:
+                if key not in variant_dict[genome_coor].info.keys():
+                    variant_dict[genome_coor].info[key] = deepcopy(record.info[key])
                 else:
-                    new_value = deepcopy(record.INFO[key])
+                    new_value = deepcopy(record.info[key])
                     new_value = [xx for xx in new_value if xx is not None]
-                    old_value = deepcopy(variant_dict[genome_coor].INFO[key])
+                    old_value = deepcopy(variant_dict[genome_coor].info[key])
                     old_value = [xx for xx in old_value if xx is not None]
 
                     if type(new_value) != list:
@@ -545,11 +548,13 @@ def repeat_merging(f_in, f_out):
 
                         # Remove empty strings from list
                         merged_value = [_f for _f in merged_value if _f]
-                        variant_dict[genome_coor].INFO[key] = deepcopy(merged_value)
+                        variant_dict[genome_coor].info[key] = deepcopy(merged_value)
     print("number of repeat records: ", num_repeats, "\n")
-    vcf_writer = vcf.Writer(f_out, vcf_reader)
+    vcf_writer = pysam.VariantFile(f_out, 'w', header=vcf_reader.header)
     for record in variant_dict.values():
-        vcf_writer.write_record(record)
+        vcf_writer.write(record)
+    vcf_reader.close()
+    vcf_writer.close()
     f_in.close()
     f_out.close()
 
@@ -566,54 +571,68 @@ def one_variant_transform(f_in, f_out, source_name):
     """takes a vcf file, read each row, if the ALT field contains more than
        one item, create multiple variant row based on that row. also adds
        ids to all individual reports (each line in the vcf). writes new vcf"""
-    vcf_reader = vcf.Reader(f_in, strict_whitespace=True)
-    vcf_writer = vcf.Writer(f_out, vcf_reader)
+    vcf_reader = pysam.VariantFile(f_in)
+
+    # Add BX_ID header if not present
+    if 'BX_ID' not in vcf_reader.header.info:
+        vcf_reader.header.info.add('BX_ID', number=1, type='Integer', description='BX report ID')
+
+    # Add ExAC allele frequency headers if processing ExAC data
+    if source_name == "ExAC":
+        for subpopulation in EXAC_SUBPOPULATIONS:
+            af_key = "AF_" + subpopulation
+            if af_key not in vcf_reader.header.info:
+                vcf_reader.header.info.add(af_key, number=1, type='String', description=f'Allele frequency for {subpopulation} population')
+
+    vcf_writer = pysam.VariantFile(f_out, 'w', header=vcf_reader.header)
     count = 1
     for record in vcf_reader:
-        n = len(record.ALT)
+        n = len(record.alts)
         if n == 1:
             if source_name == "ExAC":
                 record = append_exac_allele_frequencies(record)
-            record.INFO['BX_ID'] = count
+            record.info['BX_ID'] = count
             count += 1
-            vcf_writer.write_record(record)
+            vcf_writer.write(record)
         else:
             for i in range(n):
                 new_record = deepcopy(record)
-                new_record.ALT = [deepcopy(record.ALT[i])]
-                new_record.INFO['BX_ID'] = count
+                new_record.alts = (deepcopy(record.alts[i]),)
+                new_record.info['BX_ID'] = count
                 count += 1
-                for key in record.INFO.keys():
-                    value = deepcopy(record.INFO[key])
+                for key in record.info.keys():
+                    value = deepcopy(record.info[key])
                     if type(value) == list and len(value) == n:
-                        new_record.INFO[key] = [value[i]]
+                        new_record.info[key] = (value[i],)
                 if source_name == "ExAC":
                     new_record = append_exac_allele_frequencies(record, new_record, i)
-                vcf_writer.write_record(new_record)
+                vcf_writer.write(new_record)
+    vcf_reader.close()
+    vcf_writer.close()
 
 
 def append_exac_allele_frequencies(record, new_record=None, i=None):
     if new_record is None:
         for subpopulation in EXAC_SUBPOPULATIONS:
             # calculate allele frequencies for each subpopulation
-            allele_count = record.INFO[("AC_" + subpopulation)]
-            allele_number = record.INFO[("AN_" + subpopulation)]
+            allele_count = record.info[("AC_" + subpopulation)]
+            allele_number = record.info[("AN_" + subpopulation)]
             allele_frequency = "-"
             if len(allele_count) > 0 and allele_number != 0:
                 allele_frequency = float(allele_count[0]) / float(allele_number)
                 allele_frequency = str(utilities.round_sigfigs(allele_frequency, 3))
-            record.INFO[("AF_" + subpopulation)] = allele_frequency
+            record.info[("AF_" + subpopulation)] = allele_frequency
         return record
     else:
-        new_record.INFO['AF'] = record.INFO['AF'][i]
+        new_record.info['AF'] = record.info['AF'][i]
         for subpopulation in EXAC_SUBPOPULATIONS:
-            allele_count = record.INFO[("AC_" + subpopulation)][i]
-            allele_number = record.INFO[("AN_" + subpopulation)]
+            allele_count = record.info[("AC_" + subpopulation)][i]
+            allele_number = record.info[("AN_" + subpopulation)]
             allele_frequency = "-"
             if allele_number != 0:
                 allele_frequency = float(allele_count) / float(allele_number)
                 allele_frequency = str(utilities.round_sigfigs(allele_frequency, 3))
-            new_record.INFO[("AF_" + subpopulation)] = allele_frequency
+            new_record.info[("AF_" + subpopulation)] = allele_frequency
         return new_record
 
 
@@ -638,13 +657,13 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
     old_column_num = len(columns)
     for column_title in source_dict.keys():
         columns.append(column_title+"_{0}".format(source))
-    vcf_reader = vcf.Reader(open(source_file, 'r'), strict_whitespace=True)
+    vcf_reader = pysam.VariantFile(source_file)
     overlap = 0
     variants_num = 0
     for record in vcf_reader:
         variants_num += 1
-        genome_coor = ("chr" + str(record.CHROM) + ":g." + str(record.POS) + ":" +
-                       record.REF + ">" + str(record.ALT[0]))
+        genome_coor = ("chr" + str(record.chrom) + ":g." + str(record.pos) + ":" +
+                       record.ref + ">" + str(record.alts[0]))
         if genome_coor in variants.keys():
             overlap += 1
             if type(variants[genome_coor][COLUMN_SOURCE]) != list:
@@ -654,14 +673,15 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
             variants[genome_coor] = associate_chr_pos_ref_alt_with_item(record, old_column_num, source, genome_coor, genome_regions_symbol_dict)
         for value in source_dict.values():
             try:
-                variants[genome_coor].append(record.INFO[value])
+                variants[genome_coor].append(record.info[value])
             except KeyError:
-                logging.warning("KeyError appending VCF record.INFO[value] to variant. Variant: %s \n Record.INFO: %s \n value: %s", variants[genome_coor], record.INFO, value)
+                logging.warning("KeyError appending VCF record.info[value] to variant. Variant: %s \n Record.info: %s \n value: %s", variants[genome_coor], record.info, value)
                 if source == "BIC":
                     variants[genome_coor].append(DEFAULT_CONTENTS)
                     logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
                 else:
                     raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
+    vcf_reader.close()
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
     for value in variants.values():
@@ -682,10 +702,10 @@ def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor, g
     item[COLUMN_SOURCE] = source
 
     item[COLUMN_GENOMIC_HGVS] = genome_coor
-    item[COLUMN_VCF_CHR] = line.CHROM
-    item[COLUMN_VCF_POS] = line.POS
-    item[COLUMN_VCF_REF] = line.REF
-    item[COLUMN_VCF_ALT] = str(line.ALT[0])
+    item[COLUMN_VCF_CHR] = line.chrom
+    item[COLUMN_VCF_POS] = line.pos
+    item[COLUMN_VCF_REF] = line.ref
+    item[COLUMN_VCF_ALT] = str(line.alts[0])
 
     chr_tree = genome_regions_symbol_dict.get(int(item[COLUMN_VCF_CHR]))
 

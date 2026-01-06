@@ -9,7 +9,7 @@ import os
 from os import listdir
 from os.path import isfile, join, abspath
 from data_merging.aggregate_reports import get_reports_files
-import vcf
+import pysam
 
 csv.field_size_limit(10000000)
 
@@ -58,13 +58,14 @@ def get_bx_ids():
             suffix = '.vcf'
             source = file[:(len(file)-len(suffix))]
             bx_ids[source] = []
-            vcf_reader = vcf.Reader(open(file_path, 'r'), strict_whitespace=True)
+            vcf_reader = pysam.VariantFile(file_path)
             try:
                 for record in vcf_reader:
-                    ids = list(map(int, record.INFO['BX_ID']))
+                    ids = list(map(int, record.info['BX_ID']))
                     bx_ids[source] = bx_ids[source] + ids
             except ValueError as e:
                 print(e)
+            vcf_reader.close()
 
     return bx_ids
 
