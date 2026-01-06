@@ -1,5 +1,4 @@
 FROM python:3.12-bookworm
-
 RUN chmod 1777 /tmp
 
 RUN apt-get update && apt-get install -y \
