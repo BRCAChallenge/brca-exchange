@@ -447,37 +447,33 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
     # merge multiple variant per vcf into multiple lines
     for source_name, file_name in source_dict.items():
         print("convert to one variant per line in ", source_name)
-        f_in = open(os.path.join(input_dir, file_name), "r")
-        f_out = open(os.path.join(output_dir, source_name + ".vcf"), "w")
+        input_file = os.path.join(input_dir, file_name)
+        output_file = os.path.join(output_dir, source_name + ".vcf")
         # Individual reports (lines in VCF/TSV) are given ids as part of the one_variant_transform method.
-        one_variant_transform(f_in, f_out, source_name)
-        f_in.close()
-        f_out.close()
+        one_variant_transform(input_file, output_file, source_name)
 
         print("merge repetitive variants within ", source_name)
-        f_in = open(os.path.join(output_dir, source_name + ".vcf"), "r")
-        f_out = open(os.path.join(output_dir, source_name + "ready.vcf"), "w")
-        repeat_merging(f_in, f_out)
-        source_dict[source_name] = f_out.name
+        input_file = os.path.join(output_dir, source_name + ".vcf")
+        output_file = os.path.join(output_dir, source_name + "ready.vcf")
+        repeat_merging(input_file, output_file)
+        source_dict[source_name] = output_file
 
     print("-------check if genomic coordinates are correct----------")
     (columns, variants) = save_enigma_to_dict(os.path.join(input_dir, ENIGMA_FILE), output_dir, seq_provider, gene_regions_trees)
 
     new_source_dict = {}
     for source_name, file_name in source_dict.items():
-        f = open(file_name, "r")
         d_wrong = output_dir + "wrong_genome_coors/"
         if not os.path.exists(d_wrong):
             os.makedirs(d_wrong)
-        f_wrong = open(output_dir + "wrong_genome_coors/" +
-                       source_name + "_wrong_genome_coor.vcf", "w")
-        f_right = open(output_dir+ "right" + source_name, "w")
+        wrong_file = output_dir + "wrong_genome_coors/" + source_name + "_wrong_genome_coor.vcf"
+        right_file = output_dir + "right" + source_name
 
-        new_source_dict[source_name] = f_right.name
+        new_source_dict[source_name] = right_file
 
-        vcf_reader = pysam.VariantFile(f)
-        vcf_wrong_writer = pysam.VariantFile(f_wrong, 'w', header=vcf_reader.header)
-        vcf_right_writer = pysam.VariantFile(f_right, 'w', header=vcf_reader.header)
+        vcf_reader = pysam.VariantFile(file_name)
+        vcf_wrong_writer = pysam.VariantFile(wrong_file, 'w', header=vcf_reader.header)
+        vcf_right_writer = pysam.VariantFile(right_file, 'w', header=vcf_reader.header)
         n_wrong, n_total = 0, 0
         for record in vcf_reader:
             ref = record.ref.replace("-", "")
@@ -493,17 +489,15 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
         vcf_reader.close()
         vcf_right_writer.close()
         vcf_wrong_writer.close()
-        f_right.close()
-        f_wrong.close()
         print("in {0}, wrong: {1}, total: {2}".format(source_name, n_wrong, n_total))
 
     return new_source_dict, columns, variants
 
 
-def repeat_merging(f_in, f_out):
+def repeat_merging(input_file, output_file):
     """takes a vcf file, collapses repetitive variant rows and write out
         to a new vcf file (without header)"""
-    vcf_reader = pysam.VariantFile(f_in)
+    vcf_reader = pysam.VariantFile(input_file)
     variant_dict = {}  # str -> Record
     num_repeats = 0
     for record in vcf_reader:
@@ -550,13 +544,11 @@ def repeat_merging(f_in, f_out):
                         merged_value = [_f for _f in merged_value if _f]
                         variant_dict[genome_coor].info[key] = deepcopy(merged_value)
     print("number of repeat records: ", num_repeats, "\n")
-    vcf_writer = pysam.VariantFile(f_out, 'w', header=vcf_reader.header)
+    vcf_writer = pysam.VariantFile(output_file, 'w', header=vcf_reader.header)
     for record in variant_dict.values():
         vcf_writer.write(record)
     vcf_reader.close()
     vcf_writer.close()
-    f_in.close()
-    f_out.close()
 
 
 def get_header(f):
@@ -567,11 +559,11 @@ def get_header(f):
     return header
 
 
-def one_variant_transform(f_in, f_out, source_name):
+def one_variant_transform(input_file, output_file, source_name):
     """takes a vcf file, read each row, if the ALT field contains more than
        one item, create multiple variant row based on that row. also adds
        ids to all individual reports (each line in the vcf). writes new vcf"""
-    vcf_reader = pysam.VariantFile(f_in)
+    vcf_reader = pysam.VariantFile(input_file)
 
     # Add BX_ID header if not present
     if 'BX_ID' not in vcf_reader.header.info:
@@ -584,7 +576,7 @@ def one_variant_transform(f_in, f_out, source_name):
             if af_key not in vcf_reader.header.info:
                 vcf_reader.header.info.add(af_key, number=1, type='String', description=f'Allele frequency for {subpopulation} population')
 
-    vcf_writer = pysam.VariantFile(f_out, 'w', header=vcf_reader.header)
+    vcf_writer = pysam.VariantFile(output_file, 'w', header=vcf_reader.header)
     count = 1
     for record in vcf_reader:
         n = len(record.alts)
