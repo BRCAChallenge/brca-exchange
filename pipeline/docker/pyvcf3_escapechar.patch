@@ -1,0 +1,10 @@
+--- a/vcf/parser.py
++++ b/vcf/parser.py
+@@ -776,6 +776,7 @@ class Writer(object):
+         self.writer = csv.writer(
+             stream,
+             delimiter="\t",
+             lineterminator=lineterminator,
+             quoting=csv.QUOTE_NONE,
++            escapechar="\\",
+         )
