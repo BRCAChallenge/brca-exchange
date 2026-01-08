@@ -9,7 +9,7 @@ const databaseKey = require('./databaseKey');
 const keyParam = databaseKey.map(k => `key[]=${k}`).join('&');
 const mdih = require('./loaders/markdown-id-headers');
 
-const port = process.env.BRCAPORT || 8088;
+const port = process.env.BRCAPORT || 8080;
 
 module.exports = {
   entry: './js/index',

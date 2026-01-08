@@ -68,10 +68,20 @@ class FactSheet extends React.Component {
 	this.chart2Ref = React.createRef();
     }
     componentDidMount() {
-        backend.variantCounts().subscribe(
+        this._sub = backend.variantCounts().subscribe(
             resp => {
-                var chart1 = this.refs.chart1.getChart();
-                var chart2 = this.refs.chart2.getChart();
+		const chart1 = this.chart1Ref.current && this.chart1Ref.current.getChart
+                    ? this.chart1Ref.current.getChart()
+                    : null;
+                const chart2 = this.chart2Ref.current && this.chart2Ref.current.getChart
+                    ? this.chart2Ref.current.getChart()
+                    : null;
+
+                // If charts aren't mounted (or we navigated away), just store the data.
+                if (!chart1 || !chart2) {
+                    this.setState(resp);
+                    return;
+                }
 
                 chart1.series[0].setData([resp.brca1.benign, resp.brca2.benign], false);
                 chart1.series[1].setData([resp.brca1.likelyBenign, resp.brca2.likelyBenign], false);
@@ -83,6 +93,11 @@ class FactSheet extends React.Component {
             },
             () => this.setState({error: 'Problem connecting to server'}));
     }
+
+    componentWillUnmount() {
+	if (this._sub && typeof this._sub.unsubscribe === 'function') this._sub.unsubscribe();
+    }
+
     render() {
         return (
             <Grid id="main-grid" className="main-grid">
