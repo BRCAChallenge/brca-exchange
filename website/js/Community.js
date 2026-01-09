@@ -139,7 +139,7 @@ class Community extends React.Component {
                 </Row>
                 <Row>
                     <Col md={{ span: 10, offset: 1 }} sm={12}>
-                        // <CommunityMap onFilterRole={this.onFilterRole} search={this.state.search}/>
+                        <CommunityMap onFilterRole={this.onFilterRole} search={this.state.search}/>
 			<div style={{padding: 20, background: '#fafafa'}}>Community content loads without map.</div>
                     </Col>
                 </Row>

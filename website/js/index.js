@@ -57,7 +57,7 @@ import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } fro
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
 var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
-//var {Signup} = require('./Signup');
+import Signup from './Signup';
 //var {Signin, ResetPassword} = require('./Signin');
 //var {ConfirmEmail} = require('./ConfirmEmail');
 //var {ChangePassword} = require('./ChangePassword');
@@ -1573,8 +1573,8 @@ const routes = (
         <Route path='/variants' />
         <Route path='/variant/:id' component={VariantDetail}/>
         <Route path='/variant_literature/:id' component={LiteratureTable}/>
+        <Route path='/signup' component={Signup}/>
 	{/*
-        <Route path='signup' component={Signup}/>
         <Route path='signin' component={Signin}/>
         <Route path='reset_password' component={ResetPassword}/>
         <Route path='profile' component={Profile}/>
