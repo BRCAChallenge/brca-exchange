@@ -78,6 +78,9 @@ class ResetPassword extends React.Component {
 
 
 class ResetPasswordForm extends React.Component {
+    state = { errors: {} };
+    emailRef = React.createRef();
+
     isValid = () => {
         var compulsoryFields = ['email'];
         var errors = {};

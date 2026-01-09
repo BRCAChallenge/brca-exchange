@@ -1575,9 +1575,9 @@ const routes = (
         <Route path='/variant_literature/:id' component={LiteratureTable}/>
         <Route path='/signup' component={Signup}/>
         <Route path='/signin' component={Signin}/>
+        <Route path='/reset_password' component={ResetPassword}/>
 	{/*
-        <Route path='reset_password' component={ResetPassword}/>
-        <Route path='profile' component={Profile}/>
+	<Route path='profile' component={Profile}/>
         <Route path='confirm/:activationCode' component={ConfirmEmail}/>
         <Route path='reset/:resetToken' component={ChangePassword}/>
 	*/}
