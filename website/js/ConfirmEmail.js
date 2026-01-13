@@ -1,45 +1,41 @@
 'use strict';
 
-var React = require('react');
-var {Grid, Row} = require('react-bootstrap');
-var {State, Navigation} = require('react-router');
-var $ = require('jquery');
-var config = require('./config');
+import React from 'react';
+import { Container as Grid, Row, Alert } from 'react-bootstrap';
+import { withRouter } from 'react-router-dom';
+import $ from 'jquery';
+import config from './config';
 
+class ConfirmEmailInner extends React.Component {
+  state = { success: null };
 
-var ConfirmEmail = React.createClass({
-    mixins: [State, Navigation],
-    getInitialState: function () {
-        return {
-            success: null
-        };
-    },
-	activate: function(result) {
-		this.setState({success: result.success});
-	},
-    componentDidMount: function () {
-        var activationCode = this.context.router.getCurrentParams().activationCode;
-        var url = config.backend_url + '/accounts/confirm/' + activationCode + '/';
-        $.get(url, this.activate);
-    },
-    render: function () {
-        return (
-            <Grid id="main-grid">
-                {this.state.success &&
-                <Row id="message" className="alert alert-success">
-                    Thanks for confirming your email.
-                </Row>
-                }
+  activate = (result) => {
+    this.setState({ success: !!(result && result.success) });
+  };
 
-                {!this.state.success &&
-                <Row id="message" className="alert alert-danger">
-                    Sorry, this activation link is not valid. </Row>
-                }
-            </Grid>);
-    }
-});
+  componentDidMount() {
+    const { activationCode } = (this.props.match && this.props.match.params) || {};
+    const url = `${config.backend_url}/accounts/confirm/${activationCode}/`;
+    $.get(url, this.activate);
+  }
 
+  render() {
+    return (
+      <Grid id="main-grid">
+        {this.state.success ? (
+          <Row id="message">
+            <Alert variant="success">Thanks for confirming your email.</Alert>
+          </Row>
+        ) : (
+          <Row id="message">
+            <Alert variant="danger">Sorry, this activation link is not valid.</Alert>
+          </Row>
+        )}
+      </Grid>
+    );
+  }
+}
 
-module.exports = ({
-    ConfirmEmail: ConfirmEmail
-});
+const ConfirmEmail = withRouter(ConfirmEmailInner);
+export { ConfirmEmail };
+export default ConfirmEmail;

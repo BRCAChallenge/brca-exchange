@@ -59,9 +59,9 @@ import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } fro
 var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
 import Signup from './Signup';
 import {Signin, ResetPassword} from './Signin';
-//var {ConfirmEmail} = require('./ConfirmEmail');
+import {ConfirmEmail} from './ConfirmEmail';
 //var {ChangePassword} = require('./ChangePassword');
-//var {Profile} = require('./Profile');
+import {Profile} from './Profile';
 import VariantSearch from './VariantSearch';
 import { Releases, Release } from './Releases.js';
 import Help from './Help.js';
@@ -1576,11 +1576,9 @@ const routes = (
         <Route path='/signup' component={Signup}/>
         <Route path='/signin' component={Signin}/>
         <Route path='/reset_password' component={ResetPassword}/>
-	{/*
-	<Route path='profile' component={Profile}/>
+	<Route path='/profile' component={Profile}/>
         <Route path='confirm/:activationCode' component={ConfirmEmail}/>
-        <Route path='reset/:resetToken' component={ChangePassword}/>
-	*/}
+	{/* <Route path='reset/:resetToken' component={ChangePassword}/> */}
     </Switch>
 );
 
