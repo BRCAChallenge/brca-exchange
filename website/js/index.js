@@ -60,7 +60,7 @@ var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchM
 import Signup from './Signup';
 import {Signin, ResetPassword} from './Signin';
 import {ConfirmEmail} from './ConfirmEmail';
-//var {ChangePassword} = require('./ChangePassword');
+import {ChangePassword} from './ChangePassword';
 import {Profile} from './Profile';
 import VariantSearch from './VariantSearch';
 import { Releases, Release } from './Releases.js';
@@ -1578,7 +1578,7 @@ const routes = (
         <Route path='/reset_password' component={ResetPassword}/>
 	<Route path='/profile' component={Profile}/>
         <Route path='confirm/:activationCode' component={ConfirmEmail}/>
-	{/* <Route path='reset/:resetToken' component={ChangePassword}/> */}
+	<Route path='/reset/:resetToken' component={ChangePassword}/>
     </Switch>
 );
 
