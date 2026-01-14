@@ -920,7 +920,7 @@ var VariantTableSupplier = function (Component) {
 const VariantTable = VariantTableSupplier(Table);
 const ResearchVariantTable = ResearchVariantTableSupplier(Table);
 
-export default {
+export {
     VariantTable,
     ResearchVariantTable,
     researchModeColumns,

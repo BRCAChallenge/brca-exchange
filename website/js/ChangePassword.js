@@ -8,7 +8,7 @@ import { $c } from './Signup';
 import $ from 'jquery';
 import config from './config';
 
-class ChangePassword extends React.Component {
+class ChangePasswordInner extends React.Component {
     state = { success: null, invalid_token: false, error: null };
     contactFormRef = React.createRef();
 
