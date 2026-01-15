@@ -66,8 +66,8 @@ import VariantSearch from './VariantSearch';
 import { Releases, Release } from './Releases.js';
 import Help from './Help.js';
 
-//var KeyInline = require('./components/KeyInline');
-//var GroupHelpButton = require('./components/GroupHelpButton');
+import KeyInline from './components/KeyInline';
+import GroupHelpButton from './components/GroupHelpButton';
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 

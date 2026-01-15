@@ -719,7 +719,7 @@ var ResearchVariantTableSupplier = function (Component) {
                 openSubcols
             };
         })();
-        componentDidReceiveProps(prevProps) {
+        componentDidUpdate(prevProps) {
             // Change is now complete (has propagated all the way
             // down and back up through the parent component)
 	    if (this.state.changeInProgress && prevProps !== this.props) {
@@ -727,7 +727,7 @@ var ResearchVariantTableSupplier = function (Component) {
             }
         }
 
-        getQuery = () => {
+        getQuery() {
             const search =
                 (this.props.location && this.props.location.search) ||
                 (typeof window !== "undefined" ? window.location.search : "") ||
@@ -752,7 +752,7 @@ var ResearchVariantTableSupplier = function (Component) {
             if (hideSources) out.hideSources = hideSources;
 
             return out;
-        };
+        }
 
         toggleColumns = (prop) => {
             let {columnSelection} = this.state,
