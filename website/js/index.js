@@ -898,26 +898,29 @@ class VariantDetail extends React.Component {
                     if (added !== null || removed !== null) {
                         if (util.isEmptyField(removed)) {
                             diffHTML.push(
-                                <span>
+                                <span key={`diff-${i}-${j}-new`}>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
                                     <span className='badge bg-success'><span className='glyphicon glyphicon-star'></span> New</span>
                                     &nbsp;{`${added}`}
-                                </span>, <br />
+                                </span>
                             );
+			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
                         } else if (fieldDiff.field_type === "list") {
                             diffHTML.push(
-                                <span>
+                                <span key={`diff-${i}-${j}-list`}>
                                     <strong>{ getDisplayName(fieldName) }: </strong> <br />
                                     { !isEmptyDiff(added) && `+${added}` }{ !!(!isEmptyDiff(added) && !isEmptyDiff(removed)) && ', '}{ !isEmptyDiff(removed) && `-${removed}` }
-                                </span>, <br />
+                                </span>
                             );
+			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
                         } else if (fieldDiff.field_type === "individual") {
                             diffHTML.push(
-                                <span>
+                                <span key={`diff-${i}-${j}-individual`}>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
                                     {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
-                                </span>, <br />
+                                </span>
                             );
+			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
                         }
                     }
                 }
@@ -1247,14 +1250,14 @@ class VariantDetail extends React.Component {
                 }
             }
 
-            var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions) {
+            var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions, key) {
                 let newestSubmission = submissions ? submissions[0] : '';
                 let oldestSubmission = submissions ? submissions[submissions.length - 1] : '';
                 const significance = util.sentenceCase(util.getFormattedFieldByProp("Clinical_Significance_ClinVar", newestSubmission)
                 .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
                 const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitter_ClinVar", newestSubmission));
                 return (
-                    <Row>
+                    <Row key={`clinvar-${key}`}>
                         <Col md={12} className="variant-history-col">
                             <h3>ClinVar Submission: {newestSubmission["SCV_ClinVar"]} ({submitter}; {significance})</h3>
                             <h4>Previous Versions of this Submission (since {util.reformatDate(oldestSubmission.Data_Release.date)}):</h4>
@@ -1276,14 +1279,14 @@ class VariantDetail extends React.Component {
                 );
             }, this);
 
-            var lovdDiffRows = _.map(sortedSubmissions.LOVD, function(submissions) {
+            var lovdDiffRows = _.map(sortedSubmissions.LOVD, function(submissions, key) {
                 let newestSubmission = submissions ? submissions[0] : '';
                 let oldestSubmission = submissions ? submissions[submissions.length - 1] : '';
                 const significance = util.sentenceCase(util.getFormattedFieldByProp("Classification_LOVD", newestSubmission)
                 .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
                 const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitters_LOVD", newestSubmission));
                 return (
-                    <Row>
+                    <Row key={`lovd-${key}`}>
                         <Col md={12} className="variant-history-col">
                             <h3>LOVD Submission: {newestSubmission["DBID_LOVD"]} ({submitter}; {significance})</h3>
                             <h4>Previous Versions of this Submission (since {util.normalizeDateFieldDisplay(oldestSubmission.Data_Release.date)}):</h4>
