@@ -351,7 +351,7 @@ class Database extends React.Component {
     constructor(props) {
         super(props);
         this.state = { showModal: false, restoringDefaults: false };
-
+	this.tableRef = React.createRef();
         this.showVariant = this.showVariant.bind(this);
         this.showHelp = this.showHelp.bind(this);
         this.onChange = this.onChange.bind(this);
@@ -481,7 +481,7 @@ class Database extends React.Component {
         if (this.props.mode === 'research_mode') {
             table = (
 				<ResearchVariantTable
-					ref='table'
+					ref={this.tableRef}
 					initialState={params}
 					{...params}
 					fetch={backend.data}
@@ -500,7 +500,7 @@ class Database extends React.Component {
             params.sourceSelection = {};
             table = (
 				<VariantTable
-					ref='table'
+					ref={this.tableRef}
 					initialState={params}
 					{...params}
 					fetch={backend.data}
@@ -527,7 +527,7 @@ class Database extends React.Component {
 			<Row>
 				<Col className="jumbotron colorized-jumbo">
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
-					<RawHTML ref='content' html={message}/>
+					<RawHTML html={message}/>
 					{this.props.mode === 'research_mode' && <Button variant="secondary" onClick={this.toggleMode}>
 						Show Summary Data Only
 					</Button>}
@@ -1549,6 +1549,8 @@ class Application extends React.Component {
            	})}
 		{path.indexOf('variants') === 0 && (
 		<Database
+		    location={this.props.location}
+		    history={this.props.history}
                     mode={this.state.mode}
                     toggleMode={this.onChildToggleMode}
                     show={path.indexOf('variants') === 0} /> 
@@ -1558,6 +1560,9 @@ class Application extends React.Component {
         );
     }
 }
+
+// Wrap Application with withRouter so it gets location/history props
+const ApplicationWithRouter = withRouter(Application);
 
 const routes = (
     <Switch>
@@ -1570,7 +1575,6 @@ const routes = (
         <Route path='/release/:id' component={Release}/>
         <Route path='/whydonate' component={WhyDonate}/>
         <Route path='/fundraisingdetails' component={FundraisingDetails}/>
-        <Route path='/variants' />
         <Route path='/variant/:id' component={VariantDetail}/>
         <Route path='/variant_literature/:id' component={LiteratureTable}/>
         <Route path='/signup' component={Signup}/>
@@ -1586,8 +1590,8 @@ const container = document.getElementById('main');
 const root = createRoot(container);
 root.render(
     <BrowserRouter>
-	<Application>
+	<ApplicationWithRouter>
 		{routes}
-	</Application>
+	</ApplicationWithRouter>
     </BrowserRouter>
 );

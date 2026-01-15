@@ -17,6 +17,19 @@ var alleleFrequencyCharts = require('./AlleleFrequencyCharts');
 // TODO: Re-enable or replace after upgrading react-data-components-brcaex
 // require('react-data-components-brcaex/css/table-twbs.css');
 
+function buildHeader(onClick, title) {
+    return (
+        <span>
+            {title}
+            <span 
+                onClick={ev => {ev.stopPropagation(); onClick(title); }}
+                className='help fa fa-question-circle superscript'
+                style={{cursor: 'pointer', marginLeft: '4px'}}
+            />
+        </span>
+    );
+}
+
 function renderCell(val) {
     return <span>{val}</span>;
 }
@@ -598,6 +611,11 @@ const researchModeColumns = [
 var hasSelection = () => !(window.getSelection && window.getSelection().isCollapsed);
 
 class Table extends React.Component {
+    constructor(props) {
+	super(props);
+	this.dataTableRef = React.createRef();
+    }
+
     render() {
         // Expert portal always shows all sources and default columns
         var {data, onHeaderClick, onRowClick, hiddenSources, mode, columnSelection, sourceSelection, ...opts} = this.props;
@@ -610,7 +628,7 @@ class Table extends React.Component {
         }
         return (
             <DataTable
-                ref='table'
+                ref={this.dataTableRef}
                 className='row-clickable data-table table-grayheader'
                 {...opts}
                 columnSelection={columnSelection}

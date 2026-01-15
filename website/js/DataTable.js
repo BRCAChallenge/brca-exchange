@@ -267,7 +267,7 @@ class DataTable extends React.Component {
         this.subs.unsubscribe();
     }
     
-    handleResize() {
+    handleResize = () => {
         this.setState({windowWidth: window.innerWidth});
     }
 
