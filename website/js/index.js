@@ -301,6 +301,20 @@ function toNumber(v) {
 
 function databaseParams(paramsIn) {
     var {filter, filterValue, hide, hideSources, excludeSources, orderBy, order, search = '', changeTypes} = paramsIn;
+
+    const asArray = (v) => {
+        if (v === null || v === undefined) return [];
+        if (Array.isArray(v)) return v;
+        if (typeof v === 'string') return v.length ? [v] : [];
+        return [v];
+    };
+
+    filter = asArray(filter);
+    filterValue = asArray(filterValue);
+    hide = asArray(hide);
+    hideSources = asArray(hideSources);
+    excludeSources = asArray(excludeSources);
+    changeTypes = asArray(changeTypes);
     var numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength', 'release'), toNumber);
     var sortBy = {prop: orderBy, order};
     var columnSelection = _.object(hide, _.map(hide, _.constant(false)));
