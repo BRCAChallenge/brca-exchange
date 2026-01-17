@@ -75,14 +75,23 @@ export default class CollapsibleTile extends React.Component {
         const groupVisID = `group-panel-${this.props.groupTitle}`;
 
         // inject props for allowing us to react to child sections' request to change their visibility
-        const togglableKids = React.Children.map(this.props.children, (c) =>
-            React.cloneElement(c, {
+        const togglableKids = React.Children.map(this.props.children, (c) => {
+            if (!React.isValidElement(c)) return c;
+	
+	    // Never inject custom props into DOM nodes like <div>
+            if (typeof c.type === "string") return c;
+
+            // Only inject into children that participate in field expansion (must have an id)
+            const id = c.props && c.props.id;
+            if (!id) return c;
+
+	    return React.cloneElement(c, {
                 onFieldToggled: this.fieldToggled,
-                expanded: fieldExpansions[c.props.id],
+                expanded: !!fieldExpansions[id],
                 relayoutGrid: this.props.relayoutGrid,
                 hideEmptyItems: this.props.hideEmptyItems
             })
-        );
+	});
 
         return (
             <div

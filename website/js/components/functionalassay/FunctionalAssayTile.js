@@ -10,7 +10,7 @@ import FuncClassSubtile from "./FuncClassSubtile";
 import {Table} from "react-bootstrap";
 const util = require('../../util');
 const slugify = require('../../slugify');
-var KeyInline = require('../KeyInline');
+import KeyInline from '../KeyInline';
 const FunctionalAssayConstants = require("./FunctionalAssayConstants");
 
 
@@ -51,7 +51,7 @@ export default class FunctionalAssayTile extends React.Component {
                     const rowItem = util.getFormattedFieldByProp(prop, this.props.variant);
 
                     return (
-                        <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+                        <tr key={`fa-${assay.name}-${prop}`} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={title} noHelpLink={false}
                                 tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
                                 onClick={(event) => this.props.showHelp(event, prop)}
@@ -84,15 +84,15 @@ export default class FunctionalAssayTile extends React.Component {
                             let links = pmids.map( (pmid, idx) => {
                                 pmid = pmid.split(':')[1];
                                 if (idx < length - 1) {
-                                    return (<span><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank' rel="noopener noreferrer">PMID:{pmid}</a>, </span>);
+                                    return (<span key={`fa-prevpub-${assay.name}-${pmid}-${idx}`}><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank' rel="noopener noreferrer">PMID:{pmid}</a>, </span>);
                                 }
-                                return (<span><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank' rel="noopener noreferrer">PMID:{pmid}</a></span>);
+                                return (<span key={`fa-prevpub-${assay.name}-${pmid}-${idx}`}><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank' rel="noopener noreferrer">PMID:{pmid}</a></span>);
                             });
                             v = links;
                         }
                     }
                     return (
-                        <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+                        <tr key={`fa-${assay.name}-${k}`} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={k} noHelpLink={false}
                                 tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
                                 onClick={(event) => this.props.showHelp(event, k)}
@@ -110,7 +110,7 @@ export default class FunctionalAssayTile extends React.Component {
                         v = '-';
                     }
                     return (
-                        <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+                        <tr key={`fa-${assay.name}-${k}`} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={k} noHelpLink={false}
                                 tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
                                 onClick={(event) => this.props.showHelp(event, k)}
@@ -124,6 +124,7 @@ export default class FunctionalAssayTile extends React.Component {
 
                 if (assay.name === "Findlay") {
                     return ( <CollapsibleSection
+			        key={`functional-assay-section-${assay.name}`}
                                 fieldName={assay.author}
                                 extraHeaderItems={this.generateHeader(result)}
                                 twoColumnExtraHeader={true}
@@ -154,6 +155,7 @@ export default class FunctionalAssayTile extends React.Component {
                             </CollapsibleSection> );
                 } else {
                     return ( <CollapsibleSection
+			        key={`functional-assay-section-${assay.name}`}
                                 fieldName={assay.author}
                                 extraHeaderItems={this.generateHeader(result)}
                                 twoColumnExtraHeader={true}

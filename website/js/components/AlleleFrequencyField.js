@@ -45,6 +45,15 @@ class AlleleFrequencyField extends React.PureComponent {
         this.setState((prev) => ({ [field]: !prev[field] }));
     };
 
+    // Graphical allele frequency "field" is sometimes an array (chart descriptors)
+    getChartDescriptor(field) {
+        if (!field) return null;
+        if (Array.isArray(field)) {
+            return field.find(x => x && typeof x.replace === "function") || field[0] || null;
+        }
+        return field;
+    }
+
     generateHeader(field, fieldName, flag) {
         let fnLower = fieldName.toLowerCase();
         let isGenome = false;
@@ -99,11 +108,13 @@ class AlleleFrequencyField extends React.PureComponent {
     getRowsAndDetermineIfEmpty(source, data, variant) {
         let rowsEmpty = 0;
 
-        const rows = _.map(data, (rowDescriptor) => {
+        const rows = _.map(data, (rowDescriptor, idx) => {
             let {prop, title, noHelpLink} = rowDescriptor;
             let rowItem;
 
             title = this.cleanRowTitle(title);
+            const rowKey = prop || `${source}-${idx}-${title}`;
+            const helpKey = prop || title;
 
             if (variant[prop] !== null) {
                 rowItem = util.getFormattedFieldByProp(prop, variant);
@@ -121,12 +132,12 @@ class AlleleFrequencyField extends React.PureComponent {
             });
 
             return (
-                <tr key={prop} className={ rowClasses }>
+                <tr key={rowKey} className={ rowClasses }>
                     { rowDescriptor.tableKey !== false &&
                         (
                             <KeyInline tableKey={title} noHelpLink={noHelpLink}
-                                tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
-                                onClick={(event) => this.props.showHelp(event, prop)}
+                                tooltip={this.props.tooltips && this.props.tooltips[slugify(String(helpKey))]}
+                                onClick={(event) => this.props.showHelp(event, helpKey)}
                             />
                         )
                     }
@@ -170,16 +181,24 @@ class AlleleFrequencyField extends React.PureComponent {
         }
 
         if (fieldName === "gnomAD V3.1 Genomes, Non-Cancer (Graphical)") {
-            renderedRows = field.replace(variant, field.prop);
-            if (!variant.Variant_in_GnomAD || util.isEmptyField(variant.Allele_frequency_genome_GnomADv3)) {
+            const chartDesc = this.getChartDescriptor(field);
+            renderedRows =
+                chartDesc && typeof chartDesc.replace === "function"
+                    ? chartDesc.replace(variant, chartDesc.prop)
+                    : null;
+	    if (!variant.Variant_in_GnomAD || util.isEmptyField(variant.Allele_frequency_genome_GnomADv3)) {
                 allEmpty = true;
             }
             isChart = true;
         } else if (fieldName === "gnomAD V3.1 Genomes, Non-Cancer (Numerical)") {
             renderedRows = this.getRowsAndDetermineIfEmpty("GnomAD", field, variant, flag);
         } else if (fieldName === "gnomAD V2.1 Exomes, Non-Cancer (Graphical)") {
-            renderedRows = field.replace(variant, field.prop);
-            if (!variant.Variant_in_GnomAD || util.isEmptyField(variant['Allele_frequency_exome_GnomAD'])) {
+            const chartDesc = this.getChartDescriptor(field);
+            renderedRows =
+                chartDesc && typeof chartDesc.replace === "function"
+                    ? chartDesc.replace(variant, chartDesc.prop)
+                    : null;
+	    if (!variant.Variant_in_GnomAD || util.isEmptyField(variant['Allele_frequency_exome_GnomAD'])) {
                 allEmpty = true;
             }
             isChart = true;

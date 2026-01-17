@@ -186,10 +186,10 @@ export function getFormattedFieldByProp(prop, variant) {
             }
 
             if (i < (accessions.length - 1)) {
-                rowItem.push(<span><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>,</span>);
+                rowItem.push(<span key={`scv-${accessions[i].trim()}-${i}`}><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>,</span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>);
+                rowItem.push(<a key={`scv-${accessions[i].trim()}-${i}`} target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>);
             }
         }
     } else if (prop === "Condition_Value_ClinVar" && !isEmptyField(variant['Condition_DB_ID_ClinVar'])) {
@@ -224,10 +224,10 @@ export function getFormattedFieldByProp(prop, variant) {
         rowItem = [];
         for (let i = 0; i < ids.length; i++) {
             if (i < (ids.length - 1)) {
-                rowItem.push(<span><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
+                rowItem.push(<span key={`lovd-${ids[i].trim()}-${i}`}><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
+                rowItem.push(<a key={`lovd-${ids[i].trim()}-${i}`} target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
             }
         }
     } else if (prop === "Assertion_method_citation_ENIGMA") {
@@ -239,7 +239,7 @@ export function getFormattedFieldByProp(prop, variant) {
     } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
         const pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
         rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
-            (/^[0-9]+$/.test(piece)) ? <a target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece);
+            (/^[0-9]+$/.test(piece)) ? <a key={`pmid-${piece}-${idx}`} target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece);
     } else if (prop === "HGVS_cDNA") {
         rowItem = variant[prop].split(":")[1];
     } else if (prop === "HGVS_Protein") {
@@ -247,7 +247,7 @@ export function getFormattedFieldByProp(prop, variant) {
     } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")];
-        rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number})</small>];
+        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({count} of {number})</small>];
     } else if (prop === "Allele_frequency_genome_GnomADv3" || prop === "Allele_frequency_exome_GnomAD") {
         let flag;
         if (prop === "Allele_frequency_genome_GnomADv3") {
@@ -256,7 +256,7 @@ export function getFormattedFieldByProp(prop, variant) {
             flag = variant.Flags_GnomAD;
         }
         if (!isEmptyField(flag)) {
-            rowItem = [variant[prop], <small style={{float: 'right'}}><span className="glyphicon glyphicon-flag gnomad-flag"><span>{flag}</span></span></small>];
+            rowItem = [variant[prop], <small key={`${prop}-flag`} style={{float: 'right'}}><span className="glyphicon glyphicon-flag gnomad-flag"><span>{flag}</span></span></small>];
         } else {
             rowItem = normalizedFieldDisplay(variant[prop]);
         }
@@ -264,11 +264,11 @@ export function getFormattedFieldByProp(prop, variant) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")],
             hom = variant[prop.replace("frequency", "count_hom")];
-        rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number}, Hom={hom})</small>];
+        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({count} of {number}, Hom={hom})</small>];
     } else if (/count.*_GnomAD/.test(prop) || /number.*_GnomAD/.test(prop)) {
         rowItem = variant[prop];
     } else if (prop === "faf95_popmax_genome_GnomADv3") {
-        rowItem = [variant[prop], <small style={{float: 'right'}}>({variant.faf95_popmax_population_genome_GnomADv3})</small>];
+        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant.faf95_popmax_population_genome_GnomADv3})</small>];
     } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
         let hgvs;
         if (prop === "Genomic_Coordinate_hg38") {

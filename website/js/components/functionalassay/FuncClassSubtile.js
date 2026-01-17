@@ -71,7 +71,7 @@ export default class FuncClassSubtile extends React.Component {
         // add horizontal grid lines
         svg.append("g")
             .attr("class", "grid")
-            .call(yAxisGird);
+            .call(yAxisGrid);
 
         // draw histogram bars
         const bar = svg.selectAll(".bar")
@@ -128,7 +128,9 @@ export default class FuncClassSubtile extends React.Component {
             .attr("text-anchor", (d, i) => (i === 0) ? "start" : "end")
             .text(d => d.label);
 
-        // draw caret on classification chart
+        // draw caret on classification chart (only if score is valid)
+	const scoreX = x(score);
+	if (scoreX !== undefined && scoreX !== null && !Number.isNaN(scoreX)) {
         svg.append("g")
             .attr("transform", `translate(${x(score)}, ${height + 50})`)
             .append("polygon")
@@ -145,7 +147,7 @@ export default class FuncClassSubtile extends React.Component {
             .attr("fill", "black")
             .attr("y", 0)
             .attr("y2", -yMax);
-
+	}
     }
 
     render() {

@@ -779,7 +779,8 @@ class VariantDetail extends React.Component {
     componentDidUpdate(prevProps, prevState) {
         // mode change => refresh tooltips + relayout
         if (prevProps.mode !== this.props.mode) {
-            this.setState({ tooltips: parseTooltips(this.props.mode === 'research_mode') });
+            console.log('VariantDetail mode changed from', prevProps.mode, 'to', this.props.mode);
+	    this.setState({ tooltips: parseTooltips(this.props.mode === 'research_mode') });
             setTimeout(() => this.relayoutGrid(true), 0);
         }
 
@@ -963,7 +964,8 @@ class VariantDetail extends React.Component {
 
     // render for VariantDetail
     render() {
-        const {data, error} = this.state;
+        console.log('VariantDetail render, mode prop:', this.props.mode);
+	const {data, error} = this.state;
         if (!data) {
             return <div />;
         }
@@ -1001,7 +1003,7 @@ class VariantDetail extends React.Component {
 
                 return (
                     <SourceReportsTile
-                        key="source-reports-tile"
+                        key={`tile-${groupTitle}`}
                         groupTitle={groupTitle}
                         sourceName={reportSource}
                         reportBinding={reportBinding}
@@ -1019,7 +1021,7 @@ class VariantDetail extends React.Component {
             if (alleleFrequencies) {
                 return (
                     <AlleleFrequenciesTile
-                        key="allele-frequency-tile"
+                        key={`tile-${groupTitle}`}
                         alleleFrequencyData={innerGroups}
                         groupTitle={groupTitle}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
@@ -1035,7 +1037,7 @@ class VariantDetail extends React.Component {
             if (inSilicoPred) {
                 return (
                     <SilicoPredTile
-                        key="silico-pred-tile"
+                        key={`tile-${groupTitle}`}
                         groupTitle='silico-pred-tile'
                         priors={variant.priors}
                         displayTitle={<span><i>In Silico</i> Prior Prediction (prior to considering other evidence)</span>}
@@ -1066,7 +1068,7 @@ class VariantDetail extends React.Component {
 
                 return (
                     <FunctionalAssayTile
-                        key="source-reports-tile"
+                        key={`tile-${groupTitle}`}
                         groupTitle='functional-assay-tile'
                         results={results}
                         displayTitle="Functional Assay Results"
@@ -1085,7 +1087,7 @@ class VariantDetail extends React.Component {
             if (groupTitle === "Computational Predictions") {
                 return (
                     <ComputationalPredictionTile
-                        key="source-reports-tile"
+                        key={`tile-${groupTitle}`}
                         groupTitle='functional-assay-tile'
                         displayTitle="Computational Predictions"
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
@@ -1103,6 +1105,7 @@ class VariantDetail extends React.Component {
             if (groupTitle === "ACMG Variant Evidence Codes, Provisional Assignment") {
                 return (
                     <ProvisionalEvidenceTile
+			key={`tile-${groupTitle}`}
                         groupTitle={groupTitle}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         relayoutGrid={this.relayoutGrid}
@@ -1115,7 +1118,7 @@ class VariantDetail extends React.Component {
             }
 
             // standard 2-column table tile
-            const rows = _.map(innerCols, (rowDescriptor) => {
+            const rows = _.map(innerCols, (rowDescriptor, idx) => {
                 let {prop, title, noHelpLink} = rowDescriptor;
                 let rowItem;
 
@@ -1169,9 +1172,13 @@ class VariantDetail extends React.Component {
                     rowItem = '-';
                 }
 
+                // Make sure keys are unique within each tile table.
+                // `prop` alone can collide or be undefined in some cases.
+                const rowKey = `vd-${groupTitle}-${prop || idx}`;
+
                 totalRowsEmpty += rowsEmpty;
                 return (
-                    <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
+                    <tr key={rowKey} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         { rowDescriptor.tableKey !== false &&
                             (<KeyInline
                                 tableKey={title} noHelpLink={noHelpLink}
@@ -1538,13 +1545,18 @@ class Application extends React.Component {
     };
 
     toggleMode = () => {
-        if (this.state.mode === 'research_mode') {
+        console.log('toggleMode called, current mode:', this.state.mode);
+    	if (this.state.mode === 'research_mode') {
             localStorage.setItem('research-mode', false);
-            this.setState({mode: 'default'});
-        } else {
+            this.setState({mode: 'default'}, () => {
+               console.log('State updated to:', this.state.mode);
+            });
+    	} else {
             localStorage.setItem('research-mode', true);
-            this.setState({mode: 'research_mode'});
-        }
+            this.setState({mode: 'research_mode'}, () => {
+            	console.log('State updated to:', this.state.mode);
+            });
+    	}
     };
 
     render() {
@@ -1572,6 +1584,20 @@ class Application extends React.Component {
                     toggleMode={this.onChildToggleMode}
                     show={path.indexOf('variants') === 0} /> 
 		)}
+		{path.indexOf('variant/') === 0 && (() => {
+		const variantId = path.split('variant/')[1]?.split('?')[0]?.split('#')[0];
+    		console.log('Rendering VariantDetail from Application, mode:', this.state.mode, 'id:', variantId);
+    		return (
+        	<VariantDetail
+            	location={this.props.location}
+            	history={this.props.history}
+            	match={{ params: { id: variantId } }}
+            	params={{ id: variantId }}
+            	mode={this.state.mode}
+            	toggleMode={this.onChildToggleMode}
+       		/>
+	       	);
+	    	})()}
                 <Footer />
             </div>
         );
@@ -1592,7 +1618,7 @@ const routes = (
         <Route path='/release/:id' component={Release}/>
         <Route path='/whydonate' component={WhyDonate}/>
         <Route path='/fundraisingdetails' component={FundraisingDetails}/>
-        <Route path='/variant/:id' component={VariantDetail}/>
+	{/*<Route path='/variant/:id' component={VariantDetail}/>*/}
         <Route path='/variant_literature/:id' component={LiteratureTable}/>
         <Route path='/signup' component={Signup}/>
         <Route path='/signin' component={Signin}/>
