@@ -59,7 +59,10 @@ def parallelize_dataframe(df: pd.DataFrame, func: Callable[[pd.DataFrame], pd.Da
     if df.empty:
         return df
 
-    df_split = np.array_split(df, n_processes)
+    # Use numpy array_split but ensure results are DataFrames
+    # (newer numpy versions may return ndarrays instead of DataFrames)
+    splits = np.array_split(df, n_processes)
+    df_split = [pd.DataFrame(part, columns=df.columns) if isinstance(part, np.ndarray) else part for part in splits]
 
     with pathos.multiprocessing.ProcessingPool(ncpus=n_processes) as pool:
         df = pd.concat(pool.map(func, df_split))

@@ -30,6 +30,9 @@ def write_reports_tsv(filename, columns, ready_files_dir, genome_regions_symbol_
             if type(report[ii]) == list:
                 comma_delimited_string = ",".join(str(xx) for xx in report[ii])
                 report[ii] = comma_delimited_string
+            elif type(report[ii]) == tuple:
+                comma_delimited_string = ",".join(str(xx) for xx in report[ii])
+                report[ii] = comma_delimited_string
             elif type(report[ii]) == int:
                 report[ii] = str(report[ii])
         reports_output.write("\t".join(report)+"\n")

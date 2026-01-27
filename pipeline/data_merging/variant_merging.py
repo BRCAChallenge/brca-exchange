@@ -471,6 +471,12 @@ def preprocessing(input_dir, output_dir, seq_provider, gene_regions_trees):
         new_source_dict[source_name] = right_file
 
         vcf_reader = pysam.VariantFile(file_name)
+
+        # Add contig definitions to header if missing (required by pysam)
+        for chrom in ['13', '17', '7', '1', '2', '3', '4', '5', '6', '8', '9', '10', '11', '12', '14', '15', '16', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']:
+            if chrom not in vcf_reader.header.contigs:
+                vcf_reader.header.contigs.add(chrom)
+
         vcf_wrong_writer = pysam.VariantFile(wrong_file, 'w', header=vcf_reader.header)
         vcf_right_writer = pysam.VariantFile(right_file, 'w', header=vcf_reader.header)
         n_wrong, n_total = 0, 0
@@ -511,14 +517,17 @@ def repeat_merging(input_file, output_file):
                     variant_dict[genome_coor].info[key] = record.info[key]
                 else:
                     new_value = record.info[key]
-                    new_value = [xx for xx in new_value if xx is not None]
                     old_value = variant_dict[genome_coor].info[key]
-                    old_value = [xx for xx in old_value if xx is not None]
 
-                    if type(new_value) != list:
+                    # pysam returns scalars for INFO fields with Number=1,
+                    # so convert to list before iterating
+                    if not isinstance(new_value, (list, tuple)):
                         new_value = [new_value]
-                    if type(old_value) != list:
+                    if not isinstance(old_value, (list, tuple)):
                         old_value = [old_value]
+
+                    new_value = [xx for xx in new_value if xx is not None]
+                    old_value = [xx for xx in old_value if xx is not None]
 
                     # This if statement is crucial to not mess up text fields
                     # containing ',' and hence being treated as separate fields.
@@ -541,8 +550,25 @@ def repeat_merging(input_file, output_file):
 
                         # Remove empty strings from list
                         merged_value = [_f for _f in merged_value if _f]
-                        variant_dict[genome_coor].info[key] = tuple(merged_value)
+
+                        # pysam enforces VCF header Number= specification.
+                        # For scalar fields (Number=1), we can only store one value.
+                        info_number = vcf_reader.header.info[key].number
+                        if info_number == 1 and len(merged_value) > 1:
+                            # Keep the first (existing) value for scalar fields
+                            merged_value = [old_value[0]] if old_value else [new_value[0]]
+
+                        if len(merged_value) == 1:
+                            variant_dict[genome_coor].info[key] = merged_value[0]
+                        else:
+                            variant_dict[genome_coor].info[key] = tuple(merged_value)
     print("number of repeat records: ", num_repeats, "\n")
+
+    # Add contig definitions to header if missing (required by pysam)
+    for chrom in ['13', '17', '7', '1', '2', '3', '4', '5', '6', '8', '9', '10', '11', '12', '14', '15', '16', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']:
+        if chrom not in vcf_reader.header.contigs:
+            vcf_reader.header.contigs.add(chrom)
+
     vcf_writer = pysam.VariantFile(output_file, 'w', header=vcf_reader.header)
     for record in variant_dict.values():
         vcf_writer.write(record)
@@ -574,6 +600,12 @@ def one_variant_transform(input_file, output_file, source_name):
             af_key = "AF_" + subpopulation
             if af_key not in vcf_reader.header.info:
                 vcf_reader.header.info.add(af_key, number=1, type='String', description=f'Allele frequency for {subpopulation} population')
+
+    # Add contig definitions to header if missing (required by pysam)
+    # BRCA genes are on chr13 and chr17, but other chromosomes may be present in the data
+    for chrom in ['13', '17', '7', '1', '2', '3', '4', '5', '6', '8', '9', '10', '11', '12', '14', '15', '16', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']:
+        if chrom not in vcf_reader.header.contigs:
+            vcf_reader.header.contigs.add(chrom)
 
     vcf_writer = pysam.VariantFile(output_file, 'w', header=vcf_reader.header)
     count = 1
@@ -635,6 +667,9 @@ def write_new_tsv(filename, columns, variants):
             raise Exception("mismatching number of columns in head and row")
         for ii in range(len(variant)):
             if type(variant[ii]) == list:
+                comma_delimited_string = ",".join(str(xx) for xx in variant[ii])
+                variant[ii] = comma_delimited_string
+            elif type(variant[ii]) == tuple:
                 comma_delimited_string = ",".join(str(xx) for xx in variant[ii])
                 variant[ii] = comma_delimited_string
             elif type(variant[ii]) == int:
