@@ -1,9 +1,15 @@
+import logging
+import re
+
 import hgvs
 import pandas as pd
 
 from .hgvs_utils import HgvsWrapper
 from .seq_utils import SeqRepoWrapper
 from .variant_utils import VCFVariant
+
+# Pattern to match parentheses in tag names (invalid for VCF INFO fields)
+INVALID_TAG_PARENTHESES_PATTERN = re.compile(r'[()]')
 
 
 def cdna_str_to_genomic_var(cdna_hgvs_str, assembly=HgvsWrapper.GRCh38_Assem, hgvs_wrapper = HgvsWrapper.get_instance(),
@@ -51,3 +57,64 @@ def read_vcf_as_dataframe(path):
 
 def _is_empty_field(field_value):
     return field_value == '' or field_value is None
+
+
+def has_invalid_parentheses(tag_name):
+    """
+    Check if a tag name contains parentheses, which are invalid for VCF INFO fields.
+
+    Args:
+        tag_name: The tag name to check
+
+    Returns:
+        True if the tag name contains parentheses, False otherwise
+    """
+    return bool(INVALID_TAG_PARENTHESES_PATTERN.search(tag_name))
+
+
+def sanitize_hgvs_tag_name(tag_name):
+    """
+    Sanitize an HGVS tag name by removing parentheses.
+
+    VCF INFO field tag names must only contain alphanumeric characters and underscores.
+    HGVS nomenclature often uses parentheses (e.g., p.(Arg345Pro)), which are invalid
+    as VCF tag names.
+
+    Args:
+        tag_name: The tag name to sanitize
+
+    Returns:
+        The sanitized tag name with parentheses removed
+    """
+    return INVALID_TAG_PARENTHESES_PATTERN.sub('', tag_name)
+
+
+def validate_vcf_info_tags(vcf_reader, file_path):
+    """
+    Validate VCF INFO field tag names for invalid characters (parentheses).
+
+    Logs warnings for any tags containing parentheses and returns a mapping
+    of invalid tag names to their sanitized versions.
+
+    Args:
+        vcf_reader: pysam VariantFile object
+        file_path: Path to the VCF file (for logging)
+
+    Returns:
+        dict: Mapping of invalid tag names to sanitized tag names
+    """
+    invalid_tags = {}
+    header = vcf_reader.header
+
+    for record in header.info:
+        tag_name = record
+        if has_invalid_parentheses(tag_name):
+            sanitized_name = sanitize_hgvs_tag_name(tag_name)
+            invalid_tags[tag_name] = sanitized_name
+            logging.warning(
+                "Invalid HGVS tag name '%s' in %s contains parentheses. "
+                "Sanitized version: '%s'",
+                tag_name, file_path, sanitized_name
+            )
+
+    return invalid_tags

@@ -12,16 +12,14 @@ import time
 from ga4gh.core import sha512t24u, ga4gh_digest, ga4gh_identify, ga4gh_serialize
 from ga4gh.vrs import __version__, models, normalize
 from ga4gh.vrs.dataproxy import SeqRepoRESTDataProxy
-from ga4gh.vrs.extras.translator import Translator
+from ga4gh.vrs.extras.translator import AlleleTranslator
 
 csv.field_size_limit(10000000)
 
 SEQREPO_REST_SERVICE_URL = "http://localhost:5000/seqrepo"
 
 DP = SeqRepoRESTDataProxy(base_url=SEQREPO_REST_SERVICE_URL)
-TLR = Translator(data_proxy=DP,
-                 translate_sequence_identifiers=True,
-                 normalize=True,
+TLR = AlleleTranslator(data_proxy=DP,
                  identify=True)
 
 
@@ -79,7 +77,7 @@ def get_vrs_id(hgvs, max_repeats=5):
         except requests.exceptions.ReadTimeout:
             continue
         else:
-            allele_dict = allele.as_dict()
+            allele_dict = allele.model_dump()
             if 'id' in allele_dict:
                 return(allele_dict['id'])
             elif '_id' in allele_dict:

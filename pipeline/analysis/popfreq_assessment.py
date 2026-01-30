@@ -121,7 +121,7 @@ def field_defined(field):
     """
     Return a binary value indicating whether or not this variant has the popmax FAF defined
     """
-    return(field != "-")
+    return(field != "-" and field != "")
 
     
 

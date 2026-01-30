@@ -9,6 +9,7 @@ import os
 from os import listdir
 from os.path import isfile, join, abspath
 from data_merging.aggregate_reports import get_reports_files
+from common.vcf_files_helper import validate_vcf_info_tags
 import pysam
 
 csv.field_size_limit(10000000)
@@ -59,9 +60,14 @@ def get_bx_ids():
             source = file[:(len(file)-len(suffix))]
             bx_ids[source] = []
             vcf_reader = pysam.VariantFile(file_path)
+            validate_vcf_info_tags(vcf_reader, file_path)
             try:
                 for record in vcf_reader:
-                    ids = list(map(int, record.info['BX_ID']))
+                    bx_id_value = record.info['BX_ID']
+                    if isinstance(bx_id_value, (list, tuple)):
+                        ids = list(map(int, bx_id_value))
+                    else:
+                        ids = [int(bx_id_value)]
                     bx_ids[source] = bx_ids[source] + ids
             except ValueError as e:
                 print(e)
