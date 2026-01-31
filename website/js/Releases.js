@@ -1,15 +1,15 @@
 'use strict';
 
-var _ = require('underscore');
-var moment = require('moment');
+import _ from 'underscore';
+import moment from 'moment';
 
-var React = require('react');
-var {Link} = require('react-router');
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Container as Grid, Row, Col, Table } from 'react-bootstrap';
 
-var backend = require('./backend');
-var config = require('config');
-var anchorme = require("anchorme");
+import backend from './backend';
+import config from 'config';
+import anchorme from "anchorme";
 
 
 class Releases extends React.Component {
@@ -45,7 +45,7 @@ class Releases extends React.Component {
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
-                    <Col smOffset={1} sm={10}>
+                    <Col sm={{ spin: 10, offset: 1 }}>
                         <h1>Data Releases</h1>
                         <br />
                         <div className="table-responsive table-responsive-outset">
@@ -78,7 +78,7 @@ class Release extends React.Component {
         (props.match && props.match.params && props.match.params.id) ||
         (props.params && props.params.id);
     componentDidMount() {
-        backend.release(this.getReleaseID()).subscribe(
+        backend.release(this.getReleaseId()).subscribe(
             resp => this.setState(resp),
             () => this.setState({error: 'Problem connecting to server'}));
     }
@@ -113,13 +113,13 @@ class Release extends React.Component {
         return (
             <Grid fluid={true}>
                 <Row>
-                    <Col sm={8} smOffset={2} md={6} mdOffset={3} className='text-left'>
+                    <Col sm={{ span: 8, offset: 2 }} md={{ span: 6, offset: 3 }} className='text-left'>
                         <h1>{release.id === latest && 'Current'} Release Notes</h1>
                         {release.id !== latest && <p>* Note that this is not the most current release. Click <Link to={`/release/${latest}`}>here</Link> to see the most current release.</p>}
                     </Col>
                 </Row>
                 <Row>
-                    <Col sm={8} smOffset={2} md={6} mdOffset={3} className='text-center'>
+                    <Col sm={{ span: 8, offset: 2 }} md={{ span: 6, offset: 3 }} className='text-center'>
                         <p className='release-notes text-left' dangerouslySetInnerHTML={this.generateReleaseNotes()}></p>
                         <h3>{release['variants_added']} new variant{s(release['variants_added'])}</h3>
                         <h3>{release['variants_classified']} new classification{s(release['variants_classified'])}</h3>
@@ -128,16 +128,18 @@ class Release extends React.Component {
                     </Col>
                 </Row>
                 <Row>
-                    <Col sm={4} smOffset={4}>
+                    <Col sm={{ span: 4, offset: 4 }}>
                         <Table bordered>
-                            <tr>
-                                <td className="active"><b>Link to Data</b></td>
-                                <td><a href={release.archive ? `${config.backend_url}/downloads/releases/${release.archive.split('.')[0]}/${release.archive}` : ''}>Link</a></td>
-                            </tr>
-                            <tr>
-                                <td className="active"><b>Date</b></td>
-                                <td>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
-                            </tr>
+			    <tbody>
+                            	<tr>
+                                    <td className="active"><b>Link to Data</b></td>
+                                    <td><a href={release.archive ? `${config.backend_url}/downloads/releases/${release.archive.split('.')[0]}/${release.archive}` : ''}>Link</a></td>
+                            	</tr>
+                            	<tr>
+                                    <td className="active"><b>Date</b></td>
+                                    <td>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
+                            	</tr>
+			    </tbody>
                         </Table>
                 {release['data_sources']}
                     </Col>
