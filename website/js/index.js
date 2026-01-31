@@ -845,13 +845,28 @@ class VariantDetail extends React.Component {
     isGroupOpenLS(key) {
         // local state wins, otherwise read from storage (for initial render)
         if (this.state.openGroups.hasOwnProperty(key)) { return !!this.state.openGroups[key]; }
-        return isOpenFromStorage(key);
+        return isOpenFromStorage(key); 
     }
     toggleCard(key) {
-        const nowOpen = !this.isGroupOpenLS(key);
-        // store "true" when collapsed (legacy semantics)
-        localStorage.setItem(key, nowOpen ? "false" : "true");
-        this.setState({ openGroups: { ...this.state.openGroups, [key]: nowOpen } });
+       this.setState((prev) => {
+       const currentlyOpen =
+           Object.prototype.hasOwnProperty.call(prev.openGroups, key)
+           ? prev.openGroups[key]
+           : (localStorage.getItem(key) !== "true");
+
+       const nowOpen = !currentlyOpen;
+       // store "true" when collapsed (legacy semantics)
+       localStorage.setItem(key, nowOpen ? "false" : "true");
+
+       console.log('toggleCard:', key, 'was', currentlyOpen, 'now', nowOpen);
+       return { openGroups: { ...prev.openGroups, [key]: nowOpen } };
+   }, () => {
+       // Callback to ensure relayout happens after state update
+       console.log('State updated, openGroups:', this.state.openGroups);
+       if (this.relayoutGrid) {
+           this.relayoutGrid();
+       }
+   });
     }
     determineDiffRowColor(highlightRow) {
         return highlightRow ? 'table-danger' : '';
@@ -1214,7 +1229,7 @@ class VariantDetail extends React.Component {
                             role="button"
                             aria-expanded={isOpen}
                             className="d-flex justify-content-between align-items-center"
-                            onClick={(event) => { event.preventDefault(); this.toggleCard(storageKey); this.onChangeGroupVisibility(groupTitle, event); }}
+                            onClick={(event) => { event.preventDefault(); this.toggleCard(storageKey) }}
                         >
                             <span className="title">{groupTitle}</span>
                             <span className="d-flex align-items-center">
@@ -1395,7 +1410,7 @@ class VariantDetail extends React.Component {
 
                     {
                         (variant.id !== data[0].id && noRedirectMsg !== "true") && (
-                          <Col xs={12} classname="vcenterblock">
+                          <Col xs={12} className="vcenterblock">
                               <div className="variant-message outdated-variant-message alert alert-danger">
                                   <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
                                   The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].CA_ID}`}>Click here for updated data on this variant.</a>
@@ -1406,7 +1421,7 @@ class VariantDetail extends React.Component {
 
                     {
                         redirectedFromVariant && (
-                          <Col xs={12} classname="vcenterblock">
+                          <Col xs={12} className="vcenterblock">
                               <div className="variant-message redirected-variant-msg alert alert-primary">
                                   <h3 style={{marginTop: 0}}>You are viewing the most recent data on this variant.</h3>
                                   The variant url you requested only has data up to {util.reformatDate(redirectedFromVariant.Data_Release.date)}. You have been automatically redirected to the newest data.<br />
@@ -1433,7 +1448,7 @@ class VariantDetail extends React.Component {
                                                 role="button"
                                                 aria-expanded={splicingOpen}
                                                 className="d-flex justify-content-between align-items-center"
-                                                onClick={(e) => { e.preventDefault(); this.toggleCard(splicingKey); this.onChangeGroupVisibility("transcript-visualization", e); }}
+                                                onClick={(e) => { e.preventDefault(); this.toggleCard(splicingKey) }}
                                             >
                                                 <span className="title">{`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}</span>
                                                 <span className="d-flex align-items-center">

@@ -779,12 +779,16 @@ var ResearchVariantTableSupplier = function (Component) {
         };
 
         toggleSubcolOpen = (subColTitle) => {
-            const key = "collapse-subcol_" + subColTitle;
-            const isOpen = !!this.state.openSubcols[subColTitle];
-            const nextOpen = !isOpen;
-            // store "true" when collapsed (matches old defaultExpanded semantics)
-            localStorage.setItem(key, nextOpen ? "false" : "true");
-            this.setState({ openSubcols: { ...this.state.openSubcols, [subColTitle]: nextOpen } });
+	   const key = "collapse-subcol_" + subColTitle;
+	   this.setState((prev) => {
+	     const isOpen = !!prev.openSubcols[subColTitle];
+	     const nextOpen = !isOpen;
+	     // store "true" when collapsed (matches old semantics)
+	     localStorage.setItem(key, nextOpen ? "false" : "true");
+	     return {
+	       openSubcols: { ...prev.openSubcols, [subColTitle]: nextOpen }
+	     };
+	   });
         };
 
         getColumnSelectors() {
@@ -810,14 +814,14 @@ var ResearchVariantTableSupplier = function (Component) {
                     </Card>
                 </Col>
             );
-            return (<label className='control-label'>
+            return (<div className='control-label'>
                 <Card>
                     <Card.Header>Column Selection</Card.Header>
                     <Card.Body>
                     {filterFormSubCols}
                     </Card.Body>
                 </Card>
-            </label>);
+            </div>);
         }
 
         getSourceName(name) {
@@ -851,14 +855,14 @@ var ResearchVariantTableSupplier = function (Component) {
                     />
                 </Col>
             );
-            return (<label className='control-label source-filters'>
+            return (<div className='control-label source-filters'>
                 <Card className="top-buffer">
                     <Card.Header>Source Selection</Card.Header>
                     <Card.Body>
                     {sourceCheckboxes}
                     </Card.Body>
                 </Card>
-            </label>);
+            </div>);
         }
 
         getDownloadButton(callback) {

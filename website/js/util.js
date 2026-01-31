@@ -238,7 +238,7 @@ export function getFormattedFieldByProp(prop, variant) {
         }
     } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
         const pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
-        rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
+        rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), (piece, idx) =>
             (/^[0-9]+$/.test(piece)) ? <a key={`pmid-${piece}-${idx}`} target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece);
     } else if (prop === "HGVS_cDNA") {
         rowItem = variant[prop].split(":")[1];
