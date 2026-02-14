@@ -1,6 +1,6 @@
 {
   "name": "brcaexchange",
-  "version": "3.137.0-alpha.0",
+  "version": "3.138.0-alpha.0",
   "description": "brca variant browser",
   "main": "index.js",
   "engines": {
@@ -64,7 +64,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "@svgr/webpack": "^8.1.0",    
+    "@svgr/webpack": "^8.1.0",
     "anchorme": "^3.0.7",
     "bootstrap": "^5.3.8",
     "classnames": "^2.5.1",
