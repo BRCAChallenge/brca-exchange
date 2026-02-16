@@ -301,6 +301,54 @@ Allele_count_genome_GnomADv3	Allele Frequency	#COPY	Total count of observed alte
 Allele_number_genome_GnomADv3	Allele Frequency	#COPY	Total number of total chromosomes studied (for this variant) in genomes (gnomAD v3.1)
 Allele_frequency_genome_GnomADv3	Allele Frequency	#COPY	"Overall allele frequency (for genomes) according to all studied populations, per gnomAD v3 (gnomAD v3.1)"
 BX_ID_GnomADv3	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation (gnomAD v3.1)"
+Flags_GnomADv4		Remarks	#COPY	Flags provided by gnomAD to indicate an annotation or something unusual about the data (gnomAD v4.1)
+Variant_id_GnomADv4		Internal	#SKIP	Identifier provided by gnomAD (gnomAD v4.1)
+faf95_popmax_joint_GnomADv4	Allele Frequency	#COPY	The gnomAD joint population frequency that is most significant with a 95% confidence threshold (gnomAD v4.1)
+faf95_popmax_population_joint_GnomADv4	Allele Frequency	#COPY	95% confidence interval on the most significant gnomAD population frequenc (gnomAD v4.1)"
+Allele_count_joint_AFR_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of African Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_AFR_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous African Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_AFR_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of African Populations (gnomAD v4.1)
+Allele_frequency_joint_AFR_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of African Populations (gnomAD v4.1)
+Allele_count_joint_AMR_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of Latino Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_AMR_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous Latino Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_AMR_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of Latino Populations (gnomAD v4.1)
+Allele_frequency_joint_AMR_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of Latino Populations (gnomAD v4.1)
+Allele_count_joint_ASJ_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of Ashkenazi Jewish Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_ASJ_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous Ashkenazi Jewish Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_ASJ_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of Ashkenazi Jewish Populations (gnomAD v4.1)
+Allele_frequency_joint_ASJ_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of Ashkenazi Jewish Populations (gnomAD v4.1)
+Allele_count_joint_EAS_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of East Asian Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_EAS_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous East Asian Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_EAS_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of East Asian Populations (gnomAD v4.1)
+Allele_frequency_joint_EAS_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of East Asian Populations (gnomAD v4.1)
+Allele_count_joint_FIN_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of Finnish Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_FIN_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous Finnish Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_FIN_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of Finnish Populations (gnomAD v4.1)
+Allele_frequency_joint_FIN_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of Finnish Populations (gnomAD v4.1)
+Allele_count_joint_NFE_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of Non-Finnish European Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_NFE_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous Non-Finnish European Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_NFE_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of Non-Finnish European Populations (gnomAD v4.1)
+Allele_frequency_joint_NFE_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of Non-Finnish European Populations (gnomAD v4.1)
+Allele_count_joint_remaining_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of Remaining (Other) Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_remaining_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous Remaining (Other) Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_remaining_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of Remaining (Other) Populations (gnomAD v4.1)
+Allele_frequency_joint_remaining_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of Remaining (Other) Populations (gnomAD v4.1)
+Allele_count_joint_SAS_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of South Asian Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_SAS_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous South Asian Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_SAS_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of South Asian Populations (gnomAD v4.1)
+Allele_frequency_joint_SAS_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of South Asian Populations (gnomAD v4.1)
+Allele_count_joint_MID_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of Middle Eastern Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_MID_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous Middle Eastern Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_MID_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of Middle Eastern Populations (gnomAD v4.1)
+Allele_frequency_joint_MID_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of Middle Eastern Populations (gnomAD v4.1)
+Allele_count_joint_AMI_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of Amish Populations, per gnomAD (gnomAD v4.1)"
+Allele_count_hom_joint_AMI_GnomADv4	Allele Frequency	#COPY	"Count of observed alternate alleles (variant) in joints of homozygous Amish Populations, per gnomAD v3 (gnomAD v4.1)"
+Allele_number_joint_AMI_GnomADv4	Allele Frequency	#COPY	Number of total chromosomes studied (for this variant) in joints of Amish Populations (gnomAD v4.1)
+Allele_frequency_joint_AMI_GnomADv4	Allele Frequency	#COPY	Allele Frequency in joints of Amish Populations (gnomAD v4.1)
+Allele_count_joint_GnomADv4	Allele Frequency	#COPY	Total count of observed alternate alleles (variant) in joints (gnomAD v4.1)
+Allele_number_joint_GnomADv4	Allele Frequency	#COPY	Total number of total chromosomes studied (for this variant) in joints (gnomAD v4.1)
+Allele_frequency_joint_GnomADv4	Allele Frequency	#COPY	"Overall allele frequency (for joints) according to all studied populations, per gnomAD v3 (gnomAD v4.1)"
+BX_ID_GnomADv4	Internal	#SKIP	"Arbitrary, unique identifier used by BRCA Exchange for the purpose of variant aggregation (gnomAD v4.1)"
 HGVS_Nucleotide_ENIGMA_BRCA12_Functional_Assays	Nomenclature	#SKIP	"HGVS variant alias which references the nucleotide change based on the location in the coding DNA, not the genomic DNA"
 Chromosomal_Variant_ENIGMA_BRCA12_Functional_Assays	#SKIP	"Genomic  HGVS string specifying the variant"
 Result_Findlay_ENIGMA_BRCA12_Functional_Assays	Evidence	#COPY	"Overall authors' interpretation of the functional impact of the variant, Findlay et al, 2018"

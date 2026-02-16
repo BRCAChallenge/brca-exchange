@@ -94,7 +94,6 @@ ESP_FIELDS = {"polyPhen2_result": "PH",
               "Allele_Frequency": "BX_AF",
               "BX_ID": "BX_ID"}
 
-
 EXAC_FIELDS = {"Allele_frequency": "AF",
                "Allele_count_AFR": "AC_AFR",
                "Allele_number_AFR": "AN_AFR",
@@ -390,6 +389,73 @@ GNOMAD_V3_FIELDS = {"HGVS_cDNA": "hgvs",
 GNOMAD_V3_SUBPOPULATIONS = ["AFR", "AMR", "ASJ", "EAS", "FIN", "NFE",
                             "OTH", "SAS", "MID", "AMI"]
 
+GNOMAD_V4_FIELDS = {
+                 "Flags": "flags",
+                 "Variant_id": "variant_id",
+
+                 "faf95_popmax_joint": "fafmax_faf95_max_joint",
+                 "faf95_popmax_population_joint": "fafmax_faf95_max_gen_anc_joint",
+
+                 "Allele_count_joint_AFR": "AC_joint_afr",
+                 "Allele_count_hom_joint_AFR": "nhomalt_joint_afr",
+                 "Allele_number_joint_AFR": "AN_joint_afr",
+                 "Allele_frequency_joint_AFR": "AF_joint_afr",
+
+                 "Allele_count_joint_AMR": "AC_joint_amr",
+                 "Allele_count_hom_joint_AMR": "nhomalt_joint_amr",
+                 "Allele_number_joint_AMR": "AN_joint_amr",
+                 "Allele_frequency_joint_AMR": "AF_joint_amr",
+
+                 "Allele_count_joint_ASJ": "AC_joint_asj",
+                 "Allele_count_hom_joint_ASJ": "nhomalt_joint_asj",
+                 "Allele_number_joint_ASJ": "AN_joint_asj",
+                 "Allele_frequency_joint_ASJ": "AF_joint_asj",
+
+                 "Allele_count_joint_EAS": "AC_joint_eas",
+                 "Allele_count_hom_joint_EAS": "nhomalt_joint_eas",
+                 "Allele_number_joint_EAS": "AN_joint_eas",
+                 "Allele_frequency_joint_EAS": "AF_joint_eas",
+
+                 "Allele_count_joint_FIN": "AC_joint_fin",
+                 "Allele_count_hom_joint_FIN": "nhomalt_joint_fin",
+                 "Allele_number_joint_FIN": "AN_joint_fin",
+                 "Allele_frequency_joint_FIN": "AF_joint_fin",
+
+                 "Allele_count_joint_NFE": "AC_joint_nfe",
+                 "Allele_count_hom_joint_NFE": "nhomalt_joint_nfe",
+                 "Allele_number_joint_NFE": "AN_joint_nfe",
+                 "Allele_frequency_joint_NFE": "AF_joint_nfe",
+
+                 "Allele_count_joint_remaining": "AC_joint_remaining",
+                 "Allele_count_hom_joint_remaining": "nhomalt_joint_remaining",
+                 "Allele_number_joint_remaining": "AN_joint_remaining",
+                 "Allele_frequency_joint_remaining": "AF_joint_remaining",
+
+                 "Allele_count_joint_SAS": "AC_joint_sas",
+                 "Allele_count_hom_joint_SAS": "nhomalt_joint_sas",
+                 "Allele_number_joint_SAS": "AN_joint_sas",
+                 "Allele_frequency_joint_SAS": "AF_joint_sas",
+
+                 "Allele_count_joint_MID": "AC_joint_mid",
+                 "Allele_count_hom_joint_MID": "nhomalt_joint_mid",
+                 "Allele_number_joint_MID": "AN_joint_mid",
+                 "Allele_frequency_joint_MID": "AF_joint_mid",
+
+                 "Allele_count_joint_AMI": "AC_joint_ami",
+                 "Allele_count_hom_joint_AMI": "nhomalt_joint_ami",
+                 "Allele_number_joint_AMI": "AN_joint_ami",
+                 "Allele_frequency_joint_AMI": "AF_joint_ami",
+
+                 "Allele_count_joint": "AC_joint",
+                 "Allele_number_joint": "AN_joint",
+                 "Allele_frequency_joint": "AF_joint",
+
+                 "BX_ID": "BX_ID"}
+
+
+GNOMAD_V4_SUBPOPULATIONS = ["AFR", "AMR", "ASJ", "EAS", "FIN", "NFE",
+                            "remaining", "SAS", "MID", "AMI"]
+
 ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS = {
               "HGVS_Nucleotide": "HGVS_Nucleotide_Variant",
               "Chromosomal_Variant": "Chromosomal_Variant",
@@ -434,6 +500,7 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "BIC": BIC_FIELDS,
               "GnomAD": GNOMAD_V2_FIELDS,
               "GnomADv3": GNOMAD_V3_FIELDS,
+              "GnomADv4": GNOMAD_V4_FIELDS,
               "ENIGMA_BRCA12_Functional_Assays": ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS}
 
 LIST_TYPE_FIELDS = {
@@ -443,17 +510,34 @@ LIST_TYPE_FIELDS = {
 
 ENIGMA_FILE = "enigma_from_clinvar.tsv"
 
-GENOME1K_FILE = "1000G.sorted.hg38.vcf"
+GENOME1K_FILE = "1000_Genomes.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVar.vcf"
-LOVD_FILE = "sharedLOVD.sorted.hg38.vcf"
-EX_LOVD_FILE = "exLOVD_brca12.sorted.hg38.vcf"
-BIC_FILE = "bic_brca12.sorted.hg38.vcf"
-EXAC_FILE = "exac.brca12.sorted.hg38.vcf"
-ESP_FILE = "esp.sorted.hg38.vcf"
-GNOMAD_V2_FILE = "gnomADv2.sorted.hg38.vcf"
-GNOMAD_V3_FILE = "gnomADv3.sorted.hg38.vcf"
+LOVD_FILE = "LOVD.sorted.hg38.vcf"
+EX_LOVD_FILE = "exLOVD.brca12.sorted.hg38.vcf"
+BIC_FILE = "BIC.brca12.sorted.hg38.vcf"
+EXAC_FILE = "ExAC.brca12.sorted.hg38.vcf"
+ESP_FILE = "ESP.sorted.hg38.vcf"
+GNOMAD_V2_FILE = "GnomAD.sorted.hg38.vcf"
+GNOMAD_V3_FILE = "GnomADv3.sorted.hg38.vcf"
+GNOMAD_V4_FILE = "GnomADv4.sorted.hg38.vcf"
 
 # Functional Assays
-FUNCTIONAL_ASSAYS_SCORES_FILE = "ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf"
+FUNCTIONAL_ASSAYS_SCORES_FILE = "ENIGMA_BRCA12_functional_assays.sorted.hg38.vcf"
+
+VARIANT_REPORT_FILES = {
+    ENIGMA_FILE,
+    GENOME1K_FILE,
+    CLINVAR_FILE,
+    LOVD_FILE,
+    EX_LOVD_FILE,
+    BIC_FILE,
+    EXAC_FILE,
+    ESP_FILE,
+    GNOMAD_V2_FILE,
+    GNOMAD_V3_FILE,
+    GNOMAD_V4_FILE,
+    FUNCTIONAL_ASSAYS_SCORES_FILE
+    }
+    
 
 VCFVariant = namedtuple("VCFVariant", "chr,pos,ref,alt")

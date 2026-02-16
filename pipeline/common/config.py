@@ -14,22 +14,20 @@ NEGATIVE_STRAND = 'minus'
 def load_config(path):
     '''
     Loads gene metadata from file into a dataframe
-
     :param path: config file path
     :return: dataframe
     '''
     df = pd.read_csv(path, sep=',', header=0, na_values='-')
-
     # allow for '-' in legacy variants to avoid duplicated information in the file,
     # in case the boundaries coincide
     df['start_hg38_legacy_variants'] = df['start_hg38_legacy_variants'].fillna(df['start_hg38']).astype(int)
     df['end_hg38_legacy_variants'] = df['end_hg38_legacy_variants'].fillna(df['end_hg38']).astype(int)
-
     # allow no synonyms
     df['synonyms_ac_col'] = df['synonyms_ac_col'].fillna('-').astype(str)
-
     return df.set_index(SYMBOL_COL, drop=False)
 
+def get_gene_symbols(gene_config_df):
+    return(list(gene_config_df[SYMBOL_COL]))
 
 def get_genome_regions_symbol_dict(gene_config_df, start_col='start_hg38', end_col='end_hg38'):
     '''
