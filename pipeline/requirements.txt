@@ -2,7 +2,7 @@
 # Security-critical and deprecated packages have been updated
 
 # Core dependencies - UPDATED for security
-setuptools>=69.0.0  # Required for pkg_resources (used by bioutils)
+setuptools>=69.0.0,<81  # Required for pkg_resources (used by bioutils); 81+ removed pkg_resources
 certifi>=2024.2.2  # Was: 2019.11.28 (CRITICAL - 5 years outdated)
 requests>=2.31.0  # Was: 2.23.0 (CRITICAL - security vulnerabilities)
 urllib3>=2.0.7  # Was: 1.25.8 (HIGH - security vulnerabilities)
