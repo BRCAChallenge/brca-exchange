@@ -1,0 +1,54 @@
+##fileformat=VCFv4.0
+##source=gnomAD
+##reference=GRCh38
+##INFO=<ID=flags,Number=.,Type=String,Description="Flags provided by gnomAD">
+##INFO=<ID=variant_id,Number=.,Type=String,Description="Identifier provided by gnomAD">
+##INFO=<ID=fafmax_faf95_max_joint,Number=.,Type=String,Description="Maximum filtering allele frequency (95% confidence) for joint data">
+##INFO=<ID=fafmax_faf95_max_gen_anc_joint,Number=.,Type=String,Description="Population with maximum FAF95 for joint data">
+##INFO=<ID=AC_joint_afr,Number=.,Type=String,Description="Allele count in African/African American joint">
+##INFO=<ID=nhomalt_joint_afr,Number=.,Type=String,Description="Homozygous count in African/African American joint">
+##INFO=<ID=AN_joint_afr,Number=.,Type=String,Description="Allele number in African/African American joint">
+##INFO=<ID=AF_joint_afr,Number=.,Type=String,Description="Allele frequency in African/African American joint">
+##INFO=<ID=AC_joint_amr,Number=.,Type=String,Description="Allele count in Latino/Admixed American joint">
+##INFO=<ID=nhomalt_joint_amr,Number=.,Type=String,Description="Homozygous count in Latino/Admixed American joint">
+##INFO=<ID=AN_joint_amr,Number=.,Type=String,Description="Allele number in Latino/Admixed American joint">
+##INFO=<ID=AF_joint_amr,Number=.,Type=String,Description="Allele frequency in Latino/Admixed American joint">
+##INFO=<ID=AC_joint_asj,Number=.,Type=String,Description="Allele count in Ashkenazi Jewish joint">
+##INFO=<ID=nhomalt_joint_asj,Number=.,Type=String,Description="Homozygous count in Ashkenazi Jewish joint">
+##INFO=<ID=AN_joint_asj,Number=.,Type=String,Description="Allele number in Ashkenazi Jewish joint">
+##INFO=<ID=AF_joint_asj,Number=.,Type=String,Description="Allele frequency in Ashkenazi Jewish joint">
+##INFO=<ID=AC_joint_eas,Number=.,Type=String,Description="Allele count in East Asian joint">
+##INFO=<ID=nhomalt_joint_eas,Number=.,Type=String,Description="Homozygous count in East Asian joint">
+##INFO=<ID=AN_joint_eas,Number=.,Type=String,Description="Allele number in East Asian joint">
+##INFO=<ID=AF_joint_eas,Number=.,Type=String,Description="Allele frequency in East Asian joint">
+##INFO=<ID=AC_joint_fin,Number=.,Type=String,Description="Allele count in Finnish joint">
+##INFO=<ID=nhomalt_joint_fin,Number=.,Type=String,Description="Homozygous count in Finnish joint">
+##INFO=<ID=AN_joint_fin,Number=.,Type=String,Description="Allele number in Finnish joint">
+##INFO=<ID=AF_joint_fin,Number=.,Type=String,Description="Allele frequency in Finnish joint">
+##INFO=<ID=AC_joint_nfe,Number=.,Type=String,Description="Allele count in Non-Finnish European joint">
+##INFO=<ID=nhomalt_joint_nfe,Number=.,Type=String,Description="Homozygous count in Non-Finnish European joint">
+##INFO=<ID=AN_joint_nfe,Number=.,Type=String,Description="Allele number in Non-Finnish European joint">
+##INFO=<ID=AF_joint_nfe,Number=.,Type=String,Description="Allele frequency in Non-Finnish European joint">
+##INFO=<ID=AC_joint_remaining,Number=.,Type=String,Description="Allele count in remaining populations joint">
+##INFO=<ID=nhomalt_joint_remaining,Number=.,Type=String,Description="Homozygous count in remaining populations joint">
+##INFO=<ID=AN_joint_remaining,Number=.,Type=String,Description="Allele number in remaining populations joint">
+##INFO=<ID=AF_joint_remaining,Number=.,Type=String,Description="Allele frequency in remaining populations joint">
+##INFO=<ID=AC_joint_sas,Number=.,Type=String,Description="Allele count in South Asian joint">
+##INFO=<ID=nhomalt_joint_sas,Number=.,Type=String,Description="Homozygous count in South Asian joint">
+##INFO=<ID=AN_joint_sas,Number=.,Type=String,Description="Allele number in South Asian joint">
+##INFO=<ID=AF_joint_sas,Number=.,Type=String,Description="Allele frequency in South Asian joint">
+##INFO=<ID=AC_joint_mid,Number=.,Type=String,Description="Allele count in Middle Eastern joint">
+##INFO=<ID=nhomalt_joint_mid,Number=.,Type=String,Description="Homozygous count in Middle Eastern joint">
+##INFO=<ID=AN_joint_mid,Number=.,Type=String,Description="Allele number in Middle Eastern joint">
+##INFO=<ID=AF_joint_mid,Number=.,Type=String,Description="Allele frequency in Middle Eastern joint">
+##INFO=<ID=AC_joint_ami,Number=.,Type=String,Description="Allele count in Amish joint">
+##INFO=<ID=nhomalt_joint_ami,Number=.,Type=String,Description="Homozygous count in Amish joint">
+##INFO=<ID=AN_joint_ami,Number=.,Type=String,Description="Allele number in Amish joint">
+##INFO=<ID=AF_joint_ami,Number=.,Type=String,Description="Allele frequency in Amish joint">
+##INFO=<ID=AC_joint,Number=.,Type=String,Description="Total allele count in joint">
+##INFO=<ID=AN_joint,Number=.,Type=String,Description="Total allele number in joint">
+##INFO=<ID=AF_joint,Number=.,Type=String,Description="Total allele frequency in joint">
+##INFO=<ID=BX_ID,Number=.,Type=String,Description="BX report ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+13	32315485	13-32315485-G-A	G	A	.	.	flags=-;variant_id=13-32315485-G-A;fafmax_faf95_max_joint=1.351e-05;fafmax_faf95_max_gen_anc_joint=nfe;AC_joint_afr=0;nhomalt_joint_afr=0;AN_joint_afr=41146;AF_joint_afr=0.0;AC_joint_amr=0;nhomalt_joint_amr=0;AN_joint_amr=15102;AF_joint_amr=0.0;AC_joint_asj=0;nhomalt_joint_asj=0;AN_joint_asj=3302;AF_joint_asj=0.0;AC_joint_eas=0;nhomalt_joint_eas=0;AN_joint_eas=4960;AF_joint_eas=0.0;AC_joint_fin=0;nhomalt_joint_fin=0;AN_joint_fin=10628;AF_joint_fin=0.0;AC_joint_nfe=2;nhomalt_joint_nfe=0;AN_joint_nfe=64806;AF_joint_nfe=3.086e-05;AC_joint_remaining=0;nhomalt_joint_remaining=0;AN_joint_remaining=2024;AF_joint_remaining=0.0;AC_joint_sas=0;nhomalt_joint_sas=0;AN_joint_sas=4804;AF_joint_sas=0.0;AC_joint_mid=0;nhomalt_joint_mid=0;AN_joint_mid=304;AF_joint_mid=0.0;AC_joint_ami=0;nhomalt_joint_ami=0;AN_joint_ami=912;AF_joint_ami=0.0;AC_joint=2;AN_joint=147988;AF_joint=1.351e-05;BX_ID=1
+13	32315486	13-32315486-C-A	C	A	.	.	flags=-;variant_id=13-32315486-C-A;fafmax_faf95_max_joint=1.352e-05;fafmax_faf95_max_gen_anc_joint=nfe;AC_joint_afr=0;nhomalt_joint_afr=0;AN_joint_afr=41142;AF_joint_afr=0.0;AC_joint_amr=0;nhomalt_joint_amr=0;AN_joint_amr=15096;AF_joint_amr=0.0;AC_joint_asj=0;nhomalt_joint_asj=0;AN_joint_asj=3302;AF_joint_asj=0.0;AC_joint_eas=0;nhomalt_joint_eas=0;AN_joint_eas=4958;AF_joint_eas=0.0;AC_joint_fin=0;nhomalt_joint_fin=0;AN_joint_fin=10628;AF_joint_fin=0.0;AC_joint_nfe=2;nhomalt_joint_nfe=0;AN_joint_nfe=64812;AF_joint_nfe=3.086e-05;AC_joint_remaining=0;nhomalt_joint_remaining=0;AN_joint_remaining=2022;AF_joint_remaining=0.0;AC_joint_sas=0;nhomalt_joint_sas=0;AN_joint_sas=4804;AF_joint_sas=0.0;AC_joint_mid=0;nhomalt_joint_mid=0;AN_joint_mid=304;AF_joint_mid=0.0;AC_joint_ami=0;nhomalt_joint_ami=0;AN_joint_ami=912;AF_joint_ami=0.0;AC_joint=2;AN_joint=147980;AF_joint=1.352e-05;BX_ID=2

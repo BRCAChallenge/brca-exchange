@@ -30,26 +30,46 @@ def associate_chr_pos_ref_alt_with_item(line, column_num, source, genome_coor, g
     item = ['-'] * column_num
     item[COLUMN_SOURCE] = source
     item[COLUMN_GENOMIC_HGVS] = genome_coor
-    item[COLUMN_VCF_CHR] = line.CHROM
-    item[COLUMN_VCF_POS] = line.POS
-    item[COLUMN_VCF_REF] = line.REF
-    item[COLUMN_VCF_ALT] = str(line.ALT[0])
-    symbol = chrom_pos_to_symbol(int(re.sub("^chr", "", line.CHROM)), int(line.POS),
+    item[COLUMN_VCF_CHR] = str(line.chrom)
+    item[COLUMN_VCF_POS] = str(line.pos)
+    item[COLUMN_VCF_REF] = line.ref
+    item[COLUMN_VCF_ALT] = str(line.alts[0])
+    symbol = chrom_pos_to_symbol(int(re.sub("^chr", "", str(line.chrom))), int(line.pos),
                                       genome_regions_symbol_dict)
     item[COLUMN_GENE] = symbol
     return item
 
 
-def associate_chr_pos_ref_alt_with_enigma_item(line):
-    # Initialize a variant dict from an ENIGMA record
-    items = line.strip().split("\t")
-    items.insert(COLUMN_SOURCE, "ENIGMA")
-    v = items[COLUMN_GENOMIC_HGVS].replace("-", "").replace("chr", "").replace(">", ":")
-    (chrom, pos, ref, alt) = v.split(":")
-    items.insert(COLUMN_VCF_CHR, chrom)
-    items.insert(COLUMN_VCF_POS, pos)
-    items.insert(COLUMN_VCF_REF, ref)
-    items.insert(COLUMN_VCF_ALT, alt)
+def associate_chr_pos_ref_alt_with_enigma_vcf_record(record, info_field_names):
+    # Initialize a variant list from an ENIGMA VCF record.
+    # Returns the same structure as the old TSV-based function so that
+    # all downstream code (variant_merging, aggregate_reports) is unchanged.
+    chrom = str(record.chrom)
+    pos   = str(record.pos)   # 1-based VCF position
+    ref   = record.ref
+    alt   = str(record.alts[0])
+    genomic_coor = "chr{}:{}:{}>{}".format(chrom, pos, ref, alt)
+
+    # Build the INFO-field portion of the items list in field-declaration order.
+    info_values = []
+    for field in info_field_names:
+        val = record.info.get(field)
+        if val is None:
+            info_values.append(DEFAULT_CONTENTS)
+        elif isinstance(val, tuple):
+            info_values.append(
+                ','.join(str(v) if v is not None else DEFAULT_CONTENTS for v in val))
+        else:
+            s = str(val)
+            info_values.append(s if s not in ('', 'None') else DEFAULT_CONTENTS)
+
+    items = info_values
+    items.insert(COLUMN_SOURCE,      "ENIGMA")
+    items.insert(COLUMN_GENOMIC_HGVS, genomic_coor)
+    items.insert(COLUMN_VCF_CHR,     chrom)
+    items.insert(COLUMN_VCF_POS,     pos)
+    items.insert(COLUMN_VCF_REF,     ref)
+    items.insert(COLUMN_VCF_ALT,     alt)
     for ii in range(len(items)):
         if items[ii] is None or items[ii] == '':
             items[ii] = DEFAULT_CONTENTS
@@ -66,15 +86,16 @@ def chrom_pos_to_symbol(chrom, pos, genome_regions_symbol_dict):
     (start_pos, end_pos, gene_symbol) = symbols[0]
     return(gene_symbol)
 
-def add_columns_to_enigma_data(line):
-    # adds necessary columns to enigma data
-    columns = line.strip().split("\t")
-    columns = [c + "_ENIGMA" for c in columns if c != "Genomic_Coordinate"]
-    columns.insert(COLUMN_SOURCE, "Source")
+def add_columns_to_enigma_data_vcf(info_field_names):
+    # Build the ENIGMA column list from the VCF INFO field names.
+    # Produces the same column structure as the old TSV-based function so that
+    # all downstream consumers (variant_merging, aggregate_reports) are unchanged.
+    columns = [f + "_ENIGMA" for f in info_field_names]
+    columns.insert(COLUMN_SOURCE,      "Source")
     columns.insert(COLUMN_GENOMIC_HGVS, "Genomic_Coordinate")
-    columns.insert(COLUMN_VCF_CHR, "Chr")
-    columns.insert(COLUMN_VCF_POS, "Pos")
-    columns.insert(COLUMN_VCF_REF, "Ref")
-    columns.insert(COLUMN_VCF_ALT, "Alt")
+    columns.insert(COLUMN_VCF_CHR,     "Chr")
+    columns.insert(COLUMN_VCF_POS,     "Pos")
+    columns.insert(COLUMN_VCF_REF,     "Ref")
+    columns.insert(COLUMN_VCF_ALT,     "Alt")
     return columns
 

@@ -72,6 +72,14 @@ def write_reports_tsv(filename, columns, ready_files_dir,
     logging.info("Done")
 
 
+def aggregate_reports(reports_files, columns, genome_regions_symbol_dict):
+    all_reports = []
+    for file in reports_files:
+        reports = normalize_reports(file, columns, genome_regions_symbol_dict)
+        all_reports.extend(reports)
+    return all_reports
+
+
 def get_reports_files(input_directory):
     reports_files = []
     for f in os.listdir(input_directory):
@@ -84,13 +92,14 @@ def get_reports_files(input_directory):
 
 
 def normalize_reports(file, columns, genome_regions_symbol_dict):
-    filename, file_extension = os.path.splitext(file)
-    if file_extension == ".vcf":
-        reports = normalize_vcf_reports(file, columns, filename, file_extension, genome_regions_symbol_dict)
-    elif file_extension == ".tsv":
-        if os.path.basename(file) != ENIGMA_FILE:
-            raise Exception("ERROR: received tsv file that is not for ENIGMA: %s" % (file))
-        reports = normalize_enigma_tsv_reports(file, columns, filename, file_extension)
+    if os.path.basename(file) == ENIGMA_FILE:
+        reports = normalize_enigma_vcf_reports(file, columns)
+    elif os.path.splitext(file)[1] == ".vcf":
+        filename = os.path.splitext(os.path.basename(file))[0]
+        reports = normalize_vcf_reports(file, columns, filename, ".vcf",
+                                        genome_regions_symbol_dict)
+    else:
+        raise Exception("ERROR: unexpected file format: %s" % file)
     return reports
 
 
@@ -106,7 +115,7 @@ def normalize_vcf_reports(file, columns, filename, file_extension, genome_region
         genome_coor = ("chr" + str(record.chrom) + ":g." + str(record.pos) + ":" +
                        record.ref + ">" + str(record.alts[0]))
 
-        if variant_merging.is_outside_boundaries(record.chrom, record.pos, genome_regions_symbol_dict):
+        if utilities.is_outside_boundaries(record.chrom, record.pos, genome_regions_symbol_dict):
             logging.warning("Skipping report since the positions is outside the genome boundaries: " + str(record))
             continue
         report = utilities.associate_chr_pos_ref_alt_with_item(record, len(columns), source, genome_coor, genome_regions_symbol_dict)
@@ -122,24 +131,22 @@ def normalize_vcf_reports(file, columns, filename, file_extension, genome_region
     return reports
 
 
-def normalize_enigma_tsv_reports(file, columns, filename, file_extension):
+def normalize_enigma_vcf_reports(file, columns):
     reports = []
-    enigma_file = open(file, 'r')
-    line_num = 0
-    enigma_column_indexes = {}
-    for line in enigma_file:
-        line_num += 1
-        if line_num == 1:
-            enigma_columns = utilities.add_columns_to_enigma_data(line)
-            for key, value in enumerate(enigma_columns):
-                enigma_column_indexes[key] = value
-        else:
-            (items, chrom, pos, ref, alt) = utilities.associate_chr_pos_ref_alt_with_enigma_item(line)
-            report = ['-'] * len(columns)
-            for key, value in enigma_column_indexes.items():
+    vcf_reader = pysam.VariantFile(file)
+    info_field_names = list(vcf_reader.header.info.keys())
+    enigma_columns = utilities.add_columns_to_enigma_data_vcf(info_field_names)
+    enigma_column_indexes = {key: value for key, value in enumerate(enigma_columns)}
+    for record in vcf_reader:
+        (items, chrom, pos, ref, alt) = \
+            utilities.associate_chr_pos_ref_alt_with_enigma_vcf_record(
+                record, info_field_names)
+        report = [DEFAULT_CONTENTS] * len(columns)
+        for key, value in enigma_column_indexes.items():
+            if value in columns:
                 report[columns.index(value)] = items[key]
-            reports.append(report)
-    enigma_file.close()
+        reports.append(report)
+    vcf_reader.close()
     return reports
 
 

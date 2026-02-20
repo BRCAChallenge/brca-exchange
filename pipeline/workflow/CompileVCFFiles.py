@@ -116,16 +116,16 @@ class DownloadBICData(DefaultPipelineTask):
 
         brca1_data_url = "https://brcaexchange.org/backend/downloads/bic_brca12.sorted.hg38.vcf"
         pipeline_utils.download_file_and_display_progress(brca1_data_url)
-        os.rename("bic_brca12.sorted.hg38.vcf", self.output().path)
+        os.rename("BIC.brca12.sorted.hg38.vcf", self.output().path)
 
 @requires(DownloadBICData)
 class CopyBICOutputToOutputDir(DefaultPipelineTask):
 
     def output(self):
-        return luigi.LocalTarget(self.cfg.output_dir + "/bic_brca12.sorted.hg38.vcf")
+        return luigi.LocalTarget(self.cfg.output_dir + "/BIC.brca12.sorted.hg38.vcf")
 
     def run(self):
-        copy(self.bic_file_dir + "/bic_brca12.sorted.hg38.vcf", self.cfg.output_dir)
+        copy(self.bic_file_dir + "/BIC.brca12.sorted.hg38.vcf", self.cfg.output_dir)
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
@@ -362,7 +362,6 @@ class CrossmapConcatenatedSharedLOVDData(DefaultPipelineTask):
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
 
-
 @requires(CrossmapConcatenatedSharedLOVDData)
 class SortSharedLOVDOutput(DefaultPipelineTask):
     def output(self):
@@ -374,6 +373,20 @@ class SortSharedLOVDOutput(DefaultPipelineTask):
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
+
+class DownloadStaticLOVDData(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/LOVD.sorted.hg38.vcf")
+
+    def run(self):
+        os.chdir(self.lovd_file_dir)
+        lovd_vcf_url = \
+        "https://brcaexchange.org/backend/downloads/sharedLOVD.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(lovd_vcf_url,
+                                                          file_name=self.output().path)
+
+@requires(DownloadStaticLOVDData)
+        
 @requires(SortSharedLOVDOutput)
 class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
     def output(self):
@@ -419,13 +432,14 @@ class CopyG1KOutputToOutputDir(DefaultPipelineTask):
 class DownloadStaticExACData(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(
-            self.exac_file_dir + "/exac.brca12.sorted.hg38.vcf")
+            self.exac_file_dir + "/ExAC.brca12.sorted.hg38.vcf")
 
     def run(self):
         os.chdir(self.exac_file_dir)
 
         exac_vcf_gz_url = "https://brcaexchange.org/backend/downloads/exac.brca12.sorted.hg38.vcf"
         pipeline_utils.download_file_and_display_progress(exac_vcf_gz_url)
+        os.rename("exac.brca12.sorted.hg38.vcf", self.output().path)
 
 
 @requires(DownloadStaticExACData)
@@ -463,7 +477,7 @@ class FilterEnigmaAssertions(DefaultPipelineTask):
 @requires(FilterEnigmaAssertions)
 class ExtractEnigmaFromClinvar(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.enigma_file_dir, 'enigma_from_clinvar.tsv'))
+        return luigi.LocalTarget(os.path.join(self.enigma_file_dir, 'enigma_from_clinvar.vcf'))
 
     def run(self):
         os.chdir(clinvar_method_dir)
@@ -481,7 +495,7 @@ class ExtractEnigmaFromClinvar(DefaultPipelineTask):
 @requires(ExtractEnigmaFromClinvar)
 class CopyEnigmaOutputToOutputDir(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.cfg.output_dir + "/enigma_from_clinvar.tsv")
+        return luigi.LocalTarget(self.cfg.output_dir + "/enigma_from_clinvar.vcf")
 
     def run(self):
         copy(self.input().path, self.cfg.output_dir)
@@ -542,7 +556,7 @@ class CrossmapFunctionalAssays(DefaultPipelineTask):
 @requires(CrossmapFunctionalAssays)
 class SortFunctionalAssays(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.assays_dir, "ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf"))
+        return luigi.LocalTarget(os.path.join(self.assays_dir, "ENIGMA_BRCA12_functional_assays.sorted.hg38.vcf"))
 
     def run(self):
         args = ["vcf-sort", self.input().path]

@@ -5,7 +5,7 @@ from os import path
 from . import aggregate_reports
 
 VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/1000_Genomes.vcf')
-TSV_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/enigma_from_clinvar.tsv')
+ENIGMA_VCF_TESTDATA_FILENAME = path.join(path.dirname(__file__), 'test_files/enigma_from_clinvar.vcf')
 INPUT_DIRECTORY = path.join(path.dirname(__file__), 'test_files/')
 
 
@@ -333,11 +333,59 @@ class TestStringMethods(unittest.TestCase):
                         "Allele_count_genome_GnomADv3",
                         "Allele_number_genome_GnomADv3",
                         "Allele_frequency_genome_GnomADv3",
-                        "BX_ID_GnomADv3"]
+                        "BX_ID_GnomADv3",
+                        "Flags_GnomADv4",
+                        "Variant_id_GnomADv4",
+                        "faf95_popmax_joint_GnomADv4",
+                        "faf95_popmax_population_joint_GnomADv4",
+                        "Allele_count_joint_AFR_GnomADv4",
+                        "Allele_count_hom_joint_AFR_GnomADv4",
+                        "Allele_number_joint_AFR_GnomADv4",
+                        "Allele_frequency_joint_AFR_GnomADv4",
+                        "Allele_count_joint_AMR_GnomADv4",
+                        "Allele_count_hom_joint_AMR_GnomADv4",
+                        "Allele_number_joint_AMR_GnomADv4",
+                        "Allele_frequency_joint_AMR_GnomADv4",
+                        "Allele_count_joint_ASJ_GnomADv4",
+                        "Allele_count_hom_joint_ASJ_GnomADv4",
+                        "Allele_number_joint_ASJ_GnomADv4",
+                        "Allele_frequency_joint_ASJ_GnomADv4",
+                        "Allele_count_joint_EAS_GnomADv4",
+                        "Allele_count_hom_joint_EAS_GnomADv4",
+                        "Allele_number_joint_EAS_GnomADv4",
+                        "Allele_frequency_joint_EAS_GnomADv4",
+                        "Allele_count_joint_FIN_GnomADv4",
+                        "Allele_count_hom_joint_FIN_GnomADv4",
+                        "Allele_number_joint_FIN_GnomADv4",
+                        "Allele_frequency_joint_FIN_GnomADv4",
+                        "Allele_count_joint_NFE_GnomADv4",
+                        "Allele_count_hom_joint_NFE_GnomADv4",
+                        "Allele_number_joint_NFE_GnomADv4",
+                        "Allele_frequency_joint_NFE_GnomADv4",
+                        "Allele_count_joint_remaining_GnomADv4",
+                        "Allele_count_hom_joint_remaining_GnomADv4",
+                        "Allele_number_joint_remaining_GnomADv4",
+                        "Allele_frequency_joint_remaining_GnomADv4",
+                        "Allele_count_joint_SAS_GnomADv4",
+                        "Allele_count_hom_joint_SAS_GnomADv4",
+                        "Allele_number_joint_SAS_GnomADv4",
+                        "Allele_frequency_joint_SAS_GnomADv4",
+                        "Allele_count_joint_MID_GnomADv4",
+                        "Allele_count_hom_joint_MID_GnomADv4",
+                        "Allele_number_joint_MID_GnomADv4",
+                        "Allele_frequency_joint_MID_GnomADv4",
+                        "Allele_count_joint_AMI_GnomADv4",
+                        "Allele_count_hom_joint_AMI_GnomADv4",
+                        "Allele_number_joint_AMI_GnomADv4",
+                        "Allele_frequency_joint_AMI_GnomADv4",
+                        "Allele_count_joint_GnomADv4",
+                        "Allele_number_joint_GnomADv4",
+                        "Allele_frequency_joint_GnomADv4",
+                        "BX_ID_GnomADv4"]
 
         self.sources = list(aggregate_reports.FIELD_DICT.keys()) + ["ENIGMA"]
         self.vcf_test_file = VCF_TESTDATA_FILENAME
-        self.tsv_test_file = TSV_TESTDATA_FILENAME
+        self.enigma_vcf_test_file = ENIGMA_VCF_TESTDATA_FILENAME
 
         pwd = os.path.dirname(os.path.realpath(__file__))
 
@@ -350,15 +398,15 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(len(file_reports), 2)
         self.assertEqual(first_report[aggregate_reports.COLUMN_SOURCE], '1000_Genomes')
 
-    def test_normalize_reports_tsv(self):
-        file_reports = aggregate_reports.normalize_reports(self.tsv_test_file, self.columns, self.genome_regions_symbol_dict)
+    def test_normalize_reports_vcf_enigma(self):
+        file_reports = aggregate_reports.normalize_reports(self.enigma_vcf_test_file, self.columns, self.genome_regions_symbol_dict)
         first_report = file_reports[0]
         self.assertEqual(len(file_reports), 2)
         self.assertEqual(first_report[aggregate_reports.COLUMN_SOURCE], 'ENIGMA')
 
     def test_get_reports_files(self):
         reports_files = aggregate_reports.get_reports_files(INPUT_DIRECTORY)
-        self.assertEqual(len(reports_files), 11)
+        self.assertEqual(len(reports_files), 12)
         self.assertNotIn("1000_Genomesready.vcf", reports_files)
 
     def test_aggregate_reports(self):

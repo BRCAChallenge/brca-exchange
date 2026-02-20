@@ -1,0 +1,26 @@
+##fileformat=VCFv4.0
+##source=ENIGMA
+##reference=GRCh38
+##INFO=<ID=Gene_symbol,Number=1,Type=String,Description="Gene symbol">
+##INFO=<ID=Reference_sequence,Number=1,Type=String,Description="Reference sequence">
+##INFO=<ID=HGVS_cDNA,Number=1,Type=String,Description="HGVS cDNA notation">
+##INFO=<ID=BIC_Nomenclature,Number=1,Type=String,Description="BIC nomenclature">
+##INFO=<ID=Abbrev_AA_change,Number=1,Type=String,Description="Abbreviated amino acid change">
+##INFO=<ID=URL,Number=1,Type=String,Description="URL">
+##INFO=<ID=Condition_ID_type,Number=1,Type=String,Description="Condition ID type">
+##INFO=<ID=Condition_ID_value,Number=1,Type=String,Description="Condition ID value">
+##INFO=<ID=Condition_category,Number=1,Type=String,Description="Condition category">
+##INFO=<ID=Clinical_significance,Number=1,Type=String,Description="Clinical significance">
+##INFO=<ID=Date_last_evaluated,Number=1,Type=String,Description="Date last evaluated">
+##INFO=<ID=Assertion_method,Number=1,Type=String,Description="Assertion method">
+##INFO=<ID=Assertion_method_citation,Number=1,Type=String,Description="Assertion method citation">
+##INFO=<ID=Clinical_significance_citations,Number=1,Type=String,Description="Clinical significance citations">
+##INFO=<ID=Comment_on_clinical_significance,Number=1,Type=String,Description="Comment on clinical significance">
+##INFO=<ID=Collection_method,Number=1,Type=String,Description="Collection method">
+##INFO=<ID=Allele_origin,Number=1,Type=String,Description="Allele origin">
+##INFO=<ID=ClinVarAccession,Number=1,Type=String,Description="ClinVar accession">
+##INFO=<ID=HGVS_protein,Number=1,Type=String,Description="HGVS protein notation">
+##INFO=<ID=BX_ID,Number=1,Type=String,Description="BX report ID">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+13	32332573	chr13:32332573:A>AT	A	AT	.	.	Gene_symbol=BRCA2;Reference_sequence=NM_000059.3;HGVS_cDNA=c.1097dupT;BIC_Nomenclature=1325_1326dupT;Abbrev_AA_change=L366Ffs*12;URL=-;Condition_ID_type=OMIM;Condition_ID_value=BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 2, BROVCA2 (612555);Condition_category=Disease;Clinical_significance=Pathogenic;Date_last_evaluated=22/4/2016;Assertion_method=ENIGMA BRCA1/2 Classification Criteria (2015);Assertion_method_citation=https://enigmaconsortium.org/library/general-documents/;Clinical_significance_citations=-;Comment_on_clinical_significance=Variant allele predicted to encode a truncated non-functional protein.;Collection_method=Curation;Allele_origin=Germline;ClinVarAccession=SCV000282352.1;HGVS_protein=p.(Leu366PhefsTer12);BX_ID=1
+13	32332705	chr13:32332705:GA>G	GA	G	.	.	Gene_symbol=BRCA2;Reference_sequence=NM_000059.3;HGVS_cDNA=c.1231delA;BIC_Nomenclature=1459delA;Abbrev_AA_change=I411Yfs*19;URL=-;Condition_ID_type=OMIM;Condition_ID_value=BREAST-OVARIAN CANCER, FAMILIAL, SUSCEPTIBILITY TO, 2, BROVCA2 (612555);Condition_category=Disease;Clinical_significance=Pathogenic;Date_last_evaluated=22/4/2016;Assertion_method=ENIGMA BRCA1/2 Classification Criteria (2015);Assertion_method_citation=https://enigmaconsortium.org/library/general-documents/;Clinical_significance_citations=-;Comment_on_clinical_significance=Variant allele predicted to encode a truncated non-functional protein.;Collection_method=Curation;Allele_origin=Germline;ClinVarAccession=SCV000282353.1;HGVS_protein=p.(Ile411TyrfsTer19);BX_ID=2

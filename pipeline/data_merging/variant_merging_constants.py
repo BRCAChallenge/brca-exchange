@@ -508,7 +508,7 @@ LIST_TYPE_FIELDS = {
     "SCV_Version"
 }
 
-ENIGMA_FILE = "enigma_from_clinvar.tsv"
+ENIGMA_FILE = "enigma_from_clinvar.vcf"
 
 GENOME1K_FILE = "1000_Genomes.sorted.hg38.vcf"
 CLINVAR_FILE = "ClinVar.vcf"

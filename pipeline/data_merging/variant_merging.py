@@ -549,61 +549,62 @@ def repeat_merging(vcf_in, vcf_out):
     has_repeats = False
     unique_variant_list = {}
     vcf_reader = pysam.VariantFile(vcf_in)
-        for record in vcf_reader:
-            genome_coor = "chr{0}:{1}:{2}>{3}".format(record.CHROM, str(record.POS),
-                                                      record.REF, record.ALT[0])
-            if genome_coor in unique_variant_list:
-                has_repeats = True
-            else:
-                unique_variant_list[genome_coor] = 1
+    for record in vcf_reader:
+        genome_coor = "chr{0}:{1}:{2}>{3}".format(record.CHROM, str(record.POS),
+                                                  record.REF, record.ALT[0])
+        if genome_coor in unique_variant_list:
+            has_repeats = True
+        else:
+            unique_variant_list[genome_coor] = 1
     vcf_writer = pysam.VariantFile(vcf_out, vcf_reader)
     variant_dict = {}  # str -> Record
     num_repeats = 0
     for record in vcf_reader:
         genome_coor = "chr{0}:{1}:{2}>{3}".format(
             record.chrom, str(record.pos), record.ref, record.alts[0])
-            if has_repeats:
-                variant_dict[genome_coor] = record.copy()
-            else:
-                vcf_writer.write_record(record)
-        else:
-            num_repeats += 1
-            for key in record.info:
-                if key not in variant_dict[genome_coor].info.keys():
-                    variant_dict[genome_coor].info[key] = record.info[key]
-                else:
-                    new_value = record.info[key]
-                    new_value = [xx for xx in new_value if xx is not None]
-                    old_value = variant_dict[genome_coor].info[key]
-                    old_value = [xx for xx in old_value if xx is not None]
-
-                    if type(new_value) != list:
-                        new_value = [new_value]
-                    if type(old_value) != list:
-                        old_value = [old_value]
-
-                    # This if statement is crucial to not mess up text fields
-                    # containing ',' and hence being treated as separate fields.
-                    # The list(set(new_value + old_value)) statement below would
-                    # garble it otherwise.
-                    if new_value == old_value and key != "individuals":
-                        continue
+        if has_repeats:
+            if genome_coor in variant_dict:
+                num_repeats += 1
+                for key in record.info:
+                    if key not in variant_dict[genome_coor].info.keys():
+                        variant_dict[genome_coor].info[key] = record.info[key]
                     else:
-                        # FIXME: is there a better name for this? it seems it now only
-                        # applies to scv to ensure the order is the same,
-                        # but we don't hold this concern for other list fields...
-                        if key in LIST_TYPE_FIELDS:
-                            merged_value = list(new_value + old_value)
-                        # The "individuals" values from LOVD submissions are
-                        # added together when merging variants.
-                        elif key == "individuals":
-                            merged_value = [str(int(new_value[0]) + int(old_value[0]))]
-                        else:
-                            merged_value = sorted(list(set(new_value + old_value)))
+                        new_value = record.info[key]
+                        new_value = [xx for xx in new_value if xx is not None]
+                        old_value = variant_dict[genome_coor].info[key]
+                        old_value = [xx for xx in old_value if xx is not None]
 
-                        # Remove empty strings from list
-                        merged_value = [_f for _f in merged_value if _f]
-                        variant_dict[genome_coor].info[key] = tuple(merged_value)
+                        if type(new_value) != list:
+                            new_value = [new_value]
+                        if type(old_value) != list:
+                            old_value = [old_value]
+
+                        # This if statement is crucial to not mess up text fields
+                        # containing ',' and hence being treated as separate fields.
+                        # The list(set(new_value + old_value)) statement below would
+                        # garble it otherwise.
+                        if new_value == old_value and key != "individuals":
+                            continue
+                        else:
+                            # FIXME: is there a better name for this? it seems it now only
+                            # applies to scv to ensure the order is the same,
+                            # but we don't hold this concern for other list fields...
+                            if key in LIST_TYPE_FIELDS:
+                                merged_value = list(new_value + old_value)
+                            # The "individuals" values from LOVD submissions are
+                            # added together when merging variants.
+                            elif key == "individuals":
+                                merged_value = [str(int(new_value[0]) + int(old_value[0]))]
+                            else:
+                                merged_value = sorted(list(set(new_value + old_value)))
+
+                            # Remove empty strings from list
+                            merged_value = [_f for _f in merged_value if _f]
+                            variant_dict[genome_coor].info[key] = tuple(merged_value)
+            else:
+                variant_dict[genome_coor] = record.copy()
+        else:
+            vcf_writer.write_record(record)
     print("number of repeat records: ", num_repeats, "\n")
 
     # Add contig definitions to header if missing (required by pysam)
@@ -801,48 +802,44 @@ def save_enigma_to_dict(path, output_dir, seq_provider, gene_regions_trees,
                         genome_regions_symbols_dict, gene_symbols):
     global DISCARDED_REPORTS_WRITER
 
-    enigma_file = open(path, "r")
-    variants_per_gene = dict()
-    for symbol in gene_symbols:
-        variants_per_gene[symbol] = dict()
-    line_num = 0
-    f_wrong = open(output_dir + "ENIGMA_wrong_genome.txt", "w")
+    vcf_reader = pysam.VariantFile(path)
+    info_field_names = list(vcf_reader.header.info.keys())
+    columns = utilities.add_columns_to_enigma_data_vcf(info_field_names)
+    bx_id_column_index = next(
+        (i for i, c in enumerate(columns) if "BX_ID" in c), None)
+
+    variants_per_gene = {symbol: dict() for symbol in gene_symbols}
+    open(output_dir + "ENIGMA_wrong_genome.txt", "w").close()
     n_wrong, n_total = 0, 0
-    bx_id_column_index = None
-    for line in enigma_file:
-        line_num += 1
-        if line_num == 1:
-            columns = utilities.add_columns_to_enigma_data(line)
-            for i, column in enumerate(columns):
-                if "BX_ID" in column:
-                    bx_id_column_index = i
-            f_wrong.write(line)
+
+    for record in vcf_reader:
+        n_total += 1
+        (items, chrom, pos, ref, alt) = \
+            utilities.associate_chr_pos_ref_alt_with_enigma_vcf_record(
+                record, info_field_names)
+        bx_id = items[bx_id_column_index]
+        hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
+        symbol = utilities.chrom_pos_to_symbol(chrom, pos, genome_regions_symbols_dict)
+
+        if (ref_correct(chrom, pos, ref, alt, seq_provider)
+                and not utilities.is_outside_boundaries(chrom, pos, gene_regions_trees)):
+            variants_per_gene[symbol] = add_variant_to_dict(
+                variants_per_gene[symbol], hgvs, items)
+        elif pos == 'None':
+            logging.warning("Position is none for Enigma report, throwing away: %s",
+                            str(record))
+            log_discarded_reports("ENIGMA", bx_id, hgvs, "None position")
+            n_wrong += 1
         else:
-            (items, chrom, pos, ref, alt) = utilities.associate_chr_pos_ref_alt_with_enigma_item(line)
-            bx_id = items[bx_id_column_index]
-            hgvs = "chr%s:g.%s:%s>%s" % (str(chrom), str(pos), ref, alt)
-            symbol = utilities.chrom_pos_to_symbol(chrom, pos,
-                                                   genome_regions_symbols_dict)
+            logging.warning("Ref incorrect for Enigma report, throwing away: %s",
+                            str(record))
+            log_discarded_reports(
+                "ENIGMA", bx_id, hgvs,
+                "Incorrect Reference. Is outside Boundaries {}".format(
+                    utilities.is_outside_boundaries(chrom, pos, gene_regions_trees)))
+            n_wrong += 1
 
-            if (ref_correct(chrom, pos, ref, alt, seq_provider)
-                and not utilities.is_outside_boundaries(chrom, pos,
-                                                        gene_regions_trees)):
-                
-                variants_per_gene[symbol] = add_variant_to_dict(variants_per_gene[symbol], hgvs, items)
-            elif pos == 'None':
-                logging.warning("Position is none for Enigma report, throwing away: %s", line)
-                log_discarded_reports("ENIGMA", bx_id, hgvs, "None position")
-                n_wrong += 1
-                f_wrong.write(line)
-            else:
-                logging.warning("Ref incorrect for Enigma report, throwing away: %s", line)
-                log_discarded_reports("ENIGMA", bx_id, hgvs, "Incorrect Reference. Is outside Boundaries {}".format(utilities.is_outside_boundaries(chrom, pos, gene_regions_trees)))
-                n_wrong += 1
-                f_wrong.write(line)
-
-            n_total += 1
-
-    f_wrong.close()
+    vcf_reader.close()
     print("in ENIGMA, wrong: {0}, total: {1}".format(n_wrong, n_total))
     return (columns, variants_per_gene)
 

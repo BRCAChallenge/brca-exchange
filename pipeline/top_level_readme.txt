@@ -28,8 +28,8 @@ output/ClinVar.vcf
 	Variants from ClinVar at NCBI.
 output/bic_brca12.sorted.hg38.vcf
 	Variants from the Breast Cancer Information Core (BIC) at NCBI.
-output/enigma_from_clinvar.tsv
-	Tab-delimited file of the ENIGMA clinical significance data.
+output/enigma_from_clinvar.vcf
+	VCF file of the ENIGMA clinical significance data.
 output/esp.sorted.hg38.vcf
 	Variants from the NCBI Exome Sequencing Project
 output/exLOVD_brca12.sorted.hg38.vcf

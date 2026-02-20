@@ -3,7 +3,6 @@ import itertools
 import logging
 import re
 import click
-import pandas as pd
 import xml.etree.ElementTree as ET
 
 import common
@@ -191,34 +190,66 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
     return None
 
 
-def _create_df(variant_records):
-    df = pd.DataFrame.from_dict(variant_records)
-    df['BX_ID'] = pd.Series(range(1, len(df) + 1))
-    target_header = ['Gene_symbol',
-                     'Genomic_Coordinate',
-                     'Reference_sequence',
-                     'HGVS_cDNA',
-                     'BIC_Nomenclature',
-                     'Abbrev_AA_change',
-                     'URL',
-                     'Condition_ID_type',
-                     'Condition_ID_value',
-                     'Condition_category',
-                     'Clinical_significance',
-                     'Date_last_evaluated',
-                     'Assertion_method',
-                     'Assertion_method_citation',
-                     'Clinical_significance_citations',
-                     'Comment_on_clinical_significance',
-                     'Collection_method',
-                     'Allele_origin',
-                     'ClinVarAccession',
-                     'HGVS_protein',
-                     'BX_ID']
-    if df.empty:
-        # can happen if none of the genes of interest are curated by ENIGMA
-        return pd.DataFrame({}, columns=target_header)
-    return df.loc[:, target_header]
+# INFO fields written to VCF output, in the same order as the original TSV columns
+# (excluding Genomic_Coordinate, which becomes the VCF CHROM/POS/REF/ALT fields).
+ENIGMA_VCF_INFO_FIELDS = [
+    ('Gene_symbol',                      'Gene symbol'),
+    ('Reference_sequence',               'Reference sequence'),
+    ('HGVS_cDNA',                        'HGVS cDNA notation'),
+    ('BIC_Nomenclature',                 'BIC nomenclature'),
+    ('Abbrev_AA_change',                 'Abbreviated amino acid change'),
+    ('URL',                              'URL'),
+    ('Condition_ID_type',                'Condition ID type'),
+    ('Condition_ID_value',               'Condition ID value'),
+    ('Condition_category',               'Condition category'),
+    ('Clinical_significance',            'Clinical significance'),
+    ('Date_last_evaluated',              'Date last evaluated'),
+    ('Assertion_method',                 'Assertion method'),
+    ('Assertion_method_citation',        'Assertion method citation'),
+    ('Clinical_significance_citations',  'Clinical significance citations'),
+    ('Comment_on_clinical_significance', 'Comment on clinical significance'),
+    ('Collection_method',                'Collection method'),
+    ('Allele_origin',                    'Allele origin'),
+    ('ClinVarAccession',                 'ClinVar accession'),
+    ('HGVS_protein',                     'HGVS protein notation'),
+    ('BX_ID',                            'BX report ID'),
+]
+
+
+def _sanitize_info_value(val):
+    """Return a VCF INFO-safe string for val. None or empty string become '-'."""
+    if val is None:
+        return '-'
+    s = str(val)
+    if s == '' or s == 'None':
+        return '-'
+    s = s.replace(';', ',')   # semicolons are INFO field separators
+    s = s.replace('\t', ' ')  # tabs would break VCF column structure
+    return s
+
+
+def _write_vcf(variant_records, output_path):
+    with open(output_path, 'w') as vcf_out:
+        vcf_out.write('##fileformat=VCFv4.0\n')
+        vcf_out.write('##source=ENIGMA\n')
+        vcf_out.write('##reference=GRCh38\n')
+        for field_id, description in ENIGMA_VCF_INFO_FIELDS:
+            vcf_out.write(
+                '##INFO=<ID={},Number=1,Type=String,Description="{}">\n'.format(
+                    field_id, description))
+        vcf_out.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n')
+        for bx_id, rec in enumerate(variant_records, start=1):
+            rec['BX_ID'] = bx_id
+            gc = rec['Genomic_Coordinate']   # e.g. "chr17:43094315:REF>ALT"
+            chrom = gc.split(':')[0].lstrip('chr')
+            pos   = gc.split(':')[1]
+            ref, alt = gc.split(':')[2].split('>')
+            info_parts = [
+                '{}={}'.format(fid, _sanitize_info_value(rec.get(fid)))
+                for fid, _ in ENIGMA_VCF_INFO_FIELDS
+            ]
+            vcf_out.write('{}\t{}\t{}\t{}\t{}\t.\t.\t{}\n'.format(
+                chrom, pos, gc, ref, alt, ';'.join(info_parts)))
 
 
 @click.command()
@@ -241,8 +272,7 @@ def main(filtered_clinvar_xml, gene, output, logs, debug):
                 if next_record is not None:
                     variant_records.append(next_record)
                 elem.clear()
-    df = _create_df(variant_records)
-    df.to_csv(output, sep='\t', index=False, na_rep='-')
+    _write_vcf(variant_records, output)
 
 
 if __name__ == "__main__":
