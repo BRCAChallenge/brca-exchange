@@ -30,15 +30,15 @@ PREVIOUS_RELEASE_TAR=/files/previous_release.tar.gz
 
 RELEASE_NOTES=/files/release_notes.txt
 
-CODE_MNT=$(mount | grep /opt/brca-exchange)
+CODE_MNT=$(mount | grep /opt/brca-exchange-kb)
 [ -z "${CODE_MNT}" ] || echo "WARNING: BRCA Code base mounted from host file system"
 
-cd /opt/brca-exchange
+cd /opt/brca-exchange-kb
 
 echo "Running brca exchange pipeline:"
 echo "Git hash: $(git log | head -n 1)"
 
-cd /opt/brca-exchange/pipeline/workflow
+cd /opt/brca-exchange-kb/pipeline/workflow
 
 echo "Attempting to run task ${LUIGI_TASK}"
 python -m luigi --logging-conf-file luigi_log_configuration.conf --module CompileVCFFiles ${LUIGI_TASK} \

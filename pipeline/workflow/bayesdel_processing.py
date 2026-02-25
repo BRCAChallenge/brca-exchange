@@ -75,7 +75,7 @@ class DownloadVictorAnnotations(DefaultPipelineTask):
         return luigi.LocalTarget(self.artifacts_dir + "/BRCA.ann.all.vcf")
 
     def run(self):
-        os.chdir(self.cfg.output_dir)
+        os.chdir(self.artifacts_dir)
         victor_annotation_url = "https://brcaexchange.org/backend/downloads/BRCA.ann.all.vcf"
         pipeline_utils.download_file_and_display_progress(victor_annotation_url)
 

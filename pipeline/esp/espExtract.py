@@ -12,7 +12,7 @@ where freq is one of EA or AA (European Ancestry or African-American Ancestry)
 or if the --full option is given, echo the full VCF record.
 """
 import argparse
-import vcf
+import pysam
 
 EMPTY = '-'
 
@@ -29,34 +29,37 @@ def main():
 
     start = int(args.start)
     end = int(args.end)
-    reader = vcf.Reader(open(args.inputVcf, 'r'))
+    reader = pysam.VariantFile(args.inputVcf)
     if args.full:
-        writer = vcf.Writer(open(args.output, "w"), reader)
+        writer = pysam.VariantFile(args.output, 'w', header=reader.header)
     for record in reader:
-        if "GRCh38_POSITION" in record.INFO:
-            tokens = record.INFO["GRCh38_POSITION"][0].split(":")
+        if "GRCh38_POSITION" in record.info:
+            tokens = record.info["GRCh38_POSITION"][0].split(":")
             if len(tokens) > 1:
                 chrom = tokens[0]
                 pos = tokens[1]
                 if int(pos) >= start and int(pos) <= end:
                     if args.full:
-                        record.CHROM = chrom
-                        record.POS = pos
-                        (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency) = breakUpESPAlleleFrequencies(record.INFO["MAF"])
-                        record.INFO['BX_EAAF'] = eaAlleleFrequency
-                        record.INFO['BX_AAAF'] = aaAlleleFrequency
-                        record.INFO['BX_AF'] = alleleFrequency
-                        writer.write_record(record)
+                        record.chrom = chrom
+                        record.pos = pos
+                        (eaAlleleFrequency, aaAlleleFrequency, alleleFrequency) = breakUpESPAlleleFrequencies(record.info["MAF"])
+                        record.info['BX_EAAF'] = eaAlleleFrequency
+                        record.info['BX_AAAF'] = aaAlleleFrequency
+                        record.info['BX_AF'] = alleleFrequency
+                        writer.write(record)
                     else:
                         if args.ancestry == "EA":
-                            maf = record.INFO["MAF"][0]
+                            maf = record.info["MAF"][0]
                         elif args.ancestry == "AA":
-                            maf = record.INFO["MAF"][1]
-                        for alt in record.ALT:
-                            print("%s_%s_%s_%s %s" % (record.CHROM,
-                                                      record.POS,
-                                                      record.REF,
+                            maf = record.info["MAF"][1]
+                        for alt in record.alts:
+                            print("%s_%s_%s_%s %s" % (record.chrom,
+                                                      record.pos,
+                                                      record.ref,
                                                       alt, maf))
+    reader.close()
+    if args.full:
+        writer.close()
 
 
 def breakUpESPAlleleFrequencies(mafArray):
