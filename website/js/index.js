@@ -930,7 +930,7 @@ class VariantDetail extends React.Component {
                             diffHTML.push(
                                 <span key={`diff-${i}-${j}-new`}>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
-                                    <span className='badge bg-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                    <span className='badge bg-success'><span className='fa fa-star'></span> New</span>
                                     &nbsp;{`${added}`}
                                 </span>
                             );
@@ -947,7 +947,7 @@ class VariantDetail extends React.Component {
                             diffHTML.push(
                                 <span key={`diff-${i}-${j}-individual`}>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
-                                    {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
+                                    {removed} <span className="fa fa-arrow-right"></span> {added}
                                 </span>
                             );
 			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);

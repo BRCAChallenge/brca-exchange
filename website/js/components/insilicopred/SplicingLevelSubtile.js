@@ -367,7 +367,7 @@ export default class SplicingLevelSubtile extends React.Component {
                 isHighestProb && "highest-prob",
                 !isNumeric(field) && "is-na"
             )}>
-                {isHighestProb && <i className="glyphicon glyphicon-star" style={{marginRight: '2px'}} /> }
+                {isHighestProb && <i className="fa fa-star" style={{marginRight: '2px'}} /> }
                 {`${label} (${field})`}
             </span>
         );

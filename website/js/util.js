@@ -256,7 +256,7 @@ export function getFormattedFieldByProp(prop, variant) {
             flag = variant.Flags_GnomAD;
         }
         if (!isEmptyField(flag)) {
-            rowItem = [variant[prop], <small key={`${prop}-flag`} style={{float: 'right'}}><span className="glyphicon glyphicon-flag gnomad-flag"><span>{flag}</span></span></small>];
+            rowItem = [variant[prop], <small key={`${prop}-flag`} style={{float: 'right'}}><span className="fa fa-flag gnomad-flag"><span>{flag}</span></span></small>];
         } else {
             rowItem = normalizedFieldDisplay(variant[prop]);
         }
