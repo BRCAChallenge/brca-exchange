@@ -1173,6 +1173,7 @@ div.variant-detail-group .panel-title .title {
 }
 
 div.variant-detail-group .panel-help-btn {
+    display: inline-block;
     color: #e2e2e2;
     margin-left: 10px;
     font-size: 20px;

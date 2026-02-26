@@ -1234,7 +1234,6 @@ class VariantDetail extends React.Component {
                             <span className="title">{groupTitle}</span>
                             <span className="d-flex align-items-center">
                                 <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
-                                <i className={`fa fa-chevron-${isOpen ? 'down' : 'right'} ms-2`} aria-hidden="true" />
                             </span>
                         </Card.Header>
                         <Collapse in={isOpen} onEntered={this.relayoutGrid} onExited={this.relayoutGrid}>

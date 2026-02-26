@@ -11,7 +11,7 @@ class GroupHelpButton extends React.PureComponent {
             <span role='button' tabIndex={0} onClick={onClick} onKeyDown={(e) => {
 		    if (e.key === 'Enter' || e.key === ' ') onClick?.(e);
 	    }} aria-label="Help" style={style}
-                className='panel-help-btn fa fa-question-sign'
+                className='panel-help-btn fa fa-question-circle'
             />
         );
     }
