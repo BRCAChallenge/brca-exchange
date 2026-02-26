@@ -149,7 +149,10 @@ class VariantSearchInner extends React.Component {
                         />
 
                         <span
-                            className="glyphicon glyphicon-search search-box-icon"
+                            className="fa fa-search search-box-icon"
+			    role="button"
+			    tabIndex={0}
+			    aria-label="Search"
                             onClick={this.onClickSearchButton}
                         />
                     </div>

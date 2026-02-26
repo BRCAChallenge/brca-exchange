@@ -425,7 +425,7 @@ class CommunitySearch extends React.Component {
                                type='text'
                                onChange={this.onChange}
                                value={this.state.search} />
-                        <span className="glyphicon glyphicon-search search-box-icon"/>
+                        <span className="fa fa-search search-box-icon"/>
                     </div>
                 </div>
             </form>

@@ -451,7 +451,15 @@ input:focus {
     background-color: transparent;
 }
 
+.search-box {
+    position: relative;
+}
+
 .search-box-icon {
+    display: inline-block;
+    position:  absolute;
+    top: 50%;
+    transform: translateY(-50%);
     right: 30px;
     color: #555;
     cursor: pointer;
