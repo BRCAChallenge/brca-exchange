@@ -1452,7 +1452,6 @@ class VariantDetail extends React.Component {
                                                 <span className="title">{`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}</span>
                                                 <span className="d-flex align-items-center">
                                                     <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />
-                                                    <i className={`fa fa-chevron-${splicingOpen ? 'down' : 'right'} ms-2`} aria-hidden="true" />
                                                 </span>
                                             </Card.Header>
                                             <Collapse in={splicingOpen} onEntered={this.relayoutGrid} onExited={this.relayoutGrid}>
