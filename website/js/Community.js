@@ -158,12 +158,14 @@ class Community extends React.Component {
                 </Row>
                 <Row>
                     <Col className="btm-buffer" md={{ span: 10, offset: 1 }} sm={12}>
-                        <Col sm={6} lg={5} style={{paddingRight: "0"}}>
-                            <h4>Search for a community member:</h4>
-                        </Col>
-                        <Col sm={6} lg={7}>
-                            <CommunitySearch ref={this.communitySearchRef} onChange={s => this.searchq.next(s)}/>
-                        </Col>
+                        <Row>
+			    <Col sm={6} lg={5} style={{paddingRight: "0"}}>
+                        	<h4>Search for a community member:</h4>
+                            </Col>
+                            <Col sm={6} lg={7}>
+                        	<CommunitySearch ref={this.communitySearchRef} onChange={s => this.searchq.next(s)}/>
+                            </Col>
+			</Row>
                     </Col>
                 </Row>
                 <Row>
