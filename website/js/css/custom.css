@@ -635,7 +635,7 @@ div#main {
 }
 
 .footer {
-    margin-top: auto;
+    margin-top: 80px;
     position: static;
     width: 100%;
     text-align: center;
