@@ -475,6 +475,10 @@ input:focus {
 .matched-variant-count {
     border-radius: .25em;
     font-size: 18px;
+    font-weight: bold;
+    color: #C03657;
+    background-color: #fde8ed;
+    padding: 4px 8px;
 }
 
 /* used for the message on the search page */

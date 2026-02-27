@@ -23,8 +23,14 @@ function buildHeader(onClick, title) {
             {title}
             <span 
                 onClick={ev => {ev.stopPropagation(); onClick(title); }}
-                className='help fa fa-question-circle superscript'
-                style={{cursor: 'pointer', marginLeft: '4px'}}
+                className='help fa fa-question-circle'
+                style={{cursor: 'pointer', 
+			fontSize: '0.8em', 
+			color: '#888',
+			position: 'relative',
+			top: '-8px',
+			left: '4px'
+		}}
             />
         </span>
     );

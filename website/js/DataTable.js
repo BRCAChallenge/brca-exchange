@@ -127,8 +127,23 @@ class FastTable extends React.Component {
                                     onClick={() => this.onSort(column)}
                                     style={{cursor: 'pointer'}}
                                 >
-                                    {buildHeader ? buildHeader(column.title) : column.title}
-                                    {sortIcon}
+				    <div style={{
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					gap: '6px'
+				    }}>
+					<span>{buildHeader ? buildHeader(column.title) : column.title}</span>
+					<span style={{
+					    position: 'absolute',
+					    bottom: '3px',
+					    right: '6px',
+					    fontSize: '10px',
+					    color: isSorted ? '#888' : '#ccc'
+					}}>
+				        {isSorted ? (sortBy.order === 'asc' ? '▲' : '▼') : '▲▼'}
+					</span>
+				    </div>
                                 </th>
                             );
                         })}
@@ -426,7 +441,7 @@ class DataTable extends React.Component {
                     <Col sm={8} lg={10}>
                         <div className='form-inline'>
                             <div className='form-group'>
-                                <label className='alert-danger matched-variant-count'>
+                                <label className='matched-variant-count'>
                                 {
                                     `${count} matching ${pluralize(count, 'variant')}
                                     ${changeString ? changeString : ''}
