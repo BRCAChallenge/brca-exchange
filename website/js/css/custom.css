@@ -218,9 +218,9 @@ offending file, for future reference: website/node_modules/react-data-components
 
 .navbar {
     min-height: 56px; /* XXX This value MUST match the setting in index.js */
-    padding-top: 10px;
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-top: 12px;
+    padding-left: 3rem;
+    padding-right: 3rem;
 }
 
 /* Prevent fixed-top navbar from covering content below it */
