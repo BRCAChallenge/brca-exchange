@@ -39,66 +39,66 @@ class SearchController extends React.Component {
         });
     }
 
-searchResponse() {
-    if (!this.state.searchTerm || this.state.searchTerm === '') {
-        this.setState({ matched: 0, currentMark: null, searching: false });
-        this.searcher.unmark();
-        $('*[data-expander-id]').each((idx, elem) => {
-            this.props.setExpansion($(elem).data('expander-id'), false);
-        });
-        return;
+    searchResponse() {
+	if (!this.state.searchTerm || this.state.searchTerm === '') {
+	    this.setState({ matched: 0, currentMark: null, searching: false });
+	    this.searcher.unmark();
+	    $('*[data-expander-id]').each((idx, elem) => {
+		this.props.setExpansion($(elem).data('expander-id'), false);
+	    });
+	    return;
+	}
+
+	// PASS 1: find which cards contain matches, expand them, but don't keep marks
+	this.searcher.unmark({
+	    done: () => {
+		const expandSet = new Set();
+
+		this.searcher.mark(this.state.searchTerm, {
+		    element: 'span',
+		    className: 'highlighted',
+		    each: (elem) => {
+			$(elem).parents('*[data-expander-id]').each((idx, parent) => {
+			    expandSet.add($(parent).data('expander-id'));
+			});
+		    },
+		    done: () => {
+			// expand cards with matches, collapse those without
+			$('*[data-expander-id]').each((idx, elem) => {
+			    const id = $(elem).data('expander-id');
+			    this.props.setExpansion(id, expandSet.has(id));
+			});
+
+			// PASS 2: after React re-renders and Collapse animates, re-apply marks
+			setTimeout(() => {
+			    this.searcher.unmark({
+				done: () => {
+				    this.searcher.mark(this.state.searchTerm, {
+					element: 'span',
+					className: 'highlighted',
+					each: (elem) => {
+					    $(elem).click(function() {
+						const $highlightSet = $('.highlighted').removeClass("focused");
+						$(this).addClass("focused");
+						this.setState({ currentMark: $highlightSet.index(this) });
+					    }.bind(this));
+					},
+					done: (totalMarks) => {
+					    this.setState({
+						searching: false,
+						currentMark: null,
+						matched: totalMarks
+					    });
+					}
+				    });
+				}
+			    });
+			}, 400); // wait for Collapse animation + React re-render
+		    }
+		});
+	    }
+	});
     }
-
-    // PASS 1: find which cards contain matches, expand them, but don't keep marks
-    this.searcher.unmark({
-        done: () => {
-            const expandSet = new Set();
-
-            this.searcher.mark(this.state.searchTerm, {
-                element: 'span',
-                className: 'highlighted',
-                each: (elem) => {
-                    $(elem).parents('*[data-expander-id]').each((idx, parent) => {
-                        expandSet.add($(parent).data('expander-id'));
-                    });
-                },
-                done: () => {
-                    // expand cards with matches, collapse those without
-                    $('*[data-expander-id]').each((idx, elem) => {
-                        const id = $(elem).data('expander-id');
-                        this.props.setExpansion(id, expandSet.has(id));
-                    });
-
-                    // PASS 2: after React re-renders and Collapse animates, re-apply marks
-                    setTimeout(() => {
-                        this.searcher.unmark({
-                            done: () => {
-                                this.searcher.mark(this.state.searchTerm, {
-                                    element: 'span',
-                                    className: 'highlighted',
-                                    each: (elem) => {
-                                        $(elem).click(function() {
-                                            const $highlightSet = $('.highlighted').removeClass("focused");
-                                            $(this).addClass("focused");
-                                            this.setState({ currentMark: $highlightSet.index(this) });
-                                        }.bind(this));
-                                    },
-                                    done: (totalMarks) => {
-                                        this.setState({
-                                            searching: false,
-                                            currentMark: null,
-                                            matched: totalMarks
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }, 400); // wait for Collapse animation + React re-render
-                }
-            });
-        }
-    });
-}
 
     componentDidUpdate(prevProps) {
         if (prevProps.researchMode !== this.props.researchMode) {

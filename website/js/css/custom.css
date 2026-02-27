@@ -1713,6 +1713,14 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
     background: #ddd;
 }
 
+.has-search .btn {
+    border: 1px solid #ced4da;
+}
+
+.has-search .btn:not(:last-child) {
+    border-right: 0;
+}
+
 /**************************************************************/
 /**********     Literature Search         *********************/
 /**************************************************************/
