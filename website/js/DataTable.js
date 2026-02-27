@@ -338,8 +338,10 @@ class DataTable extends React.Component {
         // can be updated. the update also triggers a new request
         // to the server in this.componentWillReceiveProps
         var newState = mergeState(this.state, opts);
-        this.setState(newState);
-        this.props.onChange(newState);
+        this.setState(newState, () => {
+	    this.props.onChange(newState);
+	    this.fetch(newState);
+	});
     };
 
     toggleFilters = () => this.setState({filtersOpen: !this.state.filtersOpen});
