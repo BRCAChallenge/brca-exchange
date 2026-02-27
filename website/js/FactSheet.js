@@ -114,12 +114,14 @@ class FactSheet extends React.Component {
                         <p><u>Web portal statistics:</u></p>
                         {this.state.error ? <p>&nbsp;&nbsp;&nbsp;({this.state.error})</p> :
                         <div>
-                            <Col md={6}>
-                                <BarChart ref={this.chart1Ref} container='chart1' options={chartOptions1} />
-                            </Col>
-                            <Col md={6}>
-                                <PieChart ref={this.chart2Ref} container='chart2' options={chartOptions2} />
-                            </Col>
+			    <Row>
+                        	<Col md={6}>
+                        	    <BarChart ref={this.chart1Ref} container='chart1' options={chartOptions1} />
+                                 </Col>
+                                 <Col md={6}>
+                                    <PieChart ref={this.chart2Ref} container='chart2' options={chartOptions2} />
+                                 </Col>
+			    </Row>
                             <br />
                             <ul>
                                 <li>Number of unique BRCA variants in the portal: {Number(this.state.total).toLocaleString()}</li>
