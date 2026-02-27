@@ -151,26 +151,24 @@ class SearchController extends React.Component {
     render() {
         return (
             <div className="input-group has-feedback has-search">
-                <div className="input-group-addon">
+		<span className="input-group-text">
                     <span className={`fa ${this.state.searching ? "fa-refresh fa-spin" : "fa-search"}`} />
-                </div>
+                </span>
                 <input type="text" className="form-control" placeholder="Search" value={this.state.searchTerm} onChange={this.searchChanged} />
                 {
                     (this.state.matched > 0) && (
-                        <span className="input-group-addon">
-                         { this.state.currentMark !== null && `${this.state.currentMark + 1} / ` }
+			<span className="input-group-text"> 
+                            { this.state.currentMark !== null && `${this.state.currentMark + 1} / ` }
                             { this.state.matched}
-                        </span>
+			</span>
                     )
                 }
-                <div className="input-group-btn">
-                    <button type="button" disabled={this.state.matched <= 0} onClick={this.navForward} className="btn btn-default">
-                        <span className="fa fa-caret-down" />
-                    </button>
-                    <button type="button" disabled={this.state.matched <= 0} onClick={this.navBackward} className="btn btn-default">
-                        <span className="fa fa-caret-up" />
-                    </button>
-                </div>
+                <button type="button" disabled={this.state.matched <= 0} onClick={this.navForward} className="btn btn-default">
+                    <span className="fa fa-caret-down" />
+                </button>
+                <button type="button" disabled={this.state.matched <= 0} onClick={this.navBackward} className="btn btn-default">
+                    <span className="fa fa-caret-up" />
+                </button>
             </div>
         );
     }
