@@ -39,66 +39,66 @@ class SearchController extends React.Component {
         });
     }
 
-    searchResponse() {
-        if (!this.state.searchTerm || this.state.searchTerm === '') {
-            // remove any marks if they cleared the search
-            this.setState({
-                matched: 0,
-                currentMark: null,
-                searching: false
-            }, () => {
-                this.searcher.unmark();
-
-                $(this.props.target).find('*[data-expander-id]').each((idx, elem) => {
-                    this.props.setExpansion($(elem).data('expander-id'), false);
-                });
-            });
-            return;
-        }
-
-        // perform full matching against 'target'
-        // (first we unmark, then mark, then deal with the match results)
-        this.searcher.unmark({
-            done: () => {
-                this.pendingUpdate = new Set();
-
-                // then iteratively expand while searching for marks
-                this.searcher.mark(this.state.searchTerm, {
-                    element: 'span',
-                    className: 'highlighted',
-                    done: (totalMarks) => {
-                        this.setState({
-                            searching: false,
-                            currentMark: null,
-                            matched: totalMarks
-                        });
-
-                        // set all the elements that can be toggled to their match status
-                        $('*[data-expander-id]').each((idx, elem) => {
-                            const targetID = $(elem).data('expander-id');
-                            this.props.setExpansion(targetID, this.pendingUpdate.has(targetID));
-                        });
-                    },
-                    each: (elem) => {
-                        const me = this;
-
-                        // check if it has ancestors that need to be expanded and add them to the expanded list
-                        $(elem)
-                            .click(function() {
-                                const $highlightSet = $('.highlighted').removeClass("focused");
-
-                                // set this element to the currently-selected index
-                                $(this).addClass("focused");
-                                me.setState({ currentMark: $highlightSet.index(this) });
-                            })
-                            .parents('*[data-expander-id]').each((idx, elem) => {
-                                this.pendingUpdate.add($(elem).data('expander-id'));
-                            });
-                    }
-                });
-            }
+searchResponse() {
+    if (!this.state.searchTerm || this.state.searchTerm === '') {
+        this.setState({ matched: 0, currentMark: null, searching: false });
+        this.searcher.unmark();
+        $('*[data-expander-id]').each((idx, elem) => {
+            this.props.setExpansion($(elem).data('expander-id'), false);
         });
+        return;
     }
+
+    // PASS 1: find which cards contain matches, expand them, but don't keep marks
+    this.searcher.unmark({
+        done: () => {
+            const expandSet = new Set();
+
+            this.searcher.mark(this.state.searchTerm, {
+                element: 'span',
+                className: 'highlighted',
+                each: (elem) => {
+                    $(elem).parents('*[data-expander-id]').each((idx, parent) => {
+                        expandSet.add($(parent).data('expander-id'));
+                    });
+                },
+                done: () => {
+                    // expand cards with matches, collapse those without
+                    $('*[data-expander-id]').each((idx, elem) => {
+                        const id = $(elem).data('expander-id');
+                        this.props.setExpansion(id, expandSet.has(id));
+                    });
+
+                    // PASS 2: after React re-renders and Collapse animates, re-apply marks
+                    setTimeout(() => {
+                        this.searcher.unmark({
+                            done: () => {
+                                this.searcher.mark(this.state.searchTerm, {
+                                    element: 'span',
+                                    className: 'highlighted',
+                                    each: (elem) => {
+                                        $(elem).click(function() {
+                                            const $highlightSet = $('.highlighted').removeClass("focused");
+                                            $(this).addClass("focused");
+                                            this.setState({ currentMark: $highlightSet.index(this) });
+                                        }.bind(this));
+                                    },
+                                    done: (totalMarks) => {
+                                        this.setState({
+                                            searching: false,
+                                            currentMark: null,
+                                            matched: totalMarks
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }, 400); // wait for Collapse animation + React re-render
+                }
+            });
+        }
+    });
+}
 
     componentDidUpdate(prevProps) {
         if (prevProps.researchMode !== this.props.researchMode) {
