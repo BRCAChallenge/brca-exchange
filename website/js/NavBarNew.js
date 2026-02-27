@@ -40,9 +40,9 @@ class ModeButton extends React.PureComponent {
 
         return (
             <OverlayTrigger placement='bottom' delay={{ show: 300, hide: 0 }} overlay={popper}>
-                <span id="research-label" className="label label-info" style={{cursor: 'help'}} onClick={toggleMode}>
+                <button type="button" id="research-label" className="btn btn-info btn-sm text-white fw-bold" style={{cursor: 'help'}} onClick={toggleMode}>
                     {`${mode === 'research_mode' ? "Detail" : "Summary"} View`}
-                </span>
+                </button>
             </OverlayTrigger>
         );
     }
