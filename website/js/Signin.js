@@ -32,20 +32,12 @@ class ResetPassword extends React.Component {
                     {message}
                 </Row>
                 <Row>
-                    <Col md={{ span: 8, offset: 3 }}>
+                    <Col md={{ span: 4, offset: 4 }} sm={{ span:6, offset: 3 }}>
                         <h3>Forgot your password?</h3>
                         <div>Enter your email and we'll send you a link to reset your password.</div>
                         <br/>
-                    </Col>
-                </Row>
-                <Row id="form">
-                    <Col md={{ span: 8, offset: 2 }}>
                         <ResetPasswordForm ref={this.contactFormRef}/>
-                    </Col>
-                </Row>
-                <Row id="submit">
-                    <Col md={{ span: 6, offset: 3 }}>
-                        <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
+			<Button type="button" className="btn btn-primary w-100 mt-2" onClick={this.handleSubmit}>
                             Reset Password
                         </Button>
                     </Col>
@@ -113,9 +105,9 @@ class ResetPasswordForm extends React.Component {
     }
     renderField(id, label, field) {
         return (
-			<div className={$c('form-group', {'has-error': id in this.state.errors})}>
-				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
-				<div className="col-sm-6">
+			<div className={$c('mb-3', {'has-error': id in this.state.errors})}>
+				<label htmlFor={id} className="form-label">{label}</label>
+				<div>
 					{field}
 				</div>
 			</div>);
@@ -145,26 +137,15 @@ class SigninInner extends React.Component {
                     {message}
                 </Row>
                 <Row id="form">
-                    <Col md={{ span: 8, offset: 2 }}>
+                    <Col md={{ span: 4, offset: 4 }} sm={{ span: 6, offset: 3}}>
                         <SigninForm onSubmit={e => { this.handleSubmit(); e.preventDefault(); }} ref={this.contactFormRef}/>
-                    </Col>
-                </Row>
-                <Row id="submit">
-                    <Col md={{ span: 8, offset: 2 }}>
-                            <div className="form-group" style={{marginLeft: "-15px", marginRight: "-15px"}}>
-                                <label className="col-sm-4 control-label"></label>
-                                <Col sm={6}>
-                                    <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
-                                        Sign in
-                                    </Button>
-                                </Col>
-                            </div>
-                    </Col>
-                </Row>
-                <Row id="submit">
-                    <Col sm={10} md={{ span: 6, offset: 3 }}>
-                        <Link className="pull-right" to='/reset_password'><Button variant="link">Forgot your password?</Button></Link>
-                    </Col>
+                        <Button type="button" className="btn btn-primary w-100 mt-2" onClick={this.handleSubmit}>
+                            Sign in
+                        </Button>
+                    	<div className="text-end mt-2">
+                            <Link to='/reset_password'><Button variant="link">Forgot your password?</Button></Link>
+                    	</div>
+		    </Col>
                 </Row>
             </Grid>);
     }
@@ -244,10 +225,10 @@ class SigninForm extends React.Component {
     };
     render() {
         return (
-            <form className="form-horizontal" onSubmit={this.props.onSubmit}>
+            <form className="form" onSubmit={this.props.onSubmit}>
                 {this.renderTextInput('email', 'Email')}
                 {this.renderPassword('password', 'Password')}
-                <input type="submit" className="hidden" />
+                <input type="submit" className="d-none" />
             </form>);
     }
     renderTextInput(id, label) {
@@ -262,10 +243,10 @@ class SigninForm extends React.Component {
     }
     renderField(id, label, field) {
         return (
-			<div className={$c('form-group', {'has-error': id in this.state.errors})}>
-				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
-				<div className="col-sm-6">
-					{field}
+			<div className={$c('mb-3', {'has-error': id in this.state.errors})}>
+				<label htmlFor={id} className="form-label">{label}</label>
+				<div>
+				    {field}
 				</div>
 			</div>);
     }
