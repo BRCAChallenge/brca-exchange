@@ -136,15 +136,17 @@ class NavBarNew extends React.Component {
                     this.state.showModal &&
                     <Modal show={true} onHide={() => this.setState({showModal: false})}>
                         <RawHTML html={content.pages.researchWarning}/>
-                        <Button onClick={() => {
-                            this.setState({showModal: false}, function () {
-                                this.props.toggleMode();
-                                this.forceUpdate();
-                            });
-                        }}>Yes</Button>
-                        <Button onClick={() => this.setState({showModal: false}, function () {
-                            console.log("Modal visible?: " + this.state.showModal);
-                        })}>No</Button>
+                        <div className="d-flex gap-2">
+			    <Button onClick={() => {
+				this.setState({showModal: false}, function () {
+                                    this.props.toggleMode();
+                                    this.forceUpdate();
+                                });
+                            }}>Yes</Button>
+                            <Button onClick={() => this.setState({showModal: false}, function () {
+                                console.log("Modal visible?: " + this.state.showModal);
+                            })}>No</Button>
+			</div>
                     </Modal>
                 }
             </div>
