@@ -1359,11 +1359,11 @@ class VariantDetail extends React.Component {
                     {
                         (this.props.mode !== "research_mode")
                             ? (
-                                <span>
-                                    <Col md={2}>
+                                <>
+                                    <Col lg={2}>
                                         <h3>Variant Details</h3>
                                     </Col>
-                                    <Col md={8} className="vcenterblock">
+                                    <Col lg={8} className="vcenterblock">
                                         <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
                                             <h1 style={{marginTop: 30}}>{variant.Genomic_HGVS_38 ? variant.Genomic_HGVS_38 : variant.Genomic_Coordinate_hg38}</h1>
                                             <div><i>or</i></div>
@@ -1376,7 +1376,7 @@ class VariantDetail extends React.Component {
                                             </h3>
                                         </div>
                                     </Col>
-                                </span>
+                                </>
                             )
                             : (
                                 <Col xs={4} sm={{ span: 4, offset: 4 }} md={{ span: 4, offset: 4 }} className="vcenterblock">
@@ -1386,11 +1386,12 @@ class VariantDetail extends React.Component {
                                 </Col>
                             )
                     }
-                    <Col md={2} className={(this.props.mode !== "research_mode") ? "vlowerblock" : "vcenterblock"}>
+                    <Col lg={2} xs={12} className={`d-flex align-items-end ${(this.props.mode !== "research_mode") ? "vlowerblock" : "vcenterblock"}`}>
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                variant="secondary">
+                                variant="secondary"
+				className="text-nowrap">
                                 { this.state.hideEmptyItems ?
                                     <span>Show Empty Items</span> :
                                     <span>Hide Empty Items</span>
