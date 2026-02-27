@@ -119,13 +119,15 @@ class Release extends React.Component {
                     </Col>
                 </Row>
                 <Row>
-                    <Col sm={{ span: 8, offset: 2 }} md={{ span: 6, offset: 3 }} className='text-center'>
+                    <Col sm={{ span: 8, offset: 2 }} md={{ span: 6, offset: 3 }} className='text-start'>
                         <p className='release-notes text-left' dangerouslySetInnerHTML={this.generateReleaseNotes()}></p>
+		    </Col>
+		    <div className='text-center'>
                         <h3>{release['variants_added']} new variant{s(release['variants_added'])}</h3>
                         <h3>{release['variants_classified']} new classification{s(release['variants_classified'])}</h3>
                         <h3>{release['variants_modified']} changed/updated variant{s(release['variants_modified'])}</h3>
                         <h3>{release['variants_deleted']} removed variant{s(release['variants_deleted'])}</h3>
-                    </Col>
+                    </div>
                 </Row>
                 <Row>
                     <Col sm={{ span: 4, offset: 4 }}>
