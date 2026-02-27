@@ -36,11 +36,6 @@ a {
   text-decoration: none;
 }
 
-a:hover,
-a:focus {
-  text-decoration: underline;
-}
-
 p {
     font-size: 18px;
     font-weight: 200;
@@ -560,6 +555,8 @@ div.colorized-jumbo {
     margin: 80px 0 0 0;
     width: auto;
     text-align: center;
+    justify-content: center;
+    align-items: center;
 }
 
 .logo-header {
