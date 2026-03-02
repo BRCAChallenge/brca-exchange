@@ -43,13 +43,39 @@ def get_allele_count_value(faf95_popmax_population, row):
     return allele_count if allele_count else '', allele_number if allele_number else ''
 
 
+def parse_enigma_class1_comment(comment):
+    """
+    Parse Comment_on_clinical_significance_ENIGMA for Class 1 frequency data.
+
+    For comments beginning with "Class 1 not pathogenic based on frequency >1% in an outbred sampleset.",
+    extracts the frequency and population from the second sentence (e.g. "Frequency 0.03659 (African)").
+
+    Returns:
+        Tuple of (frequency, population) strings, or (None, None) if the comment does not match.
+    """
+    class1_prefix = "Class 1 not pathogenic based on frequency >1% in an outbred sampleset."
+    if not comment or not comment.startswith(class1_prefix):
+        return None, None
+
+    remainder = comment[len(class1_prefix):].strip()
+    tokens = remainder.split()
+    # Expected: tokens[0]="Frequency", tokens[1]="0.03659", tokens[2]="(African),"
+    if len(tokens) < 3:
+        return None, None
+
+    frequency = tokens[1]
+    population = tokens[2].strip('(),')
+    return frequency, population
+
+
 def create_brca_exchange_lookup(brca_exchange_output_tsv):
     """
     Read built_with_v4b.tsv and create a lookup dictionary.
 
     Returns a dictionary mapping variant keys (e.g., "BRCA2:c.-296C>T")
     to a dictionary containing V4_Popfreq, faf95_popmax_joint,
-    faf95_popmax_population, faf95_popmax_allele_count, and faf95_popmax_allele_number values.
+    faf95_popmax_population, faf95_popmax_allele_count, faf95_popmax_allele_number,
+    enigma_class1_frequency, and enigma_class1_population values.
     """
     lookup = {}
 
@@ -57,7 +83,7 @@ def create_brca_exchange_lookup(brca_exchange_output_tsv):
         reader = csv.DictReader(f, delimiter='\t')
         # Replace spaces with underscores in header
 
-        
+
         for row in reader:
             gene_symbol = row["Gene_Symbol"]
             gnomADv4_id = row["Variant_id_GnomADv4"]
@@ -65,9 +91,13 @@ def create_brca_exchange_lookup(brca_exchange_output_tsv):
             v4_popfreq = row["Provisional_Evidence_Code_Gnomad_V4"]
             faf95_popmax_joint = row["faf95_popmax_joint_GnomADv4"]
             faf95_popmax_population = row["faf95_popmax_population_joint_GnomADv4"]
+            comment = row["Comment_on_clinical_significance_ENIGMA"]
 
             # Get allele count and allele number values using the helper function
             faf95_popmax_allele_count, faf95_popmax_allele_number = get_allele_count_value(faf95_popmax_population, row)
+
+            # Extract frequency and population from Class 1 comments
+            enigma_class1_frequency, enigma_class1_population = parse_enigma_class1_comment(comment)
 
             # Skip rows with None or empty pyhgvs_cDNA
             if not pyhgvs_cdna or pyhgvs_cdna == "None" or pyhgvs_cdna == "-":
@@ -84,7 +114,9 @@ def create_brca_exchange_lookup(brca_exchange_output_tsv):
                     'faf95_popmax_joint': faf95_popmax_joint if faf95_popmax_joint else '',
                     'faf95_popmax_population': faf95_popmax_population if faf95_popmax_population else '',
                     'faf95_popmax_allele_count': faf95_popmax_allele_count,
-                    'faf95_popmax_allele_number': faf95_popmax_allele_number
+                    'faf95_popmax_allele_number': faf95_popmax_allele_number,
+                    'enigma_class1_frequency': enigma_class1_frequency,
+                    'enigma_class1_population': enigma_class1_population,
                 }
 
 
@@ -105,8 +137,8 @@ def parse_arguments():
     parser.add_argument(
         'brca_exchange_output_tsv',
         nargs='?',
-        default='built_with_v4_verify.tsv',
-        help='Input file with V4_Popfreq data (default: built_with_v4b.tsv)'
+        default='built_with_popfreq.tsv',
+        help='Input file with V4_Popfreq data (default: built_with_popfreq.tsv)'
     )
 
     parser.add_argument(
@@ -152,12 +184,13 @@ def merge_files(brca_exchange_output_tsv, enigma_tsv, output_file):
         # Process header
         header = next(reader)
         # Keep only the first 12 columns
-        header = header[:12]
-        # Trim trailing whitespace from column 12 (index 11) and replace spaces with underscores
-        header = [field.rstrip().replace(' ', '_') if i >= 11 else field.replace(' ', '_')
+        header = header[:13]
+        # Trim trailing whitespace from column 13 (index 12) and replace spaces with underscores
+        header = [field.rstrip().replace(' ', '_') if i >= 12 else field.replace(' ', '_')
                   for i, field in enumerate(header)]
         header.extend(['gnomADv4_id', 'faf95_popmax_joint_gnomADv4', 'faf95_popmax_population_joint_gnomADv4',
-                      'faf95_popmax_allele_count_gnomADv4', 'faf95_popmax_allele_number_gnomADv4', 'V4_Popfreq'])
+                      'faf95_popmax_allele_count_gnomADv4', 'faf95_popmax_allele_number_gnomADv4', 'V4_Popfreq',
+                      'enigma_class1_frequency', 'enigma_class1_population'])
         writer.writerow(header)
 
         # Process data rows
@@ -166,9 +199,9 @@ def merge_files(brca_exchange_output_tsv, enigma_tsv, output_file):
                 continue
 
             # Keep only the first 11 columns, or pad to 11 columns if shorter
-            row = row[:11]
+            row = row[:12]
             # Pad with empty strings if row has fewer than 11 values
-            while len(row) < 11:
+            while len(row) < 1:
                 row.append('')
 
             # Trim trailing whitespace from column 12 (index 11) and replace spaces with underscores
@@ -183,23 +216,28 @@ def merge_files(brca_exchange_output_tsv, enigma_tsv, output_file):
             if variant_data:
                 matched += 1
                 gnomADv4_id = variant_data.get('gnomADv4_id', '')
-                print("Setting output variable to ", gnomADv4_id)
                 faf95_popmax_joint = variant_data.get('faf95_popmax_joint', '')
                 faf95_popmax_population = variant_data.get('faf95_popmax_population', '')
                 faf95_popmax_allele_count = variant_data.get('faf95_popmax_allele_count', '')
                 faf95_popmax_allele_number = variant_data.get('faf95_popmax_allele_number', '')
                 v4_popfreq = variant_data.get('v4_popfreq', '')
+                enigma_class1_frequency = variant_data.get('enigma_class1_frequency') or ''
+                enigma_class1_population = variant_data.get('enigma_class1_population') or ''
             else:
                 unmatched += 1
+                gnomADv4_id = ''
                 faf95_popmax_joint = ''
                 faf95_popmax_population = ''
                 faf95_popmax_allele_count = ''
                 faf95_popmax_allele_number = ''
                 v4_popfreq = ''
+                enigma_class1_frequency = ''
+                enigma_class1_population = ''
 
             row.extend([gnomADv4_id, faf95_popmax_joint,
                         faf95_popmax_population, faf95_popmax_allele_count,
-                        faf95_popmax_allele_number, v4_popfreq])
+                        faf95_popmax_allele_number, v4_popfreq,
+                        enigma_class1_frequency, enigma_class1_population])
             writer.writerow(row)
 
     print(f"Complete! Output written to {output_file}")
