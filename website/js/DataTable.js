@@ -433,8 +433,8 @@ class DataTable extends React.Component {
                 </Row>
                 <Row id="filters">
                     <Col sm={12}>
-                        {filtersOpen && <div className='form-inline'>{filterFormEls}{filters}</div>}
-                        {columnSelectorsOpen && mode === "research_mode" && <div className='form-inline'>
+                        {filtersOpen && <div className='d-flex flex-wrap align-items-center gap-3 mb-3'>{filterFormEls}{filters}</div>}
+                        {columnSelectorsOpen && mode === "research_mode" && <div className='d-flex flex-wrap align-items-center gap-3 mb-3'>
                             {columnSelectors}
                         </div>}
                     </Col>

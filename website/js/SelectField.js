@@ -15,8 +15,8 @@ class SelectField extends React.PureComponent {
         const opels = _.map(options, v => <option key={String(v)} value={v}>{v}</option>);
 
         return (
-            <FormGroup controlId="formControlsSelect">
-                {label ? <FormLabel>{label}</FormLabel> : null}
+            <FormGroup controlId="formControlsSelect" className="d-flex align-items-center gap-2 mb-0">
+                {label ? <FormLabel className="mb-0 text-nowrap fw-bold">{label}</FormLabel> : null}
                 <FormSelect value={value} onChange={this.onChange}>
                     {opels}
                 </FormSelect>
