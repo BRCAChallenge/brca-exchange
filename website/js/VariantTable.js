@@ -8,7 +8,7 @@ import DataTable from './DataTable';
 var _ = require('underscore');
 
 // React-Bootstrap v2 replacements
-import { Card, Col, Collapse, Form, Button } from 'react-bootstrap';
+import { Card, Col, Row, Collapse, Form, Button } from 'react-bootstrap';
 
 import ColumnCheckbox from './ColumnCheckbox';
 var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
@@ -807,7 +807,7 @@ var ResearchVariantTableSupplier = function (Component) {
                             aria-expanded={!!this.state.openSubcols[subColTitle]}
                             className="d-flex justify-content-between align-items-center"
                         >
-                            <span>{subColTitle}</span>
+                            <span className="fw-bold">{subColTitle}</span>
                             <i className={`fa fa-chevron-${this.state.openSubcols[subColTitle] ? 'down' : 'right'}`} aria-hidden="true" />
                         </Card.Header>
                         <Collapse in={!!this.state.openSubcols[subColTitle]}>
@@ -822,9 +822,11 @@ var ResearchVariantTableSupplier = function (Component) {
             );
             return (<div className='control-label'>
                 <Card>
-                    <Card.Header>Column Selection</Card.Header>
+                    <Card.Header className="fw-bold">Column Selection</Card.Header>
                     <Card.Body>
-                    {filterFormSubCols}
+		    	<Row>
+                    	    {filterFormSubCols}
+		    	</Row>
                     </Card.Body>
                 </Card>
             </div>);
@@ -861,11 +863,13 @@ var ResearchVariantTableSupplier = function (Component) {
                     />
                 </Col>
             );
-            return (<div className='control-label source-filters'>
+            return (<div className='source-filters'>
                 <Card className="top-buffer">
-                    <Card.Header>Source Selection</Card.Header>
+                    <Card.Header className="fw-bold">Source Selection</Card.Header>
                     <Card.Body>
-                    {sourceCheckboxes}
+		    	<Row>
+                    	    {sourceCheckboxes}
+		    	</Row>
                     </Card.Body>
                 </Card>
             </div>);
