@@ -99,33 +99,33 @@ export default class CollapsibleTile extends React.Component {
                 className={allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group"}
             >
                 <Card className="mb-3">
-                    <Card.Header as="h3" className="d-flex align-items-center">
-                        <a
+                    <Card.Header as="div" className="d-flex align-items-center fw-bold">
+                        <span
                             role="button"
                             className="title text-decoration-none flex-grow-1"
                             onClick={this.toggleGroupOpen}
                             aria-expanded={this.state.groupOpen}
                         >
                             {this.props.displayTitle || this.props.groupTitle}
-                        </a>
+                        </span>
 
-                        <a
+                        <span
                             title="collapse all fields"
                             className="toggle-subfields"
                             onClick={(event) => this.setAllFieldsExpansion(event, false)}
                             style={{ cursor: 'pointer', marginRight: '10px' }}
                         >
                             <i className="fa fa-angle-double-up" aria-hidden="true" />
-                        </a>
+                        </span>
 
-                        <a
+                        <span
                             title="expand all fields"
                             className="toggle-subfields"
                             onClick={(event) => this.setAllFieldsExpansion(event, true)}
                             style={{ cursor: 'pointer' }}
                         >
                             <i className="fa fa-angle-double-down" aria-hidden="true" />
-                        </a>
+                        </span>
 
                         {this.props.helpSection && (
                             <GroupHelpButton

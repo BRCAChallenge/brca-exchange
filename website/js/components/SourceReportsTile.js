@@ -142,33 +142,33 @@ export default class SourceReportsTile extends React.Component {
                 className={`variant-detail-group variant-submitter-group ${slugify(this.props.sourceName)}-submitter`}
             >
                 <Card className="mb-3">
-                    <Card.Header as="h3" className="d-flex align-items-center">
-                        <a
+                    <Card.Header as="div" className="d-flex align-items-center fw-bold">
+                        <span
                             role="button"
                             className="title text-decoration-none flex-grow-1"
                             onClick={this.toggleGroupOpen}
                             aria-expanded={this.state.groupOpen}
                         >
                             {this.props.groupTitle}
-                        </a>
+                        </span>
 
-                        <a
+                        <span
                             title='collapse all reports'
                             className="toggle-subfields"
                             onClick={(event) => this.setAllReportExpansion(event, false)}
                             style={{ cursor: 'pointer', marginRight: '10px' }}
                         >
                             <i className="fa fa-angle-double-up" aria-hidden="true" />
-                        </a>
+                        </span>
 
-                        <a
+                        <span
                             title='expand all reports'
                             className="toggle-subfields"
                             onClick={(event) => this.setAllReportExpansion(event, true)}
                             style={{ cursor: 'pointer' }}
                         >
                             <i className="fa fa-angle-double-down" aria-hidden="true" />
-                        </a>
+                        </span>
 
                         {
                             this.props.helpSection &&

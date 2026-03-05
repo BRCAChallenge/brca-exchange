@@ -1231,7 +1231,7 @@ class VariantDetail extends React.Component {
                             className="d-flex justify-content-between align-items-center"
                             onClick={(event) => { event.preventDefault(); this.toggleCard(storageKey) }}
                         >
-                            <span className="title">{groupTitle}</span>
+                            <span className="title fw-bold">{groupTitle}</span>
                             <span className="d-flex align-items-center">
                                 <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
                             </span>
@@ -1450,7 +1450,7 @@ class VariantDetail extends React.Component {
                                                 className="d-flex justify-content-between align-items-center"
                                                 onClick={(e) => { e.preventDefault(); this.toggleCard(splicingKey) }}
                                             >
-                                                <span className="title">{`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}</span>
+                                                <span className="title fw-bold">{`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}</span>
                                                 <span className="d-flex align-items-center">
                                                     <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />
                                                 </span>
