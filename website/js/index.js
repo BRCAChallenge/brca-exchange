@@ -1224,7 +1224,7 @@ class VariantDetail extends React.Component {
 
             return (
                 <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
-                    <Card>
+                    <Card className="shadow">
                         <Card.Header
                             role="button"
                             aria-expanded={isOpen}
@@ -1442,8 +1442,8 @@ class VariantDetail extends React.Component {
                             {
                                 this.props.mode === "research_mode" && (
                                     <Col key="splicing_vis"
-                                        className={`variant-detail-group isogrid-item ${splicingTileSizeClassse}`}>
-                                        <Card>
+                                        className={`variant-detail-group isogrid-item ${splicingTileSizeClassse} p-2`}>
+                                        <Card className="shadow">
                                             <Card.Header
                                                 role="button"
                                                 aria-expanded={splicingOpen}
@@ -1471,7 +1471,7 @@ class VariantDetail extends React.Component {
                                 groupTables.map((x, i) => {
                                     return (
                                         <Col key={"group_col-" + i}
-                                            className={`variant-detail-group isogrid-item ${tileSizeClasses}`}>
+                                            className={`variant-detail-group isogrid-item ${tileSizeClasses} p-2`}>
                                             {x}
                                         </Col>
                                     );

@@ -141,7 +141,7 @@ export default class SourceReportsTile extends React.Component {
                 key={`group_collection-${groupTitle}`}
                 className={`variant-detail-group variant-submitter-group ${slugify(this.props.sourceName)}-submitter`}
             >
-                <Card className="mb-3">
+                <Card className="mb-3 shadow">
                     <Card.Header as="div" className="d-flex align-items-center fw-bold">
                         <span
                             role="button"

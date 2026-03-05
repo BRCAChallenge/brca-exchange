@@ -98,7 +98,7 @@ export default class CollapsibleTile extends React.Component {
                 key={`group_collection-${groupVisID}`}
                 className={allEmpty && this.props.hideEmptyItems ? "group-empty variant-detail-group" : "variant-detail-group"}
             >
-                <Card className="mb-3">
+                <Card className="mb-3 shadow">
                     <Card.Header as="div" className="d-flex align-items-center fw-bold">
                         <span
                             role="button"
