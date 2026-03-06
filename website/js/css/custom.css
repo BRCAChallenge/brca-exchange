@@ -581,6 +581,7 @@ div.colorized-jumbo {
 
 .logo-item {
     height: 120px;
+    width: 300px;
     padding: 10px;
     margin-bottom: 10px;
     text-align: center;
@@ -591,9 +592,10 @@ div.colorized-jumbo {
 
 .logo-item img {
     max-height: 100%;
-    max-width: 300px;
+    max-width: 100%;
     width: auto;
     vertical-align: middle;
+    object-fit: contain;
 }
 
 #BRCA-Exchange {
