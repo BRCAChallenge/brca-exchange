@@ -36,6 +36,10 @@ a {
   text-decoration: none;
 }
 
+a:hover {
+    text-decoration: underline;
+}
+
 p {
     font-size: 18px;
     font-weight: 200;
@@ -221,6 +225,10 @@ offending file, for future reference: website/node_modules/react-data-components
     padding-top: 12px;
     padding-left: 3rem;
     padding-right: 3rem;
+}
+
+.navbar a:hover {
+    text-decoration: none;
 }
 
 /* Prevent fixed-top navbar from covering content below it */
