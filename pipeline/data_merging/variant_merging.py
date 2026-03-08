@@ -23,7 +23,8 @@ from data_merging.variant_merging_constants import *
 
 DISCARDED_REPORTS_WRITER = None
 
-def options(parser):
+def parse_args():
+    parser = argparse.ArgumentParser(description="Merge variants from different sources into a single output file")
     parser.add_argument("-i", "--input", help="Input VCF directory",
                         default="/home/brca/pipeline-data/pipeline-input/")
     parser.add_argument("-o", "--output",
@@ -31,15 +32,13 @@ def options(parser):
     parser.add_argument("-c", "--config")
     parser.add_argument('-a', "--artifacts_dir", help='Artifacts directory with pipeline artifact files.')
     parser.add_argument("-v", "--verbose", action="count", default=False, help="determines logging")
+    return parser.parse_args()
 
 
 def main():
     global DISCARDED_REPORTS_WRITER
 
-    parser = argparse.ArgumentParser()
-    options(parser)
-
-    args = parser.parse_args()
+    args = parse_args()
 
     gene_config_df = config.load_config(args.config)
 

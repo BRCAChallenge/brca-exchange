@@ -1,4 +1,5 @@
 import pandas as pd
+import csv
 
 from .utils import ChrInterval, build_interval_trees_by_chr
 
@@ -6,10 +7,13 @@ HGVS_CDNA_DEFAULT_AC = 'hgvs_cdna_default_ac'
 SYMBOL_COL = 'symbol'
 SYNONYM_AC_COL = 'synonyms_ac_col'
 STRAND_COL = 'strand'
+CHROM_COL = 'chr'
 
 # not using +/- since would interfer with '-' as NA value in config file
 POSITIVE_STRAND = 'plus'
 NEGATIVE_STRAND = 'minus'
+
+
 
 def load_config(path):
     '''

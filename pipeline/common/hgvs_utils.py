@@ -26,7 +26,12 @@ class HgvsWrapper:
 
         assemblies = [self.GRCh37_Assem, self.GRCh38_Assem]
 
-        self.hgvs_ams = { a : (hgvs.assemblymapper.AssemblyMapper(self.hgvs_dp, assembly_name=a, normalize=False, prevalidation_level=None)) for a in assemblies }
+        self.hgvs_ams = {
+            a : (hgvs.assemblymapper.AssemblyMapper(self.hgvs_dp,
+                                                    assembly_name=a,
+                                                    normalize=True,
+                                                    alt_aln_method="splign"))
+            for a in assemblies }
 
         all_assemblies = bioutils.assemblies.get_assemblies()
 

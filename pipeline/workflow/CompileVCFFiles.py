@@ -373,8 +373,17 @@ class SortSharedLOVDOutput(DefaultPipelineTask):
         pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
         pipeline_utils.check_file_for_contents(self.output().path)
 
+class DownloadStaticSharedLOVDData(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/sharedLOVD.sorted.hg38.vcf")
 
-@requires(SortSharedLOVDOutput)
+    def run(self):
+        download_url = "https://brcaexchange.org/backend/downloads/"
+        shared_lovd_vcf_url = download_url + "sharedLOVD.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(shared_lovd_vcf_url)
+
+
+@requires(DownloadStaticSharedLOVDData)
 class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(f"{self.cfg.output_dir}/sharedLOVD.sorted.hg38.vcf")
