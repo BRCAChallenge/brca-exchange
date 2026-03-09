@@ -31,7 +31,7 @@ backcall==0.1.0
 beautifulsoup4==4.8.2
 biocommons.seqrepo>=0.6.9
 biopython>=1.83
-bioutils==0.5.7
+bioutils==0.6.1
 bs4==0.0.1
 click==8.1.3
 coloredlogs>=15.0
@@ -45,8 +45,8 @@ docutils==0.16
 fake-useragent==0.1.11
 fastparquet>=2024.11.0  # Updated: pandas>=2.1.4 requires this version
 ga4gh.common==0.0.7
-ga4gh.vrs==2.1.4
-hgvs==1.5.4
+ga4gh.vrs==2.3.1
+hgvs==1.5.6
 humanfriendly>=9.1
 intervaltree==3.1.0
 ipython-genutils==0.2.0

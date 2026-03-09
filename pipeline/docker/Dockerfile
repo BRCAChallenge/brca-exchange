@@ -40,6 +40,10 @@ RUN pip install $(grep "^numpy" requirements.txt)
 RUN pip install $(grep "^cython" requirements.txt)
 RUN pip install -r requirements.txt -r test-requirements.txt
 
+# spliceai 1.3.1 (latest) uses pkg_resources which was removed from setuptools 71+.
+# Patch it to use importlib.metadata instead.
+RUN python3 -c "import pathlib; p = pathlib.Path('/usr/local/lib/python3.12/site-packages/spliceai/__init__.py'); src = p.read_text(); src = src.replace('from pkg_resources import get_distribution', 'try:\n    from pkg_resources import get_distribution\nexcept ImportError:\n    from importlib.metadata import distribution as get_distribution'); p.write_text(src)"
+
 # install vcf tools
 RUN wget https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz
 RUN tar zxf vcftools*.tar.gz
