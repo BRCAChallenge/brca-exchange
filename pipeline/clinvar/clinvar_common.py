@@ -378,13 +378,16 @@ class variationArchive:
             self.name = fullname
                                       
         #
-        # Look for the RCVAccession object.  There should be exactly one.
-        rcva = element.find("./ClassifiedRecord/RCVList/RCVAccession")
-        if rcva is None:
-            self.valid = False
-            return
-        self.referenceAssertion = referenceAssertion(rcva, debug=False)
-        if not self.referenceAssertion.valid:
+        # Look for the RCVAccession object.  There can be more than one.
+        self.referenceAssertion = None
+        rcvl = element.find("./ClassifiedRecord/RCVList")
+        if rcvl is not None:
+            for rcva in rcvl.iterfind("RCVAccession"):
+                thisReferenceAssertion = referenceAssertion(rcva, debug=False)
+                if thisReferenceAssertion.valid:
+                    self.referenceAssertion = thisReferenceAssertion
+                    break
+        if self.referenceAssertion is None:
             self.valid = False
             return
         
