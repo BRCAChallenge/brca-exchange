@@ -17,3 +17,4 @@ co_occurrence_lr	The likelihood ratio based on the frequency of co-occurrence be
 case_control_lr		The likelihood ratio based on case control analysis.
 product_of_lrs	The product of all of the likelihood ratios.
 db_id	Database IDentifier.
+comments	 Additional comments
