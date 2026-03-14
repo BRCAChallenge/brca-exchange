@@ -477,10 +477,10 @@ def genomic_hgvs(chr, pos, ref, alt, normalizer, hgvs_proc):
     return str(tmp_genomic_hgvs_38)
 
 
-def map_via_seqrepo(this_gene, genomic_hgvs_str, default_cdna, normalizer,
+def map_via_seqrepo(this_gene, genomic_hgvs_38, default_cdna, normalizer,
                     hgvs_proc, assembly_mapper_38, assembly_mapper_37, debug=True):
     try:
-        tmp_cdna_hgvs = normalizer.normalize(assembly_mapper_38.g_to_c(tmp_genomic_hgvs_38,
+        tmp_cdna_hgvs = normalizer.normalize(assembly_mapper_38.g_to_c(genomic_hgvs_38,
                                                                        default_cdna))
     except (hgvs.exceptions.HGVSInvalidIntervalError,
             hgvs.exceptions.HGVSUnsupportedOperationError):
