@@ -281,10 +281,11 @@ def handle_failed_hg37_translations(rows, var_objs_hg37, var_objs_hg37_failed, t
     return (var_objs_hg37, tmp_hgvs_hg37_values)
 
 
-def get_synonyms(gene_symbol, genomic_hgvs, target_transcripts, hdp, normalizer, assembly_mapper):
+def get_synonyms(gene_symbol, genomic_hgvs_string, target_transcripts, hdp, parser, normalizer, assembly_mapper):
     """ Determine other representations a variant may be known as """
 
     # calculate other representations wrt other accensions supported by the hgvs library
+    genomic_hgvs = parser.parse(genomic_hgvs_string) 
     synonyms = []
     for _, _, _, transcript, alt_ac, method in hdp.get_tx_for_gene(gene_symbol):
         if transcript in target_transcripts:
@@ -304,7 +305,7 @@ def _filter_and_extend_synonyms(synonyms: List[str], extra: List[str]) -> List[s
 
 def _merge_and_clean_synonyms(row: dict, new_synonyms):
     """ Merging with synonmys already determined from sources and cleaning up"""
-    orig_list = [s for s in row[SYNONYMS_COL].split(',') if s]  # filter away ''
+    orig_list = [s for s in row[SYNONYMS_COL] if s]  # filter away ''
     combined = set(orig_list + new_synonyms)
     list_sorted = sorted(list(combined))
     # remove redundant representations, which we are already included in other columns
@@ -478,7 +479,8 @@ def genomic_hgvs(chr, pos, ref, alt, normalizer, hgvs_proc):
 
 
 def map_via_seqrepo(this_gene, genomic_hgvs_38, default_cdna, normalizer,
-                    hgvs_proc, assembly_mapper_38, assembly_mapper_37, debug=True):
+                    hgvs_proc, assembly_mapper_38, assembly_mapper_37,
+                    chrom, debug=True):
     genomic_hgvs_38_obj = hgvs_proc.hgvs_parser.parse(genomic_hgvs_38)
     try:
         tmp_cdna_hgvs = normalizer.normalize(assembly_mapper_38.g_to_c(genomic_hgvs_38_obj,
@@ -494,7 +496,7 @@ def map_via_seqrepo(this_gene, genomic_hgvs_38, default_cdna, normalizer,
         if debug:
             print("No interval error!  cDNA", str(tmp_cdna_hgvs))
         pyhgvs_cdna = str(tmp_cdna_hgvs)
-        target_chrom_37 = hgvs_proc.contig_maps['GRCh37'][str(chrom_ac_dict[this_gene])]
+        target_chrom_37 = hgvs_proc.contig_maps['GRCh37'][chrom]
         tmp_genomic_hgvs_37 = normalizer.normalize(assembly_mapper_37.c_to_g(tmp_cdna_hgvs))
         genomic_coordinate_37 = str(tmp_genomic_hgvs_37)
         if debug:
@@ -553,19 +555,25 @@ def main():
             row[PYHGVS_GENOMIC_COORDINATE_38_COL] = genomic_hgvs_38
             if args.debug:
                 print("working on variant", row[PYHGVS_GENOMIC_COORDINATE_38_COL])
+            this_gene = row[GENE_SYMBOL_COL]
             if row[PYHGVS_GENOMIC_COORDINATE_37_COL] is None:
                 (row[PYHGVS_CDNA_COL], row[PYHGVS_GENOMIC_COORDINATE_37_COL], row[PYHGVS_PROTEIN_COL]) = \
                     map_via_seqrepo(row['Gene_Symbol'], genomic_hgvs_38,
-                                    cdna_default_ac_dict[row['Gene_Symbol']],
+                                    cdna_default_ac_dict[this_gene],
                                     genomic_normalizer, hgvs_proc,
-                                    am38, am37, debug=args.debug)
+                                    am38, am37, str(chrom_ac_dict[this_gene]),
+                                    debug=args.debug)
                 if args.debug:
-                    print("Updating synonyms")
+                    print("Updating synonyms via SeqRepo")
                 new_synonyms = get_synonyms(
-                    row['Gene_Symbol'], genomic_hgvs_38, syn_ac_dict[row['Gene_Symbol']], hdp, gn, am38)
+                    this_gene, genomic_hgvs_38, syn_ac_dict[this_gene], hdp,
+                    hp, genomic_normalizer, am38)
                 row[SYNONYMS_COL] = _merge_and_clean_synonyms(row, new_synonyms)
-
-            (row[PYHGVS_HG37_START_COL], row[PYHGVS_HG37_END_COL]) = genomic_hgvs_to_coords(row[PYHGVS_GENOMIC_COORDINATE_37_COL], hp)
+            if row[PYHGVS_GENOMIC_COORDINATE_37_COL]:
+                (row[PYHGVS_HG37_START_COL], row[PYHGVS_HG37_END_COL]) = genomic_hgvs_to_coords(row[PYHGVS_GENOMIC_COORDINATE_37_COL], hp)
+            else:
+                row[PYHGVS_HG37_START_COL] = None
+                row[PYHGVS_HG37_END_COL] = None
             processed_rows.append(row)
 
         with open(args.output, mode='w') as output_fp:
