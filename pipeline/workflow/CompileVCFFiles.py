@@ -642,8 +642,8 @@ class BuildAggregatedOutput(DefaultPipelineTask):
         args = ["python", "pseudonym_generator.py",
                 self.input().path,
                 self.output().path,
-                "--log-path", os.path.join(self.artifacts_dir, "pseudonym-generator.log"),
-                "--config-file", self.cfg.gene_config_path,
+                "--logpath", os.path.join(self.artifacts_dir, "pseudonym-generator.log"),
+                "--configfile", self.cfg.gene_config_path,
                 "--resources", brca_resources_dir]
 
         pipeline_utils.run_process(args)

@@ -228,8 +228,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Generate pseudonyms for BRCA variants")
     parser.add_argument('input', help="Input TSV file path")
     parser.add_argument('output', help="Output TSV file path")
-    parser.add_argument('--log-path', default='pseudonym_generator.log', help="Log file path")
-    parser.add_argument('--config-file', required=True, help="path to gene configuration file")
+    parser.add_argument('--logpath', default='pseudonym_generator.log', help="Log file path")
+    parser.add_argument('--configfile', required=True, help="path to gene configuration file")
     parser.add_argument('--resources', help="path to directory containing reference sequences")
     parser.add_argument('--debug', help="Turn on extra debugging info?",
                         action='store_true', default=False)
@@ -275,9 +275,9 @@ def map_via_seqrepo(this_gene, genomic_hgvs_38, default_cdna, normalizer,
 def main():
     args = parse_args()
     csv.field_size_limit(sys.maxsize)
-    utils.setup_logfile(args.log-path)
+    utils.setup_logfile(args.logpath)
 
-    config_df = config.load_config(args.config-file)
+    config_df = config.load_config(args.configfile)
     cdna_default_ac_dict = {r[config.SYMBOL_COL]: r[config.HGVS_CDNA_DEFAULT_AC] for _, r in config_df.iterrows()}
     syn_ac_dict = {r[config.SYMBOL_COL]: r[config.SYNONYM_AC_COL].split(';') for _, r in config_df.iterrows()}
     chrom_ac_dict = {r[config.SYMBOL_COL]: r[config.CHROM_COL] for _, r in config_df.iterrows()}
@@ -341,8 +341,10 @@ def main():
                 row[PYHGVS_HG37_END_COL] = None
             if row[PYHGVS_CDNA_COL]:
                 parts = row[PYHGVS_CDNA_COL].split(':')
-                row[REFERENCE_SEQUENCE_COL] = parts[0]
-                row[HGVS_CDNA_COL] = parts[1]
+                new_ref_seq = parts[0]
+                old_ref_seq = row[REFERENCE_SEQUENCE_COL]
+                if new_ref_seq.rsplit('.', 1)[0] == old_ref_seq.rsplit('.', 1)[0]:
+                    row[HGVS_CDNA_COL] = parts[1]
             processed_rows.append(row)
 
         with open(args.output, mode='w') as output_fp:
