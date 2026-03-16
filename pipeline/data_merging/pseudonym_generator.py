@@ -275,9 +275,9 @@ def map_via_seqrepo(this_gene, genomic_hgvs_38, default_cdna, normalizer,
 def main():
     args = parse_args()
     csv.field_size_limit(sys.maxsize)
-    utils.setup_logfile(args.logfile)
+    utils.setup_logfile(args.log-path)
 
-    config_df = config.load_config(args.configfile)
+    config_df = config.load_config(args.config-file)
     cdna_default_ac_dict = {r[config.SYMBOL_COL]: r[config.HGVS_CDNA_DEFAULT_AC] for _, r in config_df.iterrows()}
     syn_ac_dict = {r[config.SYMBOL_COL]: r[config.SYNONYM_AC_COL].split(';') for _, r in config_df.iterrows()}
     chrom_ac_dict = {r[config.SYMBOL_COL]: r[config.CHROM_COL] for _, r in config_df.iterrows()}
