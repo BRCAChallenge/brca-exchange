@@ -272,13 +272,29 @@ def map_via_seqrepo(this_gene, genomic_hgvs_38, default_cdna, normalizer,
     return pyhgvs_cdna, genomic_coordinate_37, protein
 
 
+def ensure_mane_transcript_cdna(row, mane_transcript, hgvs_proc, normalizer, am38):
+    """If the cDNA in row does not use the MANE transcript, remap using SeqRepo."""
+    if not row[PYHGVS_CDNA_COL] or not row[PYHGVS_CDNA_COL].startswith(mane_transcript):
+        genomic_hgvs_38_obj = hgvs_proc.hgvs_parser.parse(str(row[PYHGVS_GENOMIC_COORDINATE_38_COL]))
+        try:
+            cdna_hgvs = normalizer.normalize(am38.g_to_c(genomic_hgvs_38_obj, mane_transcript))
+            row[PYHGVS_CDNA_COL] = str(cdna_hgvs)
+            parts = row[PYHGVS_CDNA_COL].split(':')
+            row[REFERENCE_SEQUENCE_COL] = parts[0]
+            row[HGVS_CDNA_COL] = parts[1]
+        except (hgvs.exceptions.HGVSInvalidIntervalError,
+                hgvs.exceptions.HGVSUnsupportedOperationError):
+            logging.warning(
+                f"Could not remap {row[PYHGVS_GENOMIC_COORDINATE_38_COL]} to MANE transcript {mane_transcript}")
+
+
 def main():
     args = parse_args()
     csv.field_size_limit(sys.maxsize)
     utils.setup_logfile(args.logpath)
 
     config_df = config.load_config(args.configfile)
-    cdna_default_ac_dict = {r[config.SYMBOL_COL]: r[config.HGVS_CDNA_DEFAULT_AC] for _, r in config_df.iterrows()}
+    mane_transcript_dict = {r[config.SYMBOL_COL]: r[config.HGVS_CDNA_DEFAULT_AC] for _, r in config_df.iterrows()}
     syn_ac_dict = {r[config.SYMBOL_COL]: r[config.SYNONYM_AC_COL].split(';') for _, r in config_df.iterrows()}
     chrom_ac_dict = {r[config.SYMBOL_COL]: r[config.CHROM_COL] for _, r in config_df.iterrows()}
 
@@ -324,7 +340,7 @@ def main():
             if row[PYHGVS_GENOMIC_COORDINATE_37_COL] is None:
                 (row[PYHGVS_CDNA_COL], row[PYHGVS_GENOMIC_COORDINATE_37_COL], row[PYHGVS_PROTEIN_COL]) = \
                     map_via_seqrepo(row['Gene_Symbol'], genomic_hgvs_38,
-                                    cdna_default_ac_dict[this_gene],
+                                    mane_transcript_dict[this_gene],
                                     genomic_normalizer, hgvs_proc,
                                     am38, am37, str(chrom_ac_dict[this_gene]),
                                     debug=args.debug)
@@ -339,12 +355,7 @@ def main():
             else:
                 row[PYHGVS_HG37_START_COL] = None
                 row[PYHGVS_HG37_END_COL] = None
-            if row[PYHGVS_CDNA_COL]:
-                parts = row[PYHGVS_CDNA_COL].split(':')
-                new_ref_seq = parts[0]
-                old_ref_seq = row[REFERENCE_SEQUENCE_COL]
-                if new_ref_seq.rsplit('.', 1)[0] == old_ref_seq.rsplit('.', 1)[0]:
-                    row[HGVS_CDNA_COL] = parts[1]
+            ensure_mane_transcript_cdna(row, mane_transcript_dict[this_gene], hgvs_proc, genomic_normalizer, am38)
             processed_rows.append(row)
 
         with open(args.output, mode='w') as output_fp:
