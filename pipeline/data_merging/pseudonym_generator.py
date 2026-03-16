@@ -229,7 +229,7 @@ def parse_args():
     parser.add_argument('input', help="Input TSV file path")
     parser.add_argument('output', help="Output TSV file path")
     parser.add_argument('--logfile', default='pseudonym_generator.log', help="Log file path")
-    parser.add_argument('--configfile', required=True, help="path to gene configuration file")
+    parser.add_argument('--config-file', required=True, help="path to gene configuration file")
     parser.add_argument('--resources', help="path to directory containing reference sequences")
     parser.add_argument('--debug', help="Turn on extra debugging info?",
                         action='store_true', default=False)
