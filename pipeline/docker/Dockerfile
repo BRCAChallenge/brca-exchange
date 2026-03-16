@@ -1,5 +1,4 @@
-FROM python:3.9-bullseye
-
+FROM python:3.12-bookworm
 RUN chmod 1777 /tmp
 
 RUN apt-get update && apt-get install -y \
@@ -11,15 +10,12 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \
     liblzma-dev \
     pkg-config \
-    python3 \
-    python3-pip \
     python3-gdbm \
-    python-lzo \
     rsync \
     vim \
     wget \
     zlib1g-dev \
-    netcat
+    netcat-openbsd
 
 # Get the Docker binary
 RUN curl -fsSL get.docker.com -o get-docker.sh \
@@ -31,12 +27,16 @@ COPY pipeline/requirements.txt .
 COPY test-requirements.txt .
 
 # pip 20.3+ uses strict dependency resolver that causes biocommons/bioutils and hgvs/ipython errors
-RUN pip install pip==24.0
+# Using pip 24.3.1 for Python 3.12 compatibility
+RUN pip install --upgrade pip==24.3.1
+
+# install six first as it's a fundamental dependency for many packages
+RUN pip install $(grep "^six" requirements.txt)
 
 # install numpy first to avoid issues with bio python and bx-python (see also https://github.com/LUMC/vep2lovd/issues/1)
-RUN pip install $(grep numpy requirements.txt)
+RUN pip install $(grep "^numpy" requirements.txt)
 
-RUN pip install $(grep -i cython requirements.txt)
+RUN pip install $(grep "^cython" requirements.txt)
 RUN pip install -r requirements.txt -r test-requirements.txt
 
 # install vcf tools
@@ -64,7 +64,7 @@ RUN mkdir -p $res /files/data && chmod -R o+rwx /files
 RUN rm -r  /root/.cache
 
 ARG FORCE_REBUILD=0
-COPY . /opt/brca-exchange
+COPY . /opt/brca-exchange-kb
 
 ENV LUIGI_CONFIG_PATH="/opt/luigi_pipeline_credentials.cfg"
 
@@ -72,5 +72,5 @@ ARG IS_GIT_DIRTY="False"
 ARG GIT_COMMIT=""
 LABEL GitCommit=$GIT_COMMIT IsGitDirty=$IS_GIT_DIRTY
 
-CMD ["/opt/brca-exchange/pipeline/docker/run_luigi.sh"]
+CMD ["/opt/brca-exchange-kb/pipeline/docker/run_luigi.sh"]
 

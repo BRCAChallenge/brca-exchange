@@ -12,7 +12,7 @@ mkdir -p ${WDIR}
 
 
 CODE_BASE="${WDIR}/code"
-[ -d ${CODE_BASE} ] || git clone https://github.com/BRCAChallenge/brca-exchange.git ${CODE_BASE}
+[ -d ${CODE_BASE} ] || git clone https://github.com/BRCAChallenge/brca-exchange-kb.git ${CODE_BASE}
 cd ${CODE_BASE} && git checkout ${GIT_COMMIT}
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
