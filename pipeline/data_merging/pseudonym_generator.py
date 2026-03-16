@@ -272,9 +272,9 @@ def map_via_seqrepo(this_gene, genomic_hgvs_38, default_cdna, normalizer,
     return pyhgvs_cdna, genomic_coordinate_37, protein
 
 
-def ensure_mane_transcript_cdna(row, mane_transcript, hgvs_proc, normalizer, am38):
+def ensure_mane_transcript_cdna(row, mane_transcript, hgvs_proc, normalizer, am38, debug=False):
     """If the cDNA in row does not use the MANE transcript, remap using SeqRepo."""
-    if not row[PYHGVS_CDNA_COL] or not row[PYHGVS_CDNA_COL].startswith(mane_transcript):
+    if not row[PYHGVS_CDNA_COL] or not row[PYHGVS_CDNA_COL].startswith(mane_transcript) or row[REFERENCE_SEQUENCE_COL] is not mane_transcript:
         genomic_hgvs_38_obj = hgvs_proc.hgvs_parser.parse(str(row[PYHGVS_GENOMIC_COORDINATE_38_COL]))
         try:
             cdna_hgvs = normalizer.normalize(am38.g_to_c(genomic_hgvs_38_obj, mane_transcript))
@@ -286,6 +286,9 @@ def ensure_mane_transcript_cdna(row, mane_transcript, hgvs_proc, normalizer, am3
                 hgvs.exceptions.HGVSUnsupportedOperationError):
             logging.warning(
                 f"Could not remap {row[PYHGVS_GENOMIC_COORDINATE_38_COL]} to MANE transcript {mane_transcript}")
+            row[REFERENCE_SEQUENCE_COL] = mane_transcript
+            row[HGVS_CDNA_COL] = "-"
+            row[PYHGVS_CDNA_COL] = "-"
 
 
 def main():
@@ -335,7 +338,9 @@ def main():
         for row, genomic_hgvs_38 in zip(rows, hgvs_values):
             row[PYHGVS_GENOMIC_COORDINATE_38_COL] = genomic_hgvs_38
             if args.debug:
-                print("working on variant", row[PYHGVS_GENOMIC_COORDINATE_38_COL])
+                print("working on variant", row[PYHGVS_GENOMIC_COORDINATE_38_COL], "reference",
+                      row[REFERENCE_SEQUENCE_COL], "cDNA", row[HGVS_CDNA_COL],
+                      "allele registry", row[CA_ID_COL])
             this_gene = row[GENE_SYMBOL_COL]
             if row[PYHGVS_GENOMIC_COORDINATE_37_COL] is None:
                 (row[PYHGVS_CDNA_COL], row[PYHGVS_GENOMIC_COORDINATE_37_COL], row[PYHGVS_PROTEIN_COL]) = \
@@ -355,7 +360,8 @@ def main():
             else:
                 row[PYHGVS_HG37_START_COL] = None
                 row[PYHGVS_HG37_END_COL] = None
-            ensure_mane_transcript_cdna(row, mane_transcript_dict[this_gene], hgvs_proc, genomic_normalizer, am38)
+            ensure_mane_transcript_cdna(row, mane_transcript_dict[this_gene], hgvs_proc, genomic_normalizer,
+                                        am38, debug=args.debug)
             processed_rows.append(row)
 
         with open(args.output, mode='w') as output_fp:
