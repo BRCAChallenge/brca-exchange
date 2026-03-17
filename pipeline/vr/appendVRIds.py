@@ -49,7 +49,7 @@ def main(args):
     new_column_to_append = ["VR_ID"]
     output_header_row = input_header_row + new_column_to_append
     output_file.writerow(output_header_row)
-    hgvsIndex = input_header_row.index("Genomic_HGVS_38")
+    hgvsIndex = input_header_row.index("pyhgvs_Genomic_Coordinate_38")
     for variant in input_file:
         hgvs = variant[hgvsIndex]
         # Add empty data by default
