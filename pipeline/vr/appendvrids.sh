@@ -17,8 +17,18 @@ SEQ_REPO_DIR="${4:-/usr/local/share/seqrepo}"
     || ../utilities/launch_seqrepo.sh ${SEQ_REPO_DIR}
 
 
-# ...and wait for it to be available
-./wait-for localhost:5000 && echo " => ...seqrepo-rest-service is ready"
+# ...and wait for the HTTP endpoint to be ready (not just TCP port open)
+MAX_WAIT=60
+i=0
+until curl -sf http://localhost:5000/seqrepo/ping > /dev/null 2>&1; do
+    i=$((i + 1))
+    if [ $i -ge $MAX_WAIT ]; then
+        echo "Timed out waiting for seqrepo-rest-service to become ready" >&2
+        exit 1
+    fi
+    sleep 1
+done
+echo " => ...seqrepo-rest-service is ready"
 
 
 # ----------------------------------------------------
