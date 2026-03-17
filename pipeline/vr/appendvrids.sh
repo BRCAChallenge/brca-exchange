@@ -20,7 +20,7 @@ SEQ_REPO_DIR="${4:-/usr/local/share/seqrepo}"
 # ...and wait for the HTTP endpoint to be ready (not just TCP port open)
 MAX_WAIT=300
 i=0
-until curl -sf http://localhost:5000/seqrepo/ping > /dev/null 2>&1; do
+until curl -sf http://localhost:5000/seqrepo/1/ping > /dev/null 2>&1; do
     i=$((i + 1))
     if [ $i -ge $MAX_WAIT ]; then
         echo "Timed out waiting for seqrepo-rest-service to become ready after ${MAX_WAIT}s" >&2
