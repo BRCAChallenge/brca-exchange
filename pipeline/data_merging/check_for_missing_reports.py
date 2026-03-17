@@ -131,7 +131,7 @@ def configure_logging():
         logging_level = logging.CRITICAL
 
     log_file_path = os.path.join(ARGS.artifacts_dir, "missing_reports.log")
-    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level)
+    logging.basicConfig(filename=log_file_path, filemode="w", level=logging_level, force=True)
 
 
 def isEmpty(value):

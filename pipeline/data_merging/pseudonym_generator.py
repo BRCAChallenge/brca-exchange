@@ -313,6 +313,7 @@ def main():
         new_fieldnames = [
             PYHGVS_GENOMIC_COORDINATE_38_COL, PYHGVS_CDNA_COL, PYHGVS_GENOMIC_COORDINATE_37_COL,
             PYHGVS_HG37_START_COL, PYHGVS_HG37_END_COL, PYHGVS_PROTEIN_COL, CA_ID_COL,
+            GENOMIC_HGVS_HG38_COL, GENOMIC_HGVS_HG37_COL,
         ]
         rows = list(reader)
         output_fieldnames = reader.fieldnames + new_fieldnames
@@ -362,6 +363,8 @@ def main():
                 row[PYHGVS_HG37_END_COL] = None
             ensure_mane_transcript_cdna(row, mane_transcript_dict[this_gene], hgvs_proc, genomic_normalizer,
                                         am38, debug=args.debug)
+            row[GENOMIC_HGVS_HG38_COL] = row[PYHGVS_GENOMIC_COORDINATE_38_COL]
+            row[GENOMIC_HGVS_HG37_COL] = row[PYHGVS_GENOMIC_COORDINATE_37_COL]
             processed_rows.append(row)
 
         with open(args.output, mode='w') as output_fp:
