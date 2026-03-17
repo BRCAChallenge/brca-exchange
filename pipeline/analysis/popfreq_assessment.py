@@ -272,11 +272,14 @@ def analyze_variant(variant, coverage_v2, coverage_v3, flags_v2, flags_v3,
     # If it's observable and not a SNV, initialze to NO_CODE_NON_SNV
     # If it's not observable, initialize to FAIL_QC
     # If not observable and not a SNV, initialize to NO_CODE_NON_SNV
-    (observable_in_v2,
-     read_depth_v2) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
-                                        int(variant["pyhgvs_Hg37_End"]),
-                                        int(variant["Chr"]),coverage_v2,
-                                        debug=debug)
+    if variant["pyhgvs_Hg37_Start"] and variant["pyhgvs_Hg37_End"]:
+        (observable_in_v2,
+         read_depth_v2) = estimate_coverage(int(variant["pyhgvs_Hg37_Start"]),
+                                            int(variant["pyhgvs_Hg37_End"]),
+                                            int(variant["Chr"]),coverage_v2,
+                                            debug=debug)
+    else:
+        (observable_in_v2, read_depth_v2) = (False, 0)
     (observable_in_v3,
      read_depth_v3) = estimate_coverage(int(variant["Hg38_Start"]),
                                         int(variant["Hg38_End"]),
