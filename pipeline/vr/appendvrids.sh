@@ -14,7 +14,7 @@ SEQ_REPO_DIR="${4:-/usr/local/share/seqrepo}"
 # ----------------------------------------------------
 
 [ `docker ps -f name="seqrepo-rest-service" | wc -l` -gt 1 ] \
-    || ../utilities/launch_seqrepo.sh ${SEQ_REPO_DIR}
+    || ../utilities/launch_seqrepo.sh ${SEQ_REPO_DIR}/latest
 
 
 # ...and wait for the HTTP endpoint to be ready (not just TCP port open)
