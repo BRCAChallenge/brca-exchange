@@ -15,7 +15,6 @@ from hgvs.parser import Parser
 
 from common import config, utils
 from common.hgvs_utils import HgvsWrapper
-from common.variant_utils import VCFVariant
 
 CA_ID_COL = 'CA_ID'
 CLINGEN_ALLELE_REGISTRY_ENDPOINT = "http://reg.clinicalgenome.org/alleles?file=hgvs"
@@ -236,12 +235,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def genomic_hgvs(chr, pos, ref, alt, normalizer, hgvs_proc):
-    this_variant = VCFVariant(chr, pos, ref, alt)
-    tmp_genomic_hgvs_38 = this_variant.to_hgvs_obj(hgvs_proc.contig_maps[HgvsWrapper.GRCh38_Assem])
-    normalizer.normalize(tmp_genomic_hgvs_38)
-    return str(tmp_genomic_hgvs_38)
-
 
 def map_via_seqrepo(this_gene, genomic_hgvs_38, default_cdna, normalizer,
                     hgvs_proc, assembly_mapper_38, assembly_mapper_37,
@@ -319,7 +312,7 @@ def main():
         output_fieldnames = reader.fieldnames + new_fieldnames
 
         hgvs_values = [
-            genomic_hgvs(row[CHR_COL], int(row[POS_COL]), row[REF_COL], row[ALT_COL], genomic_normalizer, hgvs_proc)
+            hgvs_proc.genomic_hgvs(row[CHR_COL], int(row[POS_COL]), row[REF_COL], row[ALT_COL])
             for row in rows
         ]
 

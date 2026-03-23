@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from data_merging.bayesdel import convert_merged_variants_to_vcf
+from insilico import convert_merged_variants_to_vcf
 from common import vcf_files_helper
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'test_files')

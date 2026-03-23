@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from click.testing import CliRunner
 
-from data_merging.bayesdel import add_bayesdel_scores_to_built_file
+from insilico import add_bayesdel_scores_to_built_file
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'test_files')
 

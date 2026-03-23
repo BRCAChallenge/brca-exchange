@@ -7,10 +7,10 @@ from luigi.util import requires
 
 import workflow.pipeline_utils as pipeline_utils
 from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_dir, analysis_method_dir
-from workflow import bayesdel_processing
+from workflow import insilico_processing
 
 
-@requires(bayesdel_processing.AddBayesdelScores)
+@requires(insilico_processing.AddBayesdelScores)
 class DownloadResources(DefaultPipelineTask):
     def output(self):
         return(luigi.LocalTarget(Path(self.cfg.output_dir) / 'release' / 'artifacts' / 'analysis'))
@@ -39,7 +39,7 @@ class runPopfreqAssessment(DefaultPipelineTask):
     def run(self):
         os.chdir(analysis_method_dir)
         args = ["python", "popfreq_assessment.py",
-                "--input", bayesdel_processing.AddBayesdelScores().output().path,
+                "--input", insilico_processing.AddBayesdelScores().output().path,
                 "--data_dir", DownloadResources().output().path,
                 "--output", self.output().path]
         pipeline_utils.run_process(args)

@@ -15,6 +15,10 @@ import shutil
 import subprocess
 import pysam
 
+from common.hgvs_utils import HgvsWrapper
+
+HGVS_38_COL = 'pyhgvs_Genomic_Coordinate_38'
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -39,9 +43,10 @@ def parse_args():
 
 
 def variant_id_string(record):
-    variant = "%s:%s:%s:%s" % (record.chrom, str(record.pos),
-                               record.ref, record.alts)
-    return(variant)
+    if HGVS_38_COL in record.info:
+        return record.info[HGVS_38_COL]
+    return HgvsWrapper.get_instance().genomic_hgvs(
+        record.chrom, record.pos, record.ref, record.alts[0])
     
 
 def list_all_variants_in_vcf(this_vcf):

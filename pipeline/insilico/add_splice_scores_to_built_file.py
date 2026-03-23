@@ -2,6 +2,7 @@ import io
 import os
 import click
 import pandas as pd
+from common.hgvs_utils import HgvsWrapper
 
 
 coord_col = 'genomics_coord'
@@ -53,10 +54,11 @@ def spliceai_results_as_df(vcf):
                                    left_index=True, right_index=True)
 
     # calculate a coordinate representation to join with built_tsv
-    df_ret[coord_col] = 'chr' + df_ret.iloc[:, 0].astype(str) + ":g." \
-        + df_ret.iloc[:, 1].astype(
-            str) + ':' + df_ret.iloc[:, 3].astype(
-                str) + ">" + df_ret.iloc[:, 4].astype(str)
+    hgvs_proc = HgvsWrapper.get_instance()
+    df_ret[coord_col] = df_ret.apply(
+        lambda row: hgvs_proc.genomic_hgvs(str(row.iloc[0]), row.iloc[1], row.iloc[3], row.iloc[4]),
+        axis=1
+    )
 
     # calculate result, which is the maximum of the 4 scores
     df_ret['DS_AG_spliceAI'] = pd.to_numeric(df_ret['DS_AG_spliceAI'], errors='coerce')
