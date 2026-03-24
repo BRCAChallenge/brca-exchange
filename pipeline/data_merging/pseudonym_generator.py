@@ -204,10 +204,11 @@ def get_synonyms(gene_symbol, genomic_hgvs_string, target_transcripts, hdp, pars
     return list({str(s) for s in synonyms}) # making sure, every representation appears only once
 
 
-def _filter_and_extend_synonyms(synonyms: List[str], extra: List[str]) -> List[str]:
+def _filter_and_extend_synonyms(synonyms_str: str, extra: List[str]) -> List[str]:
     """Remove NM_/NP_ accession entries from synonyms, then append extra synonyms."""
+    synonyms = ','.split(synonyms_str)
     filtered = [s for s in synonyms if not (s.startswith('NM_') or s.startswith('NP_'))]
-    return filtered + extra
+    return ','.join(filtered + extra)
 
 
 def _merge_and_clean_synonyms(row: dict, new_synonyms):

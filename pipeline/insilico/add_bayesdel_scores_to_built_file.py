@@ -2,8 +2,9 @@ import click
 import pandas as pd
 
 from common import vcf_files_helper
+from common.hgvs_utils import HgvsWrapper
 
-HGVS_38_COL = 'pyhgvs_Genomic_Coordinate_38'
+coord_col = 'genomics_coord'
 VCF_INFO_COL = 7
 VARS_OF_INTEREST = ["BayesDel_nsfp33a_noAF"]
 
@@ -33,7 +34,21 @@ def victor_results_as_df(path):
     info_dict = victor_vcf_df.iloc[:, VCF_INFO_COL].str.split(';').apply(
         lambda l: {s.split('=')[0]: '='.join(s.split('=')[1:]) for s in l})
 
-    return pd.DataFrame.from_records(info_dict.values, index=info_dict.index)[VARS_OF_INTEREST + [HGVS_38_COL]]
+    # generating dataframe out of dict, one column per variable
+    df_victor_props = pd.DataFrame.from_records(info_dict.values, index=info_dict.index)[VARS_OF_INTEREST]
+
+    # join back to vcf dataframe
+    df_ret = victor_vcf_df.merge(df_victor_props, how='inner', left_index=True, right_index=True)
+
+    # calculate a coordinate representation to join with built_tsv
+    hgvs_proc = HgvsWrapper.get_instance()
+    df_ret[coord_col] = df_ret.apply(
+        lambda row: hgvs_proc.genomic_hgvs(str(row.iloc[0]), row.iloc[1], row.iloc[3], row.iloc[4]),
+        axis=1
+    )
+
+    # dropping VCF columns, leaving columns for variable of interest + join field
+    return df_ret.drop(columns=[c for c in range(0, VCF_INFO_COL + 1)])
 
 
 @click.command()
@@ -44,7 +59,9 @@ def main(victor_file, built_tsv, output):
     df_victor = victor_results_as_df(victor_file)
     df = pd.read_csv(built_tsv, sep='\t', keep_default_na=False)
 
-    df.merge(df_victor, on=HGVS_38_COL, how='left').to_csv(output, sep='\t', index=False, na_rep='-')
+    df.merge(df_victor, left_on='pyhgvs_Genomic_Coordinate_38', right_on=coord_col, how='left') \
+      .drop(columns=[coord_col]) \
+      .to_csv(output, sep='\t', index=False, na_rep='-')
 
 
 if __name__ == "__main__":
