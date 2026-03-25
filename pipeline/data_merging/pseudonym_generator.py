@@ -1,10 +1,13 @@
 import argparse
+import copy
 import csv
 import logging
 import re
 import sys
 import time
 from typing import Iterable, List, Optional
+
+from pyliftover import LiftOver
 
 import requests
 import hgvs.dataproviders.uta
@@ -188,6 +191,69 @@ def genomic_hgvs_to_coords(hgvs_string: str, parser: Parser = None) -> tuple:
         return None, None
 
 
+def liftover_hgvs_38_to_37(hgvs_38_string: str, hp: Parser, contig_maps: dict, lo: LiftOver) -> Optional[str]:
+    """Use pyliftover to lift a GRCh38 genomic HGVS string to GRCh37/hg19.
+
+    Used as a fallback for large structural variants that cannot be mapped via
+    transcript coordinates. Parses the GRCh38 HGVS string to derive chromosome
+    and position, lifts via pyliftover, and returns a GRCh37 genomic HGVS string.
+
+    Args:
+        hgvs_38_string: A GRCh38 genomic HGVS string with NC_ accession.
+        hp: An hgvs Parser instance.
+        contig_maps: dict with 'GRCh38' and 'GRCh37' sub-dicts mapping
+                     chromosome names to RefSeq accessions.
+        lo: A pyliftover LiftOver instance configured for hg38 -> hg19.
+
+    Returns:
+        A GRCh37 genomic HGVS string, or None if liftover fails.
+    """
+    try:
+        var = hp.parse(hgvs_38_string)
+    except HGVSError as e:
+        logging.warning(f"liftover_hgvs_38_to_37: could not parse '{hgvs_38_string}': {e}")
+        return None
+
+    # Resolve chromosome name from GRCh38 accession
+    ac_to_chr = {ac: name for name, ac in contig_maps['GRCh38'].items()}
+    chrom = ac_to_chr.get(var.ac)
+    if not chrom:
+        logging.warning(f"liftover_hgvs_38_to_37: no chromosome found for accession {var.ac}")
+        return None
+
+    # Lift start position (HGVS is 1-based; pyliftover expects 0-based)
+    # pyliftover uses UCSC-style chromosome names (e.g. 'chr13'), while
+    # contig_maps uses bare numbers (e.g. '13'), so we add/strip the prefix.
+    chrom_ucsc = 'chr' + chrom
+    start_38 = int(str(var.posedit.pos.start)) - 1
+    lifted = lo.convert_coordinate(chrom_ucsc, start_38)
+    if not lifted:
+        logging.warning(f"liftover_hgvs_38_to_37: pyliftover could not map {chrom_ucsc}:{start_38 + 1}")
+        return None
+
+    lifted_chrom_ucsc, lifted_start_0based, _, _ = lifted[0]
+    lifted_start = lifted_start_0based + 1  # convert back to 1-based
+
+    # Preserve the original variant span for the end position
+    span = int(str(var.posedit.pos.end)) - int(str(var.posedit.pos.start))
+    lifted_end = lifted_start + span
+
+    # Strip 'chr' prefix to match contig_maps key format, then look up GRCh37 accession
+    lifted_chrom = lifted_chrom_ucsc.replace('chr', '', 1)
+    grch37_ac = contig_maps['GRCh37'].get(lifted_chrom)
+    if not grch37_ac:
+        logging.warning(f"liftover_hgvs_38_to_37: no GRCh37 accession for {lifted_chrom}")
+        return None
+
+    # Build GRCh37 HGVS string by updating accession and positions
+    var_37 = copy.deepcopy(var)
+    var_37.ac = grch37_ac
+    var_37.posedit.pos.start.base = lifted_start
+    var_37.posedit.pos.end.base = lifted_end
+
+    return str(var_37)
+
+
 def get_synonyms(gene_symbol, genomic_hgvs_string, target_transcripts, hdp, parser, normalizer, assembly_mapper):
     """ Determine other representations a variant may be known as """
 
@@ -206,9 +272,12 @@ def get_synonyms(gene_symbol, genomic_hgvs_string, target_transcripts, hdp, pars
 
 def _filter_and_extend_synonyms(synonyms_str: str, extra: List[str]) -> List[str]:
     """Remove NM_/NP_ accession entries from synonyms, then append extra synonyms."""
-    synonyms = ','.split(synonyms_str)
-    filtered = [s for s in synonyms if not (s.startswith('NM_') or s.startswith('NP_'))]
-    return ','.join(filtered + extra)
+    if synonyms_str:
+        synonyms = ','.split(synonyms_str)
+        filtered = [s for s in synonyms if not (s.startswith('NM_') or s.startswith('NP_'))]
+        return ','.join(filtered + extra)
+    else:
+        return ','.join(extra)
 
 
 def _merge_and_clean_synonyms(row: dict, new_synonyms):
@@ -301,6 +370,7 @@ def main():
     am38 = AssemblyMapper(hdp, assembly_name="GRCh38", alt_aln_method="splign", normalize=True)
     am37 = AssemblyMapper(hdp, assembly_name="GRCh37", alt_aln_method="splign", normalize=True)
     hgvs_proc = HgvsWrapper()
+    lo = LiftOver('hg38', 'hg19')
 
     with open(args.input, 'r') as input_fp:
         reader = csv.DictReader(input_fp, delimiter='\t')
@@ -353,8 +423,13 @@ def main():
             if row[PYHGVS_GENOMIC_COORDINATE_37_COL]:
                 (row[PYHGVS_HG37_START_COL], row[PYHGVS_HG37_END_COL]) = genomic_hgvs_to_coords(row[PYHGVS_GENOMIC_COORDINATE_37_COL], hp)
             else:
-                row[PYHGVS_HG37_START_COL] = None
-                row[PYHGVS_HG37_END_COL] = None
+                row[PYHGVS_GENOMIC_COORDINATE_37_COL] = liftover_hgvs_38_to_37(
+                    row[PYHGVS_GENOMIC_COORDINATE_38_COL], hp, hgvs_proc.contig_maps, lo)
+                if row[PYHGVS_GENOMIC_COORDINATE_37_COL]:
+                    (row[PYHGVS_HG37_START_COL], row[PYHGVS_HG37_END_COL]) = genomic_hgvs_to_coords(row[PYHGVS_GENOMIC_COORDINATE_37_COL], hp)
+                else:
+                    row[PYHGVS_HG37_START_COL] = None
+                    row[PYHGVS_HG37_END_COL] = None
             ensure_mane_transcript_cdna(row, mane_transcript_dict[this_gene], hgvs_proc, genomic_normalizer,
                                         am38, debug=args.debug)
             row[GENOMIC_HGVS_HG38_COL] = row[PYHGVS_GENOMIC_COORDINATE_38_COL]
