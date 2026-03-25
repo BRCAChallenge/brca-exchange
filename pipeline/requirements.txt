@@ -66,6 +66,7 @@ prompt-toolkit>=3.0.41,<3.1.0
 psycopg2-binary>=2.9.9
 ptyprocess==0.6.0
 pyBigWig==0.3.17
+pyliftover==0.4.1
 pyee==7.0.1
 Pygments>=2.11.0  # Updated for ipython>=8.20.0 compatibility
 pyppeteer==0.0.25
