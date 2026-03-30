@@ -10,6 +10,7 @@ import subprocess
 import time
 
 from ga4gh.core import sha512t24u, ga4gh_digest, ga4gh_identify, ga4gh_serialize
+from common.hgvs_utils import HgvsWrapper
 from ga4gh.vrs import __version__, models, normalize
 from ga4gh.vrs.dataproxy import SeqRepoRESTDataProxy
 from ga4gh.vrs.extras.translator import AlleleTranslator
@@ -49,9 +50,13 @@ def main(args):
     new_column_to_append = ["VR_ID"]
     output_header_row = input_header_row + new_column_to_append
     output_file.writerow(output_header_row)
-    hgvsIndex = input_header_row.index("pyhgvs_Genomic_Coordinate_38")
+    chrIndex = input_header_row.index("Chr")
+    posIndex = input_header_row.index("Pos")
+    refIndex = input_header_row.index("Ref")
+    altIndex = input_header_row.index("Alt")
+    hgvs_wrapper = HgvsWrapper.get_instance()
     for variant in input_file:
-        hgvs = variant[hgvsIndex]
+        hgvs = hgvs_wrapper.genomic_hgvs(variant[chrIndex], int(variant[posIndex]), variant[refIndex], variant[altIndex])
         # Add empty data by default
         variant.append('-')
         if not is_empty(hgvs):
