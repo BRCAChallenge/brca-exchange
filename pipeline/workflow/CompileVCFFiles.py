@@ -639,10 +639,10 @@ class BuildAggregatedOutput(DefaultPipelineTask):
         brca_resources_dir = self.cfg.resources_dir
         os.chdir(data_merging_method_dir)
 
-        args = ["python", "pseudonym_generator.py",
+        args = ["python", "brca_pseudonym_generator.py",
                 self.input().path,
                 self.output().path,
-                "--logpath", os.path.join(self.artifacts_dir, "pseudonym-generator.log"),
+                "--logpath", os.path.join(self.artifacts_dir, "brca_pseudonym_generator.log"),
                 "--configfile", self.cfg.gene_config_path,
                 "--resources", brca_resources_dir]
 
