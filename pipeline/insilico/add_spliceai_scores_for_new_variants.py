@@ -43,8 +43,6 @@ def parse_args():
 
 
 def variant_id_string(record):
-    if HGVS_38_COL in record.info:
-        return record.info[HGVS_38_COL]
     return HgvsWrapper.get_instance().genomic_hgvs(
         record.chrom, record.pos, record.ref, record.alts[0])
     

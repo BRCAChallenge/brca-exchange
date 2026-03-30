@@ -9,13 +9,8 @@ HGVS_38_COL = 'pyhgvs_Genomic_Coordinate_38'
 
 def _row_to_vcf_cols(row):
     hgvs_proc = HgvsWrapper.get_instance()
-    hgvs_str = row.get(HGVS_38_COL)
-    if pd.notna(hgvs_str) and hgvs_str not in ('', '-'):
-        vcf_id = hgvs_str
-        v = hgvs_proc.genomic_hgvs_to_vcf(hgvs_str)
-    else:
-        vcf_id = hgvs_proc.genomic_hgvs(row['Chr'], int(row['Pos']), row['Ref'], row['Alt'])
-        v = hgvs_proc.genomic_hgvs_to_vcf(vcf_id)
+    vcf_id = hgvs_proc.genomic_hgvs(row['Chr'], int(row['Pos']), row['Ref'], row['Alt'])
+    v = hgvs_proc.genomic_hgvs_to_vcf(vcf_id)
     return (v.chr, v.pos, vcf_id, v.ref, v.alt)
 
 

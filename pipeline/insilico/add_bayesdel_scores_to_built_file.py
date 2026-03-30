@@ -59,7 +59,12 @@ def main(victor_file, built_tsv, output):
     df_victor = victor_results_as_df(victor_file)
     df = pd.read_csv(built_tsv, sep='\t', keep_default_na=False)
 
-    df.merge(df_victor, left_on='pyhgvs_Genomic_Coordinate_38', right_on=coord_col, how='left') \
+    hgvs_proc = HgvsWrapper.get_instance()
+    df[coord_col] = df.apply(
+        lambda row: hgvs_proc.genomic_hgvs(str(row['Chr']), int(row['Pos']), row['Ref'], row['Alt']),
+        axis=1
+    )
+    df.merge(df_victor, on=coord_col, how='left') \
       .drop(columns=[coord_col]) \
       .to_csv(output, sep='\t', index=False, na_rep='-')
 
