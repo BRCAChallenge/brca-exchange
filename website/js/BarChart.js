@@ -1,9 +1,9 @@
 'use strict';
 
-var React = require('react'),
-    _ = require('lodash'),
-    Highcharts = require('highcharts'),
-    Chart = require('./Chart');
+import React from 'react';
+import _ from 'lodash';
+import Highcharts from 'highcharts';
+import Chart from './Chart';
 
 require('highcharts/modules/broken-axis')(Highcharts);
 
@@ -91,14 +91,18 @@ function pointBreakColumn(e) {
     }
 }
 
-var BarChart = React.createClass({
+class BarChart extends React.Component {
+    constructor(props) {
+	super(props);
+	this.chartRef = React.createRef();
+    }
     render() {
         var options = _.merge({}, defaultOptions, this.props.options);
-        return <Chart ref={"chart"} container={this.props.container} options={options} />;
-    },
-    getChart() {
-        return this.refs.chart.chart;
+        return <Chart ref={this.chartRef} container={this.props.container} options={options} />;
     }
-});
+    getChart() {
+        return this.chartRef.current?.chart;
+    }
+}
 
-module.exports = BarChart;
+export default BarChart;

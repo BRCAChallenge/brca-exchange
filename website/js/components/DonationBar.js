@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-const DonationBar = React.createClass({
+class DonationBar extends React.PureComponent {
     render() {
         return (
         	<div className="donation-bar">
@@ -14,6 +14,6 @@ const DonationBar = React.createClass({
         	</div>
         );
     }
-});
+}
 
 export default DonationBar;

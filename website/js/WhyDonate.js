@@ -1,16 +1,13 @@
 /*eslint-env browser */
 'use strict';
 
-const React = require('react');
-const RawHTML = require('./RawHTML');
-const {Grid, Row, Col, Button} = require('react-bootstrap');
-const {State, Link} = require('react-router');
+import React from 'react';
+import RawHTML from './RawHTML';
+import { Container as Grid, Row, Col, Button} from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 const content = require('./content');
 
-const WhyDonate = React.createClass({
-    mixins: [State],
-
-
+class WhyDonate extends React.Component {
     render() {
         return (
             <Grid id="main-grid" className="help-page">
@@ -18,7 +15,7 @@ const WhyDonate = React.createClass({
                     <Col smOffset={1} sm={10}>
                         <RawHTML html={content.pages.whyDonate} />
                         <h3 className="centered margin-top-forty">Will you help us improve genetic data and variant interpretations worldwide by donating today?</h3>
-                        <Button bsStyle="primary" className="center-block donate-button" onClick={()=> window.open("https://secure.ucsc.edu/s/1069/bp18/interior.aspx?sid=1069&gid=1001&pgid=780&cid=1749&dids=1004", "_blank")}>
+                        <Button variant="primary" className="d-block mx-auto donate-button" onClick={()=> window.open("https://secure.ucsc.edu/s/1069/bp18/interior.aspx?sid=1069&gid=1001&pgid=780&cid=1749&dids=1004", "_blank")}>
                             Donate Now
                         </Button>
                         <p className="centered small">
@@ -45,6 +42,6 @@ const WhyDonate = React.createClass({
             </Grid>
         );
     }
-});
+}
 
-module.exports = WhyDonate;
+export default WhyDonate;

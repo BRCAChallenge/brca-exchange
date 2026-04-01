@@ -2,20 +2,16 @@
 'use strict';
 
 const React = require('react');
-const {State} = require('react-router');
-const RawHTML = require('./RawHTML');
-const {Grid, Row, Col} = require('react-bootstrap');
+import RawHTML from './RawHTML';
+import  { Container, Row, Col } from 'react-bootstrap';
 const content = require('./content');
 
-const FundraisingDetails = React.createClass({
-    mixins: [State],
-
-
+class FundraisingDetails extends React.PureComponent {
     render() {
         return (
-            <Grid id="main-grid" className="help-page fundraising-details">
+            <Container id="main-grid" className="help-page fundraising-details">
                 <Row>
-                    <Col smOffset={1} sm={10}>
+                    <Col sm={{ span: 10, offset: 1}}>
                         <RawHTML html={content.pages.fundraisingDetails} />
                         <p className="small margin-top-forty"><sup>1 </sup>“<a href="https://www.cdc.gov/mmwr/volumes/66/ss/ss6615a1.htm">
                             BRCA Genetic Testing and Receipt of Preventive Interventions Among Women Aged 18–64 Years with
@@ -36,9 +32,9 @@ const FundraisingDetails = React.createClass({
                         </p>
                     </Col>
                 </Row>
-            </Grid>
+            </Container>
         );
     }
-});
+}
 
-module.exports = FundraisingDetails;
+export default FundraisingDetails;

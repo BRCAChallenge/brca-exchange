@@ -3,37 +3,39 @@
 'use strict';
 
 import React from "react";
-import {Panel} from 'react-bootstrap';
+import { Card, Collapse } from 'react-bootstrap';
 import util from '../util';
 import slugify from '../slugify';
-import {VariantSubmitter} from "./VariantSubmitter";
-
+import { VariantSubmitter } from "./VariantSubmitter";
 import GroupHelpButton from './GroupHelpButton';
 
 export default class SourceReportsTile extends React.Component {
     constructor(props) {
         super(props);
 
+        // seed group collapsed/expanded from localStorage (mirrors old defaultExpanded)
+        const groupTitle = `source-panel-${props.sourceName}`;
+        const defaultExpanded = localStorage.getItem("collapse-group_" + groupTitle) !== "true";
+
         this.state = {
-            reportExpanded: this.defaultReportExpansions()
+            reportExpanded: this.defaultReportExpansions(),
+            groupOpen: defaultExpanded
         };
 
         this.reportToggled = this.reportToggled.bind(this);
         this.setAllReportExpansion = this.setAllReportExpansion.bind(this);
+        this.toggleGroupOpen = this.toggleGroupOpen.bind(this);
     }
 
     defaultReportExpansions() {
         // keep track of how many non-enigma/bic entries we've seen
-        // (not a great solution b/c it introduces side effects into the map() below...)
         let nonEnigmaBics = 0;
 
-        // put it in a temp b/c we may need to re-sort it
-        // note that this is necessary because the order in which we process reports matters
+        // temp because we may need to re-sort it
         let submissions = this.props.submissions;
 
         // sort the submissions if this source specifies a sort function
         if (this.props.reportBinding.sortBy) {
-            // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
             submissions = submissions.concat().sort(this.props.reportBinding.sortBy);
         }
 
@@ -49,21 +51,18 @@ export default class SourceReportsTile extends React.Component {
             );
 
             if (!isEnigmaOrBic) {
-                // we only really care about the first, but this is the cleanest way to do this
-                // with a single var
                 nonEnigmaBics += 1;
             }
 
             // always collapse ENIGMA and BIC submissions.
             // show all items expanded if there are only a few of them.
             // otherwise, expand the first non-enigma/bic elem by default, but nothing else.
-            return ( !isEnigmaOrBic ) && (this.props.submissions.length <= 3 || nonEnigmaBics === 1);
+            return (!isEnigmaOrBic) && (this.props.submissions.length <= 3 || nonEnigmaBics === 1);
         });
     }
 
     setAllReportExpansion(e, newExpansion) {
         e.stopPropagation();
-
         this.setState({
             reportExpanded: Array.from({ length: this.props.submissions.length }, () => newExpansion)
         });
@@ -75,6 +74,14 @@ export default class SourceReportsTile extends React.Component {
             reportExpanded: pstate.reportExpanded.map((x, j) => (idx === j) ? !x : x)
         }));
     };
+
+    toggleGroupOpen(event) {
+        const groupTitle = `source-panel-${this.props.sourceName}`;
+        if (this.props.onChangeGroupVisibility) {
+            this.props.onChangeGroupVisibility(groupTitle, event);
+        }
+        this.setState(prev => ({ groupOpen: !prev.groupOpen }));
+    }
 
     render() {
         // put it in a temp b/c we're going to resort it
@@ -89,12 +96,10 @@ export default class SourceReportsTile extends React.Component {
 
         // filter out all old submissions
         let filteredSubmissions = submissions.filter(submission => submission.Data_Release.id === latestReleaseID);
-
         submissions = filteredSubmissions;
 
         // sort the submissions if this source specifies a sort function
         if (this.props.reportBinding.sortBy) {
-            // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
             submissions = submissions.concat().sort(this.props.reportBinding.sortBy);
         }
 
@@ -111,8 +116,13 @@ export default class SourceReportsTile extends React.Component {
 
             return (
                 <VariantSubmitter
-                    key={submissionData.id} idx={idx} submitter={submitterName} source={this.props.sourceName}
-                    reportBinding={this.props.reportBinding} cols={formattedCols} data={submissionData}
+                    key={submissionData.id}
+                    idx={idx}
+                    submitter={submitterName}
+                    source={this.props.sourceName}
+                    reportBinding={this.props.reportBinding}
+                    cols={formattedCols}
+                    data={submissionData}
                     hideEmptyItems={this.props.hideEmptyItems}
                     onReportToggled={this.reportToggled}
                     relayoutGrid={this.props.relayoutGrid}
@@ -127,54 +137,65 @@ export default class SourceReportsTile extends React.Component {
         const groupTitle = `source-panel-${this.props.sourceName}`;
 
         return (
-            <div key={`group_collection-${groupTitle}`} className={`variant-detail-group variant-submitter-group ${slugify(this.props.sourceName)}-submitter`}>
-                <Panel
-                    collapsible={true}
-                    defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
-                >
-                    <Panel.Heading>
-                        <Panel.Title componentClass="h3">
-                            <Panel.Toggle componentClass="a" className="title"
-                                onClick={(event) => this.props.onChangeGroupVisibility(groupTitle, event)}
-                            >
-                                {this.props.groupTitle}
-                            </Panel.Toggle>
+            <div
+                key={`group_collection-${groupTitle}`}
+                className={`variant-detail-group variant-submitter-group ${slugify(this.props.sourceName)}-submitter`}
+            >
+                <Card className="mb-3 shadow">
+                    <Card.Header as="div" className="d-flex align-items-center fw-bold">
+                        <span
+                            role="button"
+                            className="title text-decoration-none flex-grow-1"
+                            onClick={this.toggleGroupOpen}
+                            aria-expanded={this.state.groupOpen}
+                        >
+                            {this.props.groupTitle}
+                        </span>
 
-                            <a title='collapse all reports'
-                                className="toggle-subfields"
-                                onClick={(event) => this.setAllReportExpansion(event, false)}
-                                style={{cursor: 'pointer', marginRight: '10px'}}>
-                                <i className="fa fa-angle-double-up" aria-hidden="true" />
-                            </a>
+                        <span
+                            title='collapse all reports'
+                            className="toggle-subfields"
+                            onClick={(event) => this.setAllReportExpansion(event, false)}
+                            style={{ cursor: 'pointer', marginRight: '10px' }}
+                        >
+                            <i className="fa fa-angle-double-up" aria-hidden="true" />
+                        </span>
 
-                            <a title='expand all reports'
-                                className="toggle-subfields"
-                                onClick={(event) => this.setAllReportExpansion(event, true)}
-                                style={{cursor: 'pointer'}}>
-                                <i className="fa fa-angle-double-down" aria-hidden="true" />
-                            </a>
+                        <span
+                            title='expand all reports'
+                            className="toggle-subfields"
+                            onClick={(event) => this.setAllReportExpansion(event, true)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            <i className="fa fa-angle-double-down" aria-hidden="true" />
+                        </span>
 
-                            {
-                                this.props.helpSection &&
-                                <GroupHelpButton group={this.props.helpSection}
-                                    onClick={(event) => {
-                                        this.props.showHelp(event, this.props.helpSection);
-                                        return true;
-                                    }}
-                                />
-                            }
-                        </Panel.Title>
-                    </Panel.Heading>
-                    <Panel.Collapse
+                        {
+                            this.props.helpSection &&
+                            <GroupHelpButton
+                                group={this.props.helpSection}
+                                onClick={(event) => {
+                                    this.props.showHelp(event, this.props.helpSection);
+                                    return true;
+                                }}
+                            />
+                        }
+                    </Card.Header>
+
+                    <Collapse
+                        in={this.state.groupOpen}
                         onEntered={this.props.relayoutGrid}
                         onExited={this.props.relayoutGrid}
                     >
-                        <Panel.Body>
-                        {submitters}
-                        </Panel.Body>
-                    </Panel.Collapse>
-                </Panel>
+                        <div>
+                            <Card.Body>
+                                {submitters}
+                            </Card.Body>
+                        </div>
+                    </Collapse>
+                </Card>
             </div>
         );
     };
 }
+

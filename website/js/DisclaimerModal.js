@@ -1,68 +1,76 @@
 /*global module: false, require: false */
 'use strict';
 
-var React = require('react');
-var {Modal, Button} = require('react-bootstrap');
-var RawHTML = require('./RawHTML');
-var content = require('./content');
+import React from 'react';
+import { Modal, Button } from 'react-bootstrap';
+import RawHTML from './RawHTML';
+import content from './content';
 
-var DisclaimerModal = React.createClass({
-    getInitialState() {
-        return { showModal: false };
-    },
-    close() {
+class DisclaimerModal extends React.Component {
+    state = { showModal: false };
+    
+    close = () => {
         this.setState({ showModal: false });
-    },
-    open() {
+    };
+
+    open = () => {
         this.setState({ showModal: true });
-    },
-    disableResearchMode() {
-        this.props.onToggleMode();
+    };
+
+    disableResearchMode = () => {
+        if(this.props.onToggleMode) this.props.onToggleMode();
         localStorage.setItem('research-mode', false);
-    },
-    agree() {
-        this.props.onToggleMode();
+    };
+
+    agree = () => {
+        if (this.props.onToggleMode) this.props.onToggleMode();
         localStorage.setItem('research-mode', true);
         this.close();
-    },
-    buttonModal() {
+    };
+
+    buttonModal = () => {
         if(localStorage.getItem('research-mode') === 'true') {
             return (
-                <div className="form-group">
-                <Button className="btn-default" onClick={this.disableResearchMode}>Show Summary View of this Variant</Button>
-                </div>
+                <span>
+		    <Button className="btn-default" onClick={this.disableResearchMode}>Show Summary View of this Variant</Button>
+                </span>
             );
         } else {
             return (
-                <div className="form-group">
+                <span>
                     <Button className="btn-default" onClick={this.open}>{this.props.text}</Button>
 
                     {
                         this.state.showModal &&
                         <Modal show={true} onHide={this.close}>
-                            <RawHTML html={content.pages.researchWarning}/>
-                            <Button onClick={this.agree}>YES</Button>
-                            <Button onClick={this.close}>NO</Button>
+			    <RawHTML html={content.pages.researchWarning}/>
+			    <div className="d-flex gap-2">
+                                <Button onClick={this.agree}>YES</Button>
+                                <Button onClick={this.close}>NO</Button>
+			    </div>
                         </Modal>
                     }
-                </div>
+                </span>
             );
         }
-    },
-    linkModal() {
+    };
+
+    linkModal = () => {
         return (
             <span>
-                <a style={{cursor: "pointer"}} onClick={this.open}>{this.props.text}</a>
-                {
-                    this.state.showModal &&
+                <a href="#" onClick={(e) => { e.preventDefault(); this.open(); }}>{this.props.text}</a>
+		{this.state.showModal && (
                     <Modal show={true} onHide={this.close}>
                         <RawHTML html={content.pages.disclaimer} />
-                        <Button onClick={this.close}>OK</Button>
+			<div className="d-flex gap-2">
+                            <Button onClick={this.close}>OK</Button>
+			</div>
                     </Modal>
-                }
+		)}
             </span>
         );
-    },
+    };
+
     render() {
         if(this.props.buttonModal) {
             return this.buttonModal();
@@ -70,6 +78,6 @@ var DisclaimerModal = React.createClass({
             return this.linkModal();
         }
     }
-});
+}
 
-module.exports = DisclaimerModal;
+export default DisclaimerModal;

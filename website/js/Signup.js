@@ -1,18 +1,17 @@
 /*global grecaptcha: false */
 'use strict';
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var content = require('./content');
-var RawHTML = require('./RawHTML');
-var countries = require('raw!../content/countries.txt').split("\n");
+import React from 'react';
+import content from './content';
+import RawHTML from './RawHTML';
+var countries = require('raw-loader!../content/countries.txt').default.split("\n");
 var $ = require('jquery');
 var _ = require('underscore');
-var config  = require('./config');
-var {Grid, Row, Col, Button} = require('react-bootstrap');
-var {Navigation} = require('react-router');
+import config from './config';
+const { Container: Grid, Row, Col, Button} = require('react-bootstrap');
+const { withRouter } = require('react-router-dom');
 
-var Role = {
+export const Role = {
     ROLE_DATA_PROVIDER: 12,
     options: [
         // [ id, dropdown text, community page text ]
@@ -33,19 +32,24 @@ var Role = {
     get: function(id) { return this.options.find(role => role[0] === parseInt(id)); }
 };
 
-var Signup = React.createClass({
-    mixins: [Navigation],
-    getInitialState: function () {
-        return {
-            submitted: null,
-            success: null
-        };
-    },
-    render: function () {
+class SignupInner extends React.Component {
+    contentRef = React.createRef();
+    contactFormRef = React.createRef();
+    constructor(props) {
+        super(props);
+        this.contactFormRef = React.createRef();
+    }
+
+    state = {
+        submitted: null,
+        success: null
+    };
+
+    render() {
         var message;
         if (this.state.error != null) {
-            let fieldErrors = _.map(this.state.fieldErrors, err => (<li>{err}</li>));
-            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map(group => <Col md={3}><ul>{group}</ul></Col>);
+            let fieldErrors = _.map(this.state.fieldErrors, (err, i) => (<li key={`fe-${i}`}>{err}</li>));
+            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map((group, i) => <Col key={`fec-${i}`} md={3}><ul>{group}</ul></Col>);
             message = (
 				<div className="alert alert-danger">
 					<Row><Col md={6}>{this.state.error}</Col></Row>
@@ -56,43 +60,44 @@ var Signup = React.createClass({
         return (
             <Grid id="main-grid">
                 <Row>
-                    <Col sm={10} smOffset={1}  className="alert alert-warning">
-                        <RawHTML ref='content' html={content.pages.signupMessage}/>
+                    <Col sm={{ span: 10, offset: 1 }}  className="alert alert-warning">
+                        <RawHTML ref={this.contentRef} html={content.pages.signupMessage}/>
                     </Col>
                 </Row>
                 <Row id="message">
                     {message}
                 </Row>
                 <Row id="form">
-                    <Col md={8} mdOffset={2}>
-                        <SignupForm ref="contactForm"/>
+                    <Col md={{ span: 8, offset: 2 }}>
+                        <SignupForm ref={this.contactFormRef}/>
                     </Col>
                 </Row>
                 <Row id="submit">
-                    <Col md={6} mdOffset={3}>
+                    <Col md={{ span: 6, offset: 3 }}>
                         <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
                             Submit
                         </Button>
                     </Col>
                 </Row>
             </Grid>);
-    },
+    }
 
-    handleChange: function (field, e) {
+    handleChange = (field, e) => {
         var nextState = {};
         nextState[field] = e.target.checked;
         this.setState(nextState);
-    },
+    };
 
-    handleSubmit: function () {
-        var self = this;
-        var showSuccess = () => {this.transitionTo('/community', null, {registrationSuccess: true});};
+    handleSubmit = () => {
+        var showSuccess = () => {
+		this.props.history.push({ pathname: '/community', search: '?registrationSuccess=true' });
+	};
         var showFailure = msg => {this.setState({error: msg});};
         var address = '';
 
 
         var submit = function (formData) {
-            self.setState({submitted: formData});
+            this.setState({submitted: formData});
             var url = config.backend_url + '/accounts/register/';
 
             var fd = new FormData();
@@ -116,7 +121,7 @@ var Signup = React.createClass({
             };
             xhr.open('post', url);
             xhr.send(fd);
-        };
+        }.bind(this);
 
         var addLeadingCommaIfNecessary = function(address) {
             if (address.length > 0) {
@@ -142,10 +147,10 @@ var Signup = React.createClass({
         };
 
         var getLatLng = function(address, formData) {
-            var geo = new google.maps.Geocoder();
+            var geo = new window.google.maps.Geocoder();
             geo.geocode({address: address}, (results, status) => {
                 var loc;
-                if (status === google.maps.GeocoderStatus.OK) {
+                if (status === window.google.maps.GeocoderStatus.OK) {
                     loc = results[0].geometry.location;
                     formData.latitude = loc.lat().toString();
                     formData.longitude = loc.lng().toString();
@@ -157,28 +162,28 @@ var Signup = React.createClass({
         };
 
         var withGoogleMaps = function () {
-            var formData = self.refs.contactForm.getFormData();
+            var formData = this.refs.contactForm.getFormData();
 
             address = determineAddressFromCityStateCountry(formData);
             if (address.length > 3) {
-                formData = getLatLng(address, formData);
+                getLatLng(address, formData);
             } else if (formData.institution.length > 3) {
-                formData = getLatLng(formData.institution, formData);
+                getLatLng(formData.institution, formData);
             } else {
                 submit(formData);
             }
-        };
+        }.bind(this);
 
-        var formErrors = this.refs.contactForm.getFormErrors();
+        var formErrors = this.contactFormRef.current.getFormErrors();
         if (formErrors === false) {
-            google.load('maps', '3', {callback: withGoogleMaps, "other_params": "key=" + config.maps_key});
+	    loadGoogleMaps(config.maps_key, withGoogleMaps, () => submit(this.contactFormRef.current.getFormData()));
         } else {
             this.setState({error: <strong>Some information was missing:</strong>, fieldErrors: formErrors });
         }
     }
-});
+}
 
-function $c(staticClassName, conditionalClassNames) {
+export function $c(staticClassName, conditionalClassNames) {
     var classNames = [];
     if (typeof conditionalClassNames === 'undefined') {
         conditionalClassNames = staticClassName;
@@ -194,34 +199,46 @@ function $c(staticClassName, conditionalClassNames) {
     return classNames.join(' ');
 }
 
-var SignupForm = React.createClass({
-    getInitialState: function () {
-        return {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherRole: false};
-    },
-    componentDidMount: function () {
-        var me = this;
-        window.onRecaptchaLoad(function () {
-            grecaptcha.render(me.refs.signupCAPTCHA.getDOMNode(), {sitekey: config.captcha_key, callback: function(resp) {
-                me.setState({captcha: resp});
-            }});
-        });
-    },
-    getFormErrors: function () {
-        var errors = {};
-        if (ReactDOM.findDOMNode(this.refs.role).value === "NONE") {
-            errors.role = <span>Please select a <strong>Roll</strong></span>;
+class SignupForm extends React.Component {
+    state = {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherRole: false};
+    _refs = {};
+    setRef = (name) => (el) => {
+        if (el) this._refs[name] = el;
+        else delete this._refs[name];
+    };
+
+    componentDidMount() {
+        const renderCaptcha = () => {
+            if (!this._refs.signupCAPTCHA || !window.grecaptcha) return;
+            window.grecaptcha.render(this._refs.signupCAPTCHA, {
+                sitekey: config.captcha_key,
+                callback: (resp) => this.setState({ captcha: resp })
+            });
+        };
+        if (typeof window.onRecaptchaLoad === 'function') {
+            window.onRecaptchaLoad(renderCaptcha);
+        } else {
+            // if your recaptcha script loads before this component mounts
+            renderCaptcha();
         }
-        if (ReactDOM.findDOMNode(this.refs.email).value !== ReactDOM.findDOMNode(this.refs.email_confirm).value) {
+    }
+
+    getFormErrors() {
+        var errors = {};
+        if (!this._refs.role || this._refs.role.value === "NONE") {
+            errors.role = <span>Please select a <strong>Role</strong></span>;
+        }
+        if ((this._refs.email?.value || "") !== (this._refs.email_confirm?.value || "")) {
             errors["email_confirm"] = <span>The <strong>emails</strong> don't match</span>;
         }
-        if (ReactDOM.findDOMNode(this.refs.password).value !== ReactDOM.findDOMNode(this.refs.password_confirm).value) {
+        if ((this._refs.password?.value || "") !== (this._refs.password_confirm?.value || "")) {
             errors["password_confirm"] = <span>The <strong>passwords</strong> don't match</span>;
         }
         if (this.state.captcha === "") {
             errors.captcha = <span>No <strong>CAPTCHA</strong> entered</span>;
         }
         this.getCompulsoryFields().forEach(function (field) {
-            var value = ReactDOM.findDOMNode(this.refs[field]).value.trim();
+            var value = (this._refs[field]?.value || "").trim();
             if (!value) {
                 errors[field] = <span><strong>{ field.replace(/([A-Z])/g, ' $1').replace(/^./, function(str) { return str.toUpperCase(); }) }</strong> is required</span>;
             }
@@ -233,45 +250,53 @@ var SignupForm = React.createClass({
         } else {
             return errors;
         }
-    },
-    getCompulsoryFields: function () {
+    }
+
+    getCompulsoryFields() {
         var fields = ['email', 'password', 'role'];
-        if (!this.refs || !this.refs.role || parseInt(ReactDOM.findDOMNode(this.refs.role).value) !== Role.ROLE_DATA_PROVIDER) {
+	const roleVal = this._refs.role ? parseInt(this._refs.role.value) : NaN;
+        if (!this._refs.role || roleVal !== Role.ROLE_DATA_PROVIDER) {
             fields.push('firstName', 'lastName');
         }
         if (this.state.otherRole) {
             fields.push('role_other');
         }
         return fields;
-    },
-    getFormData: function () {
-        var title = ReactDOM.findDOMNode(this.refs.titlemd).checked && ReactDOM.findDOMNode(this.refs.titlemd).value ||
-            ReactDOM.findDOMNode(this.refs.titlephd).checked && ReactDOM.findDOMNode(this.refs.titlephd).value ||
-            ReactDOM.findDOMNode(this.refs.titleother).checked && ReactDOM.findDOMNode(this.refs.titlecustom).value;
+    }
 
-        var data = {
+    getFormData() {
+        var title =
+            (this._refs.titlemd?.checked && this._refs.titlemd?.value) ||
+            (this._refs.titlephd?.checked && this._refs.titlephd?.value) ||
+            (this._refs.titleother?.checked && this._refs.titlecustom?.value);
+
+        const roleVal = this._refs.role ? this._refs.role.value : "NONE";
+        const roleLabel = Role.get(roleVal) ? Role.get(roleVal)[2] : "";
+        
+	var data = {
             "image": this.state.file,
-            "email": ReactDOM.findDOMNode(this.refs.email).value,
-            "email_confirm": ReactDOM.findDOMNode(this.refs.email_confirm).value,
-            "password": ReactDOM.findDOMNode(this.refs.password).value,
-            "password_confirm": ReactDOM.findDOMNode(this.refs.password_confirm).value,
-            "firstName": ReactDOM.findDOMNode(this.refs.firstName).value,
-            "lastName": ReactDOM.findDOMNode(this.refs.lastName).value,
-            "title": title,
-            "role": ReactDOM.findDOMNode(this.refs.role).value,
-            "role_other": this.state.otherRole ? ReactDOM.findDOMNode(this.refs.role_other).value : Role.get(ReactDOM.findDOMNode(this.refs.role).value)[2],
-            "institution": ReactDOM.findDOMNode(this.refs.institution).value,
-            "city": ReactDOM.findDOMNode(this.refs.city).value,
-            "state": ReactDOM.findDOMNode(this.refs.state).value,
-            "country": ReactDOM.findDOMNode(this.refs.country).value,
-            "phone_number": ReactDOM.findDOMNode(this.refs.phone_number).value,
-            "hide_number": ReactDOM.findDOMNode(this.refs.hide_number).checked,
-            "hide_email": ReactDOM.findDOMNode(this.refs.hide_email).checked,
-            "captcha": this.state.captcha
+            "email": this._refs.email?.value,
+            "email_confirm": this._refs.email_confirm?.value,
+            "password": this._refs.password?.value,
+            "password_confirm": this._refs.password_confirm?.value,
+            "firstName": this._refs.firstName?.value,
+            "lastName": this._refs.lastName?.value,
+	    "title": title,
+            "role": roleVal,
+            "role_other": this.state.otherRole ? (this._refs.role_other?.value) : roleLabel,
+            "institution": this._refs.institution?.value,
+            "city": this._refs.city?.value,
+            "state": this._refs.state?.value,
+            "country": this._refs.country?.value,
+            "phone_number": this._refs.phone_number?.value,
+            "hide_number": !!this._refs.hide_number?.checked,
+            "hide_email": !!this._refs.hide_email?.checked,
+	    "captcha": this.state.captcha
         };
         return data;
-    },
-    handleImageChange(e) {
+    }
+
+    handleImageChange = (e) => {
         e.preventDefault();
 
         let reader = new FileReader();
@@ -292,10 +317,11 @@ var SignupForm = React.createClass({
             }
         };
         reader.readAsDataURL(file);
-    },
-    render: function () {
+    };
+
+    render() {
         var onChange = function() {
-            var value = ReactDOM.findDOMNode(this.refs.role).value;
+            var value = this._refs.role ? this._refs.role.value : "NONE";
             this.setState({otherRole: Role.other(value)});
         };
         return (
@@ -323,8 +349,8 @@ var SignupForm = React.createClass({
                 {this.renderCheckBox('hide_email', 'Hide my email address on this website')}
                 {this.renderCAPTCHA('captcha', 'CAPTCHA *')}
 			</div>);
-    },
-    renderImageUpload: function (id, label) {
+    }
+    renderImageUpload(id, label) {
         var {imagePreviewUrl, imageTooBig} = this.state;
         var imagePreview = null;
         var error = null;
@@ -340,54 +366,54 @@ var SignupForm = React.createClass({
                 {imagePreview}
                 {error}
             </div>);
-    },
-    renderTextInput: function (id, label) {
+    }
+    renderTextInput(id, label) {
         return this.renderField(id, label,
-            <input type="text" className="form-control" id={id} ref={id}/>
+            <input type="text" className="form-control" id={id} ref={this.setRef(id)}/>
         );
-    },
-    renderPassword: function (id, label) {
+    }
+    renderPassword(id, label) {
         return this.renderField(id, label,
-            <input type="password" className="form-control" id={id} ref={id}/>
+            <input type="password" className="form-control" id={id} ref={this.setRef(id)}/>
         );
-    },
-    renderTextarea: function (id, label) {
+    }
+    renderTextarea(id, label) {
         return this.renderField(id, label,
-            <textarea className="form-control" id={id} ref={id}/>
+            <textarea className="form-control" id={id} ref={this.setRef(id)}/>
         );
-    },
-    renderSelect: function(id, label, opts) {
+    }
+    renderSelect(id, label, opts) {
         var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, label,
-            <select className="form-control" id={id} ref={id}>
+            <select className="form-control" id={id} ref={this.setRef(id)}>
                 <option key={id + "NONE"} value=""></option>
                 {options}
             </select>
         );
-    },
-    renderRoles: function () {
+    }
+    renderRoles() {
         var id = 'role';
         var options = Role.options.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, 'Role',
-            <select className="form-control" id={id} ref={id}>
+            <select className="form-control" id={id} ref={this.setRef(id)}>
                 <option key={id + "NONE"} value="NONE">Choose one:</option>
                 {options}
             </select>
         );
-    },
-    renderRadioInlines: function (id, label, kwargs) {
-        var options = kwargs.values.map(function (value) {
+    }
+    renderRadioInlines(id, label, kwargs) {
+        var options = kwargs.values.map((value) => {
             var defaultChecked = (value.name === kwargs.defaultCheckedValue);
             if (value.name === "Other") {
                 return (
-                    <label className="radio-inline">
-                        <input type="radio" ref={id + value.ref} name={id} value={value.name} defaultChecked={defaultChecked}/>
-                        {value.name + ':'}<input className="form-control" type="text" ref="titlecustom" name="titlecustom"/>
+                    <label key={`${id}-${value.ref}`} className="radio-inline">
+                        <input type="radio" ref={this.setRef(id + value.ref)} name={id} value={value.name} defaultChecked={defaultChecked}/>
+                        {value.name + ':'}<input className="form-control" type="text" ref={this.setRef("titlecustom")} name="titlecustom"/>
                     </label>
                 );
             } else {
-                return (<label className="radio-inline">
-                    <input type="radio" ref={id + value.ref} name={id} value={value.name} defaultChecked={defaultChecked}/>
+                return (<label key={`${id}-${value.ref}`} className="radio-inline">
+                    <input type="radio" ref={this.setRef(id + value.ref)} name={id} value={value.name} defaultChecked={defaultChecked}/>
                         {value.name}
                     </label>
                 );
@@ -395,18 +421,18 @@ var SignupForm = React.createClass({
         });
         options = (<span className="col-xs-12">{options}</span>);
         return this.renderField(id, label, options);
-    },
-    renderCheckBox: function (id, label, defaultChecked = false) {
+    }
+    renderCheckBox(id, label, defaultChecked = false) {
         var checkbox = (<label className="radio-inline">
-            <input type='checkbox' ref={id} defaultChecked={defaultChecked}/>
+            <input type='checkbox' ref={this.setRef(id)} defaultChecked={defaultChecked}/>
             {label}
         </label>);
         return this.renderField(id, "", checkbox);
-    },
-    renderCAPTCHA: function(id, label) {
-        return this.renderField(id, label, <div ref="signupCAPTCHA"></div>);
-    },
-    renderField: function (id, label, field) {
+    }
+    renderCAPTCHA(id, label) {
+        return this.renderField(id, label, <div ref={this.setRef("signupCAPTCHA")}></div>);
+    }
+    renderField(id, label, field) {
         return (
 			<div className={$c('form-group', {'has-error': id in this.state.errors, 'required': this.getCompulsoryFields().includes(id)})}>
 				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
@@ -416,10 +442,29 @@ var SignupForm = React.createClass({
             </div>
         );
     }
-});
+}
 
-module.exports = ({
-    Signup: Signup,
-    Role: Role,
-    $c: $c
-});
+const Signup = withRouter(SignupInner);
+export { Signup };
+export default Signup;
+
+// ---- Google Maps loader (async, no jsapi) ----
+function loadGoogleMaps(key, cb, onNoKey) {
+  if (!key) {
+    // If no key, keep registration functional (just skip lat/lng enrichment)
+    if (typeof onNoKey === 'function') onNoKey();
+    return;
+  }
+  if (window.google && window.google.maps) {
+    cb();
+    return;
+  }
+  const script = document.createElement('script');
+  window.__signupInitMap = cb;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
+    key
+  )}&callback=__signupInitMap&loading=async`;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+}
