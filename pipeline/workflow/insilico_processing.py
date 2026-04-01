@@ -9,7 +9,7 @@ import luigi
 from luigi.util import requires
 
 import workflow.pipeline_utils as pipeline_utils
-from workflow.pipeline_common import DefaultPipelineTask, data_merging_method_dir, splice_ai_method_dir
+from workflow.pipeline_common import DefaultPipelineTask, insilico_method_dir
 
 
 class ConvertBuiltToVCF(DefaultPipelineTask):
@@ -21,9 +21,9 @@ class ConvertBuiltToVCF(DefaultPipelineTask):
         return luigi.LocalTarget(Path(self.cfg.output_dir)/'release'/'artifacts'/'bayesdel.vcf')
 
     def run(self):
-        os.chdir(data_merging_method_dir)
+        os.chdir(insilico_method_dir)
 
-        args = ["python", "bayesdel/convert_merged_variants_to_vcf.py", self.input().path, self.output().path]
+        args = ["python", "convert_merged_variants_to_vcf.py", self.input().path, self.output().path]
 
         pipeline_utils.run_process(args)
 
@@ -35,7 +35,7 @@ class GenerateSpliceAIData(DefaultPipelineTask):
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
-        os.chdir(splice_ai_method_dir)
+        os.chdir(insilico_method_dir)
               
         #
         # Extract the spliceAI output VCF from the previous release to identify
@@ -61,7 +61,7 @@ class AddSpliceAI(DefaultPipelineTask):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'built_with_spliceai.tsv'))
 
     def run(self):
-        os.chdir(splice_ai_method_dir)
+        os.chdir(insilico_method_dir)
 
         args = ["python", "add_splice_scores_to_built_file.py", "--vcf", self.input().path,
                 '--built-tsv', ConvertBuiltToVCF().input().path, '--output', self.output().path]
@@ -75,7 +75,7 @@ class DownloadVictorAnnotations(DefaultPipelineTask):
         return luigi.LocalTarget(self.artifacts_dir + "/BRCA.ann.all.vcf")
 
     def run(self):
-        os.chdir(self.cfg.output_dir)
+        os.chdir(self.artifacts_dir)
         victor_annotation_url = "https://brcaexchange.org/backend/downloads/BRCA.ann.all.vcf"
         pipeline_utils.download_file_and_display_progress(victor_annotation_url)
 
@@ -87,9 +87,9 @@ class AddBayesdelScores(DefaultPipelineTask):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'built_with_bayesdel.tsv'))
 
     def run(self):
-        os.chdir(data_merging_method_dir)
+        os.chdir(insilico_method_dir)
 
-        args = ["python", "bayesdel/add_bayesdel_scores_to_built_file.py", '--output', self.output().path,
+        args = ["python", "add_bayesdel_scores_to_built_file.py", '--output', self.output().path,
                 '--built-tsv', AddSpliceAI().output().path, self.input().path]
 
         pipeline_utils.run_process(args)

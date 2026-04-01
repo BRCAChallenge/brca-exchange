@@ -13,7 +13,11 @@ import argparse
 import os
 import shutil
 import subprocess
-import vcf
+import pysam
+
+from common.hgvs_utils import HgvsWrapper
+
+HGVS_38_COL = 'pyhgvs_Genomic_Coordinate_38'
 
 
 def parse_args():
@@ -39,16 +43,16 @@ def parse_args():
 
 
 def variant_id_string(record):
-    variant = "%s:%s:%s:%s" % (record.CHROM, str(record.POS),
-                               record.REF, record.ALT)
-    return(variant)
+    return HgvsWrapper.get_instance().genomic_hgvs(
+        record.chrom, record.pos, record.ref, record.alts[0])
     
 
 def list_all_variants_in_vcf(this_vcf):
     variants_in_vcf = {}
-    reader = vcf.Reader(open(this_vcf, "r"))
+    reader = pysam.VariantFile(this_vcf)
     for record in reader:
         variants_in_vcf[variant_id_string(record)] = 1
+    reader.close()
     return(variants_in_vcf)
 
 def vcf_unscored_variants(all_variants_vcf, scored_variants_vcf,
@@ -56,17 +60,17 @@ def vcf_unscored_variants(all_variants_vcf, scored_variants_vcf,
                           max_batch_size):
     variant_count = 0
     scored_variants = list_all_variants_in_vcf(scored_variants_vcf)
-    with open(all_variants_vcf, "r") as rfp:
-        reader = vcf.Reader(rfp) 
-        with open(unscored_variants_vcf, "w") as wfp:
-            writer = vcf.Writer(wfp, reader)
-            for record in reader:
-                variant = variant_id_string(record)
-                if not variant in scored_variants:
-                    writer.write_record(record)
-                    variant_count += 1
-                    if variant_count >= max_batch_size:
-                        break
+    reader = pysam.VariantFile(all_variants_vcf)
+    writer = pysam.VariantFile(unscored_variants_vcf, 'w', header=reader.header)
+    for record in reader:
+        variant = variant_id_string(record)
+        if not variant in scored_variants:
+            writer.write(record)
+            variant_count += 1
+            if variant_count >= max_batch_size:
+                break
+    reader.close()
+    writer.close()
     print(variant_count, "records written")
     return(variant_count)
 

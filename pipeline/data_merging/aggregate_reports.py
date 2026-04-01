@@ -2,7 +2,7 @@
 import os
 import logging
 
-import vcf
+import pysam
 
 from data_merging import variant_merging
 
@@ -28,6 +28,9 @@ def write_reports_tsv(filename, columns, ready_files_dir, genome_regions_symbol_
             raise Exception("mismatching number of columns in head and row")
         for ii in range(len(report)):
             if type(report[ii]) == list:
+                comma_delimited_string = ",".join(str(xx) for xx in report[ii])
+                report[ii] = comma_delimited_string
+            elif type(report[ii]) == tuple:
                 comma_delimited_string = ",".join(str(xx) for xx in report[ii])
                 report[ii] = comma_delimited_string
             elif type(report[ii]) == int:
@@ -80,21 +83,16 @@ def normalize_reports(file, columns, genome_regions_symbol_dict):
 
 def normalize_vcf_reports(file, columns, filename, file_extension, genome_regions_symbol_dict):
     reports = []
-    if "clinvar" in filename.lower():
-        # If fields contain spaces they cause strict whitespace failure
-        strict_whitespace = False
-    else:
-        strict_whitespace = True
-    reader = vcf.Reader(open(file, "r"), strict_whitespace=strict_whitespace)
+    reader = pysam.VariantFile(file)
     count = 0
     source_suffix = ".vcf"
     source = os.path.basename(file)[:-len(source_suffix)]
     for record in reader:
         count += 1
-        genome_coor = ("chr" + str(record.CHROM) + ":g." + str(record.POS) + ":" +
-                       record.REF + ">" + str(record.ALT[0]))
+        genome_coor = ("chr" + str(record.chrom) + ":g." + str(record.pos) + ":" +
+                       record.ref + ">" + str(record.alts[0]))
 
-        if variant_merging.is_outside_boundaries(record.CHROM, record.POS, genome_regions_symbol_dict):
+        if variant_merging.is_outside_boundaries(record.chrom, record.pos, genome_regions_symbol_dict):
             logging.warning("Skipping report since the positions is outside the genome boundaries: " + str(record))
             continue
 
@@ -103,10 +101,11 @@ def normalize_vcf_reports(file, columns, filename, file_extension, genome_region
             try:
                 column_name = key + "_" + source
                 column_index = columns.index(column_name)
-                report[column_index] = record.INFO[value]
+                report[column_index] = record.info[value]
             except KeyError:
-                raise Exception("WARNING: Key error with report: %s \n\nError on value: %s \n\n Error in record.INFO: %s \n\nNeeds attn." % (report, value, record.INFO))
+                raise Exception("WARNING: Key error with report: %s \n\nError on value: %s \n\n Error in record.info: %s \n\nNeeds attn." % (report, value, record.info))
         reports.append(report)
+    reader.close()
     return reports
 
 

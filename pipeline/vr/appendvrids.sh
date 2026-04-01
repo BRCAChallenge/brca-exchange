@@ -14,11 +14,26 @@ SEQ_REPO_DIR="${4:-/usr/local/share/seqrepo}"
 # ----------------------------------------------------
 
 [ `docker ps -f name="seqrepo-rest-service" | wc -l` -gt 1 ] \
-    || ../utilities/launch_seqrepo.sh ${SEQ_REPO_DIR}
+    || ../utilities/launch_seqrepo.sh ${SEQ_REPO_DIR}/latest
 
 
-# ...and wait for it to be available
-./wait-for localhost:5000 && echo " => ...seqrepo-rest-service is ready"
+# ...and wait for the HTTP endpoint to be ready (not just TCP port open)
+MAX_WAIT=300
+i=0
+until curl -sf http://localhost:5000/seqrepo/1/ping > /dev/null 2>&1; do
+    i=$((i + 1))
+    if [ $i -ge $MAX_WAIT ]; then
+        echo "Timed out waiting for seqrepo-rest-service to become ready after ${MAX_WAIT}s" >&2
+        exit 1
+    fi
+    # Fail fast if the container has already exited
+    if ! docker ps --filter name=seqrepo-rest-service --filter status=running --format '{{.Names}}' | grep -q seqrepo-rest-service; then
+        echo "seqrepo-rest-service container exited unexpectedly (check: docker logs seqrepo-rest-service)" >&2
+        exit 1
+    fi
+    sleep 1
+done
+echo " => ...seqrepo-rest-service is ready"
 
 
 # ----------------------------------------------------

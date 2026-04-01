@@ -1,32 +1,36 @@
 import click
 import pandas as pd
 
+from common.hgvs_utils import HgvsWrapper
 
-def _coord_to_vcf_cols(coord):
-    return (coord.split(':')[0].lstrip('chr'),  # chromosome col
-            int(coord.split(':')[1].lstrip('g.')),  # pos col
-            coord,  # id col
-            coord.split(':')[2].split('>')[0],  # ref col
-            coord.split(':')[2].split('>')[1])  # alt col
+
+HGVS_38_COL = 'pyhgvs_Genomic_Coordinate_38'
+
+
+def _row_to_vcf_cols(row):
+    hgvs_proc = HgvsWrapper.get_instance()
+    vcf_id = hgvs_proc.genomic_hgvs(row['Chr'], int(row['Pos']), row['Ref'], row['Alt'])
+    v = hgvs_proc.genomic_hgvs_to_vcf(vcf_id)
+    return (v.chr, v.pos, vcf_id, v.ref, v.alt)
 
 
 def convert_merged_to_vcf(path, vcf_path):
-    coord_col = 'Genomic_Coordinate_hg38'
-
     df = pd.read_csv(path, sep='\t')
 
-    vcf_cols = df.apply(lambda d: _coord_to_vcf_cols(d[coord_col]), axis=1)
+    vcf_cols = df.apply(_row_to_vcf_cols, axis=1)
 
     df_vcf = pd.DataFrame.from_dict(dict(zip(vcf_cols.index, vcf_cols.values))).T
     df_vcf.columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT']
-    df_vcf['QUAL'] = df_vcf['FILTER'] = df_vcf['ID'] = '.'
-    df_vcf['INFO'] = '.'
+    df_vcf['QUAL'] = df_vcf['FILTER'] = '.'
 
     # only taking variants with unambiguous bases
     df_vcf = df_vcf[df_vcf['ALT'].apply(lambda s: all(x in 'ACTG' for x in s))]
 
+    df_vcf['INFO'] = HGVS_38_COL + '=' + df_vcf['ID']
+
     with open(vcf_path, 'w') as f:
         header = '##fileformat=VCFv4.0\n##source=brcaexchange\n##reference=GRCh38\n'
+        header += f'##INFO=<ID={HGVS_38_COL},Number=1,Type=String,Description="GRCh38 genomic HGVS coordinate">\n'
         f.write(header)
         f.write(("##contig=<ID=1,length=249250621>"
                  "\n##contig=<ID=2,length=243199373>"
