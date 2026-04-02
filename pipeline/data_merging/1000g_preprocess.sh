@@ -1,1 +1,1 @@
-cut -f1-9 $1 | grep -v "esv"
+cut -f1-8 $1 | grep -v "esv"

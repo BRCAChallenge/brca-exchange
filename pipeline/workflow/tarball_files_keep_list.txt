@@ -11,7 +11,7 @@
 ./ENIGMA_BRCA12_functional_assays_scores.sorted.hg38.vcf
 ./md5sums.txt
 ./README.txt
-./release/artifacts/brca-pseudonym-generator.log
+./release/artifacts/pseudonym-generator.log
 ./release/artifacts/discarded_reports.tsv
 ./release/artifacts/ENIGMA_wrong_genome.txt
 ./release/artifacts/exLOVD_BRCA1_error_variants.txt
