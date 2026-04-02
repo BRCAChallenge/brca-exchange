@@ -8,7 +8,7 @@ key_observational_reference	Literature source of observational data used in the 
 prior_p_reference	Literature source of the sequence analysis based prior probability in favor of pathogenicity used in the integrated evaluation displayed here. [Goldgar et al., AJHG 75: 535-544, 2004.], [Tavtigian et al., Human Mutation 29: 1342-1354, 2008.], [Wu, K. et al., Cancer Research 65: 417-426, 2005.], [Tavtigian, S.V. et al., Journal of Medical Genetics 43: 295-305, 2006.], [Chenevix-Trench, G. et al., Cancer Research 66: 2019-2027, 2006.], [Vallee et al., manuscript submitted, 2015]
 missense_analysis_prior_p	This prior probability estimate combines position in the protein with an Align-GVGD based evaluation of missense substitutions that fall in the proteins key functional domains.
 splicing_prior_p	This prior probability estimate evaluates the sequence variants probability to damage a splice donor, damage a splice acceptor, or create a de novo splice donor.
-other_prior_p		Prior probability from other sources
+other_prior_p		Prior probability from other sources.
 combined_prior_p	The combined prior probability in favor of pathogenicity. is a combination of the missense analysis prior probability and the splicing analysis prior probability. Generally, it is the higher of the two sequence analysis-based prior probabilities.
 segregation_lr	The likelihood ratio based on segregation analysis.
 pathology_lr	The likelihood ratio based on tumor pathology and/ or tumor immunohistochemistry.
