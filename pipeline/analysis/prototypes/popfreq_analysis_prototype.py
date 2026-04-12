@@ -2,9 +2,9 @@
 # coding: utf-8
 
 import argparse
+import bisect
 import csv
 import math
-import re
 import sys
 
 csv.field_size_limit(sys.maxsize)
@@ -24,20 +24,41 @@ FAIL_QC = "No code met (QC filter)"
 FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG = "No code met (read depth, flags)"
 FAIL_NEEDS_REVIEW = "No code met (needs review)"
 FAIL_NEEDS_SOFTWARE_REVIEW = "No code met (needs software review)"
+FAIL_LCR = "No code met (low-complexity region)"
 
 READ_DEPTH_THRESHOLD_FREQUENT_VARIANT = 20
 READ_DEPTH_THRESHOLD_RARE_VARIANT = 25
 
-BA1_MSG = "The highest non-cancer, non-founder population filter allele frequency in gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥20) or gnomAD v3.1 (non-cancer subset, read depth ≥20) is %s in the %s population, which is above the ENIGMA BRCA1/2 VCEP threshold (>0.001) for BA1 (BA1 met)."
-BS1_MSG = "The highest non-cancer, non-founder population filter allele frequency in gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥20) or gnomAD v3.1 (non-cancer subset, read depth ≥20) is %s in the %s population, which is above the ENIGMA BRCA1/2 VCEP threshold (>0.0001) for BS1, and below the BA1 threshold (>0.001) (BS1 met)."
-BS1_SUPPORTING_MSG = "The highest non-cancer, non-founder population filter allele frequency in gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥20) or gnomAD v3.1 f(non-cancer subset, read depth ≥20) is %s in the %s population which is within the ENIGMA BRCA1/2 VCEP threshold (>0.00002 to ≤ 0.0001) for BS1_Supporting (BS1_Supporting met)."
-PM2_SUPPORTING_MSG = "This variant is absent from gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥25) and gnomAD v3.1 (non-cancer subset, read depth ≥25) (PM2_Supporting met)."
-NO_CODE_MSG = "This variant is present in gnomAD v2.1 (exomes only, non-cancer subset) or gnomAD v3.1 (non-cancer subset) but is below the ENIGMA BRCA1/2 VCEP threshold >0.00002 for BS1_Supporting (PM2_Supporting, BS1, and BA1 are not met)."
+SMALL_INDEL_SIZE_THRESHOLD = 50
+
+BA1_FAF_THRESHOLD = 0.001
+BS1_FAF_THRESHOLD = 0.0001
+BS1_SUPPORTING_FAF_THRESHOLD = 0.00001
+RARE_VARIANT_FAF_THRESHOLD = 0.00002
+
+BA1_MSG = (f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
+           f"in gnomAD v4.1 is %s in the %s genetic ancestry group (based on %s/%s alleles) "
+           f"which is above the ENIGMA BRCA1/2 VCEP threshold (>{BA1_FAF_THRESHOLD}) for BA1 (BA1 met).")
+BS1_MSG = (f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
+           f"in gnomAD v4.1 is %s in the %s genetic ancestry group (based on %s/%s alleles) "
+           f"which is above the ENIGMA BRCA1/2 VCEP threshold (>{BS1_FAF_THRESHOLD}) for BS1, "
+           f"and below the BA1 threshold (>{BA1_FAF_THRESHOLD}) (BS1 met).")
+BS1_SUPPORTING_MSG = (f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
+                      f"in gnomAD v4.1 is %s in the %s genetic ancestry group (based on %s/%s alleles) "
+                      f"which is above the ENIGMA BRCA1/2 VCEP threshold (>{RARE_VARIANT_FAF_THRESHOLD}) "
+                      f"for BS1_Supporting, and below the BS1 threshold (>{BS1_FAF_THRESHOLD}) (BS1_Supporting met).")
+PM2_SUPPORTING_MSG = "This variant is absent from gnomAD v4.1 (PM2_Supporting met)."
+NO_CODE_MSG = (f"This variant is present in gnomAD v2.1 (exomes only, non-cancer subset) or gnomAD v3.1 "
+               f"(non-cancer subset) but is below the ENIGMA BRCA1/2 VCEP threshold >{RARE_VARIANT_FAF_THRESHOLD} "
+               f"for BS1_Supporting (PM2_Supporting, BS1, and BA1 are not met).")
 NO_CODE_NON_SNV_MSG = "This [insertion/deletion/large genomic rearrangement] variant was not observed in gnomAD v2.1 (exomes only, non-cancer subset) or gnomAD v3.1 (non-cancer subset), but PM2_Supporting was not applied since recall is suboptimal for this type of variant (PM2_Supporting not met)."
 FAIL_QC_MSG = "This variant was not observed in gnomAD v2.1 (exomes only, non-cancer subset) or gnomAD v3.1 (non-cancer subset), but PM2_Supporting was not applied since this variant failed a gnomAD QC filter (PM2_Supporting not met)."
-FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG = "This variant is present in gnomAD but is not meeting the specified read depths threshold ≥20 (PM2_Supporting, BS1, and BA1 are not met)."
+FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG = (f"This variant is present in gnomAD but is not meeting the "
+                                                    f"specified read depths threshold \u2265{READ_DEPTH_THRESHOLD_FREQUENT_VARIANT} "
+                                                    f"(PM2_Supporting, BS1, and BA1 are not met).")
 FAIL_NEEDS_REVIEW_MSG = "No code is met (variant needs review)"
 FAIL_NEEDS_SOFTWARE_REVIEW_MSG = "No code is met (variant needs software review)"
+FAIL_LCR_MSG = "PM2_Supporting was not applied since this variant overlaps a low-complexity region (LCR)."
 
 MESSAGES_PER_CODE = {
     BA1: BA1_MSG,
@@ -49,7 +70,8 @@ MESSAGES_PER_CODE = {
     FAIL_QC: FAIL_QC_MSG,
     FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG: FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG,
     FAIL_NEEDS_REVIEW: FAIL_NEEDS_REVIEW_MSG,
-    FAIL_NEEDS_SOFTWARE_REVIEW: FAIL_NEEDS_SOFTWARE_REVIEW_MSG
+    FAIL_NEEDS_SOFTWARE_REVIEW: FAIL_NEEDS_SOFTWARE_REVIEW_MSG,
+    FAIL_LCR: FAIL_LCR_MSG
     }
 
 def parse_args():
@@ -60,6 +82,15 @@ def parse_args():
                         help="Output file with new columns")
     parser.add_argument("-d", "--data_dir", default="./processed_brca",
                         help="Directory with the processed files")
+    parser.add_argument("--popfreq-code-id", default=POPFREQ_CODE_ID,
+                        help="Column header for the v2/v3 evidence code")
+    parser.add_argument("--popfreq-code-descr", default=POPFREQ_CODE_DESCR,
+                        help="Column header for the v2/v3 evidence description")
+    parser.add_argument("--popfreq-v4-code-id", default=POPFREQ_V4_CODE_ID,
+                        help="Column header for the v4 evidence code")
+    parser.add_argument("--lcr", default=None,
+                        help="BED file of low-complexity regions; variants overlapping an LCR "
+                             "will not be assigned PM2_Supporting")
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Print debugging info")
     args = parser.parse_args()
@@ -71,6 +102,55 @@ def read_flags(flag_data):
     for row in flag_data:
         flags[row["ID"]] = row
     return(flags)
+
+
+def read_lcr(lcr_file):
+    """
+    Read a BED file of low-complexity regions.
+    Returns: dict with structure {chrom: sorted list of (start, end) tuples}
+    Coordinates are 0-based half-open, as per BED format.
+    'chr' prefixes are stripped from chromosome names.
+    """
+    lcr = {}
+    with open(lcr_file) as f:
+        for line in f:
+            if line.startswith(('#', 'track', 'browser')):
+                continue
+            fields = line.strip().split('\t')
+            if len(fields) < 3:
+                continue
+            chrom = fields[0].lstrip('chr')
+            start, end = int(fields[1]), int(fields[2])
+            lcr.setdefault(chrom, []).append((start, end))
+    for chrom in lcr:
+        lcr[chrom].sort()
+    return lcr
+
+
+def overlaps_lcr(chrom, start, end, lcr):
+    """
+    Return True if the variant region overlaps any low-complexity region.
+    Variant coords (start, end) are 1-based inclusive (VCF-style).
+    LCR regions are 0-based half-open (BED-style).
+    """
+    chrom_key = str(chrom)
+    if chrom_key not in lcr:
+        return False
+    regions = lcr[chrom_key]
+    # Convert variant to 0-based half-open for comparison with BED
+    var_start = start - 1
+    var_end = end
+    # Find the first region whose start >= var_end; none of those can overlap.
+    # Search among region start coordinates using bisect.
+    starts = [r[0] for r in regions]
+    idx = bisect.bisect_left(starts, var_end)
+    # Walk backwards from idx-1; stop as soon as a region ends before var_start.
+    for i in range(idx - 1, -1, -1):
+        r_start, r_end = regions[i]
+        if r_end <= var_start:
+            break
+        return True  # r_start < var_end and r_end > var_start
+    return False
 
 
 def read_coverage(coverage_file):
@@ -143,11 +223,12 @@ def estimate_coverage(start, end, chrom, cov_data, debug=False, use_median=False
 
 
 
-def initialize_output_file(input_file, output_filename):
+def initialize_output_file(input_file, output_filename,
+                           popfreq_code_id, popfreq_code_descr, popfreq_v4_code_id):
     """
     Create an empty output file with the new columns
     """
-    new_columns = [POPFREQ_CODE_ID, POPFREQ_CODE_DESCR, POPFREQ_V4_CODE_ID]
+    new_columns = [popfreq_code_id, popfreq_code_descr, popfreq_v4_code_id]
     input_header_row = input_file.fieldnames
     if "change_type" in input_header_row:
         idx = input_header_row.index("change_type")
@@ -170,27 +251,27 @@ def field_defined(field):
 
     
 
-def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv,
+def analyze_one_dataset(faf95_popmax_str, allele_count, is_snv,
                         read_depth, vcf_filter_flag, allele_count_threshold=1, debug=True):
     #
-    # Get the coverage data.  Rule out error conditions: low coverage, VCF filter flag.
+    # Rule out error conditions: VCF filter flag, low coverage.
+    if vcf_filter_flag:
+        return(FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG)
     rare_variant = False
     if field_defined(faf95_popmax_str):
         faf = float(faf95_popmax_str)
         if math.isnan(faf):
             rare_variant = True
-        elif faf <= 0.00002:
+        elif faf <= RARE_VARIANT_FAF_THRESHOLD:
             rare_variant = True
     else:
         faf = None
         rare_variant = True
     if debug:
-        print("Rare variant", rare_variant, "read depth", read_depth)
+        print("Rare variant", rare_variant, "read depth", read_depth, "flagged", vcf_filter_flag)
     if rare_variant and read_depth < READ_DEPTH_THRESHOLD_RARE_VARIANT:
         return(FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG)
     if (not rare_variant) and read_depth < READ_DEPTH_THRESHOLD_FREQUENT_VARIANT:
-        return(FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG)
-    if vcf_filter_flag:
         return(FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG)
     #
     # Address the cases where FAF is defined, and the variant is a candidate for a
@@ -198,11 +279,11 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
     if not rare_variant:
         if debug:
             print("Not rare variant.  FAF:", faf)
-        if faf > 0.001:
+        if faf > BA1_FAF_THRESHOLD:
             return(BA1)
-        elif faf >  0.0001:
+        elif faf > BS1_FAF_THRESHOLD:
             return(BS1)
-        elif faf > 0.00001:
+        elif faf > BS1_SUPPORTING_FAF_THRESHOLD:
             return(BS1_SUPPORTING)
         else:
             return(NO_CODE)
@@ -222,8 +303,8 @@ def analyze_one_dataset(faf95_popmax_str, faf95_population, allele_count, is_snv
         return(NO_CODE_NON_SNV)
 
 
-def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
-                            code_v3, faf_v3, faf_popmax_v3, in_v3, is_snv,
+def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2,
+                            code_v3, faf_v3, faf_popmax_v3,
                             debug=False):
     """
     Given the per-dataset evidence codes, generate an overall evidence code
@@ -232,7 +313,6 @@ def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
     pathogenic_codes = [PM2_SUPPORTING]
     intermediate_codes = [ NO_CODE, NO_CODE_NON_SNV]
     ordered_success_codes = benign_codes + intermediate_codes + pathogenic_codes
-    success_codes = set(ordered_success_codes)
     failure_codes = set([FAIL_QC, FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG])
     ordered_codes = ordered_success_codes + list(failure_codes)
 
@@ -278,17 +358,17 @@ def analyze_across_datasets(code_v2, faf_v2, faf_popmax_v2, in_v2,
         print("prior to assertions, codes are", code_v2, code_v3)
     assert(code_v2 in benign_codes or code_v2 in intermediate_codes or code_v3 in benign_codes or code_v3 in intermediate_codes)
     if code_v3 == BA1:
-        return(BA1, BA1_MSG % (faf_v3, faf_popmax_v3))
+        return(BA1, None)
     elif code_v2 == BA1:
-        return(BA1, BA1_MSG % (faf_v2, faf_popmax_v2))
+        return(BA1, None)
     elif code_v3 == BS1:
-        return(BS1, BS1_MSG % (faf_v3, faf_popmax_v3))
+        return(BS1, None)
     elif code_v2 == BS1:
-        return(BS1, BS1_MSG % (faf_v2, faf_popmax_v2))
+        return(BS1, None)
     elif code_v3 == BS1_SUPPORTING:
-        return(BS1_SUPPORTING, BS1_SUPPORTING_MSG % (faf_v3, faf_popmax_v3))
+        return(BS1_SUPPORTING, None)
     elif code_v2 == BS1_SUPPORTING:
-        return(BS1_SUPPORTING, BS1_SUPPORTING_MSG % (faf_v2, faf_popmax_v2))
+        return(BS1_SUPPORTING, None)
     elif code_v2 == NO_CODE:
         return(code_v2, NO_CODE_MSG)
     elif code_v3 == NO_CODE:
@@ -309,7 +389,11 @@ def variant_is_flagged(variant_id, flags):
 
 
 def analyze_variant(variant, coverage_v2, coverage_v3, coverage_v4,
-                    flags_v2, flags_v3,flags_v4, debug=False):
+                    flags_v2, flags_v3, flags_v4,
+                    popfreq_code_id=POPFREQ_CODE_ID,
+                    popfreq_code_descr=POPFREQ_CODE_DESCR,
+                    popfreq_v4_code_id=POPFREQ_V4_CODE_ID,
+                    lcr=None, debug=False):
     """
     Analyze a single variant, adding the output columns
     """
@@ -334,7 +418,7 @@ def analyze_variant(variant, coverage_v2, coverage_v3, coverage_v4,
     is_snv = (variant["Hg38_Start"] == variant["Hg38_End"]
                            and len(variant["Ref"]) == 1 and len(variant["Alt"]) == 1)
     snv_or_small_indel = (is_snv
-                          or (int(variant["Hg38_End"]) - int(variant["Hg38_Start"]) < 20))
+                          or (int(variant["Hg38_End"]) - int(variant["Hg38_Start"]) <= SMALL_INDEL_SIZE_THRESHOLD))
 
     if debug:
         print("variant", variant["pyhgvs_cDNA"], " snv or small indel:", snv_or_small_indel)
@@ -348,14 +432,10 @@ def analyze_variant(variant, coverage_v2, coverage_v3, coverage_v4,
         variant_v2_code_id = FAIL_QC
         if debug:
             print("Not observable in V2")
-        variant_in_v2 = False
     elif (observable_in_v2 and not field_defined(variant["Allele_count_exome_GnomAD"])):
         variant_v2_code_id = PM2_SUPPORTING
-        variant_in_v2 = False
     else:
-        variant_in_v2 = True
         variant_v2_code_id = analyze_one_dataset(variant["faf95_popmax_exome_GnomAD"],
-                                                 variant["faf95_popmax_population_exome_GnomAD"],
                                                  variant["Allele_count_exome_GnomAD"],
                                                  is_snv, read_depth_v2,
                                                  variant_is_flagged(variant["Variant_id_GnomAD"],
@@ -368,17 +448,16 @@ def analyze_variant(variant, coverage_v2, coverage_v3, coverage_v4,
                   "read depth", read_depth_v2, "snv", is_snv,
                   "V2 code", variant_v2_code_id)
     if not (observable_in_v3 and field_defined(variant["Allele_count_genome_GnomADv3"])):
-        variant_in_v3 = False
-        if is_snv:
+        if read_depth_v3 < READ_DEPTH_THRESHOLD_RARE_VARIANT:
+            variant_v3_code_id = FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG
+        elif is_snv:
             variant_v3_code_id = PM2_SUPPORTING
         else:
             variant_v3_code_id = NO_CODE_NON_SNV
         if debug:
             print("Not observable in V3: code", variant_v3_code_id)
     else:
-        variant_in_v3 = True
         variant_v3_code_id = analyze_one_dataset(variant["faf95_popmax_genome_GnomADv3"],
-                                                 variant["faf95_popmax_population_genome_GnomADv3"],
                                                  variant["Allele_count_genome_GnomADv3"],
                                                  is_snv, read_depth_v3,
                                                  variant_is_flagged(variant["Variant_id_GnomADv3"],
@@ -390,29 +469,46 @@ def analyze_variant(variant, coverage_v2, coverage_v3, coverage_v4,
                   "allele count", variant["Allele_count_genome_GnomADv3"],
                   "read depth", read_depth_v3, "snv", is_snv,
                   "V3 code", variant_v3_code_id)
-    (variant[POPFREQ_CODE_ID],
-     variant[POPFREQ_CODE_DESCR]) = analyze_across_datasets(variant_v2_code_id,variant["faf95_popmax_exome_GnomAD"],
+    (variant[popfreq_code_id],
+     variant[popfreq_code_descr]) = analyze_across_datasets(variant_v2_code_id,
+                                                            variant["faf95_popmax_exome_GnomAD"],
                                                             variant["faf95_popmax_population_exome_GnomAD"],
-                                                            variant_in_v2, variant_v3_code_id, 
+                                                            variant_v3_code_id,
                                                             variant["faf95_popmax_genome_GnomADv3"],
                                                             variant["faf95_popmax_population_genome_GnomADv3"],
-                                                            variant_in_v3, snv_or_small_indel,
                                                             debug=debug)
+    if variant[popfreq_code_id] == BA1:
+        variant[popfreq_code_descr] = BA1_MSG % (
+            variant["faf95_popmax_joint_GnomADv4"],
+            variant["faf95_popmax_population_joint_GnomADv4"],
+            variant["Allele_count_joint_GnomADv4"],
+            variant["Allele_number_joint_GnomADv4"])
+    elif variant[popfreq_code_id] == BS1:
+        variant[popfreq_code_descr] = BS1_MSG % (
+            variant["faf95_popmax_joint_GnomADv4"],
+            variant["faf95_popmax_population_joint_GnomADv4"],
+            variant["Allele_count_joint_GnomADv4"],
+            variant["Allele_number_joint_GnomADv4"])
+    elif variant[popfreq_code_id] == BS1_SUPPORTING:
+        variant[popfreq_code_descr] = BS1_SUPPORTING_MSG % (
+            variant["faf95_popmax_joint_GnomADv4"],
+            variant["faf95_popmax_population_joint_GnomADv4"],
+            variant["Allele_count_joint_GnomADv4"],
+            variant["Allele_number_joint_GnomADv4"])
 
     if not (observable_in_v4 and field_defined(variant["Allele_count_joint_GnomADv4"])):
-        variant_in_v4 = False
-        if snv_or_small_indel:
+        if read_depth_v4 < READ_DEPTH_THRESHOLD_RARE_VARIANT:
+            variant_v4_code_id = FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG
+        elif is_snv:
             variant_v4_code_id = PM2_SUPPORTING
         else:
             variant_v4_code_id = NO_CODE_NON_SNV
         if debug:
             print("Not observable in V4: code", variant_v4_code_id)
     else:
-        variant_in_v4 = True
         variant_v4_code_id = analyze_one_dataset(variant["faf95_popmax_joint_GnomADv4"],
-                                                 variant["faf95_popmax_population_joint_GnomADv4"],
                                                  variant["Allele_count_joint_GnomADv4"],
-                                                 snv_or_small_indel, read_depth_v4,
+                                                 is_snv, read_depth_v4,
                                                  variant_is_flagged(variant["Variant_id_GnomADv4"],
                                                                     flags_v4),
                                                  allele_count_threshold=1,
@@ -422,11 +518,31 @@ def analyze_variant(variant, coverage_v2, coverage_v3, coverage_v4,
                   "popmax", variant["faf95_popmax_joint_GnomADv4"],
                   "allele count", variant["Allele_count_joint_GnomADv4"],
                   "read depth", read_depth_v4, "snv", snv_or_small_indel,
-                  "V4 code", variant_v4_code_id, "V4 code", variant_v4_code_id)
-    variant[POPFREQ_V4_CODE_ID] = variant_v4_code_id
+                  "flagged", variant_is_flagged(variant["Variant_id_GnomADv4"], flags_v4),
+                  "V4 code", variant_v4_code_id)
+    variant[popfreq_v4_code_id] = variant_v4_code_id
+    if lcr is not None:
+        chrom = int(variant["Chr"])
+        hg38_start = int(variant["Hg38_Start"])
+        hg38_end = int(variant["Hg38_End"])
+        if overlaps_lcr(chrom, hg38_start, hg38_end, lcr):
+            if debug:
+                print("variant", variant["pyhgvs_cDNA"], "overlaps LCR")
+            if variant[popfreq_code_id] == PM2_SUPPORTING:
+                if read_depth_v3 < READ_DEPTH_THRESHOLD_RARE_VARIANT:
+                    variant[popfreq_code_id] = FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG
+                    variant[popfreq_code_descr] = FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG
+                else:
+                    variant[popfreq_code_id] = FAIL_LCR
+                    variant[popfreq_code_descr] = FAIL_LCR_MSG
+            if variant[popfreq_v4_code_id] == PM2_SUPPORTING:
+                if read_depth_v4 < READ_DEPTH_THRESHOLD_RARE_VARIANT:
+                    variant[popfreq_v4_code_id] = FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG
+                else:
+                    variant[popfreq_v4_code_id] = FAIL_LCR
     if debug:
-        print("variant", variant["pyhgvs_cDNA"], "consensus code:", variant[POPFREQ_CODE_ID], "msg",
-              variant[POPFREQ_CODE_DESCR], "v2 code", variant_v2_code_id,
+        print("variant", variant["pyhgvs_cDNA"], "consensus code:", variant[popfreq_code_id], "msg",
+              variant[popfreq_code_descr], "v2 code", variant_v2_code_id,
               "v3 code", variant_v3_code_id, "v4 code", variant_v4_code_id)
     return()
 
@@ -443,13 +559,20 @@ def main():
                                          delimiter = "\t"))
     flags_v4 = read_flags(csv.DictReader(open(args.data_dir + "/brca.gnomAD.4.1.hg38.flags.tsv"),
                                          delimiter = "\t"))
+    lcr = read_lcr(args.lcr) if args.lcr else None
     input_file = csv.DictReader(open(args.input), delimiter = "\t")
-    output_file = initialize_output_file(input_file, args.output)
+    output_file = initialize_output_file(input_file, args.output,
+                                         args.popfreq_code_id,
+                                         args.popfreq_code_descr,
+                                         args.popfreq_v4_code_id)
     for variant in input_file:
         if args.debug:
             print("About to analyze", variant["pyhgvs_cDNA"])
         analyze_variant(variant, cov2, cov3, cov4, flags_v2, flags_v3, flags_v4,
-                        debug=args.debug)
+                        popfreq_code_id=args.popfreq_code_id,
+                        popfreq_code_descr=args.popfreq_code_descr,
+                        popfreq_v4_code_id=args.popfreq_v4_code_id,
+                        lcr=lcr, debug=args.debug)
         output_file.writerow(variant)
 
 
