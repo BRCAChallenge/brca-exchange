@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.db.models import JSONField
+from django.contrib.postgres.fields import ArrayField
 
 from postgres_copy import CopyManager
 
@@ -37,14 +38,14 @@ class LegacyJSONField(JSONField):
 # ------------------------------------------------------------------------
 
 class VariantDiff(models.Model):
-    variant = models.OneToOneField('Variant', primary_key=True)
+    variant = models.OneToOneField('Variant', on_delete=models.CASCADE, primary_key=True)
     # Postgres-specific JSON field. If migrating away from postgres, use TextField instead
     # provides JSON validation
     diff = LegacyJSONField()
 
 
 class ReportDiff(models.Model):
-    report = models.OneToOneField('Report', primary_key=True)
+    report = models.OneToOneField('Report', on_delete=models.CASCADE, primary_key=True)
     # Postgres-specific JSON field. If migrating away from postgres, use TextField instead
     # provides JSON validation
     report_diff = LegacyJSONField()
@@ -495,7 +496,7 @@ class Variant(models.Model):
     BX_ID_GnomADv3 = models.TextField(null=True)
     BX_ID_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default='')
     VR_ID = models.TextField(null=True)
-    Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
+    Mupit_Structure = models.ForeignKey(MupitStructure, null=True, on_delete=models.CASCADE)
     CA_ID = models.TextField(null=True)
     DS_AG_spliceAI = models.TextField(null=True)
     DS_AL_spliceAI = models.TextField(null=True)
@@ -513,8 +514,8 @@ class Variant(models.Model):
     Provisional_Evidence_Description_Bioinfo = models.TextField(default='')
 
     # Data Versioning
-    Data_Release = models.ForeignKey(DataRelease)
-    Change_Type = models.ForeignKey(ChangeType)
+    Data_Release = models.ForeignKey(DataRelease, on_delete=models.CASCADE)
+    Change_Type = models.ForeignKey(ChangeType, on_delete=models.CASCADE)
 
     objects = VariantManager()
 
@@ -528,7 +529,7 @@ class ReportManager(models.Manager):
 
 
 class Report(models.Model):
-    Variant = models.ForeignKey('Variant')
+    Variant = models.ForeignKey('Variant', on_delete=models.CASCADE)
     Source = models.TextField()
     Gene_symbol_ENIGMA = models.TextField()
     Genomic_Coordinate = models.TextField()
@@ -944,17 +945,17 @@ class Report(models.Model):
     BX_ID_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default='')
     BX_ID_ENIGMA_BRCA12_Functional_Assays = models.TextField(null=True)
 
-    Data_Release = models.ForeignKey(DataRelease)
-    Change_Type = models.ForeignKey(ChangeType)
+    Data_Release = models.ForeignKey(DataRelease, on_delete=models.CASCADE)
+    Change_Type = models.ForeignKey(ChangeType, on_delete=models.CASCADE)
 
     objects = ReportManager()
 
     class Meta:
         db_table = 'report'
 
-        index_together = [
-            ["Data_Release", "SCV_ClinVar"],
-            ["Data_Release", "Submission_ID_LOVD"]
+        indexes = [
+            models.Index(fields=["Data_Release", "SCV_ClinVar"]),
+            models.Index(fields=["Data_Release", "Submission_ID_LOVD"])
         ]
 
 
@@ -973,7 +974,7 @@ class Paper(models.Model):
 
 class VariantPaper(models.Model):
     variant_hg38 = models.TextField()
-    paper = models.ForeignKey(Paper)
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     mentions = ArrayField(models.TextField())
     points = models.IntegerField(default=0)
     deleted = models.BooleanField()
@@ -1414,7 +1415,7 @@ class CurrentVariant(models.Model):
     BX_ID_Findlay_BRCA1_Ring_Function_Scores = models.TextField(default='')
     BX_ID_GnomADv3 = models.TextField(null=True)
     VR_ID = models.TextField(null=True)
-    Mupit_Structure = models.ForeignKey(MupitStructure, null=True)
+    Mupit_Structure = models.ForeignKey(MupitStructure, null=True, on_delete=models.CASCADE)
     CA_ID = models.TextField(null=True)
     DS_AG_spliceAI = models.TextField(null=True)
     DS_AL_spliceAI = models.TextField(null=True)
@@ -1432,8 +1433,8 @@ class CurrentVariant(models.Model):
     Provisional_Evidence_Description_Bioinfo = models.TextField(default='')
 
     # Data Versioning
-    Data_Release = models.ForeignKey(DataRelease)
-    Change_Type = models.ForeignKey(ChangeType)
+    Data_Release = models.ForeignKey(DataRelease, on_delete=models.CASCADE)
+    Change_Type = models.ForeignKey(ChangeType, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'currentvariant'
@@ -1441,7 +1442,7 @@ class CurrentVariant(models.Model):
 
 
 class InSilicoPriors(models.Model):
-    Variant = models.OneToOneField('Variant', primary_key=True)
+    Variant = models.OneToOneField('Variant', on_delete=models.CASCADE, primary_key=True)
 
     varType = models.TextField()
     varLoc = models.TextField()
@@ -1540,4 +1541,4 @@ class InSilicoPriors(models.Model):
 
 class VariantRepresentation(models.Model):
     Genomic_Coordinate_hg38 = models.TextField(null=False)
-    Description = JSONField(null=False, default={})
+    Description = JSONField(null=False, default=dict)
