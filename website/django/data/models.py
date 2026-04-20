@@ -23,31 +23,6 @@ class DataRelease(models.Model):
         ordering = ['date']
 
 
-class ChangeType(models.Model):
-    name = models.TextField()
-
-    class Meta:
-        db_table = "data_changetype"
-
-
-class MupitStructure(models.Model):
-    name = models.TextField()
-
-    class Meta:
-        db_table = "data_mupitstructure"
-
-
-# ------------------------------------------------------------------------
-# --- Diff models
-# ------------------------------------------------------------------------
-
-class VariantDiff(models.Model):
-    variant = models.OneToOneField('Variant', primary_key=True, on_delete=models.CASCADE)
-    diff = JSONField()
-
-    class Meta:
-        db_table = 'data_variantdiff'
-
 
 
 # ------------------------------------------------------------------------
@@ -60,8 +35,6 @@ class VariantManager(CopyManager):
 
 
 class Variant(models.Model):
-    Source = models.TextField(db_index=True)
-
     # Variant nomenclature
     Gene_Symbol = models.TextField(db_index=True)
     Reference_Sequence = models.TextField()
@@ -69,43 +42,32 @@ class Variant(models.Model):
     BIC_Nomenclature = models.TextField()
     HGVS_Protein = models.TextField()
     Protein_Change = models.TextField()
-    VRS_Digest = models.TextField(null=True, db_index=True)
     CA_ID = models.TextField(null=True, db_index=True)
+    VRS = models.JSONField(null=True, blank=True)
 
-    # Genomic coordinates
-    Chr = models.TextField(db_index=True)
-    Pos = models.TextField()
-    Ref = models.TextField()
-    Alt = models.TextField()
-    Genomic_Coordinate_hg38 = models.TextField(db_index=True)
-    Hg38_Start = models.BigIntegerField(default=1, db_index=True)
-    Hg38_End = models.BigIntegerField(default=1)
-    Genomic_Coordinate_hg37 = models.TextField()
-    Hg37_Start = models.BigIntegerField(default=1, db_index=True)
-    Hg37_End = models.BigIntegerField(default=1)
-    Genomic_HGVS_38 = models.TextField(null=True)
-    Genomic_HGVS_37 = models.TextField(null=True)
 
-    # Allele frequencies
-    Allele_Frequency = models.TextField()
-    Allele_Frequency_FAF = models.TextField()
 
-    Source_URL = models.TextField()
     Synonyms = models.TextField()
-    Pathogenicity_expert = models.TextField(db_index=True)
-    Pathogenicity_all = models.TextField()
-
-    Change_Type = models.ForeignKey(ChangeType, on_delete=models.CASCADE)
-    Mupit_Structure = models.ForeignKey(MupitStructure, null=True, on_delete=models.SET_NULL)
+    Pathogenicity = models.TextField(db_index=True)
 
     objects = VariantManager()
 
     class Meta:
         db_table = 'variant'
-        indexes = [
-            models.Index(fields=['Gene_Symbol', 'Hg38_Start']),
-            models.Index(fields=['Chr', 'Hg38_Start']),
-        ]
+
+
+class Genomic_Coordinates(models.Model):
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='genomic_coordinates')
+    assembly = models.TextField()
+    hgvs = models.TextField()
+    genome_browser_url = models.TextField()
+    chr = models.TextField()
+    pos = models.TextField()
+    ref = models.TextField()
+    alt = models.TextField()
+
+    class Meta:
+        db_table = 'genomic_coordinates'
 
 
 # ------------------------------------------------------------------------
@@ -208,6 +170,7 @@ class Variant_in_ENIGMA(models.Model):
     Collection_method = models.TextField()
     Allele_origin = models.TextField()
     ClinVarAccession = models.TextField()
+    Pathogenicity = models.TextField()
 
     class Meta:
         db_table = 'variant_enigma'
