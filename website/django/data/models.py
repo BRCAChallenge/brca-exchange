@@ -1,13 +1,5 @@
-"""
-Normalized database models for BRCA Exchange.
-
-This is a refactored version of the original models.py that normalizes the schema
-by splitting large models into smaller, related models grouped by data source.
-"""
-
 from django.db import models
 from django.db.models import JSONField
-from django.contrib.postgres.fields import ArrayField
 
 from postgres_copy import CopyManager
 
@@ -46,7 +38,20 @@ class MupitStructure(models.Model):
 
 
 # ------------------------------------------------------------------------
-# --- Core Variant Model (normalized)
+# --- Diff models
+# ------------------------------------------------------------------------
+
+class VariantDiff(models.Model):
+    variant = models.OneToOneField('Variant', primary_key=True, on_delete=models.CASCADE)
+    diff = JSONField()
+
+    class Meta:
+        db_table = 'data_variantdiff'
+
+
+
+# ------------------------------------------------------------------------
+# --- Variant model
 # ------------------------------------------------------------------------
 
 class VariantManager(CopyManager):
@@ -55,29 +60,16 @@ class VariantManager(CopyManager):
 
 
 class Variant(models.Model):
-    """
-    Core variant model containing only essential variant information.
-    Source-specific data has been moved to related models.
-    """
-    # Data source info
     Source = models.TextField(db_index=True)
-    Variant_in_ENIGMA = models.BooleanField(default=False, db_index=True)
-    Variant_in_ClinVar = models.BooleanField(default=False, db_index=True)
-    Variant_in_1000_Genomes = models.BooleanField(default=False, db_index=True)
-    Variant_in_LOVD = models.BooleanField(default=False, db_index=True)
-    Variant_in_Other = models.BooleanField(default=False, db_index=True)
-    Variant_in_GnomAD = models.BooleanField(default=False, db_index=True)
 
-    # Variant nomenclature data
+    # Variant nomenclature
     Gene_Symbol = models.TextField(db_index=True)
     Reference_Sequence = models.TextField()
     HGVS_cDNA = models.TextField(db_index=True)
     BIC_Nomenclature = models.TextField()
     HGVS_Protein = models.TextField()
-    HGVS_RNA = models.TextField()
     Protein_Change = models.TextField()
     VRS_Digest = models.TextField(null=True, db_index=True)
-    VRS_Data = models.JSONField(null=True, blank=True, help_text="GA4GH Variant Representation Standard")
     CA_ID = models.TextField(null=True, db_index=True)
 
     # Genomic coordinates
@@ -94,28 +86,15 @@ class Variant(models.Model):
     Genomic_HGVS_38 = models.TextField(null=True)
     Genomic_HGVS_37 = models.TextField(null=True)
 
-    # Allele frequencies (summary)
+    # Allele frequencies
     Allele_Frequency = models.TextField()
     Allele_Frequency_FAF = models.TextField()
 
-    # Other core fields
     Source_URL = models.TextField()
     Synonyms = models.TextField()
     Pathogenicity_expert = models.TextField(db_index=True)
     Pathogenicity_all = models.TextField()
 
-    # BX IDs for linking
-    BX_ID_ENIGMA = models.TextField(default='', db_index=True)
-    BX_ID_LOVD = models.TextField(default='', db_index=True)
-    BX_ID_ClinVar = models.TextField(default='', db_index=True)
-    BX_ID_exLOVD = models.TextField(default='', db_index=True)
-    BX_ID_GnomAD = models.TextField(null=True, db_index=True)
-    BX_ID_Other = models.TextField(default='', db_index=True)
-
-    # External IDs
-
-    # Data Versioning
-    Data_Release = models.ForeignKey(DataRelease, on_delete=models.CASCADE)
     Change_Type = models.ForeignKey(ChangeType, on_delete=models.CASCADE)
     Mupit_Structure = models.ForeignKey(MupitStructure, null=True, on_delete=models.SET_NULL)
 
@@ -130,348 +109,160 @@ class Variant(models.Model):
 
 
 # ------------------------------------------------------------------------
-# --- ENIGMA Data
+# --- Variant source sub-models
 # ------------------------------------------------------------------------
 
-class VariantENIGMA(models.Model):
-    """ENIGMA consortium data for a variant."""
-    variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='enigma_data')
-
-    URL_ENIGMA = models.TextField()
-    Condition_ID_type_ENIGMA = models.TextField()
-    Condition_ID_value_ENIGMA = models.TextField()
-    Condition_category_ENIGMA = models.TextField()
-    Clinical_significance_ENIGMA = models.TextField(db_index=True)
-    Date_last_evaluated_ENIGMA = models.TextField()
-    Assertion_method_ENIGMA = models.TextField()
-    Assertion_method_citation_ENIGMA = models.TextField()
-    Clinical_significance_citations_ENIGMA = models.TextField()
-    Comment_on_clinical_significance_ENIGMA = models.TextField()
-    Collection_method_ENIGMA = models.TextField()
-    Allele_origin_ENIGMA = models.TextField()
-    ClinVarAccession_ENIGMA = models.TextField()
-
-    class Meta:
-        db_table = 'variant_enigma'
-
-
-# ------------------------------------------------------------------------
-# --- ClinVar Data
-# ------------------------------------------------------------------------
-
-class VariantClinVar(models.Model):
+class Variant_in_ClinVar(models.Model):
     """ClinVar data for a variant."""
     variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='clinvar_data')
 
-    Clinical_Significance_ClinVar = models.TextField(db_index=True)
-    Date_Last_Updated_ClinVar = models.TextField()
-    DateSignificanceLastEvaluated_ClinVar = models.TextField(default='-')
-    Submitter_ClinVar = models.TextField()
-    SCV_ClinVar = models.TextField(db_index=True)
-    SCV_Version_ClinVar = models.TextField(default='-')
-    Allele_Origin_ClinVar = models.TextField()
-    Method_ClinVar = models.TextField()
+    Source_URL = models.TextField()
 
     class Meta:
         db_table = 'variant_clinvar'
 
 
-# ------------------------------------------------------------------------
-# --- LOVD Data
-# ------------------------------------------------------------------------
-
-class VariantLOVD(models.Model):
+class Variant_in_LOVD(models.Model):
     """LOVD (Leiden Open Variation Database) data for a variant."""
     variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='lovd_data')
 
-    Functional_analysis_technique_LOVD = models.TextField()
-    Functional_analysis_result_LOVD = models.TextField()
-    Variant_frequency_LOVD = models.TextField()
-    Variant_haplotype_LOVD = models.TextField()
-    HGVS_cDNA_LOVD = models.TextField()
-    HGVS_protein_LOVD = models.TextField()
-    Individuals_LOVD = models.TextField()
-    Variant_effect_LOVD = models.TextField()
-    Genetic_origin_LOVD = models.TextField()
-    RNA_LOVD = models.TextField()
-    Submitters_LOVD = models.TextField()
-    Created_date_LOVD = models.TextField(default="-")
-    Edited_date_LOVD = models.TextField(default="-")
-    Remarks_LOVD = models.TextField(null=True)
-    Classification_LOVD = models.TextField(null=True)
-    DBID_LOVD = models.TextField(default="-")
+    Source_URL = models.TextField()
+    Variant_haplotype = models.TextField()
 
     class Meta:
         db_table = 'variant_lovd'
 
 
-# ------------------------------------------------------------------------
-# --- exLOVD Data
-# ------------------------------------------------------------------------
-
-class VariantExLOVD(models.Model):
+class Variant_in_ExLOVD(models.Model):
     """exLOVD data for a variant."""
     variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='exlovd_data')
 
-    IARC_class_exLOVD = models.TextField()
-    Sum_family_LR_exLOVD = models.TextField()
-    Combined_prior_probablility_exLOVD = models.TextField()
-    Literature_source_exLOVD = models.TextField()
-    Co_occurrence_LR_exLOVD = models.TextField()
-    Pathology_LR_exLOVD = models.TextField(null=True)
-    Case_control_LR_exLOVD = models.TextField(null=True)
-    Posterior_probability_exLOVD = models.TextField()
-    Missense_analysis_prior_probability_exLOVD = models.TextField()
-    Segregation_LR_exLOVD = models.TextField()
+    IARC_class = models.TextField()
+    Sum_family_LR = models.TextField()
+    Combined_prior_probablility = models.TextField()
+    Literature_source = models.TextField()
+    Co_occurrence_LR = models.TextField()
+    Pathology_LR = models.TextField(null=True)
+    Case_control_LR = models.TextField(null=True)
+    Posterior_probability = models.TextField()
+    Missense_analysis_prior_probability = models.TextField()
+    Segregation_LR = models.TextField()
 
     class Meta:
         db_table = 'variant_exlovd'
 
 
-# ------------------------------------------------------------------------
-# --- GnomAD Data (v2, v3 or v4, depending on the gnomAD_version field)
-# ------------------------------------------------------------------------
-
-class VariantGnomAD(models.Model):
-    """
-    GnomAD (Genome Aggregation Database) data for a variant.
-    Due to the large number of population-specific fields, consider
-    further normalization if needed.
-    """
+class Variant_in_GnomAD(models.Model):
+    """Summary GnomAD data for a variant."""
     variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='gnomad_data')
 
-    gnomAD_version = models.TextField(null=True)
-    HGVS_cDNA_GnomAD = models.TextField(null=True)
-    HGVS_GnomAD = models.TextField(null=True)
-    HGVS_protein_GnomAD = models.TextField(null=True)
-    Flags_GnomAD = models.TextField(null=True)
-    Consequence_GnomAD = models.TextField(null=True)
-    Variant_id_GnomAD = models.TextField(null=True, db_index=True)
-    faf95_popmax_genome_GnomAD = models.TextField(null=True)
-    faf95_popmax_population_genome_GnomAD = models.TextField(null=True)
-    faf95_popmax_exome_GnomAD = models.TextField(null=True)
-    faf95_popmax_population_exome_GnomAD = models.TextField(null=True)
-    faf95_popmax_joint_GnomAD = models.TextField(null=True)
-    faf95_popmax_population_joint_GnomAD = models.TextField(null=True)
-
-    # Overall genome frequencies
-    Allele_count_genome_GnomAD = models.TextField(null=True)
-    Allele_number_genome_GnomAD = models.TextField(null=True)
-    Allele_frequency_genome_GnomAD = models.TextField(null=True)
-
-    # Overall exome frequencies
-    Allele_number_exome_GnomAD = models.TextField(null=True)
-    Allele_count_exome_GnomAD = models.TextField(null=True)
-    Allele_frequency_exome_GnomAD = models.TextField(null=True)
-
-    # Overall joint frequencies
-    Allele_number_joint_GnomAD = models.TextField(null=True)
-    Allele_count_joint_GnomAD = models.TextField(null=True)
-    Allele_frequency_joint_GnomAD = models.TextField(null=True)
-
-    # Population-specific data stored as JSON for flexibility
-    # This approach reduces the number of individual fields while maintaining data integrity
-    genome_populations = models.JSONField(null=True, blank=True, help_text="Genome frequency data by population")
-    exome_populations = models.JSONField(null=True, blank=True, help_text="Exome frequency data by population")
-    joint_populations = models.JSONField(null=True, blank=True, help_text="Joint frequency data by population")
+    Source_URL = models.TextField()
 
     class Meta:
         db_table = 'variant_gnomad'
 
 
+class Report_in_GnomAD(models.Model):
+    """GnomAD (Genome Aggregation Database) report data."""
+    variant_in_gnomad = models.ForeignKey(Variant_in_GnomAD, on_delete=models.CASCADE, related_name='gnomad_reports')
 
-# ------------------------------------------------------------------------
-# --- Data from other sources
-# ------------------------------------------------------------------------
+    version = models.TextField(null=True)
+    Flags = models.TextField(null=True)
+    Consequence = models.TextField(null=True)
+    Variant_id = models.TextField(null=True, db_index=True)
+    faf95_popmax = models.TextField(null=True)
+    faf95_popmax_population = models.TextField(null=True)
+    Allele_count = models.TextField(null=True)
+    Allele_number = models.TextField(null=True)
+    Allele_frequency = models.TextField(null=True)
+    populations = models.JSONField(null=True, blank=True)
 
-class VariantOther(models.Model):
-    """Functional assay data for a variant (Findlay, ENIGMA BRCA12, etc.)."""
-    variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='functional_assays')
+    class Meta:
+        db_table = 'report_gnomad'
 
-    # The data type, such as Functional Assay, Multifactorial, etc
-    data_type = models.TextField(null=True) 
-    # Different forms of variant data - stored as JSON due to complexity
-    variant_data = models.JSONField(null=True, blank=True, help_text="ENIGMA BRCA1/2 functional assay results")
+
+class Variant_in_Other(models.Model):
+    """Data from other sources (functional assays, multifactorial, etc.)."""
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='other_data')
+
+    data_type = models.TextField(null=True)
+    variant_data = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'variant_other'
 
 
-# ------------------------------------------------------------------------
-# --- In Silico Predictions
-# ------------------------------------------------------------------------
 
-class VariantInSilicoPredictions(models.Model):
-    """In silico prediction scores for a variant."""
-    variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='insilico_predictions')
-
-    # SpliceAI
-    DS_AG_spliceAI = models.TextField(null=True)
-    DS_AL_spliceAI = models.TextField(null=True)
-    DS_DG_spliceAI = models.TextField(null=True)
-    DS_DL_spliceAI = models.TextField(null=True)
-    DP_AG_spliceAI = models.TextField(null=True)
-    DP_AL_spliceAI = models.TextField(null=True)
-    DP_DG_spliceAI = models.TextField(null=True)
-    DP_DL_spliceAI = models.TextField(null=True)
-    result_spliceai = models.TextField(null=True)
-
-    # BayesDel
-    BayesDel_nsfp33a_noAF = models.TextField(null=True)
-
-    # Provisional Evidence
-    Provisional_Evidence_Code_Popfreq = models.TextField(default='')
-    Provisional_Evidence_Description_Popfreq = models.TextField(default='')
-    Provisional_Evidence_Code_Bioinfo = models.TextField(default='')
-    Provisional_Evidence_Description_Bioinfo = models.TextField(default='')
-
-    class Meta:
-        db_table = 'variant_insilico_predictions'
-
-
-# ------------------------------------------------------------------------
-# --- Diff Models
-# ------------------------------------------------------------------------
-
-class VariantDiff(models.Model):
-    variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE)
-    # Django 3.1+ JSONField natively supports PostgreSQL JSON type
-    diff = JSONField()
-
-    class Meta:
-        db_table = 'data_variantdiff'
-
-
-class ReportDiff(models.Model):
-    report = models.OneToOneField('Report', primary_key=True, on_delete=models.CASCADE)
-    # Django 3.1+ JSONField natively supports PostgreSQL JSON type
-    report_diff = JSONField()
-
-    class Meta:
-        db_table = 'data_reportdiff'
-
-
-# ------------------------------------------------------------------------
-# --- Report Model (similarly normalized)
-# ------------------------------------------------------------------------
-
-class ReportManager(models.Manager):
-    def create_report(self, row):
-        return self.create(**row)
-
-
-class Report(models.Model):
-    """
-    Core report model. Source-specific fields moved to related models.
-    """
-    Variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
-    Source = models.TextField(db_index=True)
-
-    # Core genomic information
-    Gene_symbol_ENIGMA = models.TextField()
-    Genomic_Coordinate = models.TextField()
-    Chr = models.TextField()
-    Pos = models.TextField()
-    Ref = models.TextField()
-    Alt = models.TextField()
-    Reference_sequence_ENIGMA = models.TextField()
-    HGVS_cDNA_ENIGMA = models.TextField()
-    BIC_Nomenclature_ENIGMA = models.TextField()
-    Abbrev_AA_change_ENIGMA = models.TextField()
-
-    objects = ReportManager()
-
-    class Meta:
-        db_table = 'data_report'
-
-
-class ReportENIGMA(models.Model):
+class Variant_in_ENIGMA(models.Model):
     """ENIGMA-specific report data."""
-    report = models.OneToOneField(Report, primary_key=True, on_delete=models.CASCADE, related_name='enigma_report')
-
-    URL_ENIGMA = models.TextField()
-    Condition_ID_type_ENIGMA = models.TextField()
-    Condition_ID_value_ENIGMA = models.TextField()
-    Condition_category_ENIGMA = models.TextField()
-    Clinical_significance_ENIGMA = models.TextField()
-    Date_last_evaluated_ENIGMA = models.TextField()
-    Assertion_method_ENIGMA = models.TextField()
-    Assertion_method_citation_ENIGMA = models.TextField()
-    Clinical_significance_citations_ENIGMA = models.TextField()
-    Comment_on_clinical_significance_ENIGMA = models.TextField()
-    Collection_method_ENIGMA = models.TextField()
-    Allele_origin_ENIGMA = models.TextField()
-    ClinVarAccession_ENIGMA = models.TextField()
-    HGVS_protein_ENIGMA = models.TextField()
-    BX_ID_ENIGMA = models.TextField()
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='enigma_reports')
+    Condition_ID_type = models.TextField()
+    Condition_ID_value = models.TextField()
+    Condition_category = models.TextField()
+    Clinical_significance = models.TextField()
+    Date_last_evaluated = models.TextField()
+    Assertion_method = models.TextField()
+    Assertion_method_citation = models.TextField()
+    Clinical_significance_citations = models.TextField()
+    Comment_on_clinical_significance = models.TextField()
+    Collection_method = models.TextField()
+    Allele_origin = models.TextField()
+    ClinVarAccession = models.TextField()
 
     class Meta:
-        db_table = 'report_enigma'
+        db_table = 'variant_enigma'
 
 
-class ReportClinVar(models.Model):
+class Report_in_ClinVar(models.Model):
     """ClinVar-specific report data."""
-    report = models.OneToOneField(Report, primary_key=True, on_delete=models.CASCADE, related_name='clinvar_report')
+    variant_in_clinvar = models.ForeignKey(Variant_in_ClinVar, on_delete=models.CASCADE, related_name='clinvar_reports')
 
-    Clinical_Significance_ClinVar = models.TextField()
-    Date_Last_Updated_ClinVar = models.TextField()
-    DateSignificanceLastEvaluated_ClinVar = models.TextField(default='-')
-    BX_ID_ClinVar = models.TextField()
-    HGVS_ClinVar = models.TextField()
-    Submitter_ClinVar = models.TextField()
-    Protein_ClinVar = models.TextField()
-    SCV_ClinVar = models.TextField(db_index=True)
-    SCV_Version_ClinVar = models.TextField(default='-')
-    Allele_Origin_ClinVar = models.TextField()
-    Method_ClinVar = models.TextField()
-    Description_ClinVar = models.TextField(default="-")
-    Summary_Evidence_ClinVar = models.TextField(default="-")
-    Review_Status_ClinVar = models.TextField(default="-")
-    Condition_Type_ClinVar = models.TextField(default="-")
-    Condition_Value_ClinVar = models.TextField(default="-")
-    Condition_DB_ID_ClinVar = models.TextField(default="-")
-    Synonyms_ClinVar = models.TextField(default="-")
+    Clinical_Significance = models.TextField()
+    Date_Last_Updated = models.TextField()
+    DateSignificanceLastEvaluated = models.TextField(default='-')
+    Submitter = models.TextField()
+    SCV = models.TextField(db_index=True)
+    SCV_Version = models.TextField(default='-')
+    Allele_Origin = models.TextField()
+    Method = models.TextField()
+    Description = models.TextField(default="-")
+    Summary_Evidence = models.TextField(default="-")
+    Review_Status = models.TextField(default="-")
+    Condition_Type = models.TextField(default="-")
+    Condition_Value = models.TextField(default="-")
+    Condition_DB_ID = models.TextField(default="-")
 
     class Meta:
         db_table = 'report_clinvar'
 
 
-class ReportLOVD(models.Model):
+class Report_in_LOVD(models.Model):
     """LOVD-specific report data."""
-    report = models.OneToOneField(Report, primary_key=True, on_delete=models.CASCADE, related_name='lovd_report')
+    variant_in_lovd = models.ForeignKey(Variant_in_LOVD, on_delete=models.CASCADE, related_name='lovd_reports')
 
-    BX_ID_LOVD = models.TextField()
-    Variant_frequency_LOVD = models.TextField()
-    HGVS_cDNA_LOVD = models.TextField()
-    HGVS_protein_LOVD = models.TextField()
-    Individuals_LOVD = models.TextField()
-    Variant_effect_LOVD = models.TextField()
-    Genetic_origin_LOVD = models.TextField()
-    RNA_LOVD = models.TextField()
-    Submitters_LOVD = models.TextField()
-    Functional_analysis_technique_LOVD = models.TextField(default='-')
-    Functional_analysis_result_LOVD = models.TextField(default='-')
-    Created_date_LOVD = models.TextField(default="-")
-    Edited_date_LOVD = models.TextField(default="-")
-    DBID_LOVD = models.TextField(default="-")
-    Remarks_LOVD = models.TextField(null=True)
-    Classification_LOVD = models.TextField(null=True)
-    Submission_ID_LOVD = models.TextField(default='-', db_index=True)
+    Variant_frequency = models.TextField()
+    Individuals = models.TextField()
+    Variant_effect = models.TextField()
+    Genetic_origin = models.TextField()
+    Submitters = models.TextField()
+    Functional_analysis_technique = models.TextField(default='-')
+    Functional_analysis_result = models.TextField(default='-')
+    Created_date = models.TextField(default="-")
+    Edited_date = models.TextField(default="-")
+    DBID = models.TextField(default="-")
+    Remarks = models.TextField(null=True)
+    Classification = models.TextField(null=True)
+    Submission_ID = models.TextField(default='-', db_index=True)
 
     class Meta:
         db_table = 'report_lovd'
 
 
-# Additional Report models for other data sources can be added similarly...
-
-
 # ------------------------------------------------------------------------
-# --- Other Models
+# --- Other models
 # ------------------------------------------------------------------------
 
 class Paper(models.Model):
-    Variant_in_gnomAD = models.BooleanField(default=False)
-    Variant_in_ExAC = models.BooleanField(default=False)
     PMID = models.TextField(db_index=True)
     Title = models.TextField()
     Author = models.TextField()
@@ -481,7 +272,7 @@ class Paper(models.Model):
         db_table = "data_paper"
 
 
-class VariantPaper(models.Model):
+class Variant_in_Paper(models.Model):
     Variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     Paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
 
@@ -490,20 +281,18 @@ class VariantPaper(models.Model):
         unique_together = ('Variant', 'Paper')
 
 
-class CurrentVariant(models.Model):
-    """
-    Represents the current version of a variant.
-    This model can also be normalized similar to Variant if needed.
-    """
-    # For brevity, keeping as-is. Can be normalized similarly to Variant.
-    pass
-
 
 class InSilicoPriors(models.Model):
     """In silico prior probabilities."""
-    pass
+
+    class Meta:
+        db_table = 'data_insilicopriors'
+        managed = False
 
 
 class VariantRepresentation(models.Model):
     """Variant representation in different formats."""
-    pass
+
+    class Meta:
+        db_table = 'data_variantrepresentation'
+        managed = False
