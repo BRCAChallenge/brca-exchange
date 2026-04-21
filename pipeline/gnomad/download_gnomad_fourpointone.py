@@ -2,7 +2,6 @@
 
 import argparse
 from common import config
-import csv
 import glob
 import logging
 import os
@@ -42,6 +41,7 @@ GNOMAD_GENOME_COVERAGE_TSV = os.path.join(_PIPELINE_DIR, "coverage.genome.tsv.bg
 GNOMAD_EXOME_COVERAGE_TSV = os.path.join(_PIPELINE_DIR, "coverage.exome.tsv.bgz")
 GNOMAD_GENOME_COVERAGE_PARQUET = os.path.join(_PIPELINE_DIR, "coverage.genome.parquet")
 GNOMAD_EXOME_COVERAGE_PARQUET = os.path.join(_PIPELINE_DIR, "coverage.exome.parquet")
+GNOMAD_COMBINED_COVERAGE_PARQUET = os.path.join(_PIPELINE_DIR, "coverage.combined.parquet")
 
 
 def parse_args():
@@ -52,6 +52,8 @@ def parse_args():
                         default='download_gnomad_fourpointone.log')
     parser.add_argument('-o', '--output', help="output file",
                         default="gnomADv4.hg38.vcf")
+    parser.add_argument('-c', '--coverage_output', help="output parquet file for weighted coverage",
+                        default=GNOMAD_COMBINED_COVERAGE_PARQUET)
     parser.add_argument('-v', '--verbose', action='count', default=False,
                         help='determines logging')
     args = parser.parse_args()
@@ -159,81 +161,54 @@ def prepare_coverage_data(logger, gene_boundaries):
     return genome_parquet, exome_parquet
 
     
-def estimate_weighted_average(genome_coverage, exome_coverage, genome_dp, exome_dp):
+def build_weighted_coverage_parquet(genome_parquet, exome_parquet, output_path, logger):
     """
-    Estimate the weighted average of genome and exome mean coverage using
-    total depth of coverage (total_DP) from the gnomAD coverage files as
-    weights.
+    Compute the total_DP-weighted average coverage for every position present
+    in either the genome or exome coverage parquets, and write the result to
+    a new parquet file.
 
-        weighted_avg = (genome_coverage * genome_dp + exome_coverage * exome_dp)
-                       / (genome_dp + exome_dp)
+    Positions present in only one dataset are weighted entirely by that
+    dataset's total_DP.  Positions where both total_DP values are zero are
+    written with a NaN weighted_mean_coverage.
+
+    Output columns: chrom (int), pos (int), weighted_mean_coverage (float).
 
     Args:
-        genome_coverage:  mean read depth across the range from gnomAD genomes.
-        exome_coverage:   mean read depth across the range from gnomAD exomes.
-        genome_dp:        mean total_DP across the range from the genome coverage file.
-        exome_dp:         mean total_DP across the range from the exome coverage file.
+        genome_parquet: Path to the genome coverage parquet.
+        exome_parquet:  Path to the exome coverage parquet.
+        output_path:    Destination path for the combined parquet.
+        logger:         Logger instance.
 
     Returns:
-        Weighted average coverage as a float, or None if total_DP is zero in
-        both datasets for the specified range.
-    """
-    total_dp = genome_dp + exome_dp
-    if total_dp == 0:
-        return None
-    return (genome_coverage * genome_dp + exome_coverage * exome_dp) / total_dp
-
-
-def estimate_coverage(chrom, start, end, genome_coverage, exome_coverage,
-                      logger):
-    """
-    Estimate coverage for a variant spanning [start, end] on chrom.
-
-    Averages the per-position mean coverage from the genome and exome
-    DataFrames over the variant region, then combines the two means with
-    AN-based weights via estimate_weighted_average.
-
-    Args:
-        chrom:            chromosome (int, str with or without 'chr' prefix).
-        start:            variant start position, 1-based inclusive.
-        end:              variant end position, 1-based inclusive.
-        genome_coverage:  DataFrame with columns 'chrom' (int), 'pos', 'mean'.
-        exome_coverage:   DataFrame with columns 'chrom' (int), 'pos', 'mean'.
-        logger:           For logging information
-
-    Returns:
-        Weighted average coverage as a float, or None if no AN data is
-        available.
-    """
-    chrom_int = int(str(chrom).replace('chr', ''))
-    positions = set(range(start, end + 1))
-
-    genome_region = genome_coverage[
-        (genome_coverage['chrom'] == chrom_int) &
-        (genome_coverage['pos'].isin(positions))
-    ]
-    exome_region = exome_coverage[
-        (exome_coverage['chrom'] == chrom_int) &
-        (exome_coverage['pos'].isin(positions))
-    ]
-
-    mean_genome_cov = genome_region['mean'].mean() if not genome_region.empty else 0.0
-    mean_exome_cov = exome_region['mean'].mean() if not exome_region.empty else 0.0
-    mean_genome_dp = genome_region['total_DP'].mean() if not genome_region.empty else 0.0
-    mean_exome_dp = exome_region['total_DP'].mean() if not exome_region.empty else 0.0
-    variant_coverage = estimate_weighted_average(mean_genome_cov, mean_exome_cov, mean_genome_dp, mean_exome_dp)
-    logger.debug("estimated coverage of %s as weighted average from genome coverage %f and exome coverage %f, genome dp %d, exome dp %d" % (variant_coverage, mean_genome_cov, mean_exome_cov, mean_genome_dp, mean_exome_dp))
-    return variant_coverage
-
-    
-def postprocess(input_vcf, output_vcf, genome_parquet, exome_parquet, logger):
-    """ Postprocess the gnomAD file by adding some key fields not provided
-    in the download VCF, such as the variant ID and the coverage
+        output_path
     """
     logger.info("Reading genome coverage from %s" % genome_parquet)
-    genome_coverage = pd.read_parquet(genome_parquet)
+    genome_df = pd.read_parquet(genome_parquet, columns=['chrom', 'pos', 'mean', 'total_DP'])
     logger.info("Reading exome coverage from %s" % exome_parquet)
-    exome_coverage = pd.read_parquet(exome_parquet)
+    exome_df = pd.read_parquet(exome_parquet, columns=['chrom', 'pos', 'mean', 'total_DP'])
+    merged = genome_df.merge(exome_df, on=['chrom', 'pos'], how='outer',
+                             suffixes=('_genome', '_exome'))
+    for col in ('mean_genome', 'mean_exome', 'total_DP_genome', 'total_DP_exome'):
+        merged[col] = merged[col].fillna(0.0)
+    total_dp = merged['total_DP_genome'] + merged['total_DP_exome']
+    weighted = ((merged['mean_genome'] * merged['total_DP_genome'] +
+                 merged['mean_exome'] * merged['total_DP_exome']) / total_dp)
+    result = merged[['chrom', 'pos']].copy()
+    result['weighted_mean_coverage'] = weighted
+    logger.info("Saving combined coverage to %s" % output_path)
+    result.to_parquet(output_path, index=False)
+    return output_path
+
+
+def postprocess(input_vcf, output_vcf, coverage_parquet, logger):
+    """Postprocess the gnomAD file by adding variant_id, flags, and coverage.
+
+    Coverage is looked up from the precomputed weighted coverage parquet
+    (output of build_weighted_coverage_parquet).  For multi-position variants
+    the per-position weighted_mean_coverage values are averaged over the range.
+    """
+    logger.info("Reading coverage from %s" % coverage_parquet)
+    coverage = pd.read_parquet(coverage_parquet)
     reader = pysam.VariantFile(input_vcf, 'r')
     reader.header.info.add("variant_id", number=1, type="String",
                            description="gnomAD-style variant ID")
@@ -243,27 +218,26 @@ def postprocess(input_vcf, output_vcf, genome_parquet, exome_parquet, logger):
                            description="Variant coverage, according to gnomAD")
     writer = pysam.VariantFile(output_vcf, 'w', header=reader.header)
     for record in reader:
-        #
-        # Set the INFO field 'flags' to the filter value
         if record.filter.keys()[0] == "PASS":
             record.info['flags'] = "-"
         else:
             record.info['flags'] = ','.join(record.filter.keys())
-        #
-        # Set the INFO field 'variant_id' to the concatenation of chrom,
-        # pos, ref, and alt.  Note that gnomAD VCFs have only one alt per
-        # row, so it's safe to just take the first alt.
-        alt = record.alts[0] 
+        alt = record.alts[0]
         var_id = "%s-%s-%s-%s" % (re.sub("^chr", "", record.chrom),
-                                  str(record.pos),record.ref, alt)
+                                  str(record.pos), record.ref, alt)
         record.info['variant_id'] = var_id
+        chrom_int = int(str(record.chrom).replace('chr', ''))
         variant_start = record.pos
         variant_end = record.pos + len(alt) - len(record.ref)
-        logger.debug("working on variant %s" % var_id)
-        coverage = estimate_coverage(record.chrom, variant_start, variant_end,
-                                     genome_coverage, exome_coverage, logger)
-        record.info['coverage'] = str(coverage)
-        bytes_written = writer.write(record)
+        region = coverage[
+            (coverage['chrom'] == chrom_int) &
+            (coverage['pos'] >= variant_start) &
+            (coverage['pos'] <= variant_end)
+        ]
+        cov = region['weighted_mean_coverage'].mean() if not region.empty else None
+        logger.debug("coverage for %s: %s" % (var_id, cov))
+        record.info['coverage'] = str(cov)
+        writer.write(record)
     reader.close()
     writer.close()
 
@@ -281,12 +255,13 @@ def main():
     gene_config_data = config.load_config(args.gene_config)
     boundaries38 = {c: (s, e) for _, (c, s, e)
                     in gene_config_data[['chr', 'start_hg38', 'end_hg38']].iterrows()}
-    #
-    # prepare the coverage data: gnomAD 3.0.1 genomes and gnomAD 4.0 exomes
-    # Each coverage dataset is written to a parquet file and freed from memory
-    # before the next is read; the parquet files are loaded again in postprocess.
     (genome_parquet,
      exome_parquet) = prepare_coverage_data(logger, boundaries38)
+    build_weighted_coverage_parquet(genome_parquet, exome_parquet,
+                                    args.coverage_output, logger)
+    for f in (GNOMAD_GENOME_COVERAGE_TSV, GNOMAD_EXOME_COVERAGE_TSV,
+              genome_parquet, exome_parquet):
+        os.remove(f)
     tmp = tempfile.NamedTemporaryFile()
     with open(tmp.name, 'w') as tmp_fp:
         for _, row in gene_config_data.iterrows():
@@ -300,20 +275,12 @@ def main():
     sort_cmd = ["bcftools", "sort", "unsorted.vcf",
                 "-Ov", "-o", "sorted.vcf"]
     subprocess.run(sort_cmd)
-    postprocess("sorted.vcf", args.output,
-                genome_parquet, exome_parquet, logger)
-
-    
-    #
-    # Clean up the individual files and their indices
+    postprocess("sorted.vcf", args.output, args.coverage_output, logger)
     for thisfile in glob.glob("*.gnomADv4.1*vcf.gz*"):
         os.remove(thisfile)
     os.remove("unsorted.vcf")
     os.remove("sorted.vcf")
 
 
-    
-
-    
 if __name__ == "__main__":
     main()

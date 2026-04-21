@@ -32,7 +32,7 @@ docutils==0.16
 fake-useragent==0.1.11
 fastparquet==2024.5.0
 ga4gh.common==0.0.7
-ga4gh.vrs==2.1.4
+ga4gh.vrs==2.3.1
 hgvs==1.5.4
 humanfriendly==10.0
 intervaltree==3.1.0
