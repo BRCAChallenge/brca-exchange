@@ -109,23 +109,23 @@ class CopyClinvarVCFToOutputDir(DefaultPipelineTask):
 
 class DownloadBICData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.bic_file_dir + "/BIC.brca12.sorted.hg38.vcf")
+        return luigi.LocalTarget(self.bic_file_dir + "/BIC.BRCA12.sorted.hg38.vcf")
 
     def run(self):
         os.chdir(self.bic_file_dir)
 
         brca1_data_url = "https://brcaexchange.org/backend/downloads/bic_brca12.sorted.hg38.vcf"
-        pipeline_utils.download_file_and_display_progress(brca1_data_url)
-        os.rename("BIC.brca12.sorted.hg38.vcf", self.output().path)
+        pipeline_utils.download_file_and_display_progress(brca1_data_url,
+                                    file_name=self.output().path)
 
 @requires(DownloadBICData)
 class CopyBICOutputToOutputDir(DefaultPipelineTask):
 
     def output(self):
-        return luigi.LocalTarget(self.cfg.output_dir + "/BIC.brca12.sorted.hg38.vcf")
+        return luigi.LocalTarget(self.cfg.output_dir + "/BIC.BRCA12.sorted.hg38.vcf")
 
     def run(self):
-        copy(self.bic_file_dir + "/BIC.brca12.sorted.hg38.vcf", self.cfg.output_dir)
+        copy(self.bic_file_dir + "/BIC.BRCA12.sorted.hg38.vcf", self.cfg.output_dir)
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
@@ -163,7 +163,7 @@ class ExtractDataFromLatestEXLOVD(DefaultPipelineTask):
 @requires(ExtractDataFromLatestEXLOVD)
 class ConvertEXLOVDBRCA1ExtractToVCF(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.ex_lovd_file_dir, "exLOVD_brca1.hg19.vcf"))
+        return luigi.LocalTarget(os.path.join(self.ex_lovd_file_dir, "exLOVD.BRCA1.hg19.vcf"))
 
     def run(self):
         os.chdir(lovd_method_dir)
@@ -171,7 +171,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(DefaultPipelineTask):
         args = ["./lovd2vcf.py", "-i", self.ex_lovd_file_dir + "/BRCA1.txt", "-o",
                 self.output().path, "-a",
                 "exLOVDAnnotation", "-e",
-                os.path.join(self.artifacts_dir, "exLOVD_BRCA1_error_variants.txt"),
+                os.path.join(self.artifacts_dir, "exLOVD.BRCA1_error_variants.txt"),
                 "-s", "exLOVD"]
 
         pipeline_utils.run_process(args)
@@ -182,7 +182,7 @@ class ConvertEXLOVDBRCA1ExtractToVCF(DefaultPipelineTask):
 class ConvertEXLOVDBRCA2ExtractToVCF(DefaultPipelineTask):
 
     def output(self):
-        return luigi.LocalTarget(self.ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf")
+        return luigi.LocalTarget(self.ex_lovd_file_dir + "/exLOVD.BRCA2.hg19.vcf")
 
     def run(self):
         os.chdir(lovd_method_dir)
@@ -190,21 +190,21 @@ class ConvertEXLOVDBRCA2ExtractToVCF(DefaultPipelineTask):
         args = ["./lovd2vcf.py", "-i", self.ex_lovd_file_dir + "/BRCA2.txt", "-o",
                 self.output().path, "-a",
                 "exLOVDAnnotation", "-e",
-                os.path.join(self.artifacts_dir, "exLOVD_BRCA2_error_variants.txt"),
+                os.path.join(self.artifacts_dir, "exLOVD.BRCA2_error_variants.txt"),
                 "-s", "exLOVD"]
 
         pipeline_utils.run_process(args)
         pipeline_utils.check_file_for_contents(self.output().path)
 
 
-@requires(ConvertEXLOVDBRCA2ExtractToVCF)
+@requires(ConvertEXLOVDBRCA1ExtractToVCF, ConvertEXLOVDBRCA2ExtractToVCF)
 class ConcatenateEXLOVDVCFFiles(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.ex_lovd_file_dir + "/exLOVD_brca12.hg19.vcf")
+        return luigi.LocalTarget(self.ex_lovd_file_dir + "/exLOVD.BRCA12.hg19.vcf")
 
     def run(self):
-        args = ["vcf-concat", self.ex_lovd_file_dir + "/exLOVD_brca1.hg19.vcf",
-                self.ex_lovd_file_dir + "/exLOVD_brca2.hg19.vcf"]
+        args = ["vcf-concat", self.ex_lovd_file_dir + "/exLOVD.BRCA1.hg19.vcf",
+                self.ex_lovd_file_dir + "/exLOVD.BRCA2.hg19.vcf"]
 
         pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
         pipeline_utils.check_file_for_contents(self.output().path)
@@ -213,7 +213,7 @@ class ConcatenateEXLOVDVCFFiles(DefaultPipelineTask):
 @requires(ConcatenateEXLOVDVCFFiles)
 class CrossmapConcatenatedEXLOVDData(DefaultPipelineTask):
     def output(self):
-        return luigi.LocalTarget(self.ex_lovd_file_dir + "/exLOVD.brca12.hg38.vcf")
+        return luigi.LocalTarget(self.ex_lovd_file_dir + "/exLOVD.BRCA12.hg38.vcf")
 
     def run(self):
         brca_resources_dir = self.cfg.resources_dir
@@ -232,7 +232,7 @@ class CrossmapConcatenatedEXLOVDData(DefaultPipelineTask):
 class SortEXLOVDOutput(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(
-            self.ex_lovd_file_dir + "/exLOVD_brca12.sorted.hg38.vcf")
+            self.ex_lovd_file_dir + "/exLOVD.BRCA12.sorted.hg38.vcf")
 
     def run(self):
         args = ["vcf-sort", self.input().path]
@@ -244,7 +244,7 @@ class SortEXLOVDOutput(DefaultPipelineTask):
 class CopyEXLOVDOutputToOutputDir(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(
-            self.cfg.output_dir + "/exLOVD_brca12.sorted.hg38.vcf")
+            self.cfg.output_dir + "/exLOVD.BRCA12.sorted.hg38.vcf")
 
     def run(self):
         copy(self.input().path, self.cfg.output_dir)
@@ -432,7 +432,7 @@ class CopyG1KOutputToOutputDir(DefaultPipelineTask):
 class DownloadStaticExACData(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(
-            self.exac_file_dir + "/ExAC.brca12.sorted.hg38.vcf")
+            self.exac_file_dir + "/ExAC.BRCA12.sorted.hg38.vcf")
 
     def run(self):
         os.chdir(self.exac_file_dir)
@@ -446,7 +446,7 @@ class DownloadStaticExACData(DefaultPipelineTask):
 class CopyEXACOutputToOutputDir(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(
-            self.cfg.output_dir + "/ExAC.brca12.sorted.hg38.vcf")
+            self.cfg.output_dir + "/ExAC.BRCA12.sorted.hg38.vcf")
 
     def run(self):
         copy(self.input().path,

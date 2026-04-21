@@ -472,14 +472,12 @@ def preprocess_vcfs(input_dir, output_dir, seq_provider, gene_regions_trees,
        ["bash", "1000g_preprocess.sh", os.path.join(input_dir, GENOME1K_FILE)], stdout=f_1000G)
 
     # merge multiple variant per vcf into multiple lines
-    for source_name, file_name in overall_source_dict.items():
+    for source_name, vcf_file_name in overall_source_dict.items():
         print("convert to one variant per line in ", source_name)
-        input_file = os.path.join(input_dir, file_name)
-        output_file = os.path.join(output_dir, source_name + ".vcf")
+        input_vcf = os.path.join(input_dir, vcf_file_name)
+        output_vcf = os.path.join(output_dir, source_name + ".vcf")
         # Individual reports (lines in VCF/TSV) are given ids as part of the one_variant_transform method.
-        one_variant_transform_and_standardize(f_in, f_out, source_name)
-        f_in.close()
-        f_out.close()
+        one_variant_transform_and_standardize(input_vcf, output_vcf, source_name)
 
         print("merge repetitive variants within ", source_name)
         vcf_in = os.path.join(output_dir, source_name + ".vcf")
@@ -517,15 +515,15 @@ def preprocess_vcfs(input_dir, output_dir, seq_provider, gene_regions_trees,
         n_wrong, n_total = 0, 0
         for record in vcf_reader:
             ref = record.REF.replace("-", "")
-            v = [record.CHROM, record.POS, ref, "dummy"]
-            if (not ref_correct(record.CHROM, record.POS, record.REF, record.ALT, seq_provider) 
-                or utilities.is_outside_boundaries(record.CHROM, record.POS, gene_regions_trees)):
+            v = [record.chrom, record.pos, ref, "dummy"]
+            if (not ref_correct(record.chrom, record.pos, record.ref, record.alt, seq_provider) 
+                or utilities.is_outside_boundaries(record.chrom, record.pos, gene_regions_trees)):
                 logging.warning("Reference incorrect for Chrom: %s, Pos: %s, Ref: %s, and Alt: %s",
                                 record.chrom, record.pos, record.ref, record.alts)
                 vcf_wrong_writer.write(record)
                 n_wrong += 1
             else:
-                gene_symbol = utilities.chrom_pos_to_symbol(record.CHROM, record.POS, genome_regions_symbol_dict)
+                gene_symbol = utilities.chrom_pos_to_symbol(record.chrom, record.pos, genome_regions_symbol_dict)
                 vcf_right_writer.write(record)
             n_total += 1
         vcf_reader.close()
@@ -549,19 +547,16 @@ def repeat_merging(vcf_in, vcf_out):
     has_repeats = False
     unique_variant_list = {}
     vcf_reader = pysam.VariantFile(vcf_in)
+    vcf_writer = pysam.VariantFile(vcf_out, "w", header=vcf_reader.header)
+    variant_dict = {}  # str -> Record
+    num_repeats = 0
     for record in vcf_reader:
-        genome_coor = "chr{0}:{1}:{2}>{3}".format(record.CHROM, str(record.POS),
-                                                  record.REF, record.ALT[0])
+        genome_coor = "chr{0}:{1}:{2}>{3}".format(record.chrom, str(record.pos),
+                                                  record.ref, record.alts[0])
         if genome_coor in unique_variant_list:
             has_repeats = True
         else:
             unique_variant_list[genome_coor] = 1
-    vcf_writer = pysam.VariantFile(vcf_out, vcf_reader)
-    variant_dict = {}  # str -> Record
-    num_repeats = 0
-    for record in vcf_reader:
-        genome_coor = "chr{0}:{1}:{2}>{3}".format(
-            record.chrom, str(record.pos), record.ref, record.alts[0])
         if has_repeats:
             if genome_coor in variant_dict:
                 num_repeats += 1
@@ -570,8 +565,12 @@ def repeat_merging(vcf_in, vcf_out):
                         variant_dict[genome_coor].info[key] = record.info[key]
                     else:
                         new_value = record.info[key]
+                        if not isinstance(new_value, (list, tuple)):
+                            new_value = (new_value,)
                         new_value = [xx for xx in new_value if xx is not None]
                         old_value = variant_dict[genome_coor].info[key]
+                        if not isinstance(old_value, (list, tuple)):
+                            old_value = (old_value,)
                         old_value = [xx for xx in old_value if xx is not None]
 
                         if type(new_value) != list:
@@ -600,19 +599,19 @@ def repeat_merging(vcf_in, vcf_out):
 
                             # Remove empty strings from list
                             merged_value = [_f for _f in merged_value if _f]
-                            variant_dict[genome_coor].info[key] = tuple(merged_value)
+                            # pysam requires a scalar for Number=1 fields; a multi-element
+                            # tuple raises TypeError in bcf_check_values.
+                            if vcf_reader.header.info[key].number == 1:
+                                variant_dict[genome_coor].info[key] = merged_value[0] if merged_value else None
+                            else:
+                                variant_dict[genome_coor].info[key] = tuple(merged_value)
             else:
                 variant_dict[genome_coor] = record.copy()
         else:
-            vcf_writer.write_record(record)
+            vcf_writer.write(record)
     print("number of repeat records: ", num_repeats, "\n")
-
-    # Add contig definitions to header if missing (required by pysam)
-    for chrom in ['13', '17', '7', '1', '2', '3', '4', '5', '6', '8', '9', '10', '11', '12', '14', '15', '16', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']:
-        if chrom not in vcf_reader.header.contigs:
-            vcf_reader.header.contigs.add(chrom)
-
-    vcf_writer = pysam.VariantFile(output_file, 'w', header=vcf_reader.header)
+    #
+    # At this point, all of the non-repeated records will be written.  Now, write the repeated records.
     if has_repeats:
         for record in variant_dict.values():
             vcf_writer.write(record)

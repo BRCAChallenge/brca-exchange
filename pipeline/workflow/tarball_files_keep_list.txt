@@ -1,10 +1,10 @@
 ./1000_Genomes.sorted.hg38.vcf
-./BIC.brca12.sorted.hg38.vcf
+./BIC.BRCA12.sorted.hg38.vcf
 ./ClinVar.vcf
 ./enigma_from_clinvar.vcf
 ./ESP.sorted.hg38.vcf
-./ExAC.brca12.sorted.hg38.vcf
-./exLOVD.brca12.sorted.hg38.vcf
+./ExAC.BRCA12.sorted.hg38.vcf
+./exLOVD.BRCA12.sorted.hg38.vcf
 ./GnomAD.sorted.hg38.vcf
 ./GnomADv3.sorted.hg38.vcf
 ./GnomADv4.sorted.hg38.vcf
