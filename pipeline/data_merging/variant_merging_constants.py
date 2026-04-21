@@ -68,13 +68,35 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Case_control_LR": "case_control_lr",
                   "Pathology_LR": "pathology_lr",
                   "Missense_analysis_prior_probability": "missense_analysis_prior_p",
+                  "Other_prior_probability": "other_prior_p",
                   "Posterior_probability": "posterior_p",
                   "IARC_class": "iarc_class",
                   "BIC_Nomenclature": "bic_dna_change",
                   "Literature_source": "key_observational_reference",
                   "HGVS_cDNA": "dna_change",
                   "HGVS_protein": "protein_change",
+                  "Comments": "comments",
                   "BX_ID": "BX_ID"}
+
+# INFO header definitions for exLOVD fields missing from the VCF header.
+# Keyed by VCF INFO name; value is (type, description).
+EX_LOVD_INFO_HEADERS = {
+    "combined_prior_p":          ("Float",   "Combined prior probability"),
+    "segregation_lr":            ("Float",   "Segregation likelihood ratio"),
+    "sum_family_lr":             ("Float",   "Sum family likelihood ratio"),
+    "co_occurrence_lr":          ("Float",   "Co-occurrence likelihood ratio"),
+    "case_control_lr":           ("Float",   "Case-control likelihood ratio"),
+    "pathology_lr":              ("Float",   "Pathology likelihood ratio"),
+    "missense_analysis_prior_p": ("Float",   "Missense analysis prior probability"),
+    "other_prior_p":             ("Float",   "Other prior probability"),
+    "posterior_p":               ("Float",   "Posterior probability"),
+    "iarc_class":                ("String",  "IARC classification"),
+    "bic_dna_change":            ("String",  "BIC nomenclature DNA change"),
+    "key_observational_reference": ("String", "Literature source"),
+    "dna_change":                ("String",  "HGVS cDNA change"),
+    "protein_change":            ("String",  "HGVS protein change"),
+    "comments":                  ("String",  "Comments"),
+}
 
 BIC_FIELDS = {"Clinical_classification": "Category",
               "Number_of_family_member_carrying_mutation": "Number_Reported",

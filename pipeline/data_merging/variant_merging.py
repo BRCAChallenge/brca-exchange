@@ -639,6 +639,12 @@ def one_variant_transform_and_standardize(input_file, output_file,
     if 'BX_ID' not in vcf_reader.header.info:
         vcf_reader.header.info.add('BX_ID', number=1, type='Integer', description='BX report ID')
 
+    # Add exLOVD INFO headers if missing (fields present in data but not in header)
+    if source_name == "exLOVD":
+        for field, (ftype, desc) in EX_LOVD_INFO_HEADERS.items():
+            if field not in vcf_reader.header.info:
+                vcf_reader.header.info.add(field, number=1, type=ftype, description=desc)
+
     # Add ExAC allele frequency headers if processing ExAC data
     if source_name == "ExAC":
         for subpopulation in EXAC_SUBPOPULATIONS:
