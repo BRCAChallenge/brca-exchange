@@ -520,9 +520,9 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ExAC": EXAC_FIELDS,
               "ESP": ESP_FIELDS,
               "BIC": BIC_FIELDS,
-              "GnomAD": GNOMAD_V2_FIELDS,
-              "GnomADv3": GNOMAD_V3_FIELDS,
-              "GnomADv4": GNOMAD_V4_FIELDS,
+              "gnomADv2": GNOMAD_V2_FIELDS,
+              "gnomADv3": GNOMAD_V3_FIELDS,
+              "gnomADv4": GNOMAD_V4_FIELDS,
               "ENIGMA_BRCA12_Functional_Assays": ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS}
 
 LIST_TYPE_FIELDS = {
@@ -539,9 +539,9 @@ EX_LOVD_FILE = "exLOVD.BRCA12.sorted.hg38.vcf"
 BIC_FILE = "BIC.BRCA12.sorted.hg38.vcf"
 EXAC_FILE = "ExAC.BRCA12.sorted.hg38.vcf"
 ESP_FILE = "ESP.sorted.hg38.vcf"
-GNOMAD_V2_FILE = "GnomAD.sorted.hg38.vcf"
-GNOMAD_V3_FILE = "GnomADv3.sorted.hg38.vcf"
-GNOMAD_V4_FILE = "GnomADv4.sorted.hg38.vcf"
+GNOMAD_V2_FILE = "gnomADv2.sorted.hg38.vcf"
+GNOMAD_V3_FILE = "gnomADv3.sorted.hg38.vcf"
+GNOMAD_V4_FILE = "gnomADv4.sorted.hg38.vcf"
 
 # Functional Assays
 FUNCTIONAL_ASSAYS_SCORES_FILE = "ENIGMA_BRCA12_functional_assays.sorted.hg38.vcf"
