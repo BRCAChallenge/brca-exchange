@@ -5,6 +5,7 @@ it also merges equivalent variants together
 """
 import argparse
 import csv
+from copy import deepcopy
 import glob
 import logging
 import os
@@ -456,9 +457,9 @@ def preprocess_vcfs(input_dir, output_dir, seq_provider, gene_regions_trees,
                    "ExAC": EXAC_FILE,
                    "ESP": ESP_FILE,
                    "BIC": BIC_FILE,
-                   "GnomAD": GNOMAD_V2_FILE,
-                   "GnomADv3": GNOMAD_V3_FILE,
-                   "GnomADv4": GNOMAD_V4_FILE,
+                   "gnomADv2": GNOMAD_V2_FILE,
+                   "gnomADv3": GNOMAD_V3_FILE,
+                   "gnomADv4": GNOMAD_V4_FILE,
                    "ENIGMA_BRCA12_Functional_Assays": FUNCTIONAL_ASSAYS_SCORES_FILE
                    }
     print("\n" + input_dir + ":")
@@ -493,7 +494,6 @@ def preprocess_vcfs(input_dir, output_dir, seq_provider, gene_regions_trees,
         if not os.path.exists(d_wrong):
             os.makedirs(d_wrong)
         wrong_file = output_dir + "wrong_genome_coors/" + source_name + "_wrong_genome_coor.vcf"
-        right_file = output_dir + "right" + source_name
 
         vcf_reader = pysam.VariantFile(file_name)
 
@@ -503,20 +503,15 @@ def preprocess_vcfs(input_dir, output_dir, seq_provider, gene_regions_trees,
                 vcf_reader.header.contigs.add(chrom)
 
         vcf_wrong_writer = pysam.VariantFile(wrong_file, 'w', header=vcf_reader.header)
-        vcf_right_writer = pysam.VariantFile(right_file, 'w', header=vcf_reader.header)
-        n_wrong, n_total = 0, 0
+        vcf_right_writer = {}
         symbol_level_source_dict[source_name] = {}
-        f_right = dict()
         for symbol in gene_symbols:
-            f_right[symbol] = open("%sright%s_%s.vcf" % (output_dir, symbol,
-                                                         source_name), "w")
-            symbol_level_source_dict[source_name][symbol] = f_right[symbol].name
-            vcf_right_writer[symbol] = vcf.Writer(f_right[symbol], vcf_reader)
+            right_symbol_file = "%sright%s_%s.vcf" % (output_dir, symbol, source_name)
+            symbol_level_source_dict[source_name][symbol] = right_symbol_file
+            vcf_right_writer[symbol] = pysam.VariantFile(right_symbol_file, 'w', header=vcf_reader.header)
         n_wrong, n_total = 0, 0
         for record in vcf_reader:
-            ref = record.REF.replace("-", "")
-            v = [record.chrom, record.pos, ref, "dummy"]
-            if (not ref_correct(record.chrom, record.pos, record.ref, record.alt, seq_provider) 
+            if (not ref_correct(record.chrom, record.pos, record.ref, record.alts, seq_provider)
                 or utilities.is_outside_boundaries(record.chrom, record.pos, gene_regions_trees)):
                 logging.warning("Reference incorrect for Chrom: %s, Pos: %s, Ref: %s, and Alt: %s",
                                 record.chrom, record.pos, record.ref, record.alts)
@@ -524,7 +519,7 @@ def preprocess_vcfs(input_dir, output_dir, seq_provider, gene_regions_trees,
                 n_wrong += 1
             else:
                 gene_symbol = utilities.chrom_pos_to_symbol(record.chrom, record.pos, genome_regions_symbol_dict)
-                vcf_right_writer.write(record)
+                vcf_right_writer[gene_symbol].write(record)
             n_total += 1
         vcf_reader.close()
         for symbol in gene_symbols:
@@ -721,10 +716,9 @@ def write_new_tsv(filename, columns, variants, first_execution):
         if len(variant) != len(columns):
             raise Exception("mismatching number of columns in head (%s) and row (%s)" % (len(columns), len(variant)))
         for ii in range(len(variant)):
-            if type(variant[ii]) == list:
-                comma_delimited_string = ",".join(str(xx) for xx in variant[ii])
-                variant[ii] = comma_delimited_string
-            elif type(variant[ii]) == int:
+            if isinstance(variant[ii], (list, tuple)):
+                variant[ii] = ",".join(str(xx) for xx in variant[ii])
+            elif not isinstance(variant[ii], str):
                 variant[ii] = str(variant[ii])
         merged_file.write("\t".join(variant)+"\n")
     merged_file.close()
@@ -755,9 +749,11 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
                 variants[genome_coor].append(record.info[value])
             except KeyError:
                 logging.warning("KeyError appending VCF record.info[value] to variant. Variant: %s \n Record.info: %s \n value: %s", variants[genome_coor], record.info, value)
-                if source == "BIC":
+                if value in vcf_reader.header.info:
+                    # Field is defined in the header but absent from this record (e.g. FAF fields
+                    # for exome-filtered gnomAD variants that have no joint stats computed).
                     variants[genome_coor].append(DEFAULT_CONTENTS)
-                    logging.debug("Could not find value %s for source %s in variant %s, inserting default content %s instead.", value, source, DEFAULT_CONTENTS)
+                    logging.debug("Field %s absent from record for source %s, inserting default content.", value, source)
                 else:
                     raise Exception("There was a problem appending a value for %s to variant %s" % (value, variants[genome_coor]))
     vcf_reader.close()
