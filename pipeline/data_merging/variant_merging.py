@@ -534,13 +534,6 @@ def preprocess_vcfs(input_dir, output_dir, seq_provider, gene_regions_trees,
 def repeat_merging(vcf_in, vcf_out):
     """takes a vcf file, collapses repetitive variant rows and write out
         to a new vcf file (without header)"""
-    #
-    # Step 1: read through the file to determine if it has repeats.
-    # If it has no repeats (i.e. if each line is a distinct variant),
-    # then it can be processed in a manner that's quicker and less
-    # memory intensive.
-    has_repeats = False
-    unique_variant_list = {}
     vcf_reader = pysam.VariantFile(vcf_in)
     vcf_writer = pysam.VariantFile(vcf_out, "w", header=vcf_reader.header)
     variant_dict = {}  # str -> Record
@@ -548,68 +541,58 @@ def repeat_merging(vcf_in, vcf_out):
     for record in vcf_reader:
         genome_coor = "chr{0}:{1}:{2}>{3}".format(record.chrom, str(record.pos),
                                                   record.ref, record.alts[0])
-        if genome_coor in unique_variant_list:
-            has_repeats = True
-        else:
-            unique_variant_list[genome_coor] = 1
-        if has_repeats:
-            if genome_coor in variant_dict:
-                num_repeats += 1
-                for key in record.info:
-                    if key not in variant_dict[genome_coor].info.keys():
-                        variant_dict[genome_coor].info[key] = record.info[key]
+        if genome_coor in variant_dict:
+            num_repeats += 1
+            for key in record.info:
+                if key not in variant_dict[genome_coor].info.keys():
+                    variant_dict[genome_coor].info[key] = record.info[key]
+                else:
+                    new_value = record.info[key]
+                    if not isinstance(new_value, (list, tuple)):
+                        new_value = (new_value,)
+                    new_value = [xx for xx in new_value if xx is not None]
+                    old_value = variant_dict[genome_coor].info[key]
+                    if not isinstance(old_value, (list, tuple)):
+                        old_value = (old_value,)
+                    old_value = [xx for xx in old_value if xx is not None]
+
+                    if type(new_value) != list:
+                        new_value = [new_value]
+                    if type(old_value) != list:
+                        old_value = [old_value]
+
+                    # This if statement is crucial to not mess up text fields
+                    # containing ',' and hence being treated as separate fields.
+                    # The list(set(new_value + old_value)) statement below would
+                    # garble it otherwise.
+                    if new_value == old_value and key != "individuals":
+                        continue
                     else:
-                        new_value = record.info[key]
-                        if not isinstance(new_value, (list, tuple)):
-                            new_value = (new_value,)
-                        new_value = [xx for xx in new_value if xx is not None]
-                        old_value = variant_dict[genome_coor].info[key]
-                        if not isinstance(old_value, (list, tuple)):
-                            old_value = (old_value,)
-                        old_value = [xx for xx in old_value if xx is not None]
-
-                        if type(new_value) != list:
-                            new_value = [new_value]
-                        if type(old_value) != list:
-                            old_value = [old_value]
-
-                        # This if statement is crucial to not mess up text fields
-                        # containing ',' and hence being treated as separate fields.
-                        # The list(set(new_value + old_value)) statement below would
-                        # garble it otherwise.
-                        if new_value == old_value and key != "individuals":
-                            continue
+                        # FIXME: is there a better name for this? it seems it now only
+                        # applies to scv to ensure the order is the same,
+                        # but we don't hold this concern for other list fields...
+                        if key in LIST_TYPE_FIELDS:
+                            merged_value = list(new_value + old_value)
+                        # The "individuals" values from LOVD submissions are
+                        # added together when merging variants.
+                        elif key == "individuals":
+                            merged_value = [str(int(new_value[0]) + int(old_value[0]))]
                         else:
-                            # FIXME: is there a better name for this? it seems it now only
-                            # applies to scv to ensure the order is the same,
-                            # but we don't hold this concern for other list fields...
-                            if key in LIST_TYPE_FIELDS:
-                                merged_value = list(new_value + old_value)
-                            # The "individuals" values from LOVD submissions are
-                            # added together when merging variants.
-                            elif key == "individuals":
-                                merged_value = [str(int(new_value[0]) + int(old_value[0]))]
-                            else:
-                                merged_value = sorted(list(set(new_value + old_value)))
+                            merged_value = sorted(list(set(new_value + old_value)))
 
-                            # Remove empty strings from list
-                            merged_value = [_f for _f in merged_value if _f]
-                            # pysam requires a scalar for Number=1 fields; a multi-element
-                            # tuple raises TypeError in bcf_check_values.
-                            if vcf_reader.header.info[key].number == 1:
-                                variant_dict[genome_coor].info[key] = merged_value[0] if merged_value else None
-                            else:
-                                variant_dict[genome_coor].info[key] = tuple(merged_value)
-            else:
-                variant_dict[genome_coor] = record.copy()
+                        # Remove empty strings from list
+                        merged_value = [_f for _f in merged_value if _f]
+                        # pysam requires a scalar for Number=1 fields; a multi-element
+                        # tuple raises TypeError in bcf_check_values.
+                        if vcf_reader.header.info[key].number == 1:
+                            variant_dict[genome_coor].info[key] = merged_value[0] if merged_value else None
+                        else:
+                            variant_dict[genome_coor].info[key] = tuple(merged_value)
         else:
-            vcf_writer.write(record)
+            variant_dict[genome_coor] = record.copy()
     print("number of repeat records: ", num_repeats, "\n")
-    #
-    # At this point, all of the non-repeated records will be written.  Now, write the repeated records.
-    if has_repeats:
-        for record in variant_dict.values():
-            vcf_writer.write(record)
+    for record in variant_dict.values():
+        vcf_writer.write(record)
     vcf_reader.close()
     vcf_writer.close()
 
