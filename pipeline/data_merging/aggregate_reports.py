@@ -125,7 +125,14 @@ def normalize_vcf_reports(file, columns, filename, file_extension, genome_region
                 column_index = columns.index(column_name)
                 report[column_index] = record.info[value]
             except KeyError:
-                raise Exception("WARNING: Key error with report: %s \n\nError on value: %s \n\n Error in record.info: %s \n\nNeeds attn." % (report, value, record.info))
+                if value in reader.header.info:
+                    # Field declared in header but absent from this record (e.g. gnomAD
+                    # FAF fields not computed for every variant).
+                    column_name = key + "_" + source
+                    column_index = columns.index(column_name)
+                    report[column_index] = DEFAULT_CONTENTS
+                else:
+                    raise Exception("WARNING: Key error with report: %s \n\nError on value: %s \n\n Error in record.info: %s \n\nNeeds attn." % (report, value, record.info))
         reports.append(report)
     reader.close()
     return reports
