@@ -154,7 +154,7 @@ def write_report(report, columns, reports_output_fp):
     if len(report) != len(columns):
         raise Exception("mismatching number of columns in head and row")
     for ii in range(len(report)):
-        if type(report[ii]) == list:
+        if isinstance(report[ii], (list, tuple)):
             comma_delimited_string = ",".join(str(xx) for xx in report[ii])
             report[ii] = comma_delimited_string
         elif type(report[ii]) == int:
