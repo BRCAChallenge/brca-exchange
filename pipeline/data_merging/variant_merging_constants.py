@@ -78,6 +78,16 @@ EX_LOVD_FIELDS = {"Combined_prior_probablility": "combined_prior_p",
                   "Comments": "comments",
                   "BX_ID": "BX_ID"}
 
+# INFO header definitions for ENIGMA_BRCA12_Functional_Assays fields whose tag
+# names contain characters invalid in standard VCF (parentheses, '+').  pysam
+# will warn about these unless they are declared in the header explicitly.
+# Keyed by VCF INFO name; value is (type, description).
+ENIGMA_FA_INFO_HEADERS = {
+    "HAT_(Cell_Survival)_Biwas": ("String", "HAT cell-survival score (Biwas)"),
+    "DS_(Drug_Sensitivity)_Biwas": ("String", "Drug-sensitivity score (Biwas)"),
+    "HAT+DS_Score_Biwas": ("String", "Combined HAT+DS score (Biwas)"),
+}
+
 # INFO header definitions for exLOVD fields missing from the VCF header.
 # Keyed by VCF INFO name; value is (type, description).
 EX_LOVD_INFO_HEADERS = {

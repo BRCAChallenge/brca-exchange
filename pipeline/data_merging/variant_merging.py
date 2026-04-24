@@ -640,6 +640,14 @@ def one_variant_transform_and_standardize(input_file, output_file,
             if field not in vcf_reader.header.info:
                 vcf_reader.header.info.add(field, number=1, type=ftype, description=desc)
 
+    # Add ENIGMA_BRCA12_Functional_Assays INFO headers for the three fields
+    # with non-standard tag names (parentheses, '+') that pysam rejects without
+    # an explicit header declaration.
+    if source_name == "ENIGMA_BRCA12_Functional_Assays":
+        for field, (ftype, desc) in ENIGMA_FA_INFO_HEADERS.items():
+            if field not in vcf_reader.header.info:
+                vcf_reader.header.info.add(field, number=1, type=ftype, description=desc)
+
     # Add ExAC allele frequency headers if processing ExAC data
     if source_name == "ExAC":
         for subpopulation in EXAC_SUBPOPULATIONS:
@@ -760,7 +768,7 @@ def add_new_source(columns, variants, source, source_file, source_dict, genome_r
     # for those enigma record that doesn't have a hit with new genome coordinate
     # add extra cells of "-" to the end of old record
     for value in variants.values():
-        if len(value) != len(columns):
+        if len(value) < len(columns):
             value += [DEFAULT_CONTENTS] * len(source_dict)
     print("number of variants in " + source + " is ", variants_num)
     print("overlap with previous dataset: ", overlap)
