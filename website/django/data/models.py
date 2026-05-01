@@ -35,6 +35,8 @@ class VariantManager(CopyManager):
 
 
 class Variant(models.Model):
+    VRS_Digest = models.TextField(primary_key=True)
+
     # Variant nomenclature
     Gene_Symbol = models.TextField(db_index=True)
     Reference_Sequence = models.TextField()
@@ -57,7 +59,7 @@ class Variant(models.Model):
 
 
 class Genomic_Coordinates(models.Model):
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='genomic_coordinates')
+    VRS_Digest = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='genomic_coordinates')
     assembly = models.TextField()
     hgvs = models.TextField()
     genome_browser_url = models.TextField()
@@ -76,7 +78,7 @@ class Genomic_Coordinates(models.Model):
 
 class Variant_in_ClinVar(models.Model):
     """ClinVar data for a variant."""
-    variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='clinvar_data')
+    VRS_Digest = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='clinvar_data')
 
     Source_URL = models.TextField()
 
@@ -86,7 +88,7 @@ class Variant_in_ClinVar(models.Model):
 
 class Variant_in_LOVD(models.Model):
     """LOVD (Leiden Open Variation Database) data for a variant."""
-    variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='lovd_data')
+    VRS_Digest = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='lovd_data')
 
     Source_URL = models.TextField()
     Variant_haplotype = models.TextField()
@@ -97,7 +99,7 @@ class Variant_in_LOVD(models.Model):
 
 class Variant_in_ExLOVD(models.Model):
     """exLOVD data for a variant."""
-    variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='exlovd_data')
+    VRS_Digest = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='exlovd_data')
 
     IARC_class = models.TextField()
     Sum_family_LR = models.TextField()
@@ -116,7 +118,7 @@ class Variant_in_ExLOVD(models.Model):
 
 class Variant_in_GnomAD(models.Model):
     """Summary GnomAD data for a variant."""
-    variant = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='gnomad_data')
+    VRS_Digest = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='gnomad_data')
 
     Source_URL = models.TextField()
 
@@ -126,7 +128,7 @@ class Variant_in_GnomAD(models.Model):
 
 class Report_in_GnomAD(models.Model):
     """GnomAD (Genome Aggregation Database) report data."""
-    variant_in_gnomad = models.ForeignKey(Variant_in_GnomAD, on_delete=models.CASCADE, related_name='gnomad_reports')
+    VRS_Digest = models.ForeignKey(Variant_in_GnomAD, on_delete=models.CASCADE, related_name='gnomad_reports')
 
     version = models.TextField(null=True)
     Flags = models.TextField(null=True)
@@ -145,7 +147,7 @@ class Report_in_GnomAD(models.Model):
 
 class Variant_in_Other(models.Model):
     """Data from other sources (functional assays, multifactorial, etc.)."""
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='other_data')
+    VRS_Digest = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='other_data')
 
     data_type = models.TextField(null=True)
     variant_data = models.JSONField(null=True, blank=True)
@@ -157,7 +159,7 @@ class Variant_in_Other(models.Model):
 
 class Variant_in_ENIGMA(models.Model):
     """ENIGMA-specific report data."""
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='enigma_reports')
+    VRS_Digest = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='enigma_reports')
     Condition_ID_type = models.TextField()
     Condition_ID_value = models.TextField()
     Condition_category = models.TextField()
@@ -178,7 +180,7 @@ class Variant_in_ENIGMA(models.Model):
 
 class Report_in_ClinVar(models.Model):
     """ClinVar-specific report data."""
-    variant_in_clinvar = models.ForeignKey(Variant_in_ClinVar, on_delete=models.CASCADE, related_name='clinvar_reports')
+    VRS_Digest = models.ForeignKey(Variant_in_ClinVar, on_delete=models.CASCADE, related_name='clinvar_reports')
 
     Clinical_Significance = models.TextField()
     Date_Last_Updated = models.TextField()
@@ -201,7 +203,7 @@ class Report_in_ClinVar(models.Model):
 
 class Report_in_LOVD(models.Model):
     """LOVD-specific report data."""
-    variant_in_lovd = models.ForeignKey(Variant_in_LOVD, on_delete=models.CASCADE, related_name='lovd_reports')
+    VRS_Digest = models.ForeignKey(Variant_in_LOVD, on_delete=models.CASCADE, related_name='lovd_reports')
 
     Variant_frequency = models.TextField()
     Individuals = models.TextField()
@@ -236,12 +238,12 @@ class Paper(models.Model):
 
 
 class Variant_in_Paper(models.Model):
-    Variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    VRS_Digest = models.ForeignKey(Variant, on_delete=models.CASCADE)
     Paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
 
     class Meta:
         db_table = "data_variantpaper"
-        unique_together = ('Variant', 'Paper')
+        unique_together = ('VRS_Digest', 'Paper')
 
 
 

@@ -103,10 +103,9 @@ def variant(request):
             variant = variant[0]
 
     else:
-        variant_id = int(variant_id)
-        variant = Variant.objects.get(id=variant_id)
+        variant = Variant.objects.get(VRS_Digest=variant_id)
 
-    query = Variant.objects.filter(id=variant.id)
+    query = Variant.objects.filter(VRS_Digest=variant.VRS_Digest)
 
     variant_versions = list(map(variant_to_dict, query))
     response = JsonResponse({"data": variant_versions})
@@ -117,7 +116,7 @@ def variant(request):
 def vrid(request):
     vr_id = request.GET.get('vr_id')
 
-    variant = Variant.objects.filter(VRS__digest=vr_id)[0]
+    variant = Variant.objects.get(VRS_Digest=vr_id)
 
     variant_data = variant_to_dict(variant)
 
@@ -159,7 +158,7 @@ def variantreps(request):
 
 
 def sitemap(request):
-    variants = Variant.objects.values_list('id')
+    variants = Variant.objects.values_list('VRS_Digest')
     root_links = [
         'https://brcaexchange.org/',
         'https://brcaexchange.org/factsheet',
@@ -179,9 +178,9 @@ def sitemap(request):
 
 
 def variant_papers(request):
-    variant_id = int(request.GET.get('variant_id'))
-    variant = Variant.objects.get(id=variant_id)
-    variantpapers = Variant_in_Paper.objects.select_related('Paper').filter(Variant=variant).all()
+    variant_id = request.GET.get('variant_id')
+    variant = Variant.objects.get(VRS_Digest=variant_id)
+    variantpapers = Variant_in_Paper.objects.select_related('Paper').filter(VRS_Digest=variant).all()
     for variantpaper in variantpapers:
         # year of 0000 means year could not be found during a crawl
         if variantpaper.Paper.Year == '0000':
