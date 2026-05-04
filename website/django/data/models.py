@@ -47,8 +47,6 @@ class Variant(models.Model):
     CA_ID = models.TextField(null=True, db_index=True)
     VRS = models.JSONField(null=True, blank=True)
 
-
-
     Synonyms = models.TextField()
     Pathogenicity = models.TextField(db_index=True)
 
@@ -56,6 +54,7 @@ class Variant(models.Model):
 
     class Meta:
         db_table = 'variant'
+        managed = False
 
 
 class Genomic_Coordinates(models.Model):
@@ -70,6 +69,7 @@ class Genomic_Coordinates(models.Model):
 
     class Meta:
         db_table = 'genomic_coordinates'
+        managed = False
 
 
 # ------------------------------------------------------------------------
@@ -84,6 +84,7 @@ class Variant_in_ClinVar(models.Model):
 
     class Meta:
         db_table = 'variant_clinvar'
+        managed = False
 
 
 class Variant_in_LOVD(models.Model):
@@ -95,54 +96,65 @@ class Variant_in_LOVD(models.Model):
 
     class Meta:
         db_table = 'variant_lovd'
+        managed = False
 
 
 class Variant_in_ExLOVD(models.Model):
-    """exLOVD data for a variant."""
+    """exLOVD expert-curated BRCA1/2 data for a variant."""
     VRS_Digest = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='exlovd_data')
 
-    IARC_class = models.TextField()
-    Sum_family_LR = models.TextField()
-    Combined_prior_probablility = models.TextField()
-    Literature_source = models.TextField()
-    Co_occurrence_LR = models.TextField()
+    Source_URL = models.TextField(default='-')
+    Exon = models.TextField(default='-')
+    DNA_Change = models.TextField(default='-')
+    BIC_DNA_Change = models.TextField(default='-')
+    Protein_Change = models.TextField(default='-')
+    Posterior_P = models.TextField(default='-')
+    IARC_Class = models.TextField(default='-')
+    DBID = models.TextField(default='-')
+    Missense_Analysis_Prior_P = models.TextField(default='-')
+    Splicing_Prior_P = models.TextField(default='-')
+    Combined_Prior_P = models.TextField(default='-')
+    Segregation_LR = models.TextField(default='-')
     Pathology_LR = models.TextField(null=True)
-    Case_control_LR = models.TextField(null=True)
-    Posterior_probability = models.TextField()
-    Missense_analysis_prior_probability = models.TextField()
-    Segregation_LR = models.TextField()
+    Co_Occurrence_LR = models.TextField(default='-')
+    Case_Control_LR = models.TextField(null=True)
+    Product_Of_LRs = models.TextField(default='-')
+    Comments = models.TextField(default='-')
 
     class Meta:
         db_table = 'variant_exlovd'
+        managed = False
 
 
 class Variant_in_GnomAD(models.Model):
-    """Summary GnomAD data for a variant."""
+    """Per-variant gnomAD anchor row (one per variant across all versions)."""
     VRS_Digest = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='gnomad_data')
 
-    Source_URL = models.TextField()
+    Source_URL = models.TextField(default='-')
 
     class Meta:
         db_table = 'variant_gnomad'
+        managed = False
 
 
 class Report_in_GnomAD(models.Model):
-    """GnomAD (Genome Aggregation Database) report data."""
+    """GnomAD frequency data — one row per variant per version (v2/v3/v4)."""
     VRS_Digest = models.ForeignKey(Variant_in_GnomAD, on_delete=models.CASCADE, related_name='gnomad_reports')
 
-    version = models.TextField(null=True)
-    Flags = models.TextField(null=True)
-    Consequence = models.TextField(null=True)
-    Variant_id = models.TextField(null=True, db_index=True)
-    faf95_popmax = models.TextField(null=True)
-    faf95_popmax_population = models.TextField(null=True)
-    Allele_count = models.TextField(null=True)
-    Allele_number = models.TextField(null=True)
-    Allele_frequency = models.TextField(null=True)
+    version = models.TextField()
+    Variant_id = models.TextField(default='-', db_index=True)
+    Flags = models.TextField(default='-')
+    Allele_count = models.TextField(default='-')
+    Allele_number = models.TextField(default='-')
+    Allele_frequency = models.TextField(default='-')
+    faf95_popmax = models.TextField(default='-')
+    faf95_popmax_population = models.TextField(default='-')
     populations = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'report_gnomad'
+        managed = False
+        unique_together = ('VRS_Digest', 'version')
 
 
 class Variant_in_Other(models.Model):
@@ -176,6 +188,7 @@ class Variant_in_ENIGMA(models.Model):
 
     class Meta:
         db_table = 'variant_enigma'
+        managed = False
 
 
 class Report_in_ClinVar(models.Model):
@@ -199,6 +212,7 @@ class Report_in_ClinVar(models.Model):
 
     class Meta:
         db_table = 'report_clinvar'
+        managed = False
 
 
 class Report_in_LOVD(models.Model):
@@ -221,6 +235,7 @@ class Report_in_LOVD(models.Model):
 
     class Meta:
         db_table = 'report_lovd'
+        managed = False
 
 
 # ------------------------------------------------------------------------

@@ -26,6 +26,14 @@ DATABASES = {
         'NAME': 'storage.pg',
         'USER': 'postgres',
         'PASSWORD': 'postgres'
-    }
+    },
+    'new_schema': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'localhost',
+        'NAME': 'storage.pg',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'OPTIONS': {'options': '-c search_path=new_schema'},
+    },
 }
 
