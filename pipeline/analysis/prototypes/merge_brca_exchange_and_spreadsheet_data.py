@@ -15,6 +15,9 @@ import argparse
 import csv
 import sys
 
+import openpyxl
+import xlrd
+
 
 def get_allele_count_value(faf95_popmax_population, row):
     """
@@ -144,8 +147,8 @@ def parse_arguments():
     parser.add_argument(
         'enigma_tsv',
         nargs='?',
-        default='ENIGMA_Johanna.tsv',
-        help='ENIGMA file to merge into (default: ENIGMA_Johanna.tsv)'
+        default='ENIGMA_Johanna.xlsx',
+        help='ENIGMA Excel spreadsheet to merge into (default: ENIGMA_Johanna.xlsx); reads from first sheet'
     )
 
     parser.add_argument(
@@ -175,38 +178,35 @@ def merge_files(brca_exchange_output_tsv, enigma_tsv, output_file):
     matched = 0
     unmatched = 0
 
-    with open(enigma_tsv, 'r', encoding='utf-8') as infile, \
-         open(output_file, 'w', encoding='utf-8', newline='') as outfile:
+    if enigma_tsv.endswith('.xls'):
+        xls_wb = xlrd.open_workbook(enigma_tsv)
+        xls_ws = xls_wb.sheets()[0]
+        rows_iter = (xls_ws.row_values(i) for i in range(xls_ws.nrows))
+        wb = None
+    else:
+        wb = openpyxl.load_workbook(enigma_tsv, read_only=True, data_only=True)
+        ws = wb.worksheets[0]
+        rows_iter = ws.iter_rows(values_only=True)
 
-        reader = csv.reader(infile, delimiter='\t')
+    with open(output_file, 'w', encoding='utf-8', newline='') as outfile:
         writer = csv.writer(outfile, delimiter='\t')
 
         # Process header
-        header = next(reader)
-        # Keep only the first 12 columns
-        header = header[:13]
-        # Trim trailing whitespace from column 13 (index 12) and replace spaces with underscores
-        header = [field.rstrip().replace(' ', '_') if i >= 12 else field.replace(' ', '_')
-                  for i, field in enumerate(header)]
+        raw_header = next(rows_iter)
+        header = [str(v) if v is not None else '' for v in raw_header[:13]]
+        header = [field.rstrip().replace(' ', '_') for field in header]
         header.extend(['gnomADv4_id', 'faf95_popmax_joint_gnomADv4', 'faf95_popmax_population_joint_gnomADv4',
                       'faf95_popmax_allele_count_gnomADv4', 'faf95_popmax_allele_number_gnomADv4', 'V4_Popfreq',
                       'enigma_class1_frequency', 'enigma_class1_population'])
         writer.writerow(header)
 
         # Process data rows
-        for row in reader:
-            if len(row) == 0:
+        for raw_row in rows_iter:
+            row = [str(v) if v is not None else '' for v in raw_row[:12]]
+            if not any(row):
                 continue
 
-            # Keep only the first 11 columns, or pad to 11 columns if shorter
-            row = row[:12]
-            # Pad with empty strings if row has fewer than 11 values
-            while len(row) < 1:
-                row.append('')
-
-            # Trim trailing whitespace from column 12 (index 11) and replace spaces with underscores
-            row = [field.rstrip().replace(' ', '_') if i >= 10 else field.replace(' ', '_')
-                   for i, field in enumerate(row)]
+            row = [field.rstrip().replace(' ', '_') for field in row]
 
             variant = row[0]  # Column 1 (0-indexed as 0)
 
@@ -240,6 +240,8 @@ def merge_files(brca_exchange_output_tsv, enigma_tsv, output_file):
                         enigma_class1_frequency, enigma_class1_population])
             writer.writerow(row)
 
+    if wb is not None:
+        wb.close()
     print(f"Complete! Output written to {output_file}")
     print(f"Matched: {matched}, Unmatched: {unmatched}")
 
