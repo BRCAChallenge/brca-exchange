@@ -16,7 +16,7 @@ BA1 = "BA1 (met)"
 BS1 = "BS1 (met)"
 BS1_SUPPORTING = "BS1_Supporting (met)"
 NO_CODE = "No code met (below threshold)"
-NO_CODE_NON_SNV = "No code met (non-SNV)"
+NO_CODE_INDEL = "No code met (indel)"
 PM2_SUPPORTING = "PM2_Supporting (met)"
 FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG = "No code met (read depth, flags)"
 FAIL_LCR = "No code met (low-complexity region)"
@@ -53,7 +53,7 @@ NO_CODE_NO_FAF_MSG = (f"This variant is recorded in gnomAD v4.1, however the Tot
                       f"any population code (BA1, BS1, BS1_Supporting, PM2_Supporting are not met).")
 
  
-NO_CODE_NON_SNV_MSG = (f"This [duplication/insertion/deletion/delins/large genomic rearrangement] variant "
+NO_CODE_INDEL_MSG = (f"This [duplication/insertion/deletion/delins/large genomic rearrangement] variant "
                        f"was not observed in gnomAD v4.1, but PM2_Supporting was not applied since recall "
                        f"is considered suboptimal for this type of variant (PM2_Supporting not met). ")
 PM2_SUPPORTING_MSG = "This variant is absent from gnomAD v4.1 (PM2_Supporting met)."
@@ -308,7 +308,7 @@ def analyze_one_dataset(faf95_popmax_str, allele_count, snv_or_small_indel,
     if snv_or_small_indel:
         return(PM2_SUPPORTING, PM2_SUPPORTING_MSG)
     else:
-        return(NO_CODE_NON_SNV, NO_CODE_NON_SNV_MSG)
+        return(NO_CODE_INDEL, NO_CODE_INDEL_MSG)
 
 
 def get_population_allele_counts(population, variant):
