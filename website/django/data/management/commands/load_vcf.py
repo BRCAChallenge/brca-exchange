@@ -1,5 +1,5 @@
 """
-Load VRS-annotated VCF files into new_schema tables.
+Load VRS-annotated VCF files into pipeline tables.
 
 Usage:
     python manage.py load_vcf [--vcf-out /path/to/vcf_out]
@@ -34,7 +34,7 @@ from data.models import (
     Variant_in_LOVD,
 )
 
-DB = 'new_schema'
+DB = 'pipeline'
 DEFAULT_VCF_OUT = Path('/data/new_schema/vcf/vcf_out')
 
 
@@ -83,7 +83,7 @@ def load_pickle(path):
 # ---------------------------------------------------------------------------
 
 class Command(BaseCommand):
-    help = 'Load VRS-annotated VCF files into new_schema tables'
+    help = 'Load VRS-annotated VCF files into pipeline tables'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -131,7 +131,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _flush(self):
-        """Clear all new_schema tables via TRUNCATE CASCADE before reloading."""
+        """Clear all pipeline tables via TRUNCATE CASCADE before reloading."""
         self.stdout.write('Flushing existing data ...')
         tables = [
             'report_gnomad', 'variant_gnomad',
