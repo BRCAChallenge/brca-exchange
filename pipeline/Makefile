@@ -185,6 +185,22 @@ setup-data-from-latest-release-tar: setup-files ## sets up brca output dir with 
 
 setup-dev-env: build-docker setup-files download-resources ## setup development environment
 
+VCF_ASSEMBLY_OUT_DIR ?= ../../data_out
+VCF_ASSEMBLY_SEQ_REPO_DIR ?= /data/seqrepo/latest
+VCF_ASSEMBLY_GENE_CONFIG ?= /data/new_schema/code/pipeline/workflow/gene_config_brca_only.txt
+VCF_ASSEMBLY_UTA_DB_URL ?= postgresql://anonymous@localhost:50828/uta/uta_20241220
+
+run-vcf-assembly: ## Run the VCFAssembly luigi task locally (no Docker)
+	HGVS_SEQREPO_DIR=$(VCF_ASSEMBLY_SEQ_REPO_DIR) \
+	UTA_DB_URL=$(VCF_ASSEMBLY_UTA_DB_URL) \
+	PYTHONPATH=/data/new_schema/code/pipeline \
+	python -m luigi --module workflow.vcf_assembly workflow.vcf_assembly.VCFAssembly \
+		--PipelineParams-gene-config-path $(VCF_ASSEMBLY_GENE_CONFIG) \
+		--PipelineParams-seq-repo-dir $(VCF_ASSEMBLY_SEQ_REPO_DIR) \
+		--PipelineParams-file-parent-dir $(VCF_ASSEMBLY_OUT_DIR) \
+		--PipelineParams-output-dir $(VCF_ASSEMBLY_OUT_DIR) \
+		--local-scheduler
+
 clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +

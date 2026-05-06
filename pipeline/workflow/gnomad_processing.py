@@ -35,7 +35,8 @@ class DownloadGnomADData(GnomADTask):
 
     def output(self):
         return { "v2": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomAD_v2_hg19_10_02_2020.tsv"),
-                 "v3": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomAD_v3_1_1_GRCh38_06_07_2021.tsv")}
+                 "v3": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomAD_v3_1_1_GRCh38_06_07_2021.tsv"),
+                 "v4": }
 
 
     def run(self):
@@ -96,19 +97,22 @@ class SortGnomADData(GnomADTask):
 
             
 class DownloadStaticGnomADVCF(GnomADTask):
-    gnomAD_v2_static_vcf_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/gnomADv2.sorted.hg38.vcf',
+    gnomAD_v2_static_vcf_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/vcf/gnomADv2.sorted.hg38.vcf',
                                                description='URL to download static gnomAD v2 vcf from')
-    gnomAD_v3_static_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/gnomADv3.sorted.hg38.vcf',
-                                            description='URL to download static gnomAD v3 vcf from')
+    gnomAD_v3_static_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/vcf/gnomADv3.sorted.hg38.vcf',
+                                                description='URL to download static gnomAD v3 vcf from')
+    gnomad_v4_static_data_url = luigi.Parameter(default='https://brcaexchange.org/backend/downloads/vcf/gnomADv4.sorted.hg38.vcf', description='URL to download static gnomAD v4 vcf from')
     
     def output(self):
         return { "v2": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomADv2.sorted.hg38.vcf"),
-                 "v3": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomADv3.sorted.hg38.vcf")}
+                 "v3": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomADv3.sorted.hg38.vcf"),
+                 "v4": luigi.LocalTarget(f"{self.gnomad_file_dir}/gnomADv4.sorted.hg38.vcf")}
     
 
     def run(self):
         self._download_file(self.gnomAD_v2_static_vcf_url, self.output()["v2"].path)
         self._download_file(self.gnomAD_v3_static_data_url, self.output()["v3"].path)
+        self._download_file(self.gnomAD_v4_static_data_url, self.output()["v4"].path)
 
 
 class DownloadGnomADv4(GnomADTask):

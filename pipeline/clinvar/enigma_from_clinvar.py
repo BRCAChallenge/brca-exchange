@@ -106,8 +106,8 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
     rec = {}
     va = clinvar.variationArchive(va_el, gene_symbols=symbols, debug=debug,
                                   mane_transcripts=mane_transcript)
-    if not hasattr(va, 'variant'):
-        logging.warning("Skipping VariationArchive %s as no variant record was found", va.id)
+    if not hasattr(va, 'variant') or not va.valid:
+        logging.warning("Skipping VariationArchive %s as no valid variant record was found", va.id)
         return(None)
     variant = va.variant
     if variant.valid:
