@@ -457,9 +457,9 @@ def preprocess_vcfs(input_dir, output_dir, seq_provider, gene_regions_trees,
                    "ExAC": EXAC_FILE,
                    "ESP": ESP_FILE,
                    "BIC": BIC_FILE,
-                   "gnomADv2": GNOMAD_V2_FILE,
-                   "gnomADv3": GNOMAD_V3_FILE,
-                   "gnomADv4": GNOMAD_V4_FILE,
+                   "GnomAD": GNOMAD_V2_FILE,
+                   "GnomADv3": GNOMAD_V3_FILE,
+                   "GnomADv4": GNOMAD_V4_FILE,
                    "ENIGMA_BRCA12_Functional_Assays": FUNCTIONAL_ASSAYS_SCORES_FILE
                    }
     print("\n" + input_dir + ":")

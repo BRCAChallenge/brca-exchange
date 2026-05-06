@@ -530,9 +530,9 @@ FIELD_DICT = {"1000_Genomes": GENOME1K_FIELDS,
               "ExAC": EXAC_FIELDS,
               "ESP": ESP_FIELDS,
               "BIC": BIC_FIELDS,
-              "gnomADv2": GNOMAD_V2_FIELDS,
-              "gnomADv3": GNOMAD_V3_FIELDS,
-              "gnomADv4": GNOMAD_V4_FIELDS,
+              "GnomAD": GNOMAD_V2_FIELDS,
+              "GnomADv3": GNOMAD_V3_FIELDS,
+              "GnomADv4": GNOMAD_V4_FIELDS,
               "ENIGMA_BRCA12_Functional_Assays": ENIGMA_BRCA12_FUNCTIONAL_ASSAY_SCORES_FIELDS}
 
 LIST_TYPE_FIELDS = {

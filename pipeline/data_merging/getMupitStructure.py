@@ -116,20 +116,22 @@ def get_brca_struct(chrom, pos):
              }
     MAX_TRIES = 5
     tries = 0
-    r = None
+    d = None
     while True:
         try:
             r = requests.post(query_url, data=params)
-        except requests.exceptions.RequestException as e:
+            if not r.text:
+                raise ValueError("Empty response body from MuPIT server")
+            d = json.loads(r.text)
+        except (requests.exceptions.RequestException, ValueError, json.JSONDecodeError) as e:
             print(e)
             time.sleep(10)
             tries += 1
             if tries >= MAX_TRIES:
-                print("Request for position %s failed 5 times, exiting." % (pos))
-                sys.exit(1)
+                print("Request for position %s failed %d times, returning '-'." % (pos, MAX_TRIES))
+                return '-'
             continue
         break
-    d = json.loads(r.text)
     structures = d['structures']
     main_struct = None;
     min_pref_level = sys.maxsize # max size integer
