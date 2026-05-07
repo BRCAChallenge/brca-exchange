@@ -532,6 +532,25 @@ class LoadVCFsToDatabase(VCFAssemblyTask):
 
 
 ###############################################
+#         COMPUTE GENOMIC HGVS STRINGS        #
+###############################################
+
+@requires(LoadVCFsToDatabase)
+class ComputeGenomicHGVS(VCFAssemblyTask):
+    """Populate genomic_coordinates.hgvs with normalized genomic HGVS strings."""
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.vcf_dir, "compute_genomic_hgvs.done"))
+
+    def run(self):
+        script = os.path.join(_pipeline_dir, "variant_processing", "compute_genomic_hgvs.py")
+        args = ["python", script]
+        self._run_process_with_pipeline_path(args)
+        with open(self.output().path, "w") as f:
+            f.write("done\n")
+
+
+###############################################
 #               TOP-LEVEL TASK                #
 ###############################################
 
@@ -542,7 +561,7 @@ class LoadVCFsToDatabase(VCFAssemblyTask):
     VRSAnnotateEnigma,
     VRSAnnotateFunctionalAssays,
     VRSAnnotateGnomAD,
-    LoadVCFsToDatabase,
+    ComputeGenomicHGVS,
 )
 class VCFAssembly(VCFAssemblyTask):
     """Runs all source chains, VRS-annotates each VCF, loads to DB, and writes sentinel."""
