@@ -35,7 +35,6 @@ from data.models import (
 )
 
 DB = 'pipeline'
-DEFAULT_VCF_OUT = Path('/data/new_schema/vcf/vcf_out')
 
 
 # ---------------------------------------------------------------------------
@@ -86,33 +85,24 @@ class Command(BaseCommand):
     help = 'Load VRS-annotated VCF files into pipeline tables'
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--vcf-out',
-            default=str(DEFAULT_VCF_OUT),
-            help='Directory containing annotated VCF and pickle files',
-        )
+        for source in ('enigma', 'clinvar', 'lovd', 'exlovd',
+                       'gnomad-v2', 'gnomad-v3', 'gnomad-v4'):
+            parser.add_argument(f'--{source}-vcf',  required=True, help=f'Path to {source} VCF (.vcf.gz)')
+            parser.add_argument(f'--{source}-pkl',  required=True, help=f'Path to {source} pickle (.dicts.pkl)')
 
     def handle(self, *args, **options):
-        vcf_out = Path(options['vcf_out'])
-
-        sources = {
-            'enigma':    (vcf_out / 'Enigma.vcf.gz',                       vcf_out / 'enigma_from_clinvar.dicts.pkl'),
-            'clinvar':   (vcf_out / 'ClinVar.vcf.gz',                        vcf_out / 'ClinVar.dicts.pkl'),
-            'lovd':      (vcf_out / 'LOVD.sorted.hg38.vcf.gz',               vcf_out / 'LOVD.dicts.pkl'),
-            'exlovd':    (vcf_out / 'exLOVD.BRCA12.sorted.hg38.vcf.gz',      vcf_out / 'exLOVD.dicts.pkl'),
-            'gnomad_v2': (vcf_out / 'gnomADv2.sorted.hg38.vcf.gz',           vcf_out / 'gnomADv2.dicts.pkl'),
-            'gnomad_v3': (vcf_out / 'gnomADv3.sorted.hg38.vcf.gz',           vcf_out / 'gnomADv3.dicts.pkl'),
-            'gnomad_v4': (vcf_out / 'gnomADv4.sorted.hg38.vcf.gz',           vcf_out / 'gnomADv4.dicts.pkl'),
-        }
+        def paths(source):
+            key = source.replace('-', '_')
+            return Path(options[f'{key}_vcf']), Path(options[f'{key}_pkl'])
 
         loaders = [
-            ('ENIGMA',    self._load_enigma,    *sources['enigma']),
-            ('ClinVar',   self._load_clinvar,   *sources['clinvar']),
-            ('LOVD',      self._load_lovd,      *sources['lovd']),
-            ('exLOVD',    self._load_exlovd,    *sources['exlovd']),
-            ('gnomAD v2', self._load_gnomad_v2, *sources['gnomad_v2']),
-            ('gnomAD v3', self._load_gnomad_v3, *sources['gnomad_v3']),
-            ('gnomAD v4', self._load_gnomad_v4, *sources['gnomad_v4']),
+            ('ENIGMA',    self._load_enigma,    *paths('enigma')),
+            ('ClinVar',   self._load_clinvar,   *paths('clinvar')),
+            ('LOVD',      self._load_lovd,      *paths('lovd')),
+            ('exLOVD',    self._load_exlovd,    *paths('exlovd')),
+            ('gnomAD v2', self._load_gnomad_v2, *paths('gnomad-v2')),
+            ('gnomAD v3', self._load_gnomad_v3, *paths('gnomad-v3')),
+            ('gnomAD v4', self._load_gnomad_v4, *paths('gnomad-v4')),
         ]
 
         self._flush()
