@@ -30,7 +30,7 @@ _GRCh38_CONTIGS.update({f'chr{k}': v for k, v in _GRCh38_CONTIGS.items()})
 
 
 class VCFAssemblyTask(luigi.Task):
-    """Base task for vcf_assembly. Creates only the directories this pipeline uses."""
+    """Base task for variant_assembly. Creates only the directories this pipeline uses."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -545,7 +545,7 @@ class VCFAssembly(VCFAssemblyTask):
     """Runs all source chains, VRS-annotates each VCF, loads to DB, and writes sentinel."""
 
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.vcf_dir, "vcf_assembly.done"))
+        return luigi.LocalTarget(os.path.join(self.vcf_dir, "variant_assembly.done"))
 
     def run(self):
         with open(self.output().path, "w") as f:
