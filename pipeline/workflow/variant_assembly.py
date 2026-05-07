@@ -492,6 +492,7 @@ class VRSAnnotateGnomAD(VCFAssemblyTask):
     VRSAnnotateSharedLOVD,
     VRSAnnotateEXLOVD,
     VRSAnnotateGnomAD,
+    VRSAnnotateFunctionalAssays,
 )
 class LoadVCFsToDatabase(VCFAssemblyTask):
     """Call the load_vcf Django management command to load all VCFs into the pipeline DB."""
@@ -504,23 +505,25 @@ class LoadVCFsToDatabase(VCFAssemblyTask):
         return luigi.LocalTarget(os.path.join(self.vcf_dir, "load_vcfs_to_db.done"))
 
     def run(self):
-        enigma_in, clinvar_in, lovd_in, exlovd_in, gnomad_in = self.input()
+        enigma_in, clinvar_in, lovd_in, exlovd_in, gnomad_in, assays_in = self.input()
         args = [
             "python", "manage.py", "load_vcf", "--skip-checks",
-            "--enigma-vcf",    enigma_in["vcf"].path,
-            "--enigma-pkl",    enigma_in["pkl"].path,
-            "--clinvar-vcf",   clinvar_in["vcf"].path,
-            "--clinvar-pkl",   clinvar_in["pkl"].path,
-            "--lovd-vcf",      lovd_in["vcf"].path,
-            "--lovd-pkl",      lovd_in["pkl"].path,
-            "--exlovd-vcf",    exlovd_in["vcf"].path,
-            "--exlovd-pkl",    exlovd_in["pkl"].path,
-            "--gnomad-v2-vcf", gnomad_in["v2_vcf"].path,
-            "--gnomad-v2-pkl", gnomad_in["v2_pkl"].path,
-            "--gnomad-v3-vcf", gnomad_in["v3_vcf"].path,
-            "--gnomad-v3-pkl", gnomad_in["v3_pkl"].path,
-            "--gnomad-v4-vcf", gnomad_in["v4_vcf"].path,
-            "--gnomad-v4-pkl", gnomad_in["v4_pkl"].path,
+            "--enigma-vcf",           enigma_in["vcf"].path,
+            "--enigma-pkl",           enigma_in["pkl"].path,
+            "--clinvar-vcf",          clinvar_in["vcf"].path,
+            "--clinvar-pkl",          clinvar_in["pkl"].path,
+            "--lovd-vcf",             lovd_in["vcf"].path,
+            "--lovd-pkl",             lovd_in["pkl"].path,
+            "--exlovd-vcf",           exlovd_in["vcf"].path,
+            "--exlovd-pkl",           exlovd_in["pkl"].path,
+            "--gnomad-v2-vcf",        gnomad_in["v2_vcf"].path,
+            "--gnomad-v2-pkl",        gnomad_in["v2_pkl"].path,
+            "--gnomad-v3-vcf",        gnomad_in["v3_vcf"].path,
+            "--gnomad-v3-pkl",        gnomad_in["v3_pkl"].path,
+            "--gnomad-v4-vcf",        gnomad_in["v4_vcf"].path,
+            "--gnomad-v4-pkl",        gnomad_in["v4_pkl"].path,
+            "--functional-assay-vcf", assays_in["vcf"].path,
+            "--functional-assay-pkl", assays_in["pkl"].path,
         ]
         os.chdir(self.django_dir)
         pipeline_utils.run_process(args)

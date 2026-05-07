@@ -32,6 +32,7 @@ from data.models import (
     Variant_in_ExLOVD,
     Variant_in_GnomAD,
     Variant_in_LOVD,
+    Variant_in_Other,
 )
 
 DB = 'pipeline'
@@ -86,7 +87,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         for source in ('enigma', 'clinvar', 'lovd', 'exlovd',
-                       'gnomad-v2', 'gnomad-v3', 'gnomad-v4'):
+                       'gnomad-v2', 'gnomad-v3', 'gnomad-v4',
+                       'functional-assay'):
             parser.add_argument(f'--{source}-vcf',  required=True, help=f'Path to {source} VCF (.vcf.gz)')
             parser.add_argument(f'--{source}-pkl',  required=True, help=f'Path to {source} pickle (.dicts.pkl)')
 
@@ -96,13 +98,14 @@ class Command(BaseCommand):
             return Path(options[f'{key}_vcf']), Path(options[f'{key}_pkl'])
 
         loaders = [
-            ('ENIGMA',    self._load_enigma,    *paths('enigma')),
-            ('ClinVar',   self._load_clinvar,   *paths('clinvar')),
-            ('LOVD',      self._load_lovd,      *paths('lovd')),
-            ('exLOVD',    self._load_exlovd,    *paths('exlovd')),
-            ('gnomAD v2', self._load_gnomad_v2, *paths('gnomad-v2')),
-            ('gnomAD v3', self._load_gnomad_v3, *paths('gnomad-v3')),
-            ('gnomAD v4', self._load_gnomad_v4, *paths('gnomad-v4')),
+            ('ENIGMA',            self._load_enigma,            *paths('enigma')),
+            ('ClinVar',           self._load_clinvar,           *paths('clinvar')),
+            ('LOVD',              self._load_lovd,              *paths('lovd')),
+            ('exLOVD',            self._load_exlovd,            *paths('exlovd')),
+            ('gnomAD v2',         self._load_gnomad_v2,         *paths('gnomad-v2')),
+            ('gnomAD v3',         self._load_gnomad_v3,         *paths('gnomad-v3')),
+            ('gnomAD v4',         self._load_gnomad_v4,         *paths('gnomad-v4')),
+            ('functional assays', self._load_functional_assays, *paths('functional-assay')),
         ]
 
         self._flush()
@@ -129,6 +132,7 @@ class Command(BaseCommand):
             'report_lovd', 'variant_lovd',
             'report_clinvar', 'variant_clinvar',
             'variant_enigma',
+            'variant_other',
             'genomic_coordinates',
             'variant',
         ]
@@ -516,7 +520,58 @@ class Command(BaseCommand):
             ('variant_exlovd',       Variant_in_ExLOVD),
             ('variant_gnomad',       Variant_in_GnomAD),
             ('report_gnomad',        Report_in_GnomAD),
+            ('variant_other',        Variant_in_Other),
         ]
         for label, model in rows:
             count = model.objects.using(DB).count()
             self.stdout.write(f'{label}: {count}')
+
+    # ------------------------------------------------------------------
+    # Functional assay loader
+    # ------------------------------------------------------------------
+
+    _VRS_INFO_KEYS = {'VRS_Allele_IDs', 'VRS_Error'}
+
+    def _load_functional_assays(self, vcf_path, pkl):
+        vcf = pysam.VariantFile(str(vcf_path))
+        n = 0
+        for rec in vcf:
+            d = alt_digest(rec)
+            if not d:
+                continue
+            vrs_data = pkl.get(alt_vrs_id(rec))
+
+            variant = self._upsert_variant(d, vrs_data,
+                Gene_Symbol=info_str(rec, 'Gene'),
+                Reference_Sequence='-',
+                HGVS_cDNA=info_str(rec, 'HGVS_Nucleotide_Variant'),
+                BIC_Nomenclature='-', HGVS_Protein='-', Protein_Change='-',
+                Synonyms='-', Pathogenicity='-',
+            )
+
+            self._upsert_coords(variant,
+                hgvs=info_str(rec, 'HGVS_Nucleotide_Variant'),
+                genome_browser_url=ucsc_url(rec.chrom, rec.pos),
+                chr=rec.chrom, pos=str(rec.pos),
+                ref=rec.ref, alt=rec.alts[0] if rec.alts else '-',
+            )
+
+            data = {}
+            for key in rec.info.keys():
+                if key in self._VRS_INFO_KEYS:
+                    continue
+                val = rec.info.get(key)
+                if val is None or (isinstance(val, tuple) and len(val) == 0):
+                    continue
+                if isinstance(val, tuple):
+                    data[key] = val[0] if len(val) == 1 else '|'.join(str(v) for v in val)
+                else:
+                    data[key] = str(val)
+
+            Variant_in_Other.objects.using(DB).update_or_create(
+                VRS_Digest=variant,
+                defaults={'data_type': 'functional_assay_results', 'variant_data': data},
+            )
+            n += 1
+        vcf.close()
+        return n

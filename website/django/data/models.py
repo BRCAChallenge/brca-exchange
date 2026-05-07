@@ -159,13 +159,14 @@ class Report_in_GnomAD(models.Model):
 
 class Variant_in_Other(models.Model):
     """Data from other sources (functional assays, multifactorial, etc.)."""
-    VRS_Digest = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='other_data')
+    VRS_Digest = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE, related_name='other_data')
 
     data_type = models.TextField(null=True)
     variant_data = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'variant_other'
+        managed = False
 
 
 
