@@ -1,19 +1,37 @@
+# Updated requirements for Python 3.13 compatibility
+# Security-critical and deprecated packages have been updated
+
+# Core dependencies - UPDATED for security
+certifi>=2024.2.2  
+requests>=2.31.0  
+urllib3>=2.0.7  
+PyJWT>=2.8.0  
+lxml>=5.1.0  
+
+# Scientific computing - UPDATED for Python 3.12
+numpy>=1.24.3,<2.0
+pandas>=2.1.4  
+
+# Testing - MIGRATED from deprecated nose
+pytest>=8.0.0  
+pytest-cov>=4.1.0  
+hypothesis>=6.0.0  
+
+
+
 appdirs==1.4.3
 appnope==0.1.0
 argcomplete==1.10.0
 attrs==22.2.0
 backcall==0.1.0
-backports-abc==0.5
 beautifulsoup4==4.8.2
-biocommons.seqrepo==0.6.6
-biopython==1.69
+biocommons.seqrepo>=0.6.9
+biopython>=1.83
 bioutils==0.6.1
 bs4==0.0.1
-bx-python==0.8.8
-certifi==2019.11.28
-chardet==3.0.4
+chardet>=5.2.0
 click==8.1.3
-coloredlogs==14.0
+coloredlogs>=15.0
 configparser==4.0.2
 CrossMap==0.4.0
 cssselect==1.1.0
@@ -28,66 +46,65 @@ djangorestframework==3.15.2
 djangorestframework_simplejwt==5.5.1
 docutils==0.16
 fake-useragent==0.1.11
-fastparquet==2024.5.0
+fastparquet>=2024.11.0  # Updated: pandas>=2.1.4 requires this version
 ga4gh.common==0.0.7
-ga4gh.vrs==0.8.4
-hgvs==1.5.4
-humanfriendly==8.0
-idna==2.9
-iniherit==0.3.9
+ga4gh.vrs==2.3.1
+hgvs==1.5.6
+humanfriendly>=9.1    
+idna>=3.6  
 intervaltree==3.1.0
-ipython==7.13.0
+ipython>=8.20.0
 ipython-genutils==0.2.0
 itertoolz==0.5
-jedi==0.16.0
+jedi>=0.18.1  # Updated for ipython>=8.20.0 compatibility
 lockfile==0.12.2
 luigi==3.8.0
 lxml==4.9.2
 mock==5.0.1
-nose==1.3.7
-numpy==1.24.1
-pandas==1.5.2
 parse==1.15.0
 Parsley==1.3
-parso==0.6.2
+parso>=0.8.0  # Updated for jedi>=0.18.1 compatibility
 pathos==0.2.9
 pexpect==4.8.0
 pickleshare==0.7.5
 pipx==0.14.0.0
-prompt-toolkit==3.0.3
-psycopg2-binary==2.8.4
+prompt-toolkit>=3.0.41,<3.1.0
+psycopg2-binary>=2.9.9
 ptyprocess==0.6.0
 pyBigWig==0.3.17
+pyliftover==0.4.1
 pyee==7.0.1
-Pygments==2.5.2
-PyJWT==1.7.1
+Pygments>=2.11.0  # Updated for ipython>=8.20.0 compatibility
 pyppeteer==0.0.25
 pyquery==1.4.1
-pysam==0.20.0
+pysam>=0.22.1
 python-daemon==2.2.4
-python-dateutil==2.8.1
+python-dateutil==2.9.0
 pytz==2020.1
-PyVCF3==1.0.3
 recordtype==1.3
 referencing==0.32.1
-requests==2.23.0
 requests-html==0.10.0
 retrying==1.3.3
 singledispatch==3.4.0.3
-six==1.14.0
+six>=1.16.0
 sortedcontainers==2.1.0
 soupsieve==2.0
 spliceai==1.3.1
 sqlparse==0.3.1
-tensorflow==2.11.0
 text-unidecode==1.3
 toolz==0.12.0
-tornado==5.1.1
-tqdm==4.43.0
-traitlets==4.3.3
-urllib3==1.25.8
+tornado==6.2
+tqdm>=4.66
+traitlets>=5.13,<6
 userpath==1.2.0
 w3lib==1.21.0
 wcwidth==0.1.8
 websockets==8.1
-yoyo-migrations==7.0.1
+yoyo-migrations>=9.0.0
+
+# TensorFlow - CONSIDER UPDATING (if needed)
+# tensorflow==2.11.0  # CRITICAL - End of support, multiple CVEs
+# Recommendation: Update to tensorflow>=2.17.0 if TensorFlow is actually used
+# Or remove if not needed for core functionality
+tensorflow>=2.17.0  # Updated for security
+rich>=13.0.0  # Required by Keras for summary_utils

@@ -31,6 +31,15 @@
 /**********         General               *********************/
 /**************************************************************/
 
+/* Restore BS3-like link behavior */
+a {
+  text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 p {
     font-size: 18px;
     font-weight: 200;
@@ -113,13 +122,6 @@ offending file, for future reference: website/node_modules/react-data-components
     height: 125px;
 }
 
-.nav > li > a {
-    padding-left: 1em;
-    padding-right: 1em;
-    text-transform: uppercase;
-    font-weight: bold;
-}
-
 .navbar-brand {
     display: -ms-flexbox;
     display: flex;
@@ -127,7 +129,7 @@ offending file, for future reference: website/node_modules/react-data-components
     justify-content: center;
     align-items: center;
 
-    padding: 0 0 0 15px;
+    padding-left: var(--bs-gutter-x, .75rem);
 }
 
 .navbar-brand .brand-collapser {
@@ -137,20 +139,29 @@ offending file, for future reference: website/node_modules/react-data-components
     justify-content: center;
     align-items: center;
 
-    margin-left: 15px;
+    margin-left: var(--bs-gutter-x, .75rem);
+}
+
+.navbar-brand .branding-clickable {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* optional, just nicer spacing */
 }
 
 .navbar-brand .logo-img {
-    margin-bottom: 10px;
+    margin-bottom: 0;
+    display: block;
 }
 
 .navbar-brand h1 {
     display: inline-block;
     font-stretch: condensed;
-    margin: 0 10px 10px 0;
+    margin: 0 10px 0 0;
 
     /*font-family: 'Lato', sans-serif;*/
     font-family: sans-serif;
+    font-size: 22px;
+    line-height: 1;
     color: black;
 }
 
@@ -210,21 +221,36 @@ offending file, for future reference: website/node_modules/react-data-components
 }
 
 .navbar {
-    min-height: 70px; /* XXX This value MUST match the setting in index.js */
-    padding-top: 10px
+    min-height: 56px; /* XXX This value MUST match the setting in index.js */
+    padding-top: 12px;
+    padding-left: 3rem;
+    padding-right: 3rem;
 }
 
-.navbar-default .navbar-nav > li > a.active {
-   color: #C03657;
+.navbar a:hover {
+    text-decoration: none;
 }
 
+/* Prevent fixed-top navbar from covering content below it */
+/*body {
+    padding-top: 56px;
+}*/
 
 .navbar-nav li.active span {
    color: #C03657;
 }
 
-.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
-    background-color: transparent;
+.navbar-nav .nav-link {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link[aria-current="page"] {
+  color: #C03657;
+  background-color: transparent;
 }
 
 /**************************************************************/
@@ -263,11 +289,11 @@ offending file, for future reference: website/node_modules/react-data-components
     margin-right: 6px;
 }
 
-.allele-frequency-gnomad-header .glyphicon-flag {
+.allele-frequency-gnomad-header .fa-flag {
     color: #C03657;
 }
 
-.gnomad-flag.glyphicon-flag {
+.gnomad-flag.fa-flag {
     text-align: left;
     color: #C03657;
     margin: 10px;
@@ -440,7 +466,15 @@ input:focus {
     background-color: transparent;
 }
 
+.search-box {
+    position: relative;
+}
+
 .search-box-icon {
+    display: inline-block;
+    position:  absolute;
+    top: 50%;
+    transform: translateY(-50%);
     right: 30px;
     color: #555;
     cursor: pointer;
@@ -449,6 +483,10 @@ input:focus {
 .matched-variant-count {
     border-radius: .25em;
     font-size: 18px;
+    font-weight: bold;
+    color: #C03657;
+    background-color: #fde8ed;
+    padding: 4px 8px;
 }
 
 /* used for the message on the search page */
@@ -529,6 +567,8 @@ div.colorized-jumbo {
     margin: 80px 0 0 0;
     width: auto;
     text-align: center;
+    justify-content: center;
+    align-items: center;
 }
 
 .logo-header {
@@ -549,6 +589,7 @@ div.colorized-jumbo {
 
 .logo-item {
     height: 120px;
+    width: 300px;
     padding: 10px;
     margin-bottom: 10px;
     text-align: center;
@@ -559,9 +600,10 @@ div.colorized-jumbo {
 
 .logo-item img {
     max-height: 100%;
-    max-width: 300px;
+    max-width: 100%;
     width: auto;
     vertical-align: middle;
+    object-fit: contain;
 }
 
 #BRCA-Exchange {
@@ -592,18 +634,33 @@ div.colorized-jumbo {
 /**************************************************************/
 /**********     Footer                    *********************/
 /**************************************************************/
+html, body { height: 100%; }
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 div#main {
-    padding-bottom: 120px;
-    border-bottom: 1px solid rgb(220,220,220);
+    flex: 1 0 auto;
+    padding-bottom: 0;
+    border-bottom: none;
 }
 
 .footer {
-    position: absolute;
-    margin-top: 120px;
-    height: 90px;
+    margin-top: 80px;
+    position: static;
     width: 100%;
     text-align: center;
     font-size: 15px;
+    border-top: 1px solid rgb(220,220,220);
+    padding: 30px 0;
+}
+
+.footer ul {
+   padding: 0;
+   margin: 0;
 }
 
 .footer img {
@@ -621,7 +678,7 @@ div#main {
 }
 
 /**************************************************************/
-/**********     disclaimer                *********************/
+/**********     Disclaimer                *********************/
 /**************************************************************/
 .modal-content .markdown {
     padding: 40px;
@@ -630,7 +687,8 @@ div#main {
 
 .modal-content button {
     margin: 0px 0px 40px 40px;
-    text-align: left;
+    width: auto;
+    display: inline-block;
 }
 
 
@@ -687,7 +745,7 @@ div#main {
     bottom: 1px;
 }
 
-.table th .glyphicon.help {
+.table th .fa.help {
     position: absolute;
 }
 
@@ -756,10 +814,6 @@ table.community h3 {
 /**************************************************************/
 /**********     Other                     *********************/
 /**************************************************************/
-html {
-    font-size: 10px;
-}
-
 #main-grid li {
     font-size: 18px;
     font-weight: 200;
@@ -812,7 +866,6 @@ html {
 }
 
 #filters .source-filters {
-    display: block;
     width: 80%;
 }
 
@@ -861,10 +914,10 @@ th[role='columnheader'] .help, .help-target .help {
 	visibility: hidden;
 }
 
-.popover.bottom > .arrow::after {
+.bs-popover-bottom > .popover-arrow::after {
     border-bottom-color: #f7f7f7;
 }
-.popover.bottom.in {
+.bs-popover-bottom {
     padding-top: 0;
     margin-top: 12px;
 }
@@ -903,7 +956,7 @@ th[role='columnheader'] .help, .help-target .help {
     white-space: nowrap;
 }
 
-.glyphicon.help {
+.fa.help {
     margin: 3px;
     cursor: pointer;
     z-index: 10;
@@ -1143,6 +1196,7 @@ div.variant-detail-group .panel-title .title {
 }
 
 div.variant-detail-group .panel-help-btn {
+    display: inline-block;
     color: #e2e2e2;
     margin-left: 10px;
     font-size: 20px;
@@ -1632,7 +1686,7 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
 }
 
 /* generic styles for spinning glyphs, used in the help search bars' progress indicator */
-.glyphicon-spin {
+.fa-spin {
     animation: spin 1000ms infinite linear;
 }
 @keyframes spin {
@@ -1671,6 +1725,14 @@ tr.highlighted td:last-child { border-right: solid 2px red; font-weight: bold; }
 .id-helper-tip:hover {
     color: #aaa;
     background: #ddd;
+}
+
+.has-search .btn {
+    border: 1px solid #ced4da;
+}
+
+.has-search .btn:not(:last-child) {
+    border-right: 0;
 }
 
 /**************************************************************/

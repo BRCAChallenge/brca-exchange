@@ -33,17 +33,17 @@ def _write_auto_sql_file(as_path):
 
         print("wrote as file to {}".format(asFh.name))
 
-def write_track_item(rec, start, end, output_fp):
-    chrom = "chr"+rec.Chr
+def write_track_item(row, start, end, output_fp):
+    chrom = "chr"+row["Chr"]
     score = 0
     strand = "."
-    name = rec.pyhgvs_cDNA[0:254]
+    name = row["pyhgvs_cDNA"][0:254]
     if name == "?":
         assert(False)
     thickStart = start
     thickEnd = end
-    color = genomeBrowserUtils.pathogenicityToColor(rec.Clinical_significance_ENIGMA)
-    out_url = "https://brcaexchange.org/variant/" + rec.CA_ID
+    color = genomeBrowserUtils.pathogenicityToColor(row["Clinical_significance_ENIGMA"])
+    out_url = "https://brcaexchange.org/variant/" + row["CA_ID"]
     #
     # When generating the mouseOver, truncate the cDNA and protein HGVS string to 50 characters each, 
     # to not overhwelm the browser's internal limit of 255 characters.
@@ -52,15 +52,15 @@ def write_track_item(rec, start, end, output_fp):
                  "<b>HGVS Protein:</b> %s<br>" + \
                  "<b>VCEP Curation:</b> %s<br>" + \
                  "<b>URL:</b> %s<br>") \
-                 % (rec.Gene_Symbol, rec.pyhgvs_cDNA[0:25], rec.pyhgvs_Protein[0:25],
-                    rec.Clinical_significance_ENIGMA,
+                 % (row["Gene_Symbol"], row["pyhgvs_cDNA"][0:25], row["pyhgvs_Protein"][0:25],
+                    row["Clinical_significance_ENIGMA"],
                     out_url)
     outRow = [chrom, start, end, name, score, strand, thickStart, thickEnd, color, out_url,
-              rec.Gene_Symbol,
-              genomeBrowserUtils.displayString(rec.pyhgvs_cDNA[0:254]),
-              genomeBrowserUtils.displayString(rec.pyhgvs_Protein[0:254]),
-              genomeBrowserUtils.displayString(rec.CA_ID),
-              rec.Clinical_significance_ENIGMA, mouseOver]
+              row["Gene_Symbol"],
+              genomeBrowserUtils.displayString(row["pyhgvs_cDNA"][0:254]),
+              genomeBrowserUtils.displayString(row["pyhgvs_Protein"][0:254]),
+              genomeBrowserUtils.displayString(row["CA_ID"]),
+              row["Clinical_significance_ENIGMA"], mouseOver]
     outRow = [str(x) for x in outRow]
     output_fp.write("\t".join(outRow)+"\n")
 
@@ -85,11 +85,11 @@ def main():
             rd = OrderedDict(zip(headers, row)) # row as dict
 
             if int(rd["Hg38_End"]) - int(rd["Hg38_Start"]) < args.length_threshold:
-                write_track_item(rec, str(int(rd["pyhgvs_Hg37_Start"])-1), rd["pyhgvs_Hg37_End"], ofhg19v)
-                write_track_item(rec, str(int(rd["Hg38_Start"])-1), rd["Hg38_End"], ofhg38v)
+                write_track_item(rd, str(int(rd["pyhgvs_Hg37_Start"])-1), rd["pyhgvs_Hg37_End"], ofhg19v)
+                write_track_item(rd, str(int(rd["Hg38_Start"])-1), rd["Hg38_End"], ofhg38v)
             else:
-                write_track_item(rec, str(int(rd["pyhgvs_Hg37_Start"])-1), rd["pyhgvs_Hg37_End"], ofhg19sv)
-                write_track_item(rec, str(int(rd["Hg38_Start"])-1), rd["Hg38_End"], ofhg38sv)
+                write_track_item(rd, str(int(rd["pyhgvs_Hg37_Start"])-1), rd["pyhgvs_Hg37_End"], ofhg19sv)
+                write_track_item(rd, str(int(rd["Hg38_Start"])-1), rd["Hg38_End"], ofhg38sv)
                 
 
         print("wrote to %s, %s, %s and %s" % (ofhg19v.name, ofhg38v.name, ofhg19sv.name, ofhg38sv.name))

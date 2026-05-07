@@ -1,8 +1,8 @@
 'use strict';
 
-var React = require('react'),
-    _ = require('lodash'),
-    Chart = require('./Chart');
+import React from 'react';
+import _ from 'lodash';
+import Chart from './Chart';
 
 var defaultOptions = {
     chart: {
@@ -26,14 +26,18 @@ var defaultOptions = {
     }
 };
 
-var PieChart = React.createClass({
+class PieChart extends React.Component {
+    constructor(props) {
+	super(props);
+	this.chartRef = React.createRef();
+    }
     render() {
         var options = _.merge({}, defaultOptions, this.props.options);
-        return <Chart ref={"chart"} container={this.props.container} options={options} />;
-    },
-    getChart() {
-        return this.refs.chart.chart;
+        return <Chart ref={this.chartRef} container={this.props.container} options={options} />;
     }
-});
+    getChart() {
+	return this.chartRef.current?.chart;
+    }
+}
 
-module.exports = PieChart;
+export default PieChart;

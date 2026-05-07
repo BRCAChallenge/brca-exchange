@@ -6,7 +6,6 @@ import click
 import pandas as pd
 import xml.etree.ElementTree as ET
 
-
 import common
 import common.hgvs_utils
 import common.ucsc
@@ -111,6 +110,8 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
         return(None)
     variant = va.variant
     if variant.valid:
+        if debug:
+            logging.debug("Variant is valid")
         rec["Gene_symbol"] = variant.geneSymbol
         if assembly not in variant.coordinates.keys():
             logging.warning("Skipping variant %s as no genomic coordinates could be extracted", va.name)
@@ -122,6 +123,10 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
         rec["HGVS_cDNA"] = default_val
         rec["Abbrev_AA_change"] = default_val
         rec["HGVS_protein"] = default_val
+        if hasattr(va, "classification"):
+            logging.debug("variant has a classification object")
+        else:
+            logging.debug("Variant has no classification object")
         rec["Condition_ID_type"] = va.classification.condition_type
         if va.classification.condition_value == None:
             rec["Condition_ID_value"] = "not provided"
@@ -221,7 +226,8 @@ def _create_df(variant_records):
 @click.argument('output', type=click.Path(writable=True))
 @click.option('--logs', type=click.Path(writable=True))
 @click.option('--gene', type=str, required=True, multiple=True)
-def main(filtered_clinvar_xml, gene, output, logs):
+@click.option('--debug', is_flag=True, default=False)
+def main(filtered_clinvar_xml, gene, output, logs, debug):
     common.utils.setup_logfile(logs)
     hgvs_util = common.hgvs_utils.HgvsWrapper()
     gene_symbols = list(set(gene))
@@ -231,7 +237,7 @@ def main(filtered_clinvar_xml, gene, output, logs):
         for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
             if event == 'end' and elem.tag == 'VariationArchive':
                 next_record = parse_record(elem, hgvs_util, gene_symbols,
-                                           mane_transcripts, debug=False)
+                                           mane_transcripts, debug=debug)
                 if next_record is not None:
                     variant_records.append(next_record)
                 elem.clear()

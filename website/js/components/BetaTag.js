@@ -13,8 +13,11 @@ export default class BetaTag extends React.Component {
 
         if (this.props.hoverText) {
             const popper = (
-                <Popover id="beta_feature_popup" title="Beta Feature">
-                    <span dangerouslySetInnerHTML={{__html: this.props.hoverText}} />
+                <Popover id="beta_feature_popup">
+		    <Popover.Header as="h3">Beta Feature</Popover.Header>
+		    <Popover.Body>
+                        <span dangerouslySetInnerHTML={{__html: this.props.hoverText}} />
+		    </Popover.Body>
                 </Popover>
             );
 

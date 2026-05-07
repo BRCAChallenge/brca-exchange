@@ -228,7 +228,7 @@ class transformer(object):
         identifier = getIdentifier(newRow, reports)
         if identifier is None:
             pass
-        variant = newRow[identifier]
+        variant = harmonize_genomic_hgvs(newRow[identifier]) if not reports else newRow[identifier]
         newValue = self._normalize(newRow[field], field)
         if field in self._newColumnsAdded and field not in list(self._renamedColumns.values()):
             if newValue == "-":
@@ -280,7 +280,9 @@ class transformer(object):
                              "Genomic_HGVS_38"]
 
         # Header to group all logs the same variant
-        variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (newRow[getIdentifier(newRow, isReport)],
+        identifier = getIdentifier(newRow, isReport)
+        variant_name = harmonize_genomic_hgvs(newRow[identifier]) if not isReport else newRow[identifier]
+        variant_intro = "\n\n %s \n Old Source: %s \n New Source: %s \n\n" % (variant_name,
                                                                               oldRow["Source"], newRow["Source"])
 
         changeset = ""
@@ -307,7 +309,7 @@ class transformer(object):
                 identifier = getIdentifier(newRow, reports)
                 if identifier is None:
                     pass
-                variant = newRow[identifier]
+                variant = harmonize_genomic_hgvs(newRow[identifier]) if not reports else newRow[identifier]
                 oldValue = self._normalize(oldRow[field], field)
                 newValue = "-"
                 if oldValue != newValue:
@@ -382,7 +384,8 @@ def appendVariantChangeTypesToOutput(variantChangeTypes, v2, output):
                     row.append(None)
                 else:
                     identifierIndex = headerRow.index(identifier)
-                    row.append(variantChangeTypes[row[identifierIndex]])
+                    key = harmonize_genomic_hgvs(row[identifierIndex]) if not reports else row[identifierIndex]
+                    row.append(variantChangeTypes[key])
                 logging.debug('variant with change type: %s', row)
                 result.append(row)
 
@@ -579,6 +582,39 @@ def isEmpty(val):
     return False
 
 
+def ncbi_to_chr(accession):
+    base = accession.split('.')[0]
+    if base.startswith("NC_0000"):
+        num = int(base.split("_")[1])
+        if 1 <= num <= 22:
+            return f"chr{num}"
+        elif num == 23:
+            return "chrX"
+        elif num == 24:
+            return "chrY"
+    elif base == "NC_012920":
+        return "chrM"
+    return None
+
+
+def harmonize_genomic_hgvs(extended_hgvs):
+    """Convert an extended genomic HGVS string to a simplified genomic HGVS string.
+
+    Maps from extended format (e.g. 'NC_000013.11:g.32314514C>T') to simplified
+    format (e.g. 'chr13:g.32314514C>T') by replacing NCBI accession-based reference
+    sequence identifiers with their chromosome name equivalents.
+
+    Also normalizes legacy format with extra colon before allele
+    (e.g. 'chr13:g.32314514:C>T' -> 'chr13:g.32314514C>T').
+    """
+    ref_seq, change = extended_hgvs.split(':', 1)
+    if ref_seq.startswith('NC_0'):
+        ref_seq = ncbi_to_chr(ref_seq)
+    # Remove legacy extra colon between position digits and allele (e.g. '32314514:C>T' -> '32314514C>T')
+    change = re.sub(r'(\d+):([A-Za-z])', r'\1\2', change)
+    return ref_seq + ':' + change
+
+
 def addGsIfNecessary(row):
     for field in PYHGVS_GENOMIC_COORDINATE_FIELDS:
         # Adjust Genomic Coordinate if it doesn't have 'g.' in coordinate
@@ -639,6 +675,14 @@ def main():
 
     args = parser.parse_args()
 
+    if args.diff_dir:
+        args.removed = os.path.join(args.diff_dir, args.removed)
+        args.added = os.path.join(args.diff_dir, args.added)
+        args.added_data = os.path.join(args.diff_dir, args.added_data)
+        args.diff = os.path.join(args.diff_dir, args.diff)
+        args.diff_json = os.path.join(args.diff_dir, args.diff_json)
+        args.output = os.path.join(args.diff_dir, args.output)
+
     if args.artifacts_dir:
         logFile = os.path.join(args.artifacts_dir, 'releaseDiff.log')
     else:
@@ -690,15 +734,26 @@ def main():
         # handle variants
         for oldRow in v1In:
             oldRow = addGsIfNecessary(oldRow)
-            oldData[oldRow[getIdentifier(oldRow, reports)]] = oldRow
+            oldData[harmonize_genomic_hgvs(oldRow[getIdentifier(oldRow, reports)])] = oldRow
         for newRow in v2In:
             newRow = addGsIfNecessary(newRow)
-            newData[newRow[getIdentifier(newRow, reports)]] = newRow
+            newData[harmonize_genomic_hgvs(newRow[getIdentifier(newRow, reports)])] = newRow
+    # Diagnostic: show sample variant IDs from each dataset
+    oldKeys = list(oldData.keys())
+    newKeys = list(newData.keys())
+    print(f"DEBUG: v1 variant count: {len(oldKeys)}, v2 variant count: {len(newKeys)}")
+    print(f"DEBUG: Sample v1 IDs: {oldKeys[:5]}")
+    print(f"DEBUG: Sample v2 IDs: {newKeys[:5]}")
+    matches = sum(1 for k in oldKeys if k in newData)
+    print(f"DEBUG: v1 variants found in v2: {matches} / {len(oldKeys)}")
+
     for oldVariant in list(oldData.keys()):
         if oldVariant not in newData:
             removed.writerow(oldData[oldVariant])
+    print(f"DEBUG: finished printing the removed records")
 
     for newVariant in list(newData.keys()):
+        print(f"DEBUG: working on new variant", newVariant)
         if newVariant not in oldData:
             variantChangeTypes[newVariant] = CHANGE_TYPES['ADDED']
             added.writerow(newData[newVariant])
@@ -708,7 +763,8 @@ def main():
             logging.debug("newV: %s change_type: %s", newVariant, change_type)
             assert(newVariant not in variantChangeTypes)
             variantChangeTypes[newVariant] = change_type
-
+    print(f"DEBUG: done sorting variants")
+            
     # Adds change_type column and values for each variant in v2 to the output
     appendVariantChangeTypesToOutput(variantChangeTypes, args.v2, args.output)
 

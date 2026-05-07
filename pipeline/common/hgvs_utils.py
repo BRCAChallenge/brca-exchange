@@ -9,6 +9,7 @@ import hgvs.normalizer
 import hgvs.parser
 import hgvs.validator
 from hgvs.exceptions import HGVSError
+from common.variant_utils import VCFVariant
 
 
 class HgvsWrapper:
@@ -26,7 +27,12 @@ class HgvsWrapper:
 
         assemblies = [self.GRCh37_Assem, self.GRCh38_Assem]
 
-        self.hgvs_ams = { a : (hgvs.assemblymapper.AssemblyMapper(self.hgvs_dp, assembly_name=a, normalize=False, prevalidation_level=None)) for a in assemblies }
+        self.hgvs_ams = {
+            a : (hgvs.assemblymapper.AssemblyMapper(self.hgvs_dp,
+                                                    assembly_name=a,
+                                                    normalize=True,
+                                                    alt_aln_method="splign"))
+            for a in assemblies }
 
         all_assemblies = bioutils.assemblies.get_assemblies()
 
@@ -158,6 +164,17 @@ class HgvsWrapper:
         except hgvs.exceptions.HGVSInvalidIntervalError as e:
             logging.info("Out of bounds error " + str(e))
         return(None)
+
+    def genomic_hgvs_to_vcf(self, hgvs_string: str) -> VCFVariant:
+        """Parse a genomic HGVS string and return a VCFVariant with chrom, pos, ref, alt."""
+        hgvs_obj = self.hgvs_parser.parse(hgvs_string)
+        return VCFVariant.from_hgvs_obj(hgvs_obj)
+
+    def genomic_hgvs(self, chr, pos, ref, alt):
+        variant = VCFVariant(chr, pos, ref, alt)
+        hgvs_obj = variant.to_hgvs_obj(self.contig_maps[self.GRCh38_Assem])
+        self.hgvs_norm.normalize(hgvs_obj)
+        return str(hgvs_obj)
 
     @staticmethod
     def get_instance():

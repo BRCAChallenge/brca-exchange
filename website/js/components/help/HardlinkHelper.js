@@ -30,7 +30,7 @@ export function idHelpClicked(e) {
     return false;
 }
 
-const HardlinkHelper = React.createClass({
+class HardlinkHelper extends React.Component {
     render() {
         const {id} = this.props;
 
@@ -40,6 +40,6 @@ const HardlinkHelper = React.createClass({
             />
         );
     }
-});
+}
 
 export default HardlinkHelper;

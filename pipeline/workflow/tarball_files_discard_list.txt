@@ -1,10 +1,13 @@
 ./1000G.sorted.hg38.vcffor_pipeline
+./gnomADv3.vcf
 ./release/artifacts/1000_Genomesready.vcf
 ./release/artifacts/1000_Genomes.vcf
 ./release/artifacts/aggregated.tsv
 ./release/artifacts/bayesdel.vcf
 ./release/artifacts/BICready.vcf
 ./release/artifacts/BIC.vcf
+./release/artifacts/BRCA.ann.all.vcf
+./release/artifacts/brca_pseudonym_generator.log
 ./release/artifacts/built.tsv
 ./release/artifacts/built_with_bayesdel.tsv
 ./release/artifacts/built_with_spliceai.tsv

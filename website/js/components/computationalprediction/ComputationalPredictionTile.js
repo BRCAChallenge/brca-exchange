@@ -11,7 +11,7 @@ const slugify = require('../../slugify');
 import {geneMeta} from '../../SplicingData.js';
 import {variantInfo, overlaps, pairwise} from '../../Splicing.js';
 const ComputationalPredictionConstants = require("./ComputationalPredictionConstants");
-var KeyInline = require('../KeyInline');
+import KeyInline from '../KeyInline';
 
 
 export default class ComputationalPredictionTile extends React.Component {
@@ -113,6 +113,7 @@ export default class ComputationalPredictionTile extends React.Component {
 
             if (group === 'varType') {
                 return ( <CollapsibleSection
+			key={`cp-section-${group}`}
                         fieldName={group}
                         computationalPrediction={true}
                         extraHeaderItems={this.generateHeader(variant.priors[group])}
@@ -126,6 +127,7 @@ export default class ComputationalPredictionTile extends React.Component {
 
             if (group === 'varLoc') {
                 return ( <CollapsibleSection
+			key={`cp-section-${group}`}
                         fieldName={group}
                         computationalPrediction={true}
                         extraHeaderItems={this.generateHeader(varLoc)}
@@ -159,43 +161,54 @@ export default class ComputationalPredictionTile extends React.Component {
                             <td><span className={rowClass + "row-value"}>{rowItem}</span></td>
                         </tr>
                     );
-                });
-
+                })
+		    
                 let additionalRows = [];
 
                 const additionalRowData = ComputationalPredictionConstants.filter(obj => {return obj.Method === group;});
 
                 for (let [k, v] of Object.entries(additionalRowData[0])) {
                     const isEmptyValue = util.isEmptyField(v);
+                    if (k === 'Method') continue;
+                    
+                    let displayValue;
                     if (isEmptyValue) {
-                        v = '-';
+                        displayValue = '-';
+                    } 
+		    const trKey = `cp-${group}-${k}`;
+		    if (k === "Publication" && v !== '-') {
+			additionalRows.push(
+                            <tr key={`${trKey}-pmid`} className={ (isEmptyValue && this.props.hideEmptyItems) ? rowClass + " variantfield-empty" : rowClass }>
+                                <KeyInline tableKey={k} noHelpLink={false}
+                                    tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
+                                    onClick={(event) => this.props.showHelp(event, k)}
+                                />
+                                <td>
+                                    <span>
+                                        <a href={`https://www.ncbi.nlm.nih.gov/pubmed/${v}`} target="_blank" rel="noopener noreferrer">
+                                            PMID: {v}
+                                        </a>
+                                    </span>
+                                </td>
+                            </tr>
+                        );
                     } else {
-                        if (k === "Publication") {
-                            additionalRows.push(
-                                <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? rowClass + " variantfield-empty" : rowClass }>
-                                    <KeyInline tableKey={k} noHelpLink={false}
-                                        tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
-                                        onClick={(event) => this.props.showHelp(event, k)}
-                                    />
-                                    <td><span><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${v}`} target='_blank'>PMID: {v}</a></span></td>
-                                </tr>
-                            );
-                        }
+                        additionalRows.push(
+                            <tr key={trKey} className={ (isEmptyValue && this.props.hideEmptyItems) ? rowClass + " variantfield-empty" : rowClass }>
+                                <KeyInline tableKey={k} noHelpLink={false}
+                                    tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
+                                    onClick={(event) => this.props.showHelp(event, k)}
+                                />
+                                <td><span className="row-value">{v}</span></td>
+                            </tr>
+                        );
                     }
-                    additionalRows.push(
-                        <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? rowClass + " variantfield-empty" : rowClass }>
-                            <KeyInline tableKey={k} noHelpLink={false}
-                                tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
-                                onClick={(event) => this.props.showHelp(event, k)}
-                            />
-                            <td><span className="row-value">{v}</span></td>
-                        </tr>
-                    );
-                }
+		}
 
                 const allRows = additionalRows.concat(rows);
 
                 return ( <CollapsibleSection
+			    key={`cp-section-${group}`}
                             fieldName={group}
                             computationalPrediction={true}
                             extraHeaderItems={this.generateHeader(result)}
@@ -219,8 +232,10 @@ export default class ComputationalPredictionTile extends React.Component {
              return section !== undefined;
         });
 
+	const {onFieldToggled, relayoutGrid, hideEmptyItems, tooltips, showHelp, ...tileprops} = this.props;
+
         return (
-            <CollapsibleTile allEmpty={allEmpty} {...this.props}>
+            <CollapsibleTile allEmpty={allEmpty} {...tileprops}>
                 <div className="tile-disclaimer">
                     This tile displays computational predictions and other annotations relevant for assigning ACMG/AMP bioinformatic codes.  Additional computational predictions are available via the <em>in Silico</em> Prior Predictions tile. Variants that are outside of the potentially clincially-important functional domains are noted as Outside Domain.
                 </div>

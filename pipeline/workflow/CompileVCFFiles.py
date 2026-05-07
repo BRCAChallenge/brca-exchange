@@ -16,7 +16,7 @@ luigi.auto_namespace(scope=__name__)
 from workflow import analysis, esp_processing, gnomad_processing, pipeline_common, pipeline_utils
 from workflow.pipeline_common import DefaultPipelineTask, clinvar_method_dir, lovd_method_dir, \
     functional_assays_method_dir, data_merging_method_dir, priors_method_dir, priors_filter_method_dir, \
-    utilities_method_dir, vr_method_dir, splice_ai_method_dir, field_metadata_path, field_metadata_path_additional
+    utilities_method_dir, vr_method_dir, insilico_method_dir, field_metadata_path, field_metadata_path_additional
 
 from common import utils
 from data_merging import generate_variants_output_file
@@ -373,8 +373,18 @@ class SortSharedLOVDOutput(DefaultPipelineTask):
         pipeline_utils.run_process(args, redirect_stdout_path=self.output().path)
         pipeline_utils.check_file_for_contents(self.output().path)
 
+class DownloadStaticSharedLOVDData(DefaultPipelineTask):
+    def output(self):
+        return luigi.LocalTarget(f"{self.lovd_file_dir}/sharedLOVD.sorted.hg38.vcf")
 
-@requires(SortSharedLOVDOutput)
+    def run(self):
+        os.chdir(self.lovd_file_dir)
+        download_url = "https://brcaexchange.org/backend/downloads/"
+        shared_lovd_vcf_url = download_url + "sharedLOVD.sorted.hg38.vcf"
+        pipeline_utils.download_file_and_display_progress(shared_lovd_vcf_url)
+
+
+@requires(DownloadStaticSharedLOVDData)
 class CopySharedLOVDOutputToOutputDir(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(f"{self.cfg.output_dir}/sharedLOVD.sorted.hg38.vcf")
@@ -632,7 +642,7 @@ class BuildAggregatedOutput(DefaultPipelineTask):
         args = ["python", "brca_pseudonym_generator.py",
                 self.input().path,
                 self.output().path,
-                "--log-path", os.path.join(self.artifacts_dir, "brca-pseudonym-generator.log"),
+                "--log-path", os.path.join(self.artifacts_dir, "brca_pseudonym_generator.log"),
                 "--config-file", self.cfg.gene_config_path,
                 "--resources", brca_resources_dir]
 
@@ -644,34 +654,6 @@ class BuildAggregatedOutput(DefaultPipelineTask):
 
 
 @requires(BuildAggregatedOutput)
-class AppendCAID(DefaultPipelineTask):
-
-    def output(self):
-        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
-        return luigi.LocalTarget(artifacts_dir + "built_with_ca_ids.tsv")
-
-    def run(self):
-        release_dir = self.cfg.output_dir + "/release/"
-        artifacts_dir = release_dir + "artifacts/"
-        brca_resources_dir = self.cfg.resources_dir
-        os.chdir(data_merging_method_dir)
-
-        args = ["python", "get_ca_id.py", "-i",
-                artifacts_dir + "built.tsv", "-o",
-                artifacts_dir + "/built_with_ca_ids.tsv", "-l",
-                artifacts_dir + "/get_ca_id.log"]
-        print("Running get_ca_id.py with the following args: %s" % (
-            args))
-        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        pipeline_utils.print_subprocess_output_and_error(sp)
-
-        pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
-            artifacts_dir + "built.tsv",
-            artifacts_dir + "built_with_ca_ids.tsv")
-
-
-@requires(AppendCAID)
 class AppendMupitStructure(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_mupit.tsv"))
@@ -699,7 +681,7 @@ class RemoveProblemVariant(DefaultPipelineTask):
     def run(self):
         artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
         os.chdir(artifacts_dir)
-        cmd = 'grep -v "chr13:g.32398769:A>G" built_with_mupit.tsv | grep -v "chr13:g.32398768:T>G"| awk \'BEGIN {OFS=FS="\t"} { sub(/\.4$/, ".3", $337); print}\''
+        cmd = 'grep -v "chr13:g.32398769:A>G" built_with_mupit.tsv | grep -v "chr13:g.32398768:T>G"| awk \'BEGIN {OFS=FS="\t"} { sub(/\\.4$/, ".3", $337); print}\''
         pipeline_utils.run_process(cmd,
                                    redirect_stdout_path='ready_for_priors.tsv',
                                    shell=True)
@@ -759,7 +741,7 @@ class PostProcessPriors(DefaultPipelineTask):
         artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
         os.chdir(artifacts_dir)
 
-        cmd = 'cat built_with_priors.tsv | awk \' BEGIN {FS=OFS="\t"} { sub(/\.3$/, ".4", $337); print}\''
+        cmd = 'cat built_with_priors.tsv | awk \' BEGIN {FS=OFS="\t"} { sub(/\\.3$/, ".4", $337); print}\''
         pipeline_utils.run_process(cmd,
                                    redirect_stdout_path='built_with_priors_postprocessed.tsv',
                                    shell=True)
@@ -767,6 +749,31 @@ class PostProcessPriors(DefaultPipelineTask):
 
         
 @requires(PostProcessPriors)
+class AppendCAID(DefaultPipelineTask):
+
+    def output(self):
+        artifacts_dir = self.cfg.output_dir + "/release/artifacts/"
+        return luigi.LocalTarget(artifacts_dir + "built_with_ca_ids.tsv")
+
+    def run(self):
+        release_dir = self.cfg.output_dir + "/release/"
+        artifacts_dir = release_dir + "artifacts/"
+        brca_resources_dir = self.cfg.resources_dir
+        os.chdir(data_merging_method_dir)
+
+        args = ["python", "get_ca_id.py", "-i", self.input().path,
+                "-o", self.output().path,
+                "-l", artifacts_dir + "/get_ca_id.log"]
+        print("Running get_ca_id.py with the following args: %s" % (
+            args))
+        sp = subprocess.Popen(args, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        pipeline_utils.print_subprocess_output_and_error(sp)
+
+        pipeline_utils.check_input_and_output_tsvs_for_same_number_variants(
+            self.input().path, self.output().path)
+
+@requires(AppendCAID)
 class AppendVRId(DefaultPipelineTask):
     def output(self):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, "built_with_vr_ids.tsv"))
@@ -778,7 +785,7 @@ class AppendVRId(DefaultPipelineTask):
         args = [
             'bash', 'appendvrids.sh',
             artifacts_dir,
-            'built_with_priors_postprocessed.tsv',
+            'built_with_ca_ids.tsv',
             'built_with_vr_ids.tsv',
              self.cfg.seq_repo_dir
         ]

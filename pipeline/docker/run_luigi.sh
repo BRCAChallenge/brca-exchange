@@ -12,7 +12,7 @@ BRCA_RESOURCES=/files/resources
 
 if [ "$#" -lt "4" ]; then
     echo "Usage: run_luigi.sh [PRIORS_REFERENCES] [OUTPUT_DIR_HOST] [PRIORS_DOCKER_IMAGE_NAME] [VR_DOCKER_IMAGE_NAME] \
-        [TASK] [WORKERS] [GENE_CONFIG_FILE] [VICTOR_DOCKER_IMAGE] [VICTOR_DATA_DIR]"
+        [TASK] [WORKERS] [GENE_CONFIG_FILE] [SEQ_REPO_DIR]"
 fi
 
 PRIORS_REFERENCES=$1
@@ -22,23 +22,21 @@ VR_DOCKER_IMAGE=$4
 LUIGI_TASK=${5}
 N_WORKERS=${6}
 GENE_CONFIG=${7}
-VICTOR_DOCKER_IMAGE=$8
-VICTOR_DATA_DIR=$9
-SEQ_REPO_DIR=${10:-}
+SEQ_REPO_DIR=${8:-}
 
 PREVIOUS_RELEASE_TAR=/files/previous_release.tar.gz
 
 RELEASE_NOTES=/files/release_notes.txt
 
-CODE_MNT=$(mount | grep /opt/brca-exchange)
+CODE_MNT=$(mount | grep /opt/brca-exchange-kb)
 [ -z "${CODE_MNT}" ] || echo "WARNING: BRCA Code base mounted from host file system"
 
-cd /opt/brca-exchange
+cd /opt/brca-exchange-kb
 
 echo "Running brca exchange pipeline:"
 echo "Git hash: $(git log | head -n 1)"
 
-cd /opt/brca-exchange/pipeline/workflow
+cd /opt/brca-exchange-kb/pipeline/workflow
 
 echo "Attempting to run task ${LUIGI_TASK}"
 python -m luigi --logging-conf-file luigi_log_configuration.conf --module CompileVCFFiles ${LUIGI_TASK} \
@@ -52,8 +50,6 @@ python -m luigi --logging-conf-file luigi_log_configuration.conf --module Compil
   --PipelineParams-output-dir-host ${OUTPUT_DIR_HOST} \
   --PipelineParams-release-notes ${RELEASE_NOTES} \
   --PipelineParams-gene-config-path ${GENE_CONFIG} \
-  --PipelineParams-victor-docker-image-name ${VICTOR_DOCKER_IMAGE} \
-  --PipelineParams-victor-data-dir ${VICTOR_DATA_DIR} \
   --PipelineParams-seq-repo-dir ${SEQ_REPO_DIR} \
   ${DATE_PARAM_OPT} \
   --workers ${N_WORKERS} --local-scheduler

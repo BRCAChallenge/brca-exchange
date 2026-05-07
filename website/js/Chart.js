@@ -10,9 +10,9 @@ var defaultOptions = {
     }
 };
 
-var Chart = React.createClass({
+class Chart extends React.Component {
     // When the DOM is ready, create the chart.
-    componentDidMount: function () {
+    componentDidMount() {
         var options = _.merge({}, defaultOptions, this.props.options);
         // Extend Highcharts with modules
         if (this.props.modules) {
@@ -25,15 +25,15 @@ var Chart = React.createClass({
             this.props.container,
             options
         );
-    },
-    //Destroy chart before unmount.
-    componentWillUnmount: function () {
-        this.chart.destroy();
-    },
-    //Create the div which the chart will be rendered to.
-    render: function () {
-        return React.createElement('div', { id: this.props.container });
     }
-});
+    //Destroy chart before unmount.
+    componentWillUnmount() {
+        if (this.chart && this.chart.destroy) this.chart.destroy();
+    }
+    //Create the div which the chart will be rendered to.
+    render() {
+        return <div id={this.props.container} />;
+    }
+}
 
-module.exports = Chart;
+export default Chart;

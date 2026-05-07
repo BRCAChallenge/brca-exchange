@@ -1,6 +1,6 @@
 'use strict';
 import React from 'react';
-import d3 from "d3";
+import * as d3 from 'd3';
 
 const _ = require('underscore');
 
@@ -10,7 +10,7 @@ import FuncClassSubtile from "./FuncClassSubtile";
 import {Table} from "react-bootstrap";
 const util = require('../../util');
 const slugify = require('../../slugify');
-var KeyInline = require('../KeyInline');
+import KeyInline from '../KeyInline';
 const FunctionalAssayConstants = require("./FunctionalAssayConstants");
 
 
@@ -39,7 +39,7 @@ export default class FunctionalAssayTile extends React.Component {
             return !util.isEmptyField(val);
         });
 
-        const impactScale = d3.scale.threshold()
+        const impactScale = d3.scaleThreshold()
             .domain(impacts[1].range)
             .range(impacts);
 
@@ -51,7 +51,7 @@ export default class FunctionalAssayTile extends React.Component {
                     const rowItem = util.getFormattedFieldByProp(prop, this.props.variant);
 
                     return (
-                        <tr key={prop} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+                        <tr key={`fa-${assay.name}-${prop}`} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={title} noHelpLink={false}
                                 tooltip={this.props.tooltips && this.props.tooltips[slugify(prop)]}
                                 onClick={(event) => this.props.showHelp(event, prop)}
@@ -77,22 +77,22 @@ export default class FunctionalAssayTile extends React.Component {
                         if (k === "Publication") {
                             // grab just the pmid for display
                             let splitText = v.split('/');
-                            v = (<a href={v} target='_blank'>PMID:{splitText[splitText.length - 1]}</a>);
+                            v = (<a href={v} target='_blank' rel="noopener noreferrer">PMID:{splitText[splitText.length - 1]}</a>);
                         } else if (k === "Previous Publications") {
                             let pmids = v.split(',');
                             let length = pmids.length;
                             let links = pmids.map( (pmid, idx) => {
                                 pmid = pmid.split(':')[1];
                                 if (idx < length - 1) {
-                                    return (<span><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>PMID:{pmid}</a>, </span>);
+                                    return (<span key={`fa-prevpub-${assay.name}-${pmid}-${idx}`}><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank' rel="noopener noreferrer">PMID:{pmid}</a>, </span>);
                                 }
-                                return (<span><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>PMID:{pmid}</a></span>);
+                                return (<span key={`fa-prevpub-${assay.name}-${pmid}-${idx}`}><a href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank' rel="noopener noreferrer">PMID:{pmid}</a></span>);
                             });
                             v = links;
                         }
                     }
                     return (
-                        <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+                        <tr key={`fa-${assay.name}-${k}`} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={k} noHelpLink={false}
                                 tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
                                 onClick={(event) => this.props.showHelp(event, k)}
@@ -110,7 +110,7 @@ export default class FunctionalAssayTile extends React.Component {
                         v = '-';
                     }
                     return (
-                        <tr key={k} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
+                        <tr key={`fa-${assay.name}-${k}`} className={ (isEmptyValue && this.props.hideEmptyItems) ? "variantfield-empty" : "" }>
                             <KeyInline tableKey={k} noHelpLink={false}
                                 tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
                                 onClick={(event) => this.props.showHelp(event, k)}
@@ -124,6 +124,7 @@ export default class FunctionalAssayTile extends React.Component {
 
                 if (assay.name === "Findlay") {
                     return ( <CollapsibleSection
+			        key={`functional-assay-section-${assay.name}`}
                                 fieldName={assay.author}
                                 extraHeaderItems={this.generateHeader(result)}
                                 twoColumnExtraHeader={true}
@@ -154,6 +155,7 @@ export default class FunctionalAssayTile extends React.Component {
                             </CollapsibleSection> );
                 } else {
                     return ( <CollapsibleSection
+			        key={`functional-assay-section-${assay.name}`}
                                 fieldName={assay.author}
                                 extraHeaderItems={this.generateHeader(result)}
                                 twoColumnExtraHeader={true}
@@ -180,7 +182,7 @@ export default class FunctionalAssayTile extends React.Component {
         return (
             <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <div className="tile-disclaimer">
-                    Assays were selected by the ENIGMA consortium as high quality assays that met internal standards permitting estimation of sensitivity and specificity, using approaches as described in <a href="https://pubmed.ncbi.nlm.nih.gov/31131967/" target='_blank'>Parsons 2019</a>.
+                    Assays were selected by the ENIGMA consortium as high quality assays that met internal standards permitting estimation of sensitivity and specificity, using approaches as described in <a href="https://pubmed.ncbi.nlm.nih.gov/31131967/" target='_blank' rel="noopener noreferrer">Parsons 2019</a>.
                     <ul>
                         <li>Genetic variation can impact RNA transcripts and/or protein function or abundance. Assays labeled with a <b>P</b> measure the impact of genetic variation at the protein level. Assays labeled with a <b>R/P</b> measure impact at both the RNA and protein level.</li>
                         <li><b>Reports</b>, or the authors’ interpretation of the functional impact of each variant, are presented as they appear in the publications. A report of ‘Many Provided’ means that the authors performed more than one assay for each variant but provided no overall report of functional impact.</li>
