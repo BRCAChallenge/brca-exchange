@@ -29,9 +29,15 @@ class MupitStructure(models.Model):
 
 
 class LegacyJSONField(JSONField):
-    def db_type(self, connection):
-        return 'json'
-
+    def from_db_value(self, value, expression, connection):
+        # psycopg3 already deserializes JSONB to Python objects
+        # so we need to handle both str and already-deserialized values
+        if value is None:
+            return value
+        if isinstance(value, str):
+            return super().from_db_value(value, expression, connection)
+        # Already a Python object (list, dict) — return as-is
+        return value
 
 # ------------------------------------------------------------------------
 # --- diff models
