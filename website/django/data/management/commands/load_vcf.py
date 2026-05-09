@@ -194,7 +194,6 @@ class Command(BaseCommand):
                     'CA_ID':              None,
                     'VRS':                vrs_data,
                     'Synonyms':           '-',
-                    'Pathogenicity':      info_str(rec, 'Clinical_significance'),
                 },
             )
             if not created:
@@ -204,7 +203,6 @@ class Command(BaseCommand):
                 variant.BIC_Nomenclature   = info_str(rec, 'BIC_Nomenclature')
                 variant.HGVS_Protein       = info_str(rec, 'HGVS_protein')
                 variant.Protein_Change     = info_str(rec, 'Abbrev_AA_change')
-                variant.Pathogenicity      = info_str(rec, 'Clinical_significance')
                 if vrs_data:
                     variant.VRS = vrs_data
                 variant.save(using=DB)
@@ -255,7 +253,6 @@ class Command(BaseCommand):
                 Reference_Sequence='-', HGVS_cDNA='-', BIC_Nomenclature='-',
                 HGVS_Protein='-', Protein_Change='-',
                 Synonyms=info_str(rec, 'Synonyms'),
-                Pathogenicity=info_str(rec, 'ClinicalSignificance'),
             )
 
             self._upsert_coords(variant,
@@ -309,7 +306,7 @@ class Command(BaseCommand):
                 Reference_Sequence='-',
                 HGVS_cDNA=info_str(rec, 'cDNA'),
                 BIC_Nomenclature='-', HGVS_Protein='-', Protein_Change='-',
-                Synonyms='-', Pathogenicity=info_str(rec, 'classification'),
+                Synonyms='-',
             )
 
             self._upsert_coords(variant,
@@ -369,7 +366,7 @@ class Command(BaseCommand):
                 BIC_Nomenclature=info_str(rec, 'bic_dna_change'),
                 HGVS_Protein='-',
                 Protein_Change=info_str(rec, 'protein_change'),
-                Synonyms='-', Pathogenicity=info_str(rec, 'iarc_class'),
+                Synonyms='-',
             )
 
             self._upsert_coords(variant,
@@ -418,7 +415,7 @@ class Command(BaseCommand):
             variant = self._upsert_variant(d, vrs_data,
                 Gene_Symbol='-', Reference_Sequence='-', HGVS_cDNA='-',
                 BIC_Nomenclature='-', HGVS_Protein='-', Protein_Change='-',
-                Synonyms='-', Pathogenicity='-',
+                Synonyms='-',
             )
 
             self._upsert_coords(variant,
@@ -546,7 +543,7 @@ class Command(BaseCommand):
                 Reference_Sequence='-',
                 HGVS_cDNA=info_str(rec, 'HGVS_Nucleotide_Variant'),
                 BIC_Nomenclature='-', HGVS_Protein='-', Protein_Change='-',
-                Synonyms='-', Pathogenicity='-',
+                Synonyms='-',
             )
 
             self._upsert_coords(variant,

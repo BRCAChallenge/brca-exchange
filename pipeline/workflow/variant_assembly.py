@@ -551,6 +551,27 @@ class ComputeGenomicHGVS(VCFAssemblyTask):
 
 
 ###############################################
+#        QUERY CLINGEN ALLELE REGISTRY        #
+###############################################
+
+@requires(ComputeGenomicHGVS)
+class QueryClinGenAlleleRegistry(VCFAssemblyTask):
+    """Populate variant CA_ID, title, HGVS_cDNA, ensembl_cdna, HGVS_Protein,
+    ensembl_protein, and Synonyms from the ClinGen Allele Registry, and insert
+    GRCh37 rows into genomic_coordinates."""
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.vcf_dir, "query_clingen_allele_registry.done"))
+
+    def run(self):
+        script = os.path.join(_pipeline_dir, "variant_processing", "query_clingen_allele_registry.py")
+        args = ["python", script]
+        self._run_process_with_pipeline_path(args)
+        with open(self.output().path, "w") as f:
+            f.write("done\n")
+
+
+###############################################
 #               TOP-LEVEL TASK                #
 ###############################################
 
@@ -561,7 +582,7 @@ class ComputeGenomicHGVS(VCFAssemblyTask):
     VRSAnnotateEnigma,
     VRSAnnotateFunctionalAssays,
     VRSAnnotateGnomAD,
-    ComputeGenomicHGVS,
+    QueryClinGenAlleleRegistry,
 )
 class VCFAssembly(VCFAssemblyTask):
     """Runs all source chains, VRS-annotates each VCF, loads to DB, and writes sentinel."""

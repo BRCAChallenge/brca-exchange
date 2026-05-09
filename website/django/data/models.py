@@ -48,7 +48,9 @@ class Variant(models.Model):
     VRS = models.JSONField(null=True, blank=True)
 
     Synonyms = models.TextField()
-    Pathogenicity = models.TextField(db_index=True)
+    title = models.TextField(default='-')
+    ensembl_cdna = models.TextField(default='-')
+    ensembl_protein = models.TextField(default='-')
 
     objects = VariantManager()
 
