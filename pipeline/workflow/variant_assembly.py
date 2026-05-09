@@ -572,6 +572,24 @@ class QueryClinGenAlleleRegistry(VCFAssemblyTask):
 
 
 ###############################################
+#           LOAD ENIGMA DOMAINS               #
+###############################################
+
+class LoadEnigmaDomains(VCFAssemblyTask):
+    """Populate enigma_domain with ENIGMA CI functional domain coordinates."""
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.vcf_dir, "load_enigma_domains.done"))
+
+    def run(self):
+        script = os.path.join(_pipeline_dir, "variant_processing", "load_enigma_domains.py")
+        args = ["python", script]
+        self._run_process_with_pipeline_path(args)
+        with open(self.output().path, "w") as f:
+            f.write("done\n")
+
+
+###############################################
 #               TOP-LEVEL TASK                #
 ###############################################
 
@@ -583,6 +601,7 @@ class QueryClinGenAlleleRegistry(VCFAssemblyTask):
     VRSAnnotateFunctionalAssays,
     VRSAnnotateGnomAD,
     QueryClinGenAlleleRegistry,
+    LoadEnigmaDomains,
 )
 class VCFAssembly(VCFAssemblyTask):
     """Runs all source chains, VRS-annotates each VCF, loads to DB, and writes sentinel."""
