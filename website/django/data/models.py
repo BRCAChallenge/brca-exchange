@@ -279,3 +279,17 @@ class VariantRepresentation(models.Model):
     class Meta:
         db_table = 'data_variantrepresentation'
         managed = False
+
+
+class EnigmaDomain(models.Model):
+    """ENIGMA Consortium functional domains of potential clinical importance."""
+    gene     = models.TextField()
+    name     = models.TextField()
+    chrom    = models.TextField()
+    assembly = models.TextField(default='GRCh38')
+    start    = models.IntegerField()
+    end      = models.IntegerField()
+
+    class Meta:
+        db_table = 'enigma_domain'
+        managed = False
