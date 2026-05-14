@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from mailchimp3 import MailChimp, mailchimpclient
 
 from brca import settings, site_settings
@@ -26,7 +26,7 @@ import logging
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
-@authentication_classes((JSONWebTokenAuthentication,))
+@authentication_classes((JWTAuthentication,))
 def retrieve(request):
     user = request.user
     query = MyUser.objects.filter(email=user)
@@ -53,7 +53,7 @@ def retrieve(request):
 @never_cache
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
-@authentication_classes((JSONWebTokenAuthentication,))
+@authentication_classes((JWTAuthentication,))
 def update(request):
     user = MyUser.objects.filter(email=request.user)
 

@@ -17,6 +17,7 @@ from .models import (
     InSilicoPriors, VariantPaper, Paper, VariantRepresentation
 )
 from django.views.decorators.http import require_http_methods
+from django.utils import timezone
 
 import google.protobuf.json_format as json_format
 from datetime import datetime
@@ -303,12 +304,12 @@ def report_to_dict(report_object):
 
     if report_object.Source == "ClinVar":
         # don't display ClinVar report diffs prior to April 2018
-        cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
+        cutoff_date = timezone.make_aware(datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p'))
     elif report_object.Source == "LOVD":
         # don't display LOVD report diffs prior to December 2 2019 (we
         # updated the definition of LOVD submissions in the early December
         # release, so it only makes sense to show diffs from following releases)
-        cutoff_date = datetime.strptime('Dec 2 2018  12:00AM', '%b %d %Y %I:%M%p')
+        cutoff_date = timezone.make_aware(datetime.strptime('Dec 2 2018  12:00AM', '%b %d %Y %I:%M%p'))
     try:
         if report_dict["Data_Release"]["date"] < cutoff_date:
             report_dict["Diff"] = None
