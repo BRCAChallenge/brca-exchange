@@ -44,8 +44,9 @@ download-resources: ## download resources files
 	$(CODE_BASE)/pipeline/download_resources_files.sh $(RESOURCES_DIR) >> "$(LOG_DIR)/download_resources_$(RELEASE_TAG).log" 2>&1 || { echo "Downloading resource files failed"; exit 1; }
 
 VEP_CONTAINER    ?= vep-server
-VEP_PORT         ?= 8080
+VEP_PORT         ?= 8888
 VEP_CACHE_DIR    ?= /data/vep_cache
+VEP_FASTA        ?= /data/references/hg38.fa
 VEP_IMAGE        ?= brca-vep-server
 
 build-vep-server: ## Build the VEP REST server Docker image
@@ -58,12 +59,15 @@ setup-vep-cache: ## Download Ensembl VEP homo_sapiens GRCh38 cache (~15 GB)
 	  INSTALL.pl --AUTO c --SPECIES homo_sapiens --ASSEMBLY GRCh38 \
 	             --CACHEDIR /vep_cache --NO_HTSLIB
 
-start-vep-server: ## Start VEP REST server on VEP_PORT (default 8080) if not already running
+start-vep-server: ## Start VEP REST server on VEP_PORT (default 8888) if not already running
 	[ $$(docker ps -f name=$(VEP_CONTAINER) | wc -l) -gt 1 ] || \
 	docker run -d --name $(VEP_CONTAINER) \
 	  --restart unless-stopped \
 	  -p $(VEP_PORT):8080 \
 	  -v $(VEP_CACHE_DIR):/vep_cache \
+	  -v $(VEP_FASTA):/references/hg38.fa:ro \
+	  -v $(VEP_FASTA).fai:/references/hg38.fa.fai:ro \
+	  -e VEP_FASTA=/references/hg38.fa \
 	  $(VEP_IMAGE)
 
 stop-vep-server: ## Stop and remove the VEP REST server container

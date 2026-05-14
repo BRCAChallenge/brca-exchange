@@ -2,7 +2,7 @@ FROM ensemblorg/ensembl-vep:latest
 
 USER root
 RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends python3 && \
+    apt-get install -y --no-install-recommends python3 samtools && \
     rm -rf /var/lib/apt/lists/*
 
 COPY server.py /server.py
