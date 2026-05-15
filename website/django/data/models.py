@@ -281,6 +281,107 @@ class VariantRepresentation(models.Model):
         managed = False
 
 
+class AnalysisVEP(models.Model):
+    """VEP annotation results for a variant."""
+    VRS_Digest    = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE,
+                                         related_name='vep_analysis')
+    variant_class = models.TextField(null=True)
+
+    class Meta:
+        db_table = 'analysis_vep'
+        managed = False
+
+
+class AnalysisBayesDel(models.Model):
+    """BayesDel scores for a variant."""
+    VRS_Digest               = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE,
+                                                     related_name='bayesdel_analysis')
+    BayesDel_nsfp33a_noAF   = models.TextField(null=True)
+
+    class Meta:
+        db_table = 'analysis_bayesdel'
+        managed = False
+
+
+class AnalysisSpliceAI(models.Model):
+    """SpliceAI scores for a variant."""
+    VRS_Digest = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE,
+                                      related_name='spliceai_analysis')
+    DS_AG  = models.TextField(null=True)
+    DS_AL  = models.TextField(null=True)
+    DS_DG  = models.TextField(null=True)
+    DS_DL  = models.TextField(null=True)
+    DP_AG  = models.TextField(null=True)
+    DP_AL  = models.TextField(null=True)
+    DP_DG  = models.TextField(null=True)
+    DP_DL  = models.TextField(null=True)
+    result = models.TextField(null=True)
+
+    class Meta:
+        db_table = 'analysis_spliceai'
+        managed = False
+
+
+class AnalysisProvisionalEvidenceCodes(models.Model):
+    """Provisional evidence codes for a variant."""
+    VRS_Digest          = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE,
+                                               related_name='provisional_evidence_codes')
+    popfreq_code        = models.TextField(null=True)
+    popfreq_description = models.TextField(null=True)
+
+    class Meta:
+        db_table = 'analysis_provisional_evidence_codes'
+        managed = False
+
+
+class AnalysisPriors(models.Model):
+    """In silico prior probability fields shown in the UI."""
+    VRS_Digest = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE,
+                                      related_name='priors_analysis')
+
+    varLoc                        = models.TextField(null=True)
+
+    proteinPrior                  = models.TextField(null=True)
+
+    refDonorPrior                 = models.TextField(null=True)
+    refRefDonorMES                = models.TextField(null=True)
+    refRefDonorZ                  = models.TextField(null=True)
+    altRefDonorMES                = models.TextField(null=True)
+    altRefDonorZ                  = models.TextField(null=True)
+    refRefDonorSeq                = models.TextField(null=True)
+    altRefDonorSeq                = models.TextField(null=True)
+
+    deNovoDonorPrior              = models.TextField(null=True)
+    refDeNovoDonorMES             = models.TextField(null=True)
+    refDeNovoDonorZ               = models.TextField(null=True)
+    altDeNovoDonorMES             = models.TextField(null=True)
+    altDeNovoDonorZ               = models.TextField(null=True)
+    refDeNovoDonorSeq             = models.TextField(null=True)
+    altDeNovoDonorSeq             = models.TextField(null=True)
+    deNovoDonorGenomicSplicePos   = models.TextField(null=True)
+    deNovoDonorTranscriptSplicePos = models.TextField(null=True)
+    closestDonorGenomicSplicePos  = models.TextField(null=True)
+    closestDonorTranscriptSplicePos = models.TextField(null=True)
+    closestDonorRefMES            = models.TextField(null=True)
+    closestDonorRefZ              = models.TextField(null=True)
+    closestDonorRefSeq            = models.TextField(null=True)
+    closestDonorAltMES            = models.TextField(null=True)
+    closestDonorAltZ              = models.TextField(null=True)
+    closestDonorAltSeq            = models.TextField(null=True)
+
+    refAccPrior                   = models.TextField(null=True)
+    refRefAccMES                  = models.TextField(null=True)
+    refRefAccZ                    = models.TextField(null=True)
+    altRefAccMES                  = models.TextField(null=True)
+    altRefAccZ                    = models.TextField(null=True)
+    refRefAccSeq                  = models.TextField(null=True)
+    altRefAccSeq                  = models.TextField(null=True)
+
+    class Meta:
+        db_table = 'analysis_priors'
+        managed = False
+
+
 class EnigmaDomain(models.Model):
     """ENIGMA Consortium functional domains of potential clinical importance."""
     gene     = models.TextField()

@@ -111,43 +111,76 @@ def genomic_hgvs_to_vcf(hgvs_str):
     raise ValueError(f'Unhandled HGVS change: {change}')
 
 
-def run_vep(hgvs_notation):
-    chrom, pos, ref, alt = genomic_hgvs_to_vcf(hgvs_notation)
-    vcf_line = f'{chrom}\t{pos}\t.\t{ref}\t{alt}\t.\t.\t.\n'
+VEP_ARGS = [
+    'vep',
+    '--format',      'vcf',
+    '--output_file', 'STDOUT',
+    '--json',
+    '--no_stats',
+    '--cache',
+    '--dir_cache',   VEP_CACHE_DIR,
+    '--fasta',       VEP_FASTA,
+    '--offline',
+    '--assembly',    ASSEMBLY,
+    '--everything',
+]
 
+
+def _run_vep_on_vcf(vcf_lines):
+    """Write vcf_lines to a temp file, run VEP, return parsed JSON records."""
     with tempfile.NamedTemporaryFile(mode='w', suffix='.vcf', delete=False) as fh:
         fh.write('##fileformat=VCFv4.1\n')
         fh.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n')
-        fh.write(vcf_line)
+        fh.writelines(vcf_lines)
         tmp = fh.name
     try:
         result = subprocess.run(
-            [
-                'vep',
-                '--input_file',  tmp,
-                '--format',      'vcf',
-                '--output_file', 'STDOUT',
-                '--json',
-                '--no_stats',
-                '--cache',
-                '--dir_cache',   VEP_CACHE_DIR,
-                '--fasta',       VEP_FASTA,
-                '--offline',
-                '--assembly',    ASSEMBLY,
-                '--everything',
-            ],
-            capture_output=True, text=True, timeout=120,
+            VEP_ARGS + ['--input_file', tmp],
+            capture_output=True, text=True, timeout=600,
         )
         if result.returncode != 0:
             raise RuntimeError(result.stderr.strip())
-        records = [
-            json.loads(line)
-            for line in result.stdout.splitlines()
-            if line.strip()
-        ]
-        return records
+        return [json.loads(l) for l in result.stdout.splitlines() if l.strip()]
     finally:
         os.unlink(tmp)
+
+
+def run_vep(hgvs_notation):
+    """Run VEP on a single HGVS string; return list of result records."""
+    chrom, pos, ref, alt = genomic_hgvs_to_vcf(hgvs_notation)
+    return _run_vep_on_vcf([f'{chrom}\t{pos}\t.\t{ref}\t{alt}\t.\t.\t.\n'])
+
+
+def run_vep_batch(hgvs_list):
+    """Run VEP on a list of HGVS strings in a single VEP call.
+
+    Returns a dict mapping each input HGVS string to its list of VEP records.
+    Entries that fail HGVS→VCF conversion are returned as {"error": "..."}.
+    """
+    vcf_lines = []
+    id_to_hgvs = {}   # VCF ID field → original HGVS (for result matching)
+    errors = {}
+
+    for i, hgvs in enumerate(hgvs_list):
+        vid = f'v{i}'
+        try:
+            chrom, pos, ref, alt = genomic_hgvs_to_vcf(hgvs)
+            vcf_lines.append(f'{chrom}\t{pos}\t{vid}\t{ref}\t{alt}\t.\t.\t.\n')
+            id_to_hgvs[vid] = hgvs
+        except Exception as e:
+            errors[hgvs] = {'error': str(e)}
+
+    results = {hgvs: [] for hgvs in hgvs_list}
+    results.update(errors)
+
+    if vcf_lines:
+        for record in _run_vep_on_vcf(vcf_lines):
+            vid = record.get('id', '')
+            hgvs = id_to_hgvs.get(vid)
+            if hgvs:
+                results[hgvs].append(record)
+
+    return results
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -179,6 +212,24 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, json.dumps(records))
             except Exception as e:
                 self._send(500, json.dumps({'error': str(e)}))
+            return
+
+        self._send(404, '{"error":"not found"}')
+
+    def do_POST(self):
+        path = unquote(self.path)
+
+        if path == '/vep/hgvs/batch':
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length)
+            try:
+                hgvs_list = json.loads(body)
+                if not isinstance(hgvs_list, list):
+                    raise ValueError('Expected a JSON array')
+                results = run_vep_batch(hgvs_list)
+                self._send(200, json.dumps(results))
+            except Exception as e:
+                self._send(400, json.dumps({'error': str(e)}))
             return
 
         self._send(404, '{"error":"not found"}')
