@@ -53,7 +53,7 @@ class MismatchException(Exception):
 
 def handle_mismatch(x, warn):
     if warn:
-        print x
+        print(x)
     else:
         raise MismatchException(x)
 

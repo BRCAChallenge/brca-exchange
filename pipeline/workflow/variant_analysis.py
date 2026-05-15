@@ -140,10 +140,40 @@ class AnalyzeSpliceAI(VCFAssemblyTask):
 
 
 ###############################################
+#         COMPUTE + LOAD PRIORS SCORES        #
+###############################################
+
+@requires(AnalyzeVEP)
+class AnalyzePriors(VCFAssemblyTask):
+    """Populate analysis_priors with splicing prior probabilities from calcVarPriors."""
+
+    genome_fa = luigi.Parameter(
+        default='/references/hg38.fa',
+        description='Path to hg38.fa reference genome')
+    priors_processes = luigi.IntParameter(
+        default=8,
+        description='Number of parallel calcVarPriors workers')
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.vcf_dir, 'analyze_priors.done'))
+
+    def run(self):
+        script = os.path.join(_pipeline_dir, 'variant_processing', 'run_priors_analysis.py')
+        args = [
+            'python', script,
+            '--genome', self.genome_fa,
+            '--processes', str(self.priors_processes),
+        ]
+        self._run_process_with_pipeline_path(args)
+        with open(self.output().path, 'w') as f:
+            f.write('done\n')
+
+
+###############################################
 #               TOP-LEVEL TASK                #
 ###############################################
 
-@requires(AnalyzeVEP, AnalyzeBayesDel, AnalyzeSpliceAI)
+@requires(AnalyzeVEP, AnalyzeBayesDel, AnalyzeSpliceAI, AnalyzePriors)
 class VariantAnalysis(VCFAssemblyTask):
     """Top-level variant analysis task."""
 

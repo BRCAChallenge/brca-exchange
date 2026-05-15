@@ -286,6 +286,7 @@ class AnalysisVEP(models.Model):
     VRS_Digest    = models.OneToOneField(Variant, primary_key=True, on_delete=models.CASCADE,
                                          related_name='vep_analysis')
     variant_class = models.TextField(null=True)
+    variant_type  = models.TextField(null=True)
 
     class Meta:
         db_table = 'analysis_vep'

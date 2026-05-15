@@ -1,8 +1,7 @@
-import json
 import os
 import re
-import subprocess
 
+import requests
 from Bio.Seq import Seq
 from pyfaidx import Fasta
 
@@ -21,8 +20,8 @@ def getExonBoundaries(variant):
     varTranscript = variant["Reference_Sequence"]
     transcriptData = verify.getTranscriptData(varTranscript)
     # parse exon starts and exon ends
-    transcriptData["exonStarts"] = re.sub(",(\s)*$", "", transcriptData["exonStarts"])
-    transcriptData["exonEnds"] = re.sub(",(\s)*$", "", transcriptData["exonEnds"])
+    transcriptData["exonStarts"] = re.sub(r",(\s)*$", "", transcriptData["exonStarts"])
+    transcriptData["exonEnds"] = re.sub(r",(\s)*$", "", transcriptData["exonEnds"])
     if transcriptData["strand"] == "+":
         exonStarts = transcriptData["exonStarts"].split(",")
         exonEnds = transcriptData["exonEnds"].split(",")
@@ -84,13 +83,17 @@ def getVarConsequences(variant):
         # API only works for alt alleles that are composed of the 4 canonical bases
         assert base in ["A", "C", "G", "T"]
 
+    vep_url = os.environ.get('VEP_SERVER_URL', 'http://localhost:8888')
     query = "%s:%s-%s:%s/%s" % (variant["Chr"], variant["Hg38_Start"],
                                 variant["Hg38_End"], varStrand, varAlt)
-    # Query local vep using query minus '?' character
-    cmd = ["vep", "--cache", "--dir_cache", "/references/vep/",
-           "--no_stats", "--offline", "--fasta", "/references/hg38.fa",
-           "--output_file", "STDOUT", "--json", "--input_data", query]
-    vep = json.loads(subprocess.check_output(cmd))
+    resp = requests.get(
+        f'{vep_url}/vep/human/region/{query}',
+        headers={'Content-Type': 'application/json'},
+        timeout=60,
+    )
+    resp.raise_for_status()
+    vep_list = resp.json()
+    vep = vep_list[0] if isinstance(vep_list, list) else vep_list
 
     # Should only be one BRCA1 canonical transcript in the list
     assert len([gene["consequence_terms"] for gene in vep["transcript_consequences"]

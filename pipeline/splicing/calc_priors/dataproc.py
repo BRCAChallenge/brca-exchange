@@ -7,7 +7,7 @@ from calc_priors.extract import getVarType
 from calc_priors.verify import getVarStrand
 
 
-class ReadOnlyDict(collections.Mapping):
+class ReadOnlyDict(collections.abc.Mapping):
     def __init__(self, data):
         self._data = data
 

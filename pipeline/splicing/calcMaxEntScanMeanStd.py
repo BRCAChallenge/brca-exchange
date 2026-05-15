@@ -9,8 +9,6 @@
 import argparse
 from Bio.Seq import Seq
 import json
-from MySQLdb.constants import FIELD_TYPE
-import _mysql
 import numpy
 import os
 import re
@@ -67,18 +65,20 @@ TranscriptDataBRCA2 = {'bin': '103',
 def fetch_gene_coordinates(transcript_name):
     """Query the indicated transcripts from the genome browser hg38 refseq table"""
     try:
-        global db # db is global to prevent reconnecting.
+        from MySQLdb.constants import FIELD_TYPE
+        import _mysql
+        global db
         if db is None:
-            print 'connect'
-        conv= { FIELD_TYPE.LONG: int }
-        db = _mysql.connect(host='genome-mysql.cse.ucsc.edu',user='genome',passwd='',db="hg38",conv=conv)
+            print('connect')
+        conv = {FIELD_TYPE.LONG: int}
+        db = _mysql.connect(host='genome-mysql.cse.ucsc.edu', user='genome', passwd='', db='hg38', conv=conv)
         db.query("""SELECT * FROM ncbiRefSeq WHERE name = '%s'""" % transcript_name)
-        r = db.use_result().fetch_row(how=1,maxrows=0)
-        if len(r)>1:
+        r = db.use_result().fetch_row(how=1, maxrows=0)
+        if len(r) > 1:
             pass
         else:
             return r[0]
-    except IndexError as e:
+    except Exception:
         if transcript_name == 'NM_007294.3':
             return TranscriptDataBRCA1
         elif transcript_name == 'NM_000059.3':
@@ -99,7 +99,7 @@ def runMaxEntScan(sequence, donor=False, usePerl=False):
         else:
             pipe = subprocess.Popen(["perl", os.path.join(os.path.dirname(__file__), 'score3.pl'), tmpfile], stdout=subprocess.PIPE)
         result = pipe.stdout.read()
-        entScore = re.findall("[+-]?\d+(?:\.\d+)?", str(result))
+        entScore = re.findall(r"[+-]?\d+(?:\.\d+)?", str(result))
         os.remove(tmpfile)
         return(float(entScore[0]))
     else:
@@ -132,19 +132,19 @@ def scoreSeq(chrom, strand, coordinate, donor=False, verbose=False):
     url = "http://togows.org/api/ucsc/hg38/%s:%d-%d.fasta" % (chrom, rangeStartCoord, rangeEndCoord)
     rr = requests.get(url)
     if verbose:
-        print rr.content
-    lines = rr.content.split('\n')
+        print(rr.text)
+    lines = rr.text.split('\n')
     headerLine = lines[0]
     sequence = ""
-    for ii in range(1,len(lines)):
+    for ii in range(1, len(lines)):
         sequence += lines[ii]
     if strand == '-':
         sequence = str(Seq(sequence).reverse_complement())
     if verbose:
-        print "Sequence to be scored:", sequence
+        print("Sequence to be scored:", sequence)
     score = runMaxEntScan(sequence, donor=donor)
     if verbose:
-        print "score:", score
+        print("score:", score)
     return score
 
 def addDataForThisTranscript(donors, acceptors, transcript, verbose=False):
@@ -182,9 +182,9 @@ def main():
     for this_transcript in args.transcripts:
         transcript = fetch_gene_coordinates(this_transcript)
         if args.verbose:
-            print transcript
-        transcript['exonStarts'] = re.sub(",(\s)*$", "", transcript['exonStarts'])
-        transcript['exonEnds'] = re.sub(",(\s)*$", "", transcript['exonEnds'])
+            print(transcript)
+        transcript['exonStarts'] = re.sub(r",(\s)*$", "", transcript['exonStarts'])
+        transcript['exonEnds'] = re.sub(r",(\s)*$", "", transcript['exonEnds'])
         (donors, acceptors) = addDataForThisTranscript(donors, acceptors, transcript, args.verbose)
     results = {
         "donors": {
@@ -197,8 +197,8 @@ def main():
             }
         }
     if args.verbose:
-        print "donors mean", results["donors"]["mean"], "std", results["donors"]["std"]
-        print "acceptors mean", results["acceptors"]["mean"], "std", results["acceptors"]["std"]
+        print("donors mean", results["donors"]["mean"], "std", results["donors"]["std"])
+        print("acceptors mean", results["acceptors"]["mean"], "std", results["acceptors"]["std"])
     with open(args.outputFile, "w") as fp:
         json.dump(results, fp)
         
