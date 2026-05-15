@@ -75,7 +75,8 @@ def main(db_url, schema, victor_vcf, overwrite):
         print(f'Matching {len(coord_rows)} variants against VCF scores ...')
         inserts = []
         for vrs_digest, chr_, pos, ref, alt in coord_rows:
-            score = scores.get((chr_, pos, ref, alt))
+            chr_bare = chr_[3:] if chr_.startswith('chr') else chr_
+            score = scores.get((chr_bare, pos, ref, alt))
             if score is not None:
                 inserts.append((vrs_digest, score))
 

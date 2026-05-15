@@ -72,10 +72,78 @@ class AnalyzeBayesDel(VCFAssemblyTask):
 
 
 ###############################################
+#         GENERATE + LOAD SPLICEAI SCORES     #
+###############################################
+
+@requires(VCFAssembly)
+class ExportVariantsToVCF(VCFAssemblyTask):
+    """Export all GRCh38 variants from the DB to a VCF for SpliceAI input."""
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'all_variants.vcf'))
+
+    def run(self):
+        script = os.path.join(_pipeline_dir, 'variant_processing', 'export_variants_to_vcf.py')
+        args = ['python', script, '--output', self.output().path]
+        self._run_process_with_pipeline_path(args)
+
+
+@requires(ExportVariantsToVCF)
+class GenerateSpliceAIScores(VCFAssemblyTask):
+    """Run SpliceAI on all unscored variants and merge with previous scores."""
+
+    genome_fa = luigi.Parameter(
+        description='Path to hg38.fa reference genome')
+    previous_spliceai_vcf = luigi.Parameter(
+        description='Path to SpliceAI-scored VCF from the previous release')
+    spliceai_batch_size = luigi.IntParameter(
+        default=1000,
+        description='Max variants per SpliceAI batch')
+    spliceai_depth = luigi.IntParameter(
+        default=4999,
+        description='SpliceAI search depth (-D)')
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'variants_with_splice_ai.vcf'))
+
+    def run(self):
+        import tempfile
+        script = os.path.join(_pipeline_dir, 'insilico', 'add_spliceai_scores_for_new_variants.py')
+        tmp_dir = tempfile.mkdtemp()
+        args = [
+            'python', script,
+            '-a', self.input().path,
+            '-b', str(self.spliceai_batch_size),
+            '-d', str(self.spliceai_depth),
+            '-f', self.genome_fa,
+            '-g', 'grch38',
+            '-o', self.output().path,
+            '-s', self.previous_spliceai_vcf,
+            '-t', tmp_dir,
+        ]
+        self._run_process_with_pipeline_path(args)
+
+
+@requires(GenerateSpliceAIScores)
+class AnalyzeSpliceAI(VCFAssemblyTask):
+    """Populate analysis_spliceai from the SpliceAI-scored VCF."""
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.vcf_dir, 'analyze_spliceai.done'))
+
+    def run(self):
+        script = os.path.join(_pipeline_dir, 'variant_processing', 'run_spliceai_analysis.py')
+        args = ['python', script, '--spliceai-vcf', self.input().path]
+        self._run_process_with_pipeline_path(args)
+        with open(self.output().path, 'w') as f:
+            f.write('done\n')
+
+
+###############################################
 #               TOP-LEVEL TASK                #
 ###############################################
 
-@requires(AnalyzeVEP, AnalyzeBayesDel)
+@requires(AnalyzeVEP, AnalyzeBayesDel, AnalyzeSpliceAI)
 class VariantAnalysis(VCFAssemblyTask):
     """Top-level variant analysis task."""
 
