@@ -1,8 +1,19 @@
-import pyhgvs
+import hgvs.dataproviders.uta as uta
+import hgvs.assemblymapper as am
+import hgvs.parser
 
 from calcMaxEntScanMeanStd import fetch_gene_coordinates
 from calc_priors.constants import brca1CIDomains, brca2CIDomains, greyZones, BRCA1_RefSeq, \
     BRCA2_RefSeq
+
+_CHROM_TO_NC = {
+    'chr13': 'NC_000013.11',
+    'chr17': 'NC_000017.11',
+}
+_hdp = uta.connect()
+_hp = hgvs.parser.Parser()
+_mapper = am.AssemblyMapper(_hdp, assembly_name='GRCh38', alt_aln_method='splign',
+                            prevalidation_level=None)
 
 # Fetch transcript data for BRCA1/BRCA2 RefSeq transcripts
 brca1TranscriptData = fetch_gene_coordinates(BRCA1_RefSeq)
@@ -205,18 +216,17 @@ def getTranscriptData(referenceSequence):
     return None
 
 
-def convertGenomicPosToTranscriptPos(genomicPos, chrom, genome, transcript):
+def convertGenomicPosToTranscriptPos(genomicPos, chrom, transcript):
     """
-    Given a genomic position, chrom (in format "chrN"), genome (SequenceFileDB for genome),
-      and transcript (pyhgvs transcript object):
-    Returns a string of the transcript position at the given genomic position
+    Given a genomic position, chrom (in format "chrN"), and transcript accession string:
+    Returns a string of the transcript (cDNA) position at the given genomic position.
+    Uses the biocommons hgvs library via UTA for coordinate mapping.
     """
-    # use "T" and "A" for ref and alt because transcript position is not dependent on these values
-    # converts genomic position to transcript position
-    hgvs_name = str(pyhgvs.format_hgvs_name(chrom, genomicPos, "T", "A", genome, transcript))
-    # parses out transcript position from full hgvs_name
-    transcriptPos = str(pyhgvs.HGVSName(hgvs_name).cdna_start)
-    return transcriptPos
+    chrom_key = chrom if chrom.startswith('chr') else f'chr{chrom}'
+    nc = _CHROM_TO_NC[chrom_key]
+    g_var = _hp.parse_hgvs_variant(f'{nc}:g.{genomicPos}T>A')
+    c_var = _mapper.g_to_c(g_var, transcript)
+    return str(c_var.posedit.pos.start)
 
 
 def formatSplicePosition(position, transcript=False):

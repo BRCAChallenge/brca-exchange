@@ -424,13 +424,12 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
     assert False, "Should never reach this"
 
 
-def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, transcript, deNovoDonorInRefAcc=False):
+def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, transcript, deNovoDonorInRefAcc=False):
     """
-    Given a variant, boundaries (either priors or enigma), and exonicPortionSize
+    Given a variant, boundaries (either priors or enigma), exonicPortionSize,
+      and transcript accession string:
       1. checks that variant is a single nucleotide substitution
       2. checks that variant is in an exon or is in a reference splice donor region
-    Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
-       both genome and transcript are necessary to convert from genomic to transcript coordinates
     Returns a dictionary containing:
       prior probability of pathogenecity and predicted qualitative engima class
       deNovo donor MaxEntScan scores, zscores, and sequences for ref and alt
@@ -553,12 +552,12 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
                     priorProb = LOW_PROBABILITY
 
             # converts genomic splice position to transcript splice position
-            newTranscriptSplicePos = verify.convertGenomicPosToTranscriptPos(newGenomicSplicePos, extract.getVarChrom(variant), genome,
+            newTranscriptSplicePos = verify.convertGenomicPosToTranscriptPos(newGenomicSplicePos, extract.getVarChrom(variant),
                                                                       transcript)
             # converts closest genomic splice position to transcript splice position
             closestGenomicSplicePos = subDonorInfo["genomicSplicePos"]
             closestTranscriptSplicePos = verify.convertGenomicPosToTranscriptPos(closestGenomicSplicePos, extract.getVarChrom(variant),
-                                                                          genome, transcript)
+                                                                          transcript)
 
             return {"priorProb": priorProb,
                     "enigmaClass": extract.getEnigmaClass(priorProb),
@@ -590,14 +589,12 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
                     "frameshiftFlag": frameshiftFlag}
 
 
-def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength, genome, transcript):
+def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength, transcript):
     """
-    Given a variant, exonic portion size, and de novo length:
+    Given a variant, exonic portion size, de novo length, and transcript accession string:
       1. checks that variant is a single nucleotide substitution
       2. checks that variant is in de novo splice acceptor region
          de novo splice acceptor region defined by deNovoLength
-    Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
-       both genome and transcript are necessary to convert from genomic to transcript coordinates
     Returns a dictionary containing:
       prior probability of pathogenecity and predicted qualitative engima class (both N/A)
       deNovo acceptor MaxEntScan scores, zscores, and sequence for ref and alt
@@ -650,12 +647,12 @@ def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength, geno
                 altGreaterClosestAltFlag = 1
 
             # converts genomic splice position to transcript splice position
-            newTranscriptSplicePos = verify.convertGenomicPosToTranscriptPos(newGenomicSplicePos, extract.getVarChrom(variant), genome,
+            newTranscriptSplicePos = verify.convertGenomicPosToTranscriptPos(newGenomicSplicePos, extract.getVarChrom(variant),
                                                                       transcript)
             # converts closest genomic splice position to transcript splice position
             closestGenomicSplicePos = closestAccInfo["genomicSplicePos"]
             closestTranscriptSplicePos = verify.convertGenomicPosToTranscriptPos(closestGenomicSplicePos, extract.getVarChrom(variant),
-                                                                          genome, transcript)
+                                                                          transcript)
 
             return {"priorProb": "N/A",
                     "enigmaClass": "N/A",
@@ -687,11 +684,10 @@ def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength, geno
                     "frameshiftFlag": frameshiftFlag}
 
 
-def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcript):
+def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, transcript):
     """
-    Given a variant, boundaries (either PRIORS or ENIGMA), and a list of dictionaries with variant data
-    Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
-       both genome and transcript are necessary to convert from genomic to transcript coordinates
+    Given a variant, boundaries (either PRIORS or ENIGMA), a list of dictionaries with variant data,
+    and transcript accession string:
     Determines reference donor and de novo donor scores for variant
     If variant causes a nonsense mutation, determines if splice rescue occurs
     Returns dicitionary containing scores and sequences for ref and de novo splice donor/acceptor,
@@ -723,7 +719,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
     """
     if compute.varInSpliceRegion(variant, donor=True, deNovo=False) and extract.getVarType(variant) == "substitution":
         refSpliceInfo = getPriorProbRefSpliceDonorSNS(variant, boundaries)
-        deNovoSpliceInfo = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, genome, transcript,
+        deNovoSpliceInfo = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, transcript,
                                                       deNovoDonorInRefAcc=False)
         deNovoPrior = deNovoSpliceInfo["priorProb"]
         refPrior = refSpliceInfo["priorProb"]
@@ -843,7 +839,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
                 "varConsequences": ",".join(varCons)}
 
 
-def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, transcript):
+def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, transcript):
     """
     Given a variant, boundaries (either PRIORS or ENIGMA), and list of dictionaries with variant data
     Determines reference and de novo acceptor scores for variant
@@ -879,13 +875,12 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, tran
     """
     if compute.varInSpliceRegion(variant, donor=False, deNovo=False) and extract.getVarType(variant) == "substitution":
         refSpliceInfo = getPriorProbRefSpliceAcceptorSNS(variant, boundaries)
-        deNovoAccInfo = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, genome,
-                                                      transcript)
+        deNovoAccInfo = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, transcript)
         refPrior = refSpliceInfo["priorProb"]
         proteinPrior = "N/A"
         applicablePrior = refSpliceInfo["priorProb"]
         if compute.varInExon(variant):
-            deNovoDonorInfo = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, genome, transcript,
+            deNovoDonorInfo = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, transcript,
                                                          deNovoDonorInRefAcc=True)
             deNovoDonorPrior = deNovoDonorInfo["priorProb"]
             proteinInfo = getPriorProbProteinSNS(variant, variantData)
@@ -1161,17 +1156,16 @@ def getPriorProbInGreyZoneSNS(variant, boundaries, variantData):
                 "lowMESFlag": "N/A"}
 
 
-def getPriorProbInExonSNS(variant, boundaries, variantData, genome, transcript):
+def getPriorProbInExonSNS(variant, boundaries, variantData, transcript):
     """
-    Given a variant, boundaries (either "enigma" or "priors") and a list of dictionaries containing variant data:
+    Given a variant, boundaries (either "enigma" or "priors"), a list of dictionaries containing variant data,
+    and transcript accession string:
       1. Checks that variant is in an exon or clinically important domains and NOT in a splice site
       2. Checks that variant is a SNS variant
       3. Gets protein prior from variantData
       4. Determines if variant is a nonsense variant, if yes determines if splice rescue occurs
       5. If not a nonsense variant, calculates de novo donor prior and de novo acceptor prior if applicable
          Gets applicable prior if variant has a de novo donor prior
-    Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
-       both genome and transcript are necessary to convert from genomic to transcript coordinates
     Returns a dictionary containing all values, dictionary entry is "-" if not relevant to variant
     Values in dictionary include:
         applicable prior, highest prior if variant has multiple priors
@@ -1201,11 +1195,10 @@ def getPriorProbInExonSNS(variant, boundaries, variantData, genome, transcript):
         CIDomainInRegionFlag = "N/A"
         isDivisibleFlag = "N/A"
         lowMESFlag = "N/A"
-        deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, genome, transcript,
+        deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, transcript,
                                                      deNovoDonorInRefAcc=False)
         if compute.varInSpliceRegion(variant, donor=False, deNovo=True):
-            deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, genome,
-                                                          transcript)
+            deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH, transcript)
         else:
             deNovoAccData = {"priorProb": "N/A",
                              "refMaxEntScanScore": "N/A",
@@ -1443,13 +1436,11 @@ def getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries):
                 "lowMESFlag": "N/A"}
 
 
-def getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript):
+def getPriorProbIntronicDeNovoDonorSNS(variant, transcript):
     """
-    Given a variant,
+    Given a variant and transcript accession string:
       1. Checks that variant is NOT in exon or reference donor/acceptor site
       2. Checks that variant is a substitution variant
-    Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
-       both genome and transcript are necessary to convert from genomic to transcript coordinates
     Determines if alt MES score is greater than ref MES score for highest scoring sliding window
       If altMES > refMES, then deNovoDonorAltGreaterRefFlag = 1 (0 otherwise)
     Determines closest ref donor scores
@@ -1499,12 +1490,12 @@ def getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript):
                 frameshiftFlag = 1
 
             # converts genomic splice position to transcript splice position
-            newTranscriptSplicePos = verify.convertGenomicPosToTranscriptPos(newGenomicSplicePos, extract.getVarChrom(variant), genome,
+            newTranscriptSplicePos = verify.convertGenomicPosToTranscriptPos(newGenomicSplicePos, extract.getVarChrom(variant),
                                                                       transcript)
             # converts closest genomic splice position to transcript splice position
             closestGenomicSplicePos = closestDonorInfo["genomicSplicePos"]
             closestTranscriptSplicePos = verify.convertGenomicPosToTranscriptPos(closestGenomicSplicePos, extract.getVarChrom(variant),
-                                                                          genome, transcript)
+                                                                          transcript)
 
             return {"priorProb": "N/A",
                     "enigmaClass": "N/A",
@@ -1552,13 +1543,11 @@ def getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript):
             "spliceFlag": 0}
 
 
-def getPriorProbInIntronSNS(variant, boundaries, genome, transcript):
+def getPriorProbInIntronSNS(variant, boundaries, transcript):
     """
-    Given a variant and boundaries (either "priors or "enigma"),
+    Given a variant, boundaries (either "priors" or "enigma"), and transcript accession string:
     Checks that variant is located in an intron and is a substitution variant
     Determines if variant creates a de novo donor site in the intron
-    Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
-       both genome and transcript are necessary to convert from genomic to transcript coordinates
     Returns a dictionary containing applicable prior and predicted qualitative enigma class
     Dictionary also contains de novo donor ref and alt scores
     AND a spliceFlag which is equal to 1 if variant creates a better de novo splice site than ref sequence
@@ -1567,7 +1556,7 @@ def getPriorProbInIntronSNS(variant, boundaries, genome, transcript):
     varLoc = compute.getVarLocation(variant, boundaries)
     varType = extract.getVarType(variant)
     if varLoc == "intron_variant" and varType == "substitution":
-        deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript)
+        deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant, transcript)
         if deNovoDonorData["spliceFlag"] == 0:
             priorProb = LOW_PROBABILITY
             enigmaClass = extract.getEnigmaClass(priorProb)
@@ -1664,13 +1653,11 @@ def getPriorProbInIntronSNS(variant, boundaries, genome, transcript):
                 "lowMESFlag": "N/A"}
 
 
-def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
+def getPriorProbInUTRSNS(variant, boundaries, transcript):
     """
-    Given a variant and boundaries (either "priors" or "enigma"),
+    Given a variant, boundaries (either "priors" or "enigma"), and transcript accession string:
     Checks that variant is a SNS variant in a UTR
     Determines prior prob based on location (5'/3' UTR and intron/exon)
-    Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
-       both genome and transcript are necessary to convert from genomic to transcript coordinates
     Returns a dictionary containing applicable prior and predicted qualitative enigma class
     Dictionary also contains de novo donor/acceptor ref and alt scores if applicable
     AND a spliceFlag which is equal to 1 if variant creates a better de novo splice site than ref sequence
@@ -1741,18 +1728,17 @@ def getPriorProbInUTRSNS(variant, boundaries, genome, transcript):
             spliceFlag = 0
         elif "5_prime_UTR_variant" in varCons:
             if compute.varInExon(variant):
-                deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, genome,
-                                                             transcript,
+                deNovoDonorData = getPriorProbDeNovoDonorSNS(variant, boundaries, STD_EXONIC_PORTION, transcript,
                                                              deNovoDonorInRefAcc=False)
                 applicablePrior = deNovoDonorData["priorProb"]
                 applicableClass = deNovoDonorData["enigmaClass"]
                 spliceFlag = 0
                 if compute.varInSpliceRegion(variant, donor=False, deNovo=True):
                     deNovoAccData = getPriorProbDeNovoAcceptorSNS(variant, STD_EXONIC_PORTION, STD_DE_NOVO_LENGTH,
-                                                                  genome, transcript)
+                                                                  transcript)
         else:
             # to account for variants in 5' UTR that are classified as other variant types
-            deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript)
+            deNovoDonorData = getPriorProbIntronicDeNovoDonorSNS(variant, transcript)
             spliceFlag = deNovoDonorData["spliceFlag"]
             if spliceFlag == 1:
                 applicablePrior = deNovoDonorData["priorProb"]

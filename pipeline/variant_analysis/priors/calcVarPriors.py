@@ -15,7 +15,6 @@ import click
 import traceback
 import multiprocessing
 import pytest
-import pyhgvs.utils as pyhgvs_utils
 
 _SPLICING_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -31,11 +30,10 @@ from calc_priors.utils import Benchmark, approximate_compare_tsv, MismatchExcept
 
 csv.field_size_limit(10000000)
 
-def getVarData(variant, boundaries, inputVariantData, genome, transcript):
+def getVarData(variant, boundaries, inputVariantData, transcript):
     """
-    Given variant, boundaries (either "priors" or "enigma') and list of dictionaries with variant data
-    Genome is a SequenceFileDB for genome and transcript is a pyhgvs transcript object)
-       both genome and transcript are necessary to convert from genomic to transcript coordinates
+    Given variant, boundaries (either "priors" or "enigma"), list of dictionaries with variant data,
+    and transcript accession string:
     Checks that variant is a single nucleotide substitution
     Determines prior prob dictionary based on variant location
     Return dictionary containing all values for all new prior prob fields
@@ -49,19 +47,19 @@ def getVarData(variant, boundaries, inputVariantData, genome, transcript):
             if varLoc == "outside_transcript_boundaries_variant":
                 varData = getPriorProbOutsideTranscriptBoundsSNS(variant, boundaries)
             elif varLoc == "CI_splice_donor_variant" or varLoc == "splice_donor_variant":
-                varData = getPriorProbSpliceDonorSNS(variant, boundaries, inputVariantData, genome, transcript)
+                varData = getPriorProbSpliceDonorSNS(variant, boundaries, inputVariantData, transcript)
             elif varLoc == "CI_splice_acceptor_variant" or varLoc == "splice_acceptor_variant":
-                varData = getPriorProbSpliceAcceptorSNS(variant, boundaries, inputVariantData, genome, transcript)
+                varData = getPriorProbSpliceAcceptorSNS(variant, boundaries, inputVariantData, transcript)
             elif varLoc == "CI_domain_variant" or varLoc == "exon_variant":
-                varData = getPriorProbInExonSNS(variant, boundaries, inputVariantData, genome, transcript)
+                varData = getPriorProbInExonSNS(variant, boundaries, inputVariantData, transcript)
             elif varLoc == "grey_zone_variant":
                 varData = getPriorProbInGreyZoneSNS(variant, boundaries, inputVariantData)
             elif varLoc == "after_grey_zone_variant":
                 varData = getPriorProbAfterGreyZoneSNS(variant, boundaries)
             elif varLoc == "UTR_variant":
-                varData = getPriorProbInUTRSNS(variant, boundaries, genome, transcript)
+                varData = getPriorProbInUTRSNS(variant, boundaries, transcript)
             elif varLoc == "intron_variant":
-                varData = getPriorProbInIntronSNS(variant, boundaries, genome, transcript)
+                varData = getPriorProbInIntronSNS(variant, boundaries, transcript)
             else:
                 varData = BLANK_DICT.copy()
         else:
@@ -103,9 +101,9 @@ def calc_one(variant):
     try:
         # variantData = csv.DictReader(open("mod_res_dn_brca20160525.txt", "r"), delimiter="\t")
         if variant["Gene_Symbol"] == "BRCA1":
-            varData = getVarData(variant, priors_set, variantData, None, brca1Transcript)
+            varData = getVarData(variant, priors_set, variantData, brca1Transcript)
         elif variant["Gene_Symbol"] == "BRCA2":
-            varData = getVarData(variant, priors_set, variantData, None, brca2Transcript)
+            varData = getVarData(variant, priors_set, variantData, brca2Transcript)
         else:
             varData = BLANK_DICT
             varData['varLoc'] = '-'
@@ -131,11 +129,8 @@ def calc_all(variants, priors, genome, transcripts, processes):
     outputData = csv.DictWriter(priors, delimiter="\t", lineterminator="\n", fieldnames=fieldnames)
     outputData.writerow(dict((fn, fn) for fn in inputData.fieldnames))
 
-    # read RefSeq transcripts
-    transcripts = pyhgvs_utils.read_transcripts(transcripts)
-
-    brca1Transcript = transcripts.get(BRCA1_RefSeq)
-    brca2Transcript = transcripts.get(BRCA2_RefSeq)
+    brca1Transcript = BRCA1_RefSeq
+    brca2Transcript = BRCA2_RefSeq
 
     if processes > 1:
         # Create a pool of processes and calculate in parallel

@@ -49,7 +49,7 @@ fake-useragent==0.1.11
 fastparquet>=2024.11.0  # Updated: pandas>=2.1.4 requires this version
 ga4gh.common==0.0.7
 ga4gh.vrs==2.3.1
-hgvs==1.5.6
+hgvs==1.5.7
 humanfriendly>=9.1    
 idna>=3.6  
 intervaltree==3.1.0
