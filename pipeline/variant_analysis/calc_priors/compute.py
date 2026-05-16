@@ -335,6 +335,8 @@ def getDeNovoFrameshiftAndCIStatus(variant, boundaries, donor=True, deNovoDonorI
             if variant["Gene_Symbol"] == "BRCA1" and nextExonNum == "exon4":
                 nextExonNum = "exon5"
             refSpliceAccBounds = extract.getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)
+            if nextExonNum not in refSpliceAccBounds:
+                return False
             regionEnd = refSpliceAccBounds[nextExonNum]["acceptorStart"]
         else:
             # prevExonNum parses out N from varExonNum and adds 1 to get previous exon number "exonN-1"
@@ -510,6 +512,12 @@ def getClosestSpliceSiteScores(variant, deNovoOffset, donor=True, deNovo=False, 
         if donor:
             refSpliceDonorBounds = extract.getRefSpliceDonorBoundaries(variant, STD_DONOR_INTRONIC_LENGTH,
                                                                STD_DONOR_EXONIC_LENGTH)
+            if exonNumber not in refSpliceDonorBounds:
+                # variant is in the last exon which has no downstream donor; use the nearest exon
+                exon_nums = sorted(refSpliceDonorBounds.keys(),
+                                   key=lambda e: int(e.replace('exon', '')))
+                exonNumber = exon_nums[-1] if exon_nums else exonNumber
+                exonName = exonNumber
             closestSpliceBounds = refSpliceDonorBounds[exonNumber]
         else:
             refSpliceAccBounds = extract.getSpliceAcceptorBoundaries(variant, STD_ACC_INTRONIC_LENGTH, STD_ACC_EXONIC_LENGTH)

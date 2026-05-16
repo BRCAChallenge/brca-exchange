@@ -9,13 +9,15 @@ calculates either the prior probability of pathogenicity or a prior ENGIMA class
 
 import csv
 from itertools import chain
-
+import os
 import subprocess
 import click
 import traceback
 import multiprocessing
 import pytest
 import pyhgvs.utils as pyhgvs_utils
+
+_SPLICING_DIR = os.path.dirname(os.path.abspath(__file__))
 
 from calc_priors.constants import BRCA1_RefSeq, BRCA2_RefSeq
 from calc_priors.dataproc import BLANK_DICT, addVarDataToRow
@@ -78,13 +80,13 @@ brca2Transcript = None
 useOldFile = False
 
 if useOldFile:
-    with open("mod_res_dn_brca20160525.txt", "r") as combinedfile:
+    with open(os.path.join(_SPLICING_DIR, "mod_res_dn_brca20160525.txt"), "r") as combinedfile:
         variantData = dict(
             ((x['gene'], x['nthgvs']), x) for x in csv.DictReader(combinedfile, delimiter="\t")
         )
 else:
-    with open("references/HCI_AllPriorsReport_BRCA1_V20.txt", "r") as brca1file, \
-         open("references/HCI_AllPriorsReport_BRCA2_V20.txt", "r") as brca2file:
+    with open(os.path.join(_SPLICING_DIR, "references/HCI_AllPriorsReport_BRCA1_V20.txt"), "r") as brca1file, \
+         open(os.path.join(_SPLICING_DIR, "references/HCI_AllPriorsReport_BRCA2_V20.txt"), "r") as brca2file:
         variantData = dict(
             ((x['gene'], x['nthgvs']), x) for x in chain(
                 csv.DictReader(brca1file, delimiter="\t"),
@@ -123,7 +125,7 @@ def calc_all(variants, priors, genome, transcripts, processes):
 
     inputData = csv.DictReader(variants, delimiter="\t")
     fieldnames = inputData.fieldnames
-    newHeaders = open("headers.tsv", "r").read().split()
+    newHeaders = open(os.path.join(_SPLICING_DIR, "headers.tsv"), "r").read().split()
     for header in newHeaders:
         fieldnames.append(header)
     outputData = csv.DictWriter(priors, delimiter="\t", lineterminator="\n", fieldnames=fieldnames)
@@ -172,7 +174,8 @@ def run(command):
 @click.group()
 @click.option("--genome", type=click.Path(exists=False), default="/references/hg38.fa",
               help="Fasta file containing hg38 reference genome")
-@click.option("--transcripts", type=click.File("r"), default="refseq_annotation.hg38.gp",
+@click.option("--transcripts", type=click.File("r"),
+              default=os.path.join(_SPLICING_DIR, "refseq_annotation.hg38.gp"),
               help="RefSeq annotation hg38-based genepred file")
 @click.option("--processes", type=int, default=8,
               help="Number of processes to use")

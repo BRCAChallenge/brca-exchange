@@ -2,6 +2,8 @@ import os
 import re
 
 import requests
+
+_DIR = os.path.dirname(os.path.abspath(__file__))
 from Bio.Seq import Seq
 from pyfaidx import Fasta
 
@@ -74,35 +76,38 @@ def getVarConsequences(variant):
     returns a list of strings detailing consequences of variant
     """
 
-    # varStrand always 1 because all alternate alleles and positions refer to the plus strand
-    varStrand = 1
     varAlt = variant["Alt"]
+    varRef = variant["Ref"]
 
     assert variant["Chr"] in ["13", "17"]
     for base in varAlt:
         # API only works for alt alleles that are composed of the 4 canonical bases
         assert base in ["A", "C", "G", "T"]
 
+    _chr_accession = {"13": "NC_000013.11", "17": "NC_000017.11"}
+    accession = _chr_accession[variant["Chr"]]
+    hgvs = f"{accession}:g.{variant['Hg38_Start']}{varRef}>{varAlt}"
+
     vep_url = os.environ.get('VEP_SERVER_URL', 'http://localhost:8888')
-    query = "%s:%s-%s:%s/%s" % (variant["Chr"], variant["Hg38_Start"],
-                                variant["Hg38_End"], varStrand, varAlt)
-    resp = requests.get(
-        f'{vep_url}/vep/human/region/{query}',
+    resp = requests.post(
+        f'{vep_url}/vep/hgvs/batch',
+        json=[hgvs],
         headers={'Content-Type': 'application/json'},
         timeout=60,
     )
     resp.raise_for_status()
-    vep_list = resp.json()
-    vep = vep_list[0] if isinstance(vep_list, list) else vep_list
+    result = resp.json()
 
-    # Should only be one BRCA1 canonical transcript in the list
-    assert len([gene["consequence_terms"] for gene in vep["transcript_consequences"]
-                if gene["transcript_id"] == BRCA1_CANONICAL
-                or gene["transcript_id"] == BRCA2_CANONICAL]) == 1
+    records = result.get(hgvs, [])
+    if isinstance(records, dict) and 'error' in records:
+        return []
 
-    for gene in vep["transcript_consequences"]:
-        if gene["transcript_id"] == BRCA1_CANONICAL or gene["transcript_id"] == BRCA2_CANONICAL:
-            return gene["consequence_terms"]
+    for record in records:
+        for gene in record.get('transcript_consequences', []):
+            if gene['transcript_id'] in (BRCA1_CANONICAL, BRCA2_CANONICAL):
+                return gene['consequence_terms']
+
+    return []
 
 
 def getVarType(variant):
@@ -153,10 +158,9 @@ def getRefSpliceDonorBoundaries(variant, intronicLength, exonicLength):
     """
     varExons = getExonBoundaries(variant)
     donorExons = varExons.copy()
-    if variant["Gene_Symbol"] == "BRCA1":
-        del donorExons["exon24"]
-    elif variant["Gene_Symbol"] == "BRCA2":
-        del donorExons["exon27"]
+    last_exon = f"exon{len(varExons)}"
+    if last_exon in donorExons:
+        del donorExons[last_exon]
     varStrand = verify.getVarStrand(variant)
     donorBoundaries = {}
     for exon in donorExons.keys():
@@ -227,7 +231,8 @@ def getFastaSeq(chrom, rangeStart, rangeStop, plusStrandSeq=True):
 
     # NOTE: pyfaidx is NOT thread safe. Would be better to have one
     # REMIND: Switch to one per thread/process
-    hg38 = Fasta("/references/hg38.fa", sequence_always_upper=True)
+    _default_fa = os.path.abspath(os.path.join(_DIR, '../../../../resources/hg38.fa'))
+    hg38 = Fasta(os.environ.get('GENOME_FA', _default_fa), sequence_always_upper=True)
     sequence = hg38[chrom][regionStart - 1:regionEnd]
 
     if plusStrandSeq:
@@ -269,8 +274,8 @@ def getAltSeqDict(variant, seqLocDict):
     varAlt = variant["Alt"]
     varGenPos = int(variant["Pos"])
     seqLocDictRef = seqLocDict[varGenPos]
+    altSeqDict = seqLocDict.copy()
     if varRef == seqLocDictRef:
-        altSeqDict = seqLocDict.copy()
         altSeqDict[varGenPos] = varAlt
     return altSeqDict
 
@@ -459,9 +464,9 @@ def getEnigmaClass(priorProb):
     """
     Given a prior probability of pathogenecity, returns a predicted qualitative ENIGMA class
     """
-    # if variant has prior prob = N/A then a predicted qualitative ENIGMA class will have already been determined
-    if priorProb == "N/A":
-        pass
+    # if variant has prior prob = N/A or non-numeric, return as-is
+    if not isinstance(priorProb, (int, float)):
+        return priorProb
     else:
         if priorProb >= 0.99:
             return "class_5"

@@ -1,29 +1,28 @@
 """
-Populate analysis_priors from calcVarPriors output.
+Populate analysis_priors from calcVarPriors.
 
 Processes substitution variants only — the splicing prior calculator
-handles only SNVs. Uses varType from analysis_vep (populated by
+handles only SNVs. Uses variant_type from analysis_vep (populated by
 run_vep_analysis.py) to filter variants without re-querying the VEP
-server. Writes a temp input TSV, runs calcVarPriors.py calc as a
-subprocess (from the splicing directory), parses the output, and upserts
-the UI-visible priors columns into analysis_priors.
+server. Imports calc_one from calcVarPriors directly and upserts the
+UI-visible priors columns into analysis_priors.
 """
 
-import csv
+import io
+import multiprocessing
 import os
-import subprocess
-import tempfile
 
 import click
 import psycopg2
 import psycopg2.extras
+import pyhgvs.utils as pyhgvs_utils
+
+import calcVarPriors
+from calc_priors.constants import BRCA1_RefSeq, BRCA2_RefSeq
+
+_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DB_BATCH = 500
-
-_SPLICING_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    'splicing',
-)
 
 # UI-visible priors columns stored in analysis_priors
 _PRIORS_COLS = [
@@ -53,13 +52,23 @@ def _blank_to_none(val):
 @click.option('--db-url', default='postgresql://postgres:postgres@localhost/storage.pg',
               envvar='PIPELINE_DB_URL', show_default=True)
 @click.option('--schema', default='pipeline', show_default=True)
-@click.option('--genome', default='/references/hg38.fa', show_default=True,
-              help='Path to hg38 reference FASTA')
 @click.option('--processes', default=8, show_default=True,
               help='Number of parallel calcVarPriors workers')
 @click.option('--overwrite', is_flag=True, default=False,
               help='Re-score variants already in analysis_priors')
-def main(db_url, schema, genome, processes, overwrite):
+@click.option('--limit', default=0, show_default=True,
+              help='Process only this many variants (0 = all)')
+def main(db_url, schema, processes, overwrite, limit):
+    transcripts_path = os.path.join(_DIR, 'refseq_annotation.hg38.gp')
+    with open(transcripts_path) as f:
+        # read_transcripts requires 16-column genePredExt format; skip shorter lines
+        filtered = io.StringIO(''.join(
+            line for line in f if line.startswith('#') or len(line.split('\t')) == 16
+        ))
+    transcripts = pyhgvs_utils.read_transcripts(filtered)
+    calcVarPriors.brca1Transcript = transcripts.get(BRCA1_RefSeq)
+    calcVarPriors.brca2Transcript = transcripts.get(BRCA2_RefSeq)
+
     conn = psycopg2.connect(db_url, options=f'-c search_path={schema}')
     try:
         with conn.cursor() as cur:
@@ -72,6 +81,7 @@ def main(db_url, schema, genome, processes, overwrite):
                     JOIN analysis_vep av ON av."VRS_Digest" = v."VRS_Digest"
                     WHERE gc.assembly = 'GRCh38'
                       AND av.variant_type = 'substitution'
+                      AND v."Gene_Symbol" IN ('BRCA1', 'BRCA2')
                 """)
             else:
                 cur.execute("""
@@ -83,60 +93,56 @@ def main(db_url, schema, genome, processes, overwrite):
                     LEFT JOIN analysis_priors ap ON ap."VRS_Digest" = v."VRS_Digest"
                     WHERE gc.assembly = 'GRCh38'
                       AND av.variant_type = 'substitution'
+                      AND v."Gene_Symbol" IN ('BRCA1', 'BRCA2')
                       AND ap."VRS_Digest" IS NULL
                 """)
             db_rows = cur.fetchall()
     finally:
         conn.close()
 
-    snvs = []
+    variants = []
     for vrs, gene, refseq, hgvs_cdna, chr_, pos, ref, alt in db_rows:
         chr_bare = chr_[3:] if chr_.startswith('chr') else chr_
-        snvs.append((vrs, gene, refseq, hgvs_cdna, chr_bare, pos, ref, alt))
+        variants.append({
+            'VRS_Digest': vrs,
+            'Gene_Symbol': gene,
+            'Reference_Sequence': refseq,
+            'HGVS_cDNA': hgvs_cdna,
+            'Chr': chr_bare,
+            'Pos': pos,
+            'Ref': ref,
+            'Alt': alt,
+            'Hg38_Start': pos,
+            'Hg38_End': pos,
+        })
 
-    print(f'Processing {len(snvs)} SNV variants ...')
-    if not snvs:
+    if limit > 0:
+        variants = variants[:limit]
+    print(f'Processing {len(variants)} substitution variants ...')
+    if not variants:
         print('Nothing to do.')
         return
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        in_tsv = os.path.join(tmpdir, 'variants_in.tsv')
-        out_tsv = os.path.join(tmpdir, 'variants_out.tsv')
+    if processes > 1:
+        pool = multiprocessing.Pool(processes)
+        try:
+            rows = pool.map(calcVarPriors.calc_one, variants)
+        finally:
+            pool.close()
+            pool.join()
+    else:
+        rows = [calcVarPriors.calc_one(v) for v in variants]
 
-        with open(in_tsv, 'w', newline='') as fh:
-            writer = csv.writer(fh, delimiter='\t')
-            writer.writerow(['Chr', 'Pos', 'Ref', 'Alt', 'Reference_Sequence',
-                             'HGVS_cDNA', 'Gene_Symbol', 'Hg38_Start', 'Hg38_End', 'VRS_Digest'])
-            for vrs, gene, refseq, hgvs_cdna, chr_bare, pos, ref, alt in snvs:
-                writer.writerow([chr_bare, pos, ref, alt, refseq,
-                                  hgvs_cdna, gene, pos, pos, vrs])
+    inserts = []
+    for row in rows:
+        vrs = row['VRS_Digest']
+        values = tuple(_blank_to_none(row.get(col)) for col in _PRIORS_COLS)
+        inserts.append((vrs,) + values)
 
-        cmd = [
-            'python', 'calcVarPriors.py',
-            '--genome', genome,
-            '--processes', str(processes),
-            'calc', in_tsv, out_tsv,
-        ]
-        print(f'Running calcVarPriors.py ...')
-        result = subprocess.run(cmd, cwd=_SPLICING_DIR)
-        if result.returncode != 0:
-            raise SystemExit(f'calcVarPriors.py exited with code {result.returncode}')
-
-        print(f'Parsing output ...')
-        inserts = []
-        with open(out_tsv, newline='') as fh:
-            reader = csv.DictReader(fh, delimiter='\t')
-            for row in reader:
-                if row.get('varType') != 'substitution':
-                    continue
-                vrs = row['VRS_Digest']
-                values = tuple(_blank_to_none(row.get(col)) for col in _PRIORS_COLS)
-                inserts.append((vrs,) + values)
-
-    print(f'Writing {len(inserts)} rows to analysis_priors ...')
     col_list = ', '.join(f'"{c}"' for c in _PRIORS_COLS)
     update_set = ', '.join(f'"{c}" = EXCLUDED."{c}"' for c in _PRIORS_COLS)
 
+    print(f'Writing {len(inserts)} rows to analysis_priors ...')
     conn = psycopg2.connect(db_url, options=f'-c search_path={schema}')
     try:
         with conn.cursor() as cur:

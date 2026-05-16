@@ -28,7 +28,7 @@ class AnalyzeVEP(VCFAssemblyTask):
         return luigi.LocalTarget(os.path.join(self.vcf_dir, 'analyze_vep.done'))
 
     def run(self):
-        script = os.path.join(_pipeline_dir, 'variant_processing', 'run_vep_analysis.py')
+        script = os.path.join(_pipeline_dir, 'variant_analysis', 'run_vep_analysis.py')
         args = ['python', script, '--vep-url', self.vep_server_url]
         self._run_process_with_pipeline_path(args)
         with open(self.output().path, 'w') as f:
@@ -64,7 +64,7 @@ class AnalyzeBayesDel(VCFAssemblyTask):
 
     def run(self):
         _, victor_vcf = self.input()
-        script = os.path.join(_pipeline_dir, 'variant_processing', 'run_bayesdel_analysis.py')
+        script = os.path.join(_pipeline_dir, 'variant_analysis', 'run_bayesdel_analysis.py')
         args = ['python', script, '--victor-vcf', victor_vcf.path]
         self._run_process_with_pipeline_path(args)
         with open(self.output().path, 'w') as f:
@@ -83,7 +83,7 @@ class ExportVariantsToVCF(VCFAssemblyTask):
         return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'all_variants.vcf'))
 
     def run(self):
-        script = os.path.join(_pipeline_dir, 'variant_processing', 'export_variants_to_vcf.py')
+        script = os.path.join(_pipeline_dir, 'variant_analysis', 'export_variants_to_vcf.py')
         args = ['python', script, '--output', self.output().path]
         self._run_process_with_pipeline_path(args)
 
@@ -132,7 +132,7 @@ class AnalyzeSpliceAI(VCFAssemblyTask):
         return luigi.LocalTarget(os.path.join(self.vcf_dir, 'analyze_spliceai.done'))
 
     def run(self):
-        script = os.path.join(_pipeline_dir, 'variant_processing', 'run_spliceai_analysis.py')
+        script = os.path.join(_pipeline_dir, 'variant_analysis', 'run_spliceai_analysis.py')
         args = ['python', script, '--spliceai-vcf', self.input().path]
         self._run_process_with_pipeline_path(args)
         with open(self.output().path, 'w') as f:
@@ -147,9 +147,6 @@ class AnalyzeSpliceAI(VCFAssemblyTask):
 class AnalyzePriors(VCFAssemblyTask):
     """Populate analysis_priors with splicing prior probabilities from calcVarPriors."""
 
-    genome_fa = luigi.Parameter(
-        default='/references/hg38.fa',
-        description='Path to hg38.fa reference genome')
     priors_processes = luigi.IntParameter(
         default=8,
         description='Number of parallel calcVarPriors workers')
@@ -158,12 +155,38 @@ class AnalyzePriors(VCFAssemblyTask):
         return luigi.LocalTarget(os.path.join(self.vcf_dir, 'analyze_priors.done'))
 
     def run(self):
-        script = os.path.join(_pipeline_dir, 'variant_processing', 'run_priors_analysis.py')
+        script = os.path.join(_pipeline_dir, 'variant_analysis', 'run_priors_analysis.py')
         args = [
             'python', script,
-            '--genome', self.genome_fa,
             '--processes', str(self.priors_processes),
         ]
+        self._run_process_with_pipeline_path(args)
+        with open(self.output().path, 'w') as f:
+            f.write('done\n')
+
+
+###############################################
+#        COMPUTE + LOAD POPFREQ CODES         #
+###############################################
+
+@requires(VCFAssembly)
+class AnalyzePopfreq(VCFAssemblyTask):
+    """Populate analysis_provisional_evidence_codes with population frequency evidence codes."""
+
+    data_dir = luigi.Parameter(
+        description='Directory containing df_cov_v4.csv (gnomAD v4 coverage)')
+    lcr_bed = luigi.Parameter(
+        default='',
+        description='Optional BED file of low-complexity regions')
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.vcf_dir, 'analyze_popfreq.done'))
+
+    def run(self):
+        script = os.path.join(_pipeline_dir, 'variant_analysis', 'run_popfreq_analysis.py')
+        args = ['python', script, '--data-dir', self.data_dir]
+        if self.lcr_bed:
+            args += ['--lcr', self.lcr_bed]
         self._run_process_with_pipeline_path(args)
         with open(self.output().path, 'w') as f:
             f.write('done\n')
@@ -173,7 +196,7 @@ class AnalyzePriors(VCFAssemblyTask):
 #               TOP-LEVEL TASK                #
 ###############################################
 
-@requires(AnalyzeVEP, AnalyzeBayesDel, AnalyzeSpliceAI, AnalyzePriors)
+@requires(AnalyzeVEP, AnalyzeBayesDel, AnalyzeSpliceAI, AnalyzePriors, AnalyzePopfreq)
 class VariantAnalysis(VCFAssemblyTask):
     """Top-level variant analysis task."""
 

@@ -11,6 +11,12 @@ from calc_priors import extract
 from calc_priors import compute
 
 
+def _max_prior(*priors):
+    """Return max of prior probability values, skipping non-numeric sentinels ('N/A', '-', etc.)."""
+    numeric = [p for p in priors if isinstance(p, (int, float))]
+    return max(numeric) if numeric else "N/A"
+
+
 def getPriorProbSpliceRescueNonsenseSNS(variant, boundaries, deNovoDonorInRefAcc=False):
     """
     Given a variant, determines if there is a possibility of splice rescue
@@ -327,6 +333,8 @@ def getPriorProbAfterGreyZoneSNS(variant, boundaries):
     """
     varType = extract.getVarType(variant)
     varLoc = compute.getVarLocation(variant, boundaries)
+    priorProb = "N/A"
+    enigmaClass = "N/A"
     if varType == "substitution" and varLoc == "after_grey_zone_variant":
         varCons = extract.getVarConsequences(variant)
         if "stop_gained" in varCons or "missense_variant" in varCons or "synonymous_variant" in varCons:
@@ -517,7 +525,7 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
                 else:
                     priorProb = HIGH_PROBABILITY
             if (altZScore > subZScore and refAltZScore == "N/A") or (
-                    altZScore > refAltZScore and refAltZScore != "N/A"):
+                    refAltZScore != "N/A" and altZScore > refAltZScore):
                 # promote prior prob by one step
                 if priorProb == LOW_PROBABILITY:
                     priorProb = MODERATE_DENOVO_PROBABILITY
@@ -535,7 +543,7 @@ def getPriorProbDeNovoDonorSNS(variant, boundaries, exonicPortionSize, genome, t
 
             if altZScore > subZScore:
                 altGreaterClosestRefFlag = 1
-            if altZScore > refAltZScore and refAltZScore != "N/A":
+            if refAltZScore != "N/A" and altZScore > refAltZScore:
                 altGreaterClosestAltFlag = 1
 
             if frameshiftFlag == 0 and priorProb != 0:
@@ -638,7 +646,7 @@ def getPriorProbDeNovoAcceptorSNS(variant, exonicPortionSize, deNovoLength, geno
                 altGreaterRefFlag = 1
             if altZScore > closestZScore:
                 altGreaterClosestRefFlag = 1
-            if altZScore > refAltZScore and refAltZScore != "N/A":
+            if refAltZScore != "N/A" and altZScore > refAltZScore:
                 altGreaterClosestAltFlag = 1
 
             # converts genomic splice position to transcript splice position
@@ -723,14 +731,7 @@ def getPriorProbSpliceDonorSNS(variant, boundaries, variantData, genome, transcr
         if compute.varInExon(variant):
             proteinInfo = getPriorProbProteinSNS(variant, variantData)
             proteinPrior = proteinInfo["priorProb"]
-        if deNovoPrior != "N/A" and proteinPrior != "N/A":
-            applicablePrior = max(deNovoPrior, refPrior, proteinPrior)
-        elif deNovoPrior == "N/A" and proteinPrior != "N/A":
-            applicablePrior = max(refPrior, proteinPrior)
-        elif deNovoPrior != "N/A" and proteinPrior == "N/A":
-            applicablePrior = max(deNovoPrior, refPrior)
-        elif deNovoPrior == "N/A" and proteinPrior == "N/A":
-            applicablePrior = refPrior
+        applicablePrior = _max_prior(deNovoPrior, refPrior, proteinPrior)
 
         spliceRescue = "N/A"
         spliceFlag = 0
@@ -889,10 +890,7 @@ def getPriorProbSpliceAcceptorSNS(variant, boundaries, variantData, genome, tran
             deNovoDonorPrior = deNovoDonorInfo["priorProb"]
             proteinInfo = getPriorProbProteinSNS(variant, variantData)
             proteinPrior = proteinInfo["priorProb"]
-            if deNovoDonorPrior != "N/A" and proteinPrior != "N/A":
-                applicablePrior = max(deNovoDonorPrior, proteinPrior, refPrior)
-            else:
-                applicablePrior = max(proteinPrior, refPrior)
+            applicablePrior = _max_prior(deNovoDonorPrior, proteinPrior, refPrior)
         else:
             deNovoDonorPrior = "N/A"
             deNovoDonorInfo = {"refMaxEntScanScore": "N/A",
@@ -1252,7 +1250,7 @@ def getPriorProbInExonSNS(variant, boundaries, variantData, genome, transcript):
             applicablePrior = proteinData["priorProb"]
             applicableClass = proteinData["enigmaClass"]
             if deNovoDonorData["priorProb"] != "N/A":
-                applicablePrior = max(proteinData["priorProb"], deNovoDonorData["priorProb"])
+                applicablePrior = _max_prior(proteinData["priorProb"], deNovoDonorData["priorProb"])
                 applicableClass = extract.getEnigmaClass(applicablePrior)
 
         return {"applicablePrior": applicablePrior,
@@ -1537,6 +1535,21 @@ def getPriorProbIntronicDeNovoDonorSNS(variant, genome, transcript):
                     "altGreaterClosestAltFlag": "N/A",
                     "frameshiftFlag": frameshiftFlag,
                     "spliceFlag": spliceFlag}
+    return {"priorProb": "N/A", "enigmaClass": "N/A",
+            "refMaxEntScanScore": "N/A", "refZScore": "N/A",
+            "altMaxEntScanScore": "N/A", "altZScore": "N/A",
+            "refSeq": "N/A", "altSeq": "N/A",
+            "varStart": "N/A", "varLength": "N/A",
+            "exonStart": "N/A", "intronStart": "N/A",
+            "genomicSplicePos": "N/A", "transcriptSplicePos": "N/A",
+            "closestGenomicSplicePos": "N/A", "closestTranscriptSplicePos": "N/A",
+            "closestRefMaxEntScanScore": "N/A", "closestRefZScore": "N/A",
+            "closestRefSeq": "N/A", "closestAltMaxEntScanScore": "N/A",
+            "closestAltZScore": "N/A", "closestAltSeq": "N/A",
+            "closestExonStart": "N/A", "closestIntronStart": "N/A",
+            "altGreaterRefFlag": 0, "altGreaterClosestRefFlag": 0,
+            "altGreaterClosestAltFlag": "N/A", "frameshiftFlag": 0,
+            "spliceFlag": 0}
 
 
 def getPriorProbInIntronSNS(variant, boundaries, genome, transcript):

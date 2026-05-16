@@ -201,6 +201,7 @@ def main(db_url, schema, overwrite):
                 _extract(data, vrs_digest)
 
             if ca_id:
+                ref_seq = hgvs_cdna.split(':')[0] if hgvs_cdna and ':' in hgvs_cdna else '-'
                 variant_updates.append((
                     ca_id,
                     title or '-',
@@ -209,6 +210,7 @@ def main(db_url, schema, overwrite):
                     hgvs_protein or '-',
                     ensembl_protein or '-',
                     synonyms,
+                    ref_seq,
                     vrs_digest,
                 ))
 
@@ -225,7 +227,8 @@ def main(db_url, schema, overwrite):
                 cur.executemany(
                     """UPDATE variant
                        SET "CA_ID" = %s, title = %s, "HGVS_cDNA" = %s, ensembl_cdna = %s,
-                           "HGVS_Protein" = %s, ensembl_protein = %s, "Synonyms" = %s
+                           "HGVS_Protein" = %s, ensembl_protein = %s, "Synonyms" = %s,
+                           "Reference_Sequence" = %s
                        WHERE "VRS_Digest" = %s""",
                     batch,
                 )

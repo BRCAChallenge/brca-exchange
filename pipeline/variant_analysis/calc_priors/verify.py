@@ -42,6 +42,8 @@ def varOutsideBoundaries(variant):
     varGenPos = int(variant["Pos"])
     varTranscript = variant["Reference_Sequence"]
     transcriptData = getTranscriptData(varTranscript)
+    if transcriptData is None:
+        return True
     varStrand = getVarStrand(variant)
     if varStrand == "+":
         txnStart = int(transcriptData["txStart"])
@@ -189,12 +191,14 @@ def getVarStrand(variant):
 
 def getTranscriptData(referenceSequence):
     """
-    Given a reference sequence (e.g. "NM_007294.3"),
-    Returns transcript data for that reference sequencee
+    Given a reference sequence (e.g. "NM_007294.3" or "NM_007294.4"),
+    Returns transcript data for that reference sequence.
+    Version suffix is ignored so that newer RefSeq versions still resolve.
     """
-    if referenceSequence == BRCA1_RefSeq:
+    base = referenceSequence.split('.')[0] if referenceSequence else ''
+    if base == BRCA1_RefSeq.split('.')[0]:
         return brca1TranscriptData
-    elif referenceSequence == BRCA2_RefSeq:
+    elif base == BRCA2_RefSeq.split('.')[0]:
         return brca2TranscriptData
 
     print("Warning: No reference sequence available for " + str(referenceSequence))

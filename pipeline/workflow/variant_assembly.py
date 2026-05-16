@@ -543,7 +543,7 @@ class ComputeGenomicHGVS(VCFAssemblyTask):
         return luigi.LocalTarget(os.path.join(self.vcf_dir, "compute_genomic_hgvs.done"))
 
     def run(self):
-        script = os.path.join(_pipeline_dir, "variant_processing", "compute_genomic_hgvs.py")
+        script = os.path.join(_pipeline_dir, "variant_analysis", "compute_genomic_hgvs.py")
         args = ["python", script]
         self._run_process_with_pipeline_path(args)
         with open(self.output().path, "w") as f:
@@ -564,7 +564,7 @@ class QueryClinGenAlleleRegistry(VCFAssemblyTask):
         return luigi.LocalTarget(os.path.join(self.vcf_dir, "query_clingen_allele_registry.done"))
 
     def run(self):
-        script = os.path.join(_pipeline_dir, "variant_processing", "query_clingen_allele_registry.py")
+        script = os.path.join(_pipeline_dir, "variant_analysis", "query_clingen_allele_registry.py")
         args = ["python", script]
         self._run_process_with_pipeline_path(args)
         with open(self.output().path, "w") as f:
@@ -582,7 +582,7 @@ class LoadEnigmaDomains(VCFAssemblyTask):
         return luigi.LocalTarget(os.path.join(self.vcf_dir, "load_enigma_domains.done"))
 
     def run(self):
-        script = os.path.join(_pipeline_dir, "variant_processing", "load_enigma_domains.py")
+        script = os.path.join(_pipeline_dir, "variant_analysis", "load_enigma_domains.py")
         args = ["python", script]
         self._run_process_with_pipeline_path(args)
         with open(self.output().path, "w") as f:
