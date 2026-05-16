@@ -10,6 +10,11 @@ UI-visible priors columns into analysis_priors.
 Variants whose Reference_Sequence:HGVS_cDNA (version-normalized) appears
 in splicingfilter/blacklisted_vars.txt are skipped; their priors columns
 are left NULL in analysis_priors.
+
+Transcript coordinate conversion uses the biocommons hgvs library via a
+UTA database instance. Set UTA_DB_URL to point at a local instance for
+best performance, e.g.:
+  UTA_DB_URL=postgresql://anonymous@localhost:50828/uta/uta_20241220
 """
 
 import multiprocessing
@@ -89,7 +94,15 @@ def _blank_to_none(val):
               help='Re-score variants already in analysis_priors')
 @click.option('--limit', default=0, show_default=True,
               help='Process only this many variants (0 = all)')
-def main(db_url, schema, processes, overwrite, limit):
+@click.option('--uta-db-url', default=None, envvar='UTA_DB_URL', show_default=True,
+              help='UTA database URL for transcript coordinate mapping. '
+                   'Defaults to UTA_DB_URL env var or the biocommons public instance. '
+                   'Use a local instance for best performance, e.g. '
+                   'postgresql://anonymous@localhost:50828/uta/uta_20241220')
+def main(db_url, schema, processes, overwrite, limit, uta_db_url):
+    if uta_db_url:
+        os.environ['UTA_DB_URL'] = uta_db_url
+
     calcVarPriors.brca1Transcript = BRCA1_RefSeq
     calcVarPriors.brca2Transcript = BRCA2_RefSeq
 

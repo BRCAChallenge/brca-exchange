@@ -10,10 +10,17 @@ _CHROM_TO_NC = {
     'chr13': 'NC_000013.11',
     'chr17': 'NC_000017.11',
 }
-_hdp = uta.connect()
 _hp = hgvs.parser.Parser()
-_mapper = am.AssemblyMapper(_hdp, assembly_name='GRCh38', alt_aln_method='splign',
-                            prevalidation_level=None)
+_mapper = None  # initialised lazily on first call so UTA_DB_URL can be set at runtime
+
+
+def _get_mapper():
+    global _mapper
+    if _mapper is None:
+        _hdp = uta.connect()
+        _mapper = am.AssemblyMapper(_hdp, assembly_name='GRCh38', alt_aln_method='splign',
+                                    prevalidation_level=None)
+    return _mapper
 
 # Fetch transcript data for BRCA1/BRCA2 RefSeq transcripts
 brca1TranscriptData = fetch_gene_coordinates(BRCA1_RefSeq)
@@ -225,7 +232,7 @@ def convertGenomicPosToTranscriptPos(genomicPos, chrom, transcript):
     chrom_key = chrom if chrom.startswith('chr') else f'chr{chrom}'
     nc = _CHROM_TO_NC[chrom_key]
     g_var = _hp.parse_hgvs_variant(f'{nc}:g.{genomicPos}T>A')
-    c_var = _mapper.g_to_c(g_var, transcript)
+    c_var = _get_mapper().g_to_c(g_var, transcript)
     return str(c_var.posedit.pos.start)
 
 
