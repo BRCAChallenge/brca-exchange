@@ -6,6 +6,10 @@ handles only SNVs. Uses variant_type from analysis_vep (populated by
 run_vep_analysis.py) to filter variants without re-querying the VEP
 server. Imports calc_one from calcVarPriors directly and upserts the
 UI-visible priors columns into analysis_priors.
+
+Variants whose Reference_Sequence:HGVS_cDNA (version-normalized) appears
+in splicingfilter/blacklisted_vars.txt are skipped; their priors columns
+are left NULL in analysis_priors.
 """
 
 import io
@@ -26,6 +30,32 @@ import calcVarPriors
 from calc_priors.constants import BRCA1_RefSeq, BRCA2_RefSeq
 
 DB_BATCH = 500
+_BLACKLIST_PATH = os.path.join(_DIR, '..', 'splicingfilter', 'blacklisted_vars.txt')
+
+
+def _load_blacklist(path):
+    """Return a set of version-stripped 'ACCESSION:cDNA' keys, e.g. 'NM_000059:c.551T>C'."""
+    blacklist = set()
+    try:
+        with open(path) as f:
+            for line in f:
+                entry = line.strip()
+                if not entry:
+                    continue
+                if ':' in entry:
+                    acc, cdna = entry.split(':', 1)
+                    # strip version suffix so NM_000059.3 matches NM_000059.4
+                    acc_base = acc.rsplit('.', 1)[0]
+                    blacklist.add(f'{acc_base}:{cdna}')
+    except FileNotFoundError:
+        print(f'Warning: blacklist file not found at {path}; no variants will be skipped.')
+    return blacklist
+
+
+def _blacklist_key(refseq, hgvs_cdna):
+    """Return version-stripped lookup key for a variant."""
+    acc_base = refseq.rsplit('.', 1)[0] if refseq else refseq
+    return f'{acc_base}:{hgvs_cdna}'
 
 # UI-visible priors columns stored in analysis_priors
 _PRIORS_COLS = [
@@ -103,8 +133,14 @@ def main(db_url, schema, processes, overwrite, limit):
     finally:
         conn.close()
 
+    blacklist = _load_blacklist(_BLACKLIST_PATH)
+
     variants = []
+    blacklisted_count = 0
     for vrs, gene, refseq, hgvs_cdna, chr_, pos, ref, alt in db_rows:
+        if blacklist and _blacklist_key(refseq, hgvs_cdna) in blacklist:
+            blacklisted_count += 1
+            continue
         chr_bare = chr_[3:] if chr_.startswith('chr') else chr_
         variants.append({
             'VRS_Digest': vrs,
@@ -119,6 +155,8 @@ def main(db_url, schema, processes, overwrite, limit):
             'Hg38_End': pos,
         })
 
+    if blacklisted_count:
+        print(f'Skipped {blacklisted_count} blacklisted variants.')
     if limit > 0:
         variants = variants[:limit]
     print(f'Processing {len(variants)} substitution variants ...')
