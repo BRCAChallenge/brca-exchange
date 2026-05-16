@@ -11,16 +11,19 @@ UI-visible priors columns into analysis_priors.
 import io
 import multiprocessing
 import os
+import sys
 
 import click
 import psycopg2
 import psycopg2.extras
 import pyhgvs.utils as pyhgvs_utils
 
+_DIR = os.path.dirname(os.path.abspath(__file__))
+_PRIORS_DIR = os.path.join(_DIR, 'priors')
+sys.path.insert(0, _PRIORS_DIR)
+
 import calcVarPriors
 from calc_priors.constants import BRCA1_RefSeq, BRCA2_RefSeq
-
-_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DB_BATCH = 500
 
@@ -59,7 +62,7 @@ def _blank_to_none(val):
 @click.option('--limit', default=0, show_default=True,
               help='Process only this many variants (0 = all)')
 def main(db_url, schema, processes, overwrite, limit):
-    transcripts_path = os.path.join(_DIR, 'refseq_annotation.hg38.gp')
+    transcripts_path = os.path.join(_PRIORS_DIR, 'refseq_annotation.hg38.gp')
     with open(transcripts_path) as f:
         # read_transcripts requires 16-column genePredExt format; skip shorter lines
         filtered = io.StringIO(''.join(
