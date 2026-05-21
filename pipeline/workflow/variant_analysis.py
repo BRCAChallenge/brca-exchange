@@ -169,24 +169,56 @@ class AnalyzePriors(VCFAssemblyTask):
 #        COMPUTE + LOAD POPFREQ CODES         #
 ###############################################
 
-@requires(VCFAssembly)
+_VARIANT_ANALYSIS_BASE_URL = 'https://brcaexchange.org/backend/downloads/variant_analysis'
+
+
+class DownloadLCRBed(VCFAssemblyTask):
+    """Download the low-complexity region BED file (LCRFromHengHg38)."""
+
+    lcr_url = luigi.Parameter(
+        default=f'{_VARIANT_ANALYSIS_BASE_URL}/LCRFromHengHg38.bed',
+        description='URL of the LCR BED file')
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'LCRFromHengHg38.bed'))
+
+    def run(self):
+        data = pipeline_utils.urlopen_with_retry(self.lcr_url).read()
+        with open(self.output().path, 'wb') as f:
+            f.write(data)
+
+
+class DownloadCoverageParquet(VCFAssemblyTask):
+    """Download the gnomAD v4.1 coverage Parquet file."""
+
+    coverage_url = luigi.Parameter(
+        default=f'{_VARIANT_ANALYSIS_BASE_URL}/gnomADv4.1.coverage.parquet',
+        description='URL of the gnomAD v4.1 coverage Parquet file')
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'gnomADv4.1.coverage.parquet'))
+
+    def run(self):
+        data = pipeline_utils.urlopen_with_retry(self.coverage_url).read()
+        with open(self.output().path, 'wb') as f:
+            f.write(data)
+
+
+@requires(VCFAssembly, DownloadCoverageParquet, DownloadLCRBed)
 class AnalyzePopfreq(VCFAssemblyTask):
     """Populate analysis_provisional_evidence_codes with population frequency evidence codes."""
-
-    data_dir = luigi.Parameter(
-        description='Directory containing df_cov_v4.csv (gnomAD v4 coverage)')
-    lcr_bed = luigi.Parameter(
-        default='',
-        description='Optional BED file of low-complexity regions')
 
     def output(self):
         return luigi.LocalTarget(os.path.join(self.vcf_dir, 'analyze_popfreq.done'))
 
     def run(self):
+        _, coverage_parquet, lcr_bed = self.input()
         script = os.path.join(_pipeline_dir, 'variant_analysis', 'run_popfreq_analysis.py')
-        args = ['python', script, '--data-dir', self.data_dir]
-        if self.lcr_bed:
-            args += ['--lcr', self.lcr_bed]
+        args = [
+            'python', script,
+            '--coverage-file', coverage_parquet.path,
+            '--lcr', lcr_bed.path,
+        ]
         self._run_process_with_pipeline_path(args)
         with open(self.output().path, 'w') as f:
             f.write('done\n')

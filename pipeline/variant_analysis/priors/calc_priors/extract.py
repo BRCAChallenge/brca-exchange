@@ -231,7 +231,7 @@ def getFastaSeq(chrom, rangeStart, rangeStop, plusStrandSeq=True):
 
     # NOTE: pyfaidx is NOT thread safe. Would be better to have one
     # REMIND: Switch to one per thread/process
-    _default_fa = os.path.abspath(os.path.join(_DIR, '../../../../resources/hg38.fa'))
+    _default_fa = os.path.abspath(os.path.join(_DIR, '../../../../../resources/hg38.fa'))
     hg38 = Fasta(os.environ.get('GENOME_FA', _default_fa), sequence_always_upper=True)
     sequence = hg38[chrom][regionStart - 1:regionEnd]
 

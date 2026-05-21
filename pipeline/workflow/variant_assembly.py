@@ -482,6 +482,35 @@ class VRSAnnotateGnomAD(VCFAssemblyTask):
             )
 
 
+class DownloadGnomADCoverage(VCFAssemblyTask):
+    """Download gnomAD genome + exome coverage and write a combined weighted-mean parquet.
+
+    Disabled by default; pass --DownloadGnomADCoverage-enabled true to run.
+    """
+    enabled = luigi.BoolParameter(default=False)
+    gene_config = luigi.Parameter(
+        default=os.path.join(_pipeline_dir, 'workflow', 'gene_config_brca_only.txt'),
+        description='Gene config file with chr/start_hg38/end_hg38 columns')
+    coverage_output = luigi.Parameter(
+        default=os.path.join(_pipeline_dir, '..', '..', 'resources', 'gnomADv4.1.coverage.joint.parquet'),
+        description='Output path for the combined weighted-mean coverage parquet')
+
+    def output(self):
+        return luigi.LocalTarget(os.path.normpath(self.coverage_output))
+
+    def run(self):
+        if not self.enabled:
+            return
+        script = os.path.join(_pipeline_dir, 'gnomad', 'download_coverage_v4.py')
+        args = [
+            'python', script,
+            '-g', self.gene_config,
+            '-c', os.path.normpath(self.coverage_output),
+            '-v',
+        ]
+        self._run_process_with_pipeline_path(args)
+
+
 ###############################################
 #           LOAD VCFs TO DATABASE             #
 ###############################################

@@ -1040,6 +1040,9 @@ def getPriorProbProteinSNS(variant, variantData):
             # if HGVS_cDNA field is blank use pyhgvs field instead
             # [12:] parses out the NM_ accession so varHGVS is in format c.65C>T
             varHGVS = variant["pyhgvs_cDNA"][12:]
+        # Strip accession prefix (e.g. "NM_007294.4:c.65C>T" → "c.65C>T")
+        if ':' in varHGVS:
+            varHGVS = varHGVS.split(':', 1)[1]
         varGene = variant["Gene_Symbol"]
 
         try:

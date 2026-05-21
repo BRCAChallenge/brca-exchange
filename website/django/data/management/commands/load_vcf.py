@@ -496,7 +496,7 @@ class Command(BaseCommand):
         return self._load_gnomad(vcf_path, pkl, version='v4',
             ac_key='AC_joint', an_key='AN_joint', af_key='AF_joint',
             variant_id_key='variant_id',
-            faf_key='faf95_joint', faf_pop_key='grpmax_joint',
+            faf_key='fafmax_faf95_max_joint', faf_pop_key='fafmax_faf95_max_gen_anc_joint',
             build_populations=populations,
         )
 
