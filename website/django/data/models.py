@@ -341,6 +341,7 @@ class AnalysisPriors(models.Model):
                                       related_name='priors_analysis')
 
     varLoc                        = models.TextField(null=True)
+    applicablePrior               = models.TextField(null=True)
 
     proteinPrior                  = models.TextField(null=True)
 

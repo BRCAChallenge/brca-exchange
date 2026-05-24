@@ -63,6 +63,7 @@ def _blacklist_key(refseq, hgvs_cdna):
 # UI-visible priors columns stored in analysis_priors
 _PRIORS_COLS = [
     'varLoc',
+    'applicablePrior',
     'proteinPrior',
     'refDonorPrior',
     'refRefDonorMES', 'refRefDonorZ', 'altRefDonorMES', 'altRefDonorZ',
