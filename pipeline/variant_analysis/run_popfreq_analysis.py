@@ -14,9 +14,11 @@ region BED file must still be supplied as local files.
 """
 
 import bisect
+import dataclasses
 import logging
 import math
 import os
+from typing import Optional
 
 import click
 import psycopg2
@@ -33,41 +35,75 @@ FAIL_LCR = "No code met (low-complexity region)"
 
 READ_DEPTH_THRESHOLD_FREQUENT_VARIANT = 20
 READ_DEPTH_THRESHOLD_RARE_VARIANT = 25
-
-SMALL_INDEL_SIZE_THRESHOLD = 50
 ALLELE_COUNT_RARE_VARIANT_THRESHOLD = 1
 
-BA1_FAF_THRESHOLD = 0.001
-BS1_FAF_THRESHOLD = 0.0001
-BS1_SUPPORTING_FAF_THRESHOLD = 0.00001
-RARE_VARIANT_FAF_THRESHOLD = 0.00001
+# Default threshold values (popfreq_1.3)
+_BA1_FAF_THRESHOLD            = 0.001
+_BS1_FAF_THRESHOLD            = 0.0001
+_BS1_SUPPORTING_FAF_THRESHOLD = 0.00001
+_RARE_VARIANT_FAF_THRESHOLD   = 0.00001
+_SMALL_INDEL_SIZE_THRESHOLD   = 50
 
-BA1_MSG = (f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
-           f"in gnomAD v4.1 is %s in the %s genetic ancestry group (based on %s/%s alleles) "
-           f"which is above the ENIGMA BRCA1/2 VCEP threshold (>{BA1_FAF_THRESHOLD}) for BA1 (BA1 met).")
-BS1_MSG = (f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
-           f"in gnomAD v4.1 is %s in the %s genetic ancestry group (based on %s/%s alleles) "
-           f"which is above the ENIGMA BRCA1/2 VCEP threshold (>{BS1_FAF_THRESHOLD}) for BS1, "
-           f"and below the BA1 threshold (>{BA1_FAF_THRESHOLD}) (BS1 met).")
-BS1_SUPPORTING_MSG = (f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
-                      f"in gnomAD v4.1 is %s in the %s genetic ancestry group (based on %s/%s alleles) "
-                      f"which is above the ENIGMA BRCA1/2 VCEP threshold (>{RARE_VARIANT_FAF_THRESHOLD}) "
-                      f"for BS1_Supporting, and below the BS1 threshold (>{BS1_FAF_THRESHOLD}) (BS1_Supporting met).")
-NO_CODE_MET_MSG = (f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
-                   f"in gnomAD v4.1 is %s in the %s genetic ancestry group (based on %s/%s alleles) "
-                   f"which is below the ENIGMA BRCA1/2 VCEP threshold (>{BS1_SUPPORTING_FAF_THRESHOLD}) "
-                   f"for BS1_Supporting and does not meet any population code "
-                   f"(BA1, BS1, BS1_Supporting, PM2_Supporting are not met).")
-NO_CODE_NO_FAF_MSG = (f"This variant is recorded in gnomAD v4.1, however the Total GrpMax filtering allele frequency "
-                      f"(the lower threshold of the 95% CI) was not calculated, therefore this variant does not meet "
-                      f"any population code (BA1, BS1, BS1_Supporting, PM2_Supporting are not met).")
-NO_CODE_INDEL_MSG = (f"This [duplication/insertion/deletion/delins/large genomic rearrangement] variant "
-                       f"was not observed in gnomAD v4.1, but PM2_Supporting was not applied since recall "
-                       f"is considered suboptimal for this type of variant (PM2_Supporting not met). ")
+
+@dataclasses.dataclass
+class PopfreqConfig:
+    """Configurable thresholds for population frequency evidence code computation."""
+    ba1_faf_threshold:            float = _BA1_FAF_THRESHOLD
+    bs1_faf_threshold:            float = _BS1_FAF_THRESHOLD
+    bs1_supporting_faf_threshold: float = _BS1_SUPPORTING_FAF_THRESHOLD
+    rare_variant_faf_threshold:   float = _RARE_VARIANT_FAF_THRESHOLD
+    small_indel_size_threshold:   int   = _SMALL_INDEL_SIZE_THRESHOLD
+    use_lcr:                      bool  = True
+
+    def ba1_msg(self, faf, pop, ac, an):
+        return (
+            f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
+            f"in gnomAD v4.1 is {faf} in the {pop} genetic ancestry group (based on {ac}/{an} alleles) "
+            f"which is above the ENIGMA BRCA1/2 VCEP threshold (>{self.ba1_faf_threshold}) for BA1 (BA1 met)."
+        )
+
+    def bs1_msg(self, faf, pop, ac, an):
+        return (
+            f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
+            f"in gnomAD v4.1 is {faf} in the {pop} genetic ancestry group (based on {ac}/{an} alleles) "
+            f"which is above the ENIGMA BRCA1/2 VCEP threshold (>{self.bs1_faf_threshold}) for BS1, "
+            f"and below the BA1 threshold (>{self.ba1_faf_threshold}) (BS1 met)."
+        )
+
+    def bs1_supporting_msg(self, faf, pop, ac, an):
+        return (
+            f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
+            f"in gnomAD v4.1 is {faf} in the {pop} genetic ancestry group (based on {ac}/{an} alleles) "
+            f"which is above the ENIGMA BRCA1/2 VCEP threshold (>{self.rare_variant_faf_threshold}) "
+            f"for BS1_Supporting, and below the BS1 threshold (>{self.bs1_faf_threshold}) (BS1_Supporting met)."
+        )
+
+    def no_code_met_msg(self, faf, pop, ac, an):
+        return (
+            f"The Total GrpMax filtering allele frequency (the lower threshold of the 95%% CI) "
+            f"in gnomAD v4.1 is {faf} in the {pop} genetic ancestry group (based on {ac}/{an} alleles) "
+            f"which is below the ENIGMA BRCA1/2 VCEP threshold (>{self.bs1_supporting_faf_threshold}) "
+            f"for BS1_Supporting and does not meet any population code "
+            f"(BA1, BS1, BS1_Supporting, PM2_Supporting are not met)."
+        )
+
+
+NO_CODE_NO_FAF_MSG = (
+    "This variant is recorded in gnomAD v4.1, however the Total GrpMax filtering allele frequency "
+    "(the lower threshold of the 95% CI) was not calculated, therefore this variant does not meet "
+    "any population code (BA1, BS1, BS1_Supporting, PM2_Supporting are not met)."
+)
+NO_CODE_INDEL_MSG = (
+    "This [duplication/insertion/deletion/delins/large genomic rearrangement] variant "
+    "was not observed in gnomAD v4.1, but PM2_Supporting was not applied since recall "
+    "is considered suboptimal for this type of variant (PM2_Supporting not met). "
+)
 PM2_SUPPORTING_MSG = "This variant is absent from gnomAD v4.1 (PM2_Supporting met)."
-FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG = (f"This variant is present in gnomAD but is not meeting the "
-                                                    f"specified read depths threshold ≥{READ_DEPTH_THRESHOLD_FREQUENT_VARIANT} "
-                                                    f"(PM2_Supporting, BS1, and BA1 are not met).")
+FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG = (
+    f"This variant is present in gnomAD but is not meeting the "
+    f"specified read depths threshold ≥{READ_DEPTH_THRESHOLD_FREQUENT_VARIANT} "
+    f"(PM2_Supporting, BS1, and BA1 are not met)."
+)
 FAIL_LCR_MSG = "PM2_Supporting was not applied since this variant overlaps a low-complexity region (LCR)."
 
 DB_BATCH = 500
@@ -201,7 +237,8 @@ def analyze_one_dataset(faf95_popmax_str, allele_count, snv_or_small_indel,
                         allele_count_threshold,
                         chrom, genome_start, genome_end, lcr,
                         faf95_popmax, faf95_popmax_population,
-                        allele_count_pop, allele_number_pop, debug=True):
+                        allele_count_pop, allele_number_pop,
+                        config: PopfreqConfig, debug=True):
     if vcf_filter_flag:
         return(FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG, FAIL_INSUFFICIENT_READ_DEPTH_OR_FILTER_FLAG_MSG)
     rare_variant = False
@@ -209,7 +246,7 @@ def analyze_one_dataset(faf95_popmax_str, allele_count, snv_or_small_indel,
         faf = float(faf95_popmax_str)
         if math.isnan(faf):
             rare_variant = True
-        elif faf <= RARE_VARIANT_FAF_THRESHOLD:
+        elif faf <= config.rare_variant_faf_threshold:
             rare_variant = True
     else:
         faf = None
@@ -225,18 +262,14 @@ def analyze_one_dataset(faf95_popmax_str, allele_count, snv_or_small_indel,
     if not rare_variant:
         if debug:
             print("Not rare variant.  FAF:", faf)
-        if faf > BA1_FAF_THRESHOLD:
-            msg = BA1_MSG % (faf95_popmax, faf95_popmax_population, allele_count_pop, allele_number_pop)
-            return(BA1, msg)
-        elif faf > BS1_FAF_THRESHOLD:
-            msg = BS1_MSG % (faf95_popmax, faf95_popmax_population, allele_count_pop, allele_number_pop)
-            return(BS1, msg)
-        elif faf > BS1_SUPPORTING_FAF_THRESHOLD:
-            msg = BS1_SUPPORTING_MSG % (faf95_popmax, faf95_popmax_population, allele_count_pop, allele_number_pop)
-            return(BS1_SUPPORTING, msg)
+        if faf > config.ba1_faf_threshold:
+            return(BA1, config.ba1_msg(faf95_popmax, faf95_popmax_population, allele_count_pop, allele_number_pop))
+        elif faf > config.bs1_faf_threshold:
+            return(BS1, config.bs1_msg(faf95_popmax, faf95_popmax_population, allele_count_pop, allele_number_pop))
+        elif faf > config.bs1_supporting_faf_threshold:
+            return(BS1_SUPPORTING, config.bs1_supporting_msg(faf95_popmax, faf95_popmax_population, allele_count_pop, allele_number_pop))
         else:
-            msg = NO_CODE_MET_MSG % (faf95_popmax, faf95_popmax_population, allele_count_pop, allele_number_pop)
-            return(NO_CODE, msg)
+            return(NO_CODE, config.no_code_met_msg(faf95_popmax, faf95_popmax_population, allele_count_pop, allele_number_pop))
     if debug:
         print("Rare variant.  Allele count", allele_count, "SNV", snv_or_small_indel)
     if not field_defined(allele_count):
@@ -249,9 +282,8 @@ def analyze_one_dataset(faf95_popmax_str, allele_count, snv_or_small_indel,
         if field_defined(faf95_popmax_str):
             return(NO_CODE, NO_CODE_NO_FAF_MSG)
         else:
-            msg = NO_CODE_MET_MSG % (faf95_popmax, faf95_popmax_population, allele_count_pop, allele_number_pop)
-            return(NO_CODE, msg)
-    if lcr is not None:
+            return(NO_CODE, config.no_code_met_msg(faf95_popmax, faf95_popmax_population, allele_count_pop, allele_number_pop))
+    if config.use_lcr and lcr is not None:
         if overlaps_lcr(chrom, genome_start, genome_end, lcr):
             return(FAIL_LCR, FAIL_LCR_MSG)
     if snv_or_small_indel:
@@ -263,14 +295,14 @@ def analyze_one_dataset(faf95_popmax_str, allele_count, snv_or_small_indel,
 def _compute_evidence_code(hgvs_cdna, chr_, pos, ref,
                             gnomad_flags, gnomad_allele_count,
                             gnomad_faf95, gnomad_faf95_population,
-                            cov4, lcr, debug=False):
+                            cov4, lcr, config: PopfreqConfig, debug=False):
     """Compute the popfreq evidence code for one variant from DB row fields."""
     start = int(pos)
     end = start + len(ref) - 1
     chrom = int(chr_.lstrip('chr'))
 
     _, read_depth = estimate_coverage(start, end, chrom, cov4, debug=debug)
-    snv_or_small_indel = (end - start <= SMALL_INDEL_SIZE_THRESHOLD)
+    snv_or_small_indel = (end - start <= config.small_indel_size_threshold)
 
     # NULL gnomAD columns (variant absent from gnomAD v4) are treated as '-' (undefined).
     faf95 = gnomad_faf95 if gnomad_faf95 is not None else '-'
@@ -297,6 +329,7 @@ def _compute_evidence_code(hgvs_cdna, chr_, pos, ref,
         chrom, start, end, lcr,
         faf95, faf95_pop,
         '-', '-',
+        config=config,
         debug=debug,
     )
 
@@ -358,11 +391,28 @@ WHERE v."VRS_Digest" = %s
               help='Analyze only the single variant with this VRS digest')
 @click.option('--method-name', default=None,
               help='Method name to record in the method_name column (e.g. "popfreq_1.3")')
-def main(db_url, schema, coverage_file, lcr, overwrite, debug, dry_run, vrs_digest, method_name):
+@click.option('--bs1-supporting-faf-threshold', default=_BS1_SUPPORTING_FAF_THRESHOLD, type=float,
+              show_default=True, help='FAF threshold above which BS1_Supporting is assigned')
+@click.option('--rare-variant-faf-threshold', default=_RARE_VARIANT_FAF_THRESHOLD, type=float,
+              show_default=True, help='FAF threshold at-or-below which a variant is considered rare')
+@click.option('--small-indel-size-threshold', default=_SMALL_INDEL_SIZE_THRESHOLD, type=int,
+              show_default=True, help='Max ref length (bp) to be treated as a small indel eligible for PM2_Supporting')
+@click.option('--no-lcr', is_flag=True, default=False,
+              help='Disable LCR filtering (PM2_Supporting may be assigned regardless of LCR overlap)')
+def main(db_url, schema, coverage_file, lcr, overwrite, debug, dry_run, vrs_digest, method_name,
+         bs1_supporting_faf_threshold, rare_variant_faf_threshold,
+         small_indel_size_threshold, no_lcr):
     logging.basicConfig(level=logging.WARNING, format='%(levelname)s %(message)s')
 
     if debug:
         dry_run = True
+
+    config = PopfreqConfig(
+        bs1_supporting_faf_threshold=bs1_supporting_faf_threshold,
+        rare_variant_faf_threshold=rare_variant_faf_threshold,
+        small_indel_size_threshold=small_indel_size_threshold,
+        use_lcr=not no_lcr,
+    )
 
     print(f'Loading coverage: {coverage_file} ...')
     cov4 = read_coverage(coverage_file)
@@ -399,7 +449,7 @@ def main(db_url, schema, coverage_file, lcr, overwrite, debug, dry_run, vrs_dige
             code, msg = _compute_evidence_code(
                 hgvs_cdna, chr_, pos, ref,
                 flags, allele_count, faf95, faf95_pop,
-                cov4, lcr_data, debug=debug,
+                cov4, lcr_data, config=config, debug=debug,
             )
             results.append((vrs_digest_row, code, msg, method_name))
             if dry_run:

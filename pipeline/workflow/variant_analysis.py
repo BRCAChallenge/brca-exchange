@@ -214,6 +214,36 @@ class AnalyzePopfreq(VCFAssemblyTask):
             f.write('done\n')
 
 
+@requires(VCFAssembly, CoverageParquet)
+class AnalyzePopfreqLegacy(VCFAssemblyTask):
+    """Populate analysis_provisional_evidence_codes using legacy popfreq_1.2 parameters.
+
+    Uses BS1_Supporting/rare-variant FAF threshold of 0.00002, single-base indel
+    size threshold (1 bp), and no LCR filtering.  Results are written with
+    method_name='popfreq_1.2'.
+    """
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.vcf_dir, 'analyze_popfreq_legacy.done'))
+
+    def run(self):
+        _, coverage_parquet = self.input()
+        script = os.path.join(_pipeline_dir, 'variant_analysis', 'run_popfreq_analysis.py')
+        args = [
+            'python', script,
+            '--coverage-file', coverage_parquet.path,
+            '--method-name', 'popfreq_1.2',
+            '--bs1-supporting-faf-threshold', '0.00002',
+            '--rare-variant-faf-threshold', '0.00002',
+            '--small-indel-size-threshold', '1',
+            '--no-lcr',
+            '--overwrite',
+        ]
+        self._run_process_with_pipeline_path(args)
+        with open(self.output().path, 'w') as f:
+            f.write('done\n')
+
+
 ###############################################
 #               TOP-LEVEL TASK                #
 ###############################################
