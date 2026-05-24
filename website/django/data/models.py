@@ -329,6 +329,7 @@ class AnalysisProvisionalEvidenceCodes(models.Model):
                                                related_name='provisional_evidence_codes')
     popfreq_code        = models.TextField(null=True)
     popfreq_description = models.TextField(null=True)
+    method_name         = models.TextField(null=True)
 
     class Meta:
         db_table = 'analysis_provisional_evidence_codes'

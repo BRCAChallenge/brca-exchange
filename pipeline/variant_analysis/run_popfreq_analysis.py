@@ -311,7 +311,8 @@ CREATE TABLE IF NOT EXISTS analysis_provisional_evidence_codes (
     "VRS_Digest"        text PRIMARY KEY
                              REFERENCES variant("VRS_Digest") ON DELETE CASCADE,
     popfreq_code        text,
-    popfreq_description text
+    popfreq_description text,
+    method_name         text
 )
 """
 
@@ -355,7 +356,9 @@ WHERE v."VRS_Digest" = %s
               help='Compute and print results without writing to the database')
 @click.option('--vrs-digest', default=None, metavar='DIGEST',
               help='Analyze only the single variant with this VRS digest')
-def main(db_url, schema, coverage_file, lcr, overwrite, debug, dry_run, vrs_digest):
+@click.option('--method-name', default=None,
+              help='Method name to record in the method_name column (e.g. "popfreq_1.3")')
+def main(db_url, schema, coverage_file, lcr, overwrite, debug, dry_run, vrs_digest, method_name):
     logging.basicConfig(level=logging.WARNING, format='%(levelname)s %(message)s')
 
     if debug:
@@ -398,7 +401,7 @@ def main(db_url, schema, coverage_file, lcr, overwrite, debug, dry_run, vrs_dige
                 flags, allele_count, faf95, faf95_pop,
                 cov4, lcr_data, debug=debug,
             )
-            results.append((vrs_digest_row, code, msg))
+            results.append((vrs_digest_row, code, msg, method_name))
             if dry_run:
                 print(f'  {hgvs_cdna}  →  {code}')
                 print(f'  {msg}')
@@ -413,11 +416,12 @@ def main(db_url, schema, coverage_file, lcr, overwrite, debug, dry_run, vrs_dige
                 psycopg2.extras.execute_values(
                     cur,
                     """INSERT INTO analysis_provisional_evidence_codes
-                           ("VRS_Digest", popfreq_code, popfreq_description)
+                           ("VRS_Digest", popfreq_code, popfreq_description, method_name)
                        VALUES %s
                        ON CONFLICT ("VRS_Digest") DO UPDATE
                            SET popfreq_code        = EXCLUDED.popfreq_code,
-                               popfreq_description = EXCLUDED.popfreq_description""",
+                               popfreq_description = EXCLUDED.popfreq_description,
+                               method_name         = EXCLUDED.method_name""",
                     results[i:i + DB_BATCH],
                 )
         conn.commit()
