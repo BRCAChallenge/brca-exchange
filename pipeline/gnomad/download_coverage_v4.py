@@ -82,59 +82,66 @@ def process_one_gene(chrom, start_coord, end_coord, output_vcf, logger):
     os.remove(local_file_tbi)
 
 
-def read_coverage(tsv_path, gene_boundaries):
-    """
-    Read mean coverage and total_DP for the given gene boundaries from a
-    local bgzipped gnomAD coverage TSV file, returning a pandas DataFrame
-    with columns 'chrom' (int, no 'chr' prefix), 'pos' (int), 'mean' (float),
-    and 'total_DP' (float).
-
-    The input data is expected to have a 'locus' column formatted as 'chrN:POS',
-    a 'mean' column for mean read depth, and a 'total_DP' column for total
-    depth of coverage.
-    """
-    chrom_ranges = {
-        'chr' + str(chrom): (int(str(chrom).replace('chr', '')), start, end)
-        for chrom, (start, end) in gene_boundaries.items()
-    }
-    rows = []
-    for chunk in pd.read_csv(tsv_path, sep='\t', compression='gzip',
-                              usecols=['locus', 'mean', 'total_DP'],
-                              chunksize=100_000):
-        chunk[['chrom_str', 'pos_str']] = chunk['locus'].str.split(':', n=1, expand=True)
-        chunk['pos'] = chunk['pos_str'].astype(int)
-        for chrom_str, (chrom_int, start, end) in chrom_ranges.items():
-            mask = ((chunk['chrom_str'] == chrom_str) &
-                    (chunk['pos'] >= start) &
-                    (chunk['pos'] <= end))
-            subset = chunk.loc[mask, ['pos', 'mean', 'total_DP']].copy()
-            if not subset.empty:
-                subset['chrom'] = chrom_int
-                rows.append(subset[['chrom', 'pos', 'mean', 'total_DP']])
-    if rows:
-        return pd.concat(rows, ignore_index=True)
-    return pd.DataFrame(columns=['chrom', 'pos', 'mean', 'total_DP'])
-
-
 def build_coverage_parquet(tsv_path, gene_boundaries, parquet_path, logger):
     """
-    Read coverage data for the given gene boundaries from one gnomAD coverage
-    TSV file, write it to a parquet file, and discard the in-memory DataFrame.
+    Stream the bgzipped gnomAD coverage TSV in small chunks, writing rows for
+    the given gene boundaries directly to a parquet file via fastparquet's
+    append mode.  Peak memory is bounded by one chunk at a time; no
+    accumulation in RAM before writing.
 
     Args:
-        tsv_path:       Path to the bgzipped gnomAD coverage TSV.
+        tsv_path:        Path to the bgzipped gnomAD coverage TSV.
         gene_boundaries: Dict mapping chrom -> (start, end).
-        parquet_path:   Destination path for the parquet file.
-        logger:         Logger instance.
+        parquet_path:    Destination path for the parquet file.
+        logger:          Logger instance.
 
     Returns:
         parquet_path
     """
+    import fastparquet
+
+    chrom_ranges = {
+        'chr' + str(chrom): (int(str(chrom).replace('chr', '')), start, end)
+        for chrom, (start, end) in gene_boundaries.items()
+    }
+
     logger.info("Reading coverage from %s" % tsv_path)
-    df = read_coverage(tsv_path, gene_boundaries)
-    logger.info("Saving coverage to %s" % parquet_path)
-    df.to_parquet(parquet_path, index=False)
-    del df
+    first_write = True
+    for chunk in pd.read_csv(tsv_path, sep='\t', compression='gzip',
+                              usecols=['locus', 'mean', 'total_DP'],
+                              dtype={'mean': 'float32', 'total_DP': 'float32'},
+                              chunksize=50_000):
+        split = chunk['locus'].str.split(':', n=1, expand=True)
+        chrom_str_col = split[0]
+        pos_col = split[1].astype('int32')
+        del split, chunk['locus']
+
+        for chrom_str, (chrom_int, start, end) in chrom_ranges.items():
+            mask = (chrom_str_col == chrom_str) & (pos_col >= start) & (pos_col <= end)
+            if not mask.any():
+                continue
+            subset = pd.DataFrame({
+                'chrom':    pd.array([chrom_int] * int(mask.sum()), dtype='int32'),
+                'pos':      pos_col[mask].values,
+                'mean':     chunk.loc[mask, 'mean'].values,
+                'total_DP': chunk.loc[mask, 'total_DP'].values,
+            })
+            fastparquet.write(parquet_path, subset, append=not first_write)
+            first_write = False
+            del subset
+        del chrom_str_col, pos_col, chunk
+
+    if first_write:
+        # No rows matched — write an empty parquet
+        empty = pd.DataFrame({
+            'chrom': pd.array([], dtype='int32'),
+            'pos':   pd.array([], dtype='int32'),
+            'mean':  pd.array([], dtype='float32'),
+            'total_DP': pd.array([], dtype='float32'),
+        })
+        fastparquet.write(parquet_path, empty)
+
+    logger.info("Saved coverage to %s" % parquet_path)
     return parquet_path
 
 
