@@ -169,42 +169,32 @@ class AnalyzePriors(VCFAssemblyTask):
 #        COMPUTE + LOAD POPFREQ CODES         #
 ###############################################
 
-_VARIANT_ANALYSIS_BASE_URL = 'https://brcaexchange.org/backend/downloads/variant_analysis'
+_RESOURCES_DIR = os.path.normpath(os.path.join(_pipeline_dir, '..', '..', 'resources'))
 
 
-class DownloadLCRBed(VCFAssemblyTask):
-    """Download the low-complexity region BED file (LCRFromHengHg38)."""
+class LCRBed(luigi.ExternalTask):
+    """Low-complexity region BED file — expected to be present in the resources directory."""
 
-    lcr_url = luigi.Parameter(
-        default=f'{_VARIANT_ANALYSIS_BASE_URL}/LCRFromHengHg38.bed',
-        description='URL of the LCR BED file')
-
-    def output(self):
-        return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'LCRFromHengHg38.bed'))
-
-    def run(self):
-        data = pipeline_utils.urlopen_with_retry(self.lcr_url).read()
-        with open(self.output().path, 'wb') as f:
-            f.write(data)
-
-
-class DownloadCoverageParquet(VCFAssemblyTask):
-    """Download the gnomAD v4.1 coverage Parquet file."""
-
-    coverage_url = luigi.Parameter(
-        default=f'{_VARIANT_ANALYSIS_BASE_URL}/gnomADv4.1.coverage.parquet',
-        description='URL of the gnomAD v4.1 coverage Parquet file')
+    lcr_path = luigi.Parameter(
+        default=os.path.join(_RESOURCES_DIR, 'LCRFromHengHg38.bed'),
+        description='Path to the LCR BED file')
 
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.artifacts_dir, 'gnomADv4.1.coverage.parquet'))
-
-    def run(self):
-        data = pipeline_utils.urlopen_with_retry(self.coverage_url).read()
-        with open(self.output().path, 'wb') as f:
-            f.write(data)
+        return luigi.LocalTarget(self.lcr_path)
 
 
-@requires(VCFAssembly, DownloadCoverageParquet, DownloadLCRBed)
+class CoverageParquet(luigi.ExternalTask):
+    """gnomAD v4.1 combined coverage parquet — expected to be present in the resources directory."""
+
+    coverage_path = luigi.Parameter(
+        default=os.path.join(_RESOURCES_DIR, 'gnomADv4.1.coverage.joint.parquet'),
+        description='Path to the gnomAD v4.1 coverage parquet file')
+
+    def output(self):
+        return luigi.LocalTarget(self.coverage_path)
+
+
+@requires(VCFAssembly, CoverageParquet, LCRBed)
 class AnalyzePopfreq(VCFAssemblyTask):
     """Populate analysis_provisional_evidence_codes with population frequency evidence codes."""
 
