@@ -218,9 +218,9 @@ class AnalyzePopfreq(VCFAssemblyTask):
 class AnalyzePopfreqLegacy(VCFAssemblyTask):
     """Populate analysis_provisional_evidence_codes using legacy popfreq_1.2 parameters.
 
-    Uses BS1_Supporting/rare-variant FAF threshold of 0.00002, single-base indel
-    size threshold (1 bp), and no LCR filtering.  Results are written with
-    method_name='popfreq_1.2'.
+    Uses BS1_Supporting/rare-variant FAF threshold of 0.00002, no LCR filtering,
+    and all indels absent from gnomAD v4.1 receive No code met (indel).
+    Results are written with method_name='popfreq_1.2'.
     """
 
     def output(self):
@@ -235,7 +235,7 @@ class AnalyzePopfreqLegacy(VCFAssemblyTask):
             '--method-name', 'popfreq_1.2',
             '--bs1-supporting-faf-threshold', '0.00002',
             '--rare-variant-faf-threshold', '0.00002',
-            '--small-indel-size-threshold', '1',
+            '--small-indel-size-threshold', '0',
             '--no-lcr',
             '--overwrite',
         ]

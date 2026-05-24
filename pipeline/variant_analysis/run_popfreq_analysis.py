@@ -292,7 +292,7 @@ def analyze_one_dataset(faf95_popmax_str, allele_count, snv_or_small_indel,
         return(NO_CODE_INDEL, NO_CODE_INDEL_MSG)
 
 
-def _compute_evidence_code(hgvs_cdna, chr_, pos, ref,
+def _compute_evidence_code(hgvs_cdna, chr_, pos, ref, alt,
                             gnomad_flags, gnomad_allele_count,
                             gnomad_faf95, gnomad_faf95_population,
                             cov4, lcr, config: PopfreqConfig, debug=False):
@@ -302,7 +302,9 @@ def _compute_evidence_code(hgvs_cdna, chr_, pos, ref,
     chrom = int(chr_.lstrip('chr'))
 
     _, read_depth = estimate_coverage(start, end, chrom, cov4, debug=debug)
-    snv_or_small_indel = (end - start <= config.small_indel_size_threshold)
+    is_snv = (len(ref) == 1 and len(alt) == 1)
+    indel_size = max(len(ref), len(alt)) - 1
+    snv_or_small_indel = is_snv or (indel_size <= config.small_indel_size_threshold)
 
     # NULL gnomAD columns (variant absent from gnomAD v4) are treated as '-' (undefined).
     faf95 = gnomad_faf95 if gnomad_faf95 is not None else '-'
@@ -317,7 +319,7 @@ def _compute_evidence_code(hgvs_cdna, chr_, pos, ref,
         print(f'    gnomad_flags={gnomad_flags!r}  gnomad_allele_count={gnomad_allele_count!r}')
         print(f'    gnomad_faf95={gnomad_faf95!r}  gnomad_faf95_population={gnomad_faf95_population!r}')
         print(f'  derived:')
-        print(f'    start={start}  end={end}  chrom={chrom}  snv_or_small_indel={snv_or_small_indel}')
+        print(f'    start={start}  end={end}  chrom={chrom}  is_snv={is_snv}  indel_size={indel_size}  snv_or_small_indel={snv_or_small_indel}')
         print(f'    faf95={faf95!r}  faf95_pop={faf95_pop!r}  allele_count={allele_count!r}')
         print(f'    is_flagged={is_flagged}  read_depth={read_depth}')
 
@@ -351,7 +353,7 @@ CREATE TABLE IF NOT EXISTS analysis_provisional_evidence_codes (
 
 _QUERY_ALL = """
 SELECT v."VRS_Digest", v."HGVS_cDNA",
-       gc.chr, gc.pos, gc.ref,
+       gc.chr, gc.pos, gc.ref, gc.alt,
        rg."Flags", rg."Allele_count",
        rg.faf95_popmax, rg.faf95_popmax_population
 FROM variant v
@@ -440,14 +442,14 @@ def main(db_url, schema, coverage_file, lcr, overwrite, debug, dry_run, vrs_dige
 
         print(f'Computing evidence codes for {len(rows)} variant(s) ...')
         results = []
-        for (vrs_digest_row, hgvs_cdna, chr_, pos, ref,
+        for (vrs_digest_row, hgvs_cdna, chr_, pos, ref, alt,
              flags, allele_count, faf95, faf95_pop) in rows:
 
             if debug:
                 print(f'Analyzing {hgvs_cdna}')
 
             code, msg = _compute_evidence_code(
-                hgvs_cdna, chr_, pos, ref,
+                hgvs_cdna, chr_, pos, ref, alt,
                 flags, allele_count, faf95, faf95_pop,
                 cov4, lcr_data, config=config, debug=debug,
             )
