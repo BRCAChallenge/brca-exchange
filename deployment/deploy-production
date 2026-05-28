@@ -25,8 +25,12 @@ ssh -l${USER} ${HOST} <<-'ENDSSH'
     requirements=$(pip3 freeze)
     deactivate
     requirements=$(echo ${requirements}) # drop carriage returns
+    if [ ! -f /var/www/backend/${DST}/virtualenv3/bin/python3 ] || [ "$(/var/www/backend/{$DST}/virtualenv3/bin/python3 --version 2>&1)" != "$(python3.13 --version 2>&1)" ]; then
+        rm -rf /var/www/backend/${DST}/virtualenv3
+        python3.13 -m venv /var/www/backend/${DST}/virtualenv3
+    fi 
     . /var/www/backend/${DST}/virtualenv3/bin/activate
     pip3 install ${requirements}
-    python3 /var/www/backend/production/django/manage.py migrate --noinput --verbosity 2
+    python3.13 /var/www/backend/production/django/manage.py migrate --noinput --verbosity 2
     sudo apache2ctl restart
 ENDSSH

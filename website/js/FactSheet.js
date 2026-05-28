@@ -2,7 +2,7 @@
 
 var React = require('react');
 var { Container: Grid, Col, Row, Alert } = require('react-bootstrap');
-var backend = require('backend');
+import backend from 'backend';
 
 import PieChart from './PieChart';
 import BarChart from './BarChart';

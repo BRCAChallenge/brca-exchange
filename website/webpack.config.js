@@ -61,7 +61,9 @@ module.exports = {
             cacheDirectory: true,
             presets: [
               ['@babel/preset-env', { modules: false }],
-              ['@babel/preset-react', { runtime: 'automatic', development: true }]
+              ['@babel/preset-react', { 
+		      runtime: 'automatic', 
+		      development: process.env.NODE_ENV === 'development' }]
             ]
           }
         }

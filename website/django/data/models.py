@@ -2,9 +2,6 @@ from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 
-from postgres_copy import CopyManager
-
-
 class DataRelease(models.Model):
     schema = models.TextField()
     archive = models.TextField()
@@ -61,7 +58,7 @@ class ReportDiff(models.Model):
 # --- variants
 # ------------------------------------------------------------------------
 
-class VariantManager(CopyManager):
+class VariantManager(models.Manager):
     def create_variant(self, row):
         return self.create(**row)
 
