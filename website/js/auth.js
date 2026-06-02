@@ -1,8 +1,8 @@
 'use strict';
-var config = require('./config');
-var $ = require('jquery');
+import config from './config';
+import $ from 'jquery';
 
-module.exports = {
+const auth = {
     login: function (username, pass, cb) {
         this.logout();
         // Todo: handle the expiration of the tokens
@@ -58,3 +58,5 @@ module.exports = {
         });
     }
 };
+
+export default auth;
