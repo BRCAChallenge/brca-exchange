@@ -26,6 +26,14 @@ DATABASES = {
         'NAME': 'storage.pg',
         'USER': 'postgres',
         'PASSWORD': 'postgres'
-    }
+    },
+    'pipeline': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'localhost',
+        'NAME': 'storage.pg',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'OPTIONS': {'options': '-c search_path=pipeline'},
+    },
 }
 
