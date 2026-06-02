@@ -38,18 +38,12 @@ cssselect==1.1.0
 cython==0.29.32
 decorator==4.4.2
 distro==1.4.0
-Django==5.1.15
-django-cors-headers==4.6.0
-django-extensions==4.1
-django-postgres-copy==2.7.4
-djangorestframework==3.15.2
-djangorestframework_simplejwt==5.5.1
 docutils==0.16
 fake-useragent==0.1.11
 fastparquet>=2024.11.0  # Updated: pandas>=2.1.4 requires this version
 ga4gh.common==0.0.7
 ga4gh.vrs==2.3.1
-hgvs==1.5.7
+hgvs==1.5.6
 humanfriendly>=9.1    
 idna>=3.6  
 intervaltree==3.1.0
@@ -58,8 +52,7 @@ ipython-genutils==0.2.0
 itertoolz==0.5
 jedi>=0.18.1  # Updated for ipython>=8.20.0 compatibility
 lockfile==0.12.2
-luigi==3.8.0
-lxml==4.9.2
+luigi==3.3
 mock==5.0.1
 parse==1.15.0
 Parsley==1.3

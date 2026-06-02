@@ -13,12 +13,13 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.gzip import gzip_page
 from .models import (
-    Variant, DataRelease,
-    InSilicoPriors, Variant_in_Paper, Paper, VariantRepresentation
+    Variant, VariantDiff, CurrentVariant, DataRelease, ChangeType, Report, ReportDiff,
+    InSilicoPriors, VariantPaper, Paper, VariantRepresentation
 )
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 
+import google.protobuf.json_format as json_format
 from datetime import datetime
 from operator import itemgetter
 import logging
@@ -34,32 +35,40 @@ def releases(request):
     else:
         releases = list(DataRelease.objects.values())
     latest = DataRelease.objects.order_by('-id')[0].id
+    change_types = {x['name']: x['id'] for x in list(ChangeType.objects.values())}
+    for release in releases:
+        variants = Variant.objects.filter(Data_Release_id=release['id'])
+        release['variants_added'] = variants.filter(Change_Type_id=change_types['new']).count()
+        release['variants_classified'] = variants.filter(
+            Q(Change_Type_id=change_types['changed_classification']) | Q(Change_Type_id=change_types['added_classification'])).count()
+        release['variants_modified'] = variants.filter(
+            Q(Change_Type_id=change_types['added_information']) | Q(Change_Type_id=change_types['changed_information'])).count()
+        release['variants_deleted'] = variants.filter(Change_Type_id=change_types['deleted']).count()
     response = JsonResponse({"releases": list(releases), "latest": latest})
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
-
 def variant_counts(request):
-    query = Variant.objects.all()
+    query = CurrentVariant.objects.all().exclude(Change_Type__name='deleted')
     total_count = query.count()
     brca1_count = query.filter(Gene_Symbol='BRCA1').count()
     brca2_count = query.filter(Gene_Symbol='BRCA2').count()
-    query = query.filter(enigma_reports__isnull=False).distinct()
+    query = query.filter(Variant_in_ENIGMA=True)
     enigma_count = query.count()
-    enigma_pathogenic_count = query.filter(Pathogenicity='Pathogenic').count()
-    enigma_benign_count = query.filter(Pathogenicity__contains='Benign').count()
-    enigma_likely_benign_count = query.filter(Pathogenicity__contains='Likely benign').count()
-    enigma_likely_pathogenic_count = query.filter(Pathogenicity__contains='Likely pathogenic').count()
+    enigma_pathogenic_count = query.filter(Pathogenicity_expert='Pathogenic').count()
+    enigma_benign_count = query.filter(Pathogenicity_expert__contains='Benign').count()
+    enigma_likely_benign_count = query.filter(Pathogenicity_expert__contains='Likely benign').count()
+    enigma_likely_pathogenic_count = query.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     query_brca1 = query.filter(Gene_Symbol='BRCA1')
-    brca1_enigma_pathogenic_count = query_brca1.filter(Pathogenicity='Pathogenic').count()
-    brca1_enigma_benign_count = query_brca1.filter(Pathogenicity__contains='Benign').count()
-    brca1_enigma_likely_benign_count = query_brca1.filter(Pathogenicity__contains='Likely benign').count()
-    brca1_enigma_likely_pathogenic_count = query_brca1.filter(Pathogenicity__contains='Likely pathogenic').count()
+    brca1_enigma_pathogenic_count = query_brca1.filter(Pathogenicity_expert='Pathogenic').count()
+    brca1_enigma_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Benign').count()
+    brca1_enigma_likely_benign_count = query_brca1.filter(Pathogenicity_expert__contains='Likely benign').count()
+    brca1_enigma_likely_pathogenic_count = query_brca1.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     query_brca2 = query.filter(Gene_Symbol='BRCA2')
-    brca2_enigma_pathogenic_count = query_brca2.filter(Pathogenicity='Pathogenic').count()
-    brca2_enigma_benign_count = query_brca2.filter(Pathogenicity__contains='Benign').count()
-    brca2_enigma_likely_benign_count = query_brca2.filter(Pathogenicity__contains='Likely benign').count()
-    brca2_enigma_likely_pathogenic_count = query_brca2.filter(Pathogenicity__contains='Likely pathogenic').count()
+    brca2_enigma_pathogenic_count = query_brca2.filter(Pathogenicity_expert='Pathogenic').count()
+    brca2_enigma_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Benign').count()
+    brca2_enigma_likely_benign_count = query_brca2.filter(Pathogenicity_expert__contains='Likely benign').count()
+    brca2_enigma_likely_pathogenic_count = query_brca2.filter(Pathogenicity_expert__contains='Likely pathogenic').count()
     response = JsonResponse({
         "total": total_count,
         "brca1": {
@@ -91,7 +100,7 @@ def variant(request):
 
     # Accept search by ClinGen Allele Registry id (CA_ID)
     if variant_id_clean.startswith('ca'):
-        query = Variant.objects
+        query = CurrentVariant.objects
         variant = query.filter(Q(CA_ID__icontains=variant_id_clean))
 
         if len(variant) != 1:
@@ -104,9 +113,15 @@ def variant(request):
             variant = variant[0]
 
     else:
-        variant = Variant.objects.get(VRS_Digest=variant_id)
+        variant_id = int(variant_id)
+        variant = Variant.objects.get(id=variant_id)
 
-    query = Variant.objects.filter(VRS_Digest=variant.VRS_Digest)
+    key = variant.Genomic_Coordinate_hg38
+    query = Variant.objects.filter(Genomic_Coordinate_hg38=key)\
+        .order_by('-Data_Release_id')\
+        .select_related('Data_Release')\
+        .select_related('Mupit_Structure')\
+        .select_related('insilicopriors')
 
     variant_versions = list(map(variant_to_dict, query))
     response = JsonResponse({"data": variant_versions})
@@ -117,20 +132,35 @@ def variant(request):
 def vrid(request):
     vr_id = request.GET.get('vr_id')
 
-    variant = Variant.objects.get(VRS_Digest=vr_id)
+    variant = Variant.objects.filter(VR_ID=vr_id).order_by('-Data_Release_id')[0]
 
     variant_data = variant_to_dict(variant)
 
     relevant_keys = {
         'id',
+        'Source',
+        'URL_ENIGMA',
+        'Condition_ID_type_ENIGMA',
+        'Condition_ID_value_ENIGMA',
+        'Condition_category_ENIGMA',
+        'Clinical_significance_ENIGMA',
+        'Date_last_evaluated_ENIGMA',
+        'Assertion_method_ENIGMA',
+        'Assertion_method_citation_ENIGMA',
+        'Clinical_significance_citations_ENIGMA',
+        'Comment_on_clinical_significance_ENIGMA',
+        'Collection_method_ENIGMA',
+        'Allele_origin_ENIGMA',
+        'ClinVarAccession_ENIGMA',
         'Gene_Symbol',
         'Reference_Sequence',
         'HGVS_cDNA',
         'BIC_Nomenclature',
         'HGVS_Protein',
         'Protein_Change',
-        'CA_ID',
-        'VRS',
+        'Genomic_HGVS_38',
+        'Genomic_HGVS_37',
+        'CA_ID'
     }
 
     response = JsonResponse({"data": {k: variant_data[k] for k in variant_data if k in relevant_keys}})
@@ -141,8 +171,8 @@ def vrid(request):
 def variantreps(request):
     vr_reps = list(
         VariantRepresentation.objects.raw("""
-        select VR.id, VR."Genomic_Coordinate_hg38", V.id as Variant_id, VR."Description" from data_variantrepresentation VR
-        inner join variant V on V."Genomic_Coordinate_hg38" = VR."Genomic_Coordinate_hg38"
+        select VR.id, VR."Genomic_Coordinate_hg38", CV.id as Variant_id, VR."Description" from data_variantrepresentation VR
+        inner join currentvariant CV on CV."Genomic_Coordinate_hg38" = VR."Genomic_Coordinate_hg38"
         """)
     )
 
@@ -159,7 +189,7 @@ def variantreps(request):
 
 
 def sitemap(request):
-    variants = Variant.objects.values_list('VRS_Digest')
+    variants = CurrentVariant.objects.values_list('id')
     root_links = [
         'https://brcaexchange.org/',
         'https://brcaexchange.org/factsheet',
@@ -178,23 +208,123 @@ def sitemap(request):
     return response
 
 
+def variant_reports(request, variant_id):
+    variant_id = str(variant_id).lower().strip()
+    variant_id = remove_disallowed_chars(variant_id)
+
+    # Accept search by ClinGen Allele Registry id (CA_ID)
+    if variant_id.startswith('ca'):
+        query = CurrentVariant.objects
+        current_variant = query.filter(Q(CA_ID__icontains=variant_id))[0]
+        key = current_variant.Genomic_Coordinate_hg38
+        variant_id = Variant.objects.filter(Genomic_Coordinate_hg38=key)\
+            .order_by('-Data_Release_id')[0].id
+
+    else:
+        variant_id = int(variant_id)
+
+    change_types_map = {x['name']:x['id'] for x in list(ChangeType.objects.values())}
+    query = Report.objects.filter(Variant_id=variant_id).exclude(Change_Type_id=change_types_map['deleted'])
+    report_versions = []
+    for report in query:
+        key = None
+        if report.Source == "ClinVar":
+            key = report.SCV_ClinVar
+            if not key or key == '-':
+                # if no key is available, skip report history
+                report_query = [report]
+            else:
+                # extend the selection w/reports that have matching keys,
+                # but only up until the requested variants' release
+                report_query = Report.objects\
+                    .filter(Data_Release_id__lte=report.Data_Release.id, SCV_ClinVar=key)\
+                    .order_by('-Data_Release_id').select_related('Data_Release')
+            report_versions.extend(list(map(report_to_dict, report_query)))
+        elif report.Source == "LOVD":
+            # only return submissions on or after 12/2/2019 since we redefined submission ids in this release
+            cutoff_date = '2019-12-02'
+            key = report.Submission_ID_LOVD
+            if not key or key == '-':
+                # if no key is available, skip report history
+                report_query = [report]
+            else:
+                # extend the selection w/reports that have matching keys,
+                # but only up until the requested variants' release (i.e., same as for ClinVar)
+                report_query = Report.objects\
+                    .filter(Data_Release_id__lte=report.Data_Release.id, Submission_ID_LOVD=key, Data_Release__date__gte=cutoff_date)\
+                    .order_by('-Data_Release_id').select_related('Data_Release')
+            report_versions.extend(list(map(report_to_dict, report_query)))
+
+    response = JsonResponse({"data": report_versions})
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
 def variant_papers(request):
-    variant_id = request.GET.get('variant_id')
-    variant = Variant.objects.get(VRS_Digest=variant_id)
-    variantpapers = Variant_in_Paper.objects.select_related('Paper').filter(VRS_Digest=variant).all()
+    variant_id = int(request.GET.get('variant_id'))
+    variant = Variant.objects.get(id=variant_id)
+    variant_name = variant.Genomic_Coordinate_hg38
+    variantpapers = VariantPaper.objects.select_related('paper').filter(variant_hg38=variant_name).all()
     for variantpaper in variantpapers:
         # year of 0000 means year could not be found during a crawl
-        if variantpaper.Paper.Year == '0000':
-            variantpaper.Paper.Year = "Unknown"
-    variantpapers = [dict(model_to_dict(vp.Paper), **{"mentions": vp.mentions, "points": vp.points}) for vp in variantpapers]
+        if variantpaper.paper.year == 0000:
+            variantpaper.paper.year = "Unknown"
+    variantpapers = [dict(model_to_dict(vp.paper), **{"mentions": vp.mentions, "points": vp.points}) for vp in variantpapers]
     response = JsonResponse({"data": variantpapers}, safe=False)
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
-
 def variant_to_dict(variant_object):
+    change_types_map = {x['name']:x['id'] for x in list(ChangeType.objects.values())}
     variant_dict = model_to_dict(variant_object)
+    variant_dict["Data_Release"] = model_to_dict(variant_object.Data_Release)
+    if variant_object.Mupit_Structure is not None:
+        variant_dict["Mupit_Structure"] = model_to_dict(variant_object.Mupit_Structure)
+    variant_dict["Data_Release"]["date"] = variant_object.Data_Release.date
+    variant_dict["Change_Type"] = ChangeType.objects.get(id=variant_dict["Change_Type"]).name
+
+    try:
+        variant_dict["priors"] = model_to_dict(variant_object.insilicopriors)
+    except InSilicoPriors.DoesNotExist:
+        variant_dict["priors"] = None
+
+    try:
+        variant_diff = VariantDiff.objects.get(variant_id=variant_object.id)
+        variant_dict["Diff"] = variant_diff.diff
+    except VariantDiff.DoesNotExist:
+        variant_dict["Diff"] = None
     return variant_dict
+
+
+def report_to_dict(report_object):
+    change_types_map = {x['name']:x['id'] for x in list(ChangeType.objects.values())}
+    report_dict = model_to_dict(report_object)
+    report_dict["Data_Release"] = model_to_dict(report_object.Data_Release)
+    report_dict["Data_Release"]["date"] = report_object.Data_Release.date
+    report_dict["Change_Type"] = ChangeType.objects.get(id=report_dict["Change_Type"]).name
+
+    if report_object.Source == "ClinVar":
+        # don't display ClinVar report diffs prior to April 2018
+        cutoff_date = timezone.make_aware(datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p'))
+    elif report_object.Source == "LOVD":
+        # don't display LOVD report diffs prior to December 2 2019 (we
+        # updated the definition of LOVD submissions in the early December
+        # release, so it only makes sense to show diffs from following releases)
+        cutoff_date = timezone.make_aware(datetime.strptime('Dec 2 2018  12:00AM', '%b %d %Y %I:%M%p'))
+    try:
+        if report_dict["Data_Release"]["date"] < cutoff_date:
+            report_dict["Diff"] = None
+            return report_dict
+    except UnboundLocalError as e:
+        logging.error(repr(e))
+
+    try:
+        report_diff = ReportDiff.objects.get(report_id=report_object.id)
+        report_dict["Diff"] = report_diff.report_diff
+    except ReportDiff.DoesNotExist:
+        report_dict["Diff"] = None
+
+
+    return report_dict
 
 
 @gzip_page
@@ -210,10 +340,22 @@ def index(request):
     filters = request.GET.getlist('filter')
     filter_values = request.GET.getlist('filterValue')
     column = request.GET.getlist('column')
+    release = request.GET.get('release')
+    change_types = request.GET.getlist('change_types')
+    change_types_map = {x['name']:x['id'] for x in list(ChangeType.objects.values())}
+    show_deleted = (request.GET.get('show_deleted', False) != False)
     deleted_count = 0
     synonyms_count = 0
+    release_name = None
 
-    query = Variant.objects
+    if release:
+        query = Variant.objects.filter(Data_Release_id=int(release))
+        if(change_types):
+            change_types = [change_types_map[c] for c in [c for c in change_types if c in change_types_map]]
+            query = query.filter(Change_Type_id__in=change_types)
+        release_name = DataRelease.objects.get(id=int(release)).name
+    else:
+        query = CurrentVariant.objects
 
     if format == 'csv' or format == 'tsv':
         quotes = '\''
@@ -226,7 +368,11 @@ def index(request):
         query = apply_filters(query, filter_values, filters, quotes=quotes)
 
     if search_term:
-        query, synonyms_count = apply_search(query, search_term, quotes=quotes)
+        query, synonyms_count = apply_search(query, search_term, quotes=quotes, release=release)
+
+    if not show_deleted and not release:
+        deleted_count = query.filter(Change_Type_id=change_types_map['deleted']).count()
+        query = query.exclude(Change_Type_id=change_types_map['deleted'])
 
     if order_by:
         query = apply_order(query, order_by, direction)
@@ -234,6 +380,8 @@ def index(request):
     if format == 'csv' or format == 'tsv':
         cursor = connection.cursor()
 
+        # create an in-memory StringIO object that we can use to buffer the results from the server
+        # (it'll get released when it goes out of scope, so unlike a real file we don't need to close it)
         f = io.StringIO()
         query = "COPY ({}) TO STDOUT WITH DELIMITER '{}' CSV HEADER".format(query.query, '\t' if format == 'tsv' else ',')
         # HACK to add quotes around search terms
@@ -248,19 +396,10 @@ def index(request):
     elif format == 'json':
         count = query.count()
         query = select_page(query, page_size, page_num)
-        response = JsonResponse({'count': count, 'deletedCount': deleted_count, 'synonyms': synonyms_count, 'data': list(query.values(*column))})
+        # call list() now to evaluate the query
+        response = JsonResponse({'count': count, 'deletedCount': deleted_count, 'synonyms': synonyms_count, 'releaseName': release_name, 'data': list(query.values(*column))})
         response['Access-Control-Allow-Origin'] = '*'
         return response
-
-
-SOURCE_RELATED_FIELDS = {
-    'Variant_in_ENIGMA': 'enigma_reports__isnull',
-    'Variant_in_ClinVar': 'clinvar_data__isnull',
-    'Variant_in_LOVD': 'lovd_data__isnull',
-    'Variant_in_GnomAD': 'gnomad_data__isnull',
-}
-
-ALL_SOURCES = list(SOURCE_RELATED_FIELDS.keys())
 
 
 def apply_sources(query, include, exclude):
@@ -268,14 +407,15 @@ def apply_sources(query, include, exclude):
     # the row must match in at least one column
     if len(include) > 0:
         if include == ['all']:
-            include = ALL_SOURCES
-        include_list = (Q(**{SOURCE_RELATED_FIELDS[s]: False}) for s in include if s in SOURCE_RELATED_FIELDS)
-        query = query.filter(reduce(__or__, include_list)).distinct()
+            include = [f.name for f in Variant._meta.get_fields() if (f.name.startswith("Variant_in_") and f.name != "Variant_in_Findlay_BRCA1_Ring_Function_Scores")]
+        include_list = (Q(**{column: True}) for column in include)
+        query = query.filter(reduce(__or__, include_list))
     else:
         # exclude all sources if none are included
-        for source in (exclude or ALL_SOURCES):
-            if source in SOURCE_RELATED_FIELDS:
-                query = query.filter(**{SOURCE_RELATED_FIELDS[source]: True})
+        exclude = [f.name for f in Variant._meta.get_fields() if "Variant_in" in f.name]
+    if exclude:
+        exclude_dict = {exclusion: False for exclusion in exclude}
+        query = query.filter(**exclude_dict)
     return query
 
 
@@ -310,7 +450,7 @@ def remove_disallowed_chars(search_term):
     return search_term
 
 
-def apply_search(query, search_term, quotes=''):
+def apply_search(query, search_term, quotes='', release=None):
     '''
     NOTE: there is some additional handling of search terms on the front-end in
     website/js/hgvs.js. hgvs.js methods are called before sending the query to the
@@ -323,8 +463,16 @@ def apply_search(query, search_term, quotes=''):
 
         User submitted search --> Field:Field
 
+        BRCA1:chr17:g.43094692:G>C --> Gene_Symbol:Genomic_Coordinate_hg38
+        BRCA1:chr17:g.41246709:G>C --> Gene_Symbol:Genomic_Coordinate_hg37
+        BRCA1:NC_000013.11:g.32398880A>C --> Gene_Symbol:Genomic_HGVS_38
+        BRCA1:NC_000013.10:g.32973017A>C --> Gene_Symbol:Genomic_HGVS_37
         BRCA1:958C>G --> Gene_Symbol:BIC_Nomenclature
         BRCA1:c.839C>G --> Gene_Symbol:HGVS_cDNA
+        NM_007294.3:chr17:g.43094692:G>C --> Reference_Sequence:Genomic_Coordinate_hg38
+        NM_007294.3:chr17:g.41246709:G>C --> Reference_Sequence:Genomic_Coordinate_hg37
+        NM_007294.3:NC_000013.11:g.32398880A>C --> Gene_Symbol:Genomic_HGVS_38
+        NM_007294.3:NC_000013.10:g.32973017A>C --> Gene_Symbol:Genomic_HGVS_37
         NM_007294.3:958C>G --> Reference_Sequence:BIC_Nomenclature
         NM_007294.3:c.839C>G --> Reference_Sequence:HGVS_cDNA
         BRCA1:p.(Ala280Gly) --> Gene_Symbol:HGVS_Protein.split(':')[1] (HGVS_Protein is actually stored as NP_009225.1:p.(Ala280Gly), so this has to be split on the ":")
@@ -342,11 +490,27 @@ def apply_search(query, search_term, quotes=''):
 
     # Accept search by ga4gh VR id
     if search_term.startswith('ga4gh'):
-        return query.filter(Q(VRS__digest__icontains=search_term)), 0
+        return query.filter(Q(VR_ID__icontains=search_term)), 0
 
     # Accept only full clinvar accession numbers
     if search_term.startswith('scv') and len(search_term) >= 12:
         clinvar_accession = True
+
+    # Accept genomic coordinates with or without a 'g.' before the position
+    if 'chr17:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('chr17:', 'chr17:g.')
+    if 'chr13:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('chr13:', 'chr13:g.')
+
+    # Accept genomic hgvs nomenclature with or without a 'g.' before the position
+    if 'nc_000013.11:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000013.11:', 'nc_000013.11:g.')
+    if 'nc_000017.11:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000017.11:', 'nc_000017.11:g.')
+    if 'nc_000013.10:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000013.10:', 'nc_000013.10:g.')
+    if 'nc_000017.10:' in search_term and 'g.' not in search_term:
+        search_term = search_term.replace('nc_000017.10:', 'nc_000017.10:g.')
 
     p_hgvs_protein_colon = re.compile("^np_[0-9]{6}.[0-9]:")
     m_hgvs_protein_colon = p_hgvs_protein_colon.match(search_term)
@@ -394,6 +558,10 @@ def apply_search(query, search_term, quotes=''):
         results = query.filter(Gene_Symbol__iexact=prefix).filter(
             Q(HGVS_cDNA__icontains=suffix) |
             Q(HGVS_Protein__icontains=suffix) |
+            Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(Genomic_Coordinate_hg37__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
+            Q(Genomic_HGVS_37__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Protein_Change__istartswith=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
@@ -403,6 +571,8 @@ def apply_search(query, search_term, quotes=''):
         non_synonyms = results.filter(
             Q(HGVS_cDNA__icontains=suffix) |
             Q(HGVS_Protein__icontains=suffix) |
+            Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Protein_Change__istartswith=suffix)
         )
@@ -414,27 +584,42 @@ def apply_search(query, search_term, quotes=''):
         comma_prefixed_suffix = ',' + suffix
         results = query.filter(Reference_Sequence__iexact=prefix).filter(
             Q(HGVS_cDNA__icontains=suffix) |
+            Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(Genomic_Coordinate_hg37__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
+            Q(Genomic_HGVS_37__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix) |
             Q(Synonyms__icontains=comma_prefixed_suffix) |
             Q(Synonyms__istartswith=suffix)
         ) | query.filter(Synonyms__icontains=search_term)
         non_synonyms = results.filter(
             Q(HGVS_cDNA__icontains=suffix) |
+            Q(Genomic_Coordinate_hg38__istartswith=suffix) |
+            Q(Genomic_HGVS_38__istartswith=suffix) |
             Q(BIC_Nomenclature__istartswith=suffix)
         )
-
     # Handle clinvar accession numbers
     elif clinvar_accession is True:
         results = query.filter(
-            Q(clinvar_data__clinvar_reports__SCV__icontains=search_term) |
-            Q(enigma_reports__ClinVarAccession__icontains=search_term)
-        ).distinct()
-        non_synonyms = results
+            Q(SCV_ClinVar__icontains=search_term) |
+            Q(ClinVarAccession_ENIGMA__icontains=search_term)
+        )
 
-    # Generic searches (no prefixes)
+        # filter against synonym fields
+        non_synonyms = query.filter(
+            Q(SCV_ClinVar__icontains=search_term) |
+            Q(ClinVarAccession_ENIGMA__icontains=search_term)
+        )
+
+        # Generic searches (no prefixes)
     else:
+        # filter non-special-case searches against the following fields
         results = query.filter(
-            Q(Pathogenicity__icontains=search_term) |
+            Q(Pathogenicity_expert__icontains=search_term) |
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Genomic_Coordinate_hg37__icontains=search_term) |
+            Q(Genomic_HGVS_38__istartswith=search_term) |
+            Q(Genomic_HGVS_37__istartswith=search_term) |
             Q(Synonyms__icontains=search_term) |
             Q(Gene_Symbol__icontains=search_term) |
             Q(HGVS_cDNA__icontains=search_term) |
@@ -443,8 +628,11 @@ def apply_search(query, search_term, quotes=''):
             Q(Protein_Change__icontains=search_term)
         )
 
+        # filter against synonym fields
         non_synonyms = query.filter(
-            Q(Pathogenicity__icontains=search_term) |
+            Q(Pathogenicity_expert__icontains=search_term) |
+            Q(Genomic_Coordinate_hg38__icontains=search_term) |
+            Q(Genomic_HGVS_38__istartswith=search_term) |
             Q(Gene_Symbol__icontains=search_term) |
             Q(HGVS_cDNA__icontains=search_term) |
             Q(BIC_Nomenclature__icontains=search_term) |
@@ -460,10 +648,10 @@ def apply_search(query, search_term, quotes=''):
 def apply_order(query, order_by, direction):
     # special case for HGVS columns
     if order_by in ('HGVS_cDNA', 'HGVS_Protein'):
-        order_by = 'Gene_Symbol'
+        order_by = 'Genomic_Coordinate_hg38'
     if direction == 'descending':
         order_by = '-' + order_by
-    return query.order_by(order_by, 'Pathogenicity')
+    return query.order_by(order_by, 'Pathogenicity_expert')
 
 
 def select_page(query, page_size, page_num):
