@@ -39,7 +39,7 @@ def retrieve(request):
     mc_client = MailChimp(mc_api=settings.MAILCHIMP_KEY, timeout=10.0)
 
     try:
-        mc_user = client.lists.members.get(list_id=settings.MAILCHIMP_LIST, subscriber_hash=subscriber_hash)
+        mc_user = mc_client.lists.members.get(list_id=settings.MAILCHIMP_LIST, subscriber_hash=subscriber_hash)
         is_subscribed = (mc_user['status'] == 'pending' or mc_user['status'] == 'subscribed')
         response = JsonResponse({'user': data, 'mailinglist': is_subscribed})
         return response

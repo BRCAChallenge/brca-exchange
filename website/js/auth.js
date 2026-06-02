@@ -46,7 +46,7 @@ const auth = {
             success: function (res) {
                 cb({
                     authenticated: true,
-                    token: res.token
+                    token: res.access
                 });
             },
             error: function (res) {
