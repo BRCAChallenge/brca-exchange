@@ -4,17 +4,19 @@
 var webpack = require('webpack');
 var config = require('./webpack.config');
 
-config.output.filename = "[name].[chunkhash].js";
-config.output.chunkFilename = "[chunkhash].bundle.js";
+config.output.filename = "[name].[contenthash].js";
+config.output.chunkFilename = "[contenthash].bundle.js";
+
+config.optimization = {
+    ...config.optimization,
+    minimize: true,
+    moduleIds: 'deterministic',
+};
+
 config.plugins = config.plugins.concat([
-    new webpack.optimize.UglifyJsPlugin(),
-    new webpack.optimize.OccurenceOrderPlugin(true),
-	new webpack.optimize.DedupePlugin(),
-	new webpack.DefinePlugin({
-		"process.env": {
-			NODE_ENV: '"production"' // disable reactjs run-time checks.
-		}
-	})
+    new webpack.DefinePlugin({
+    	'process.env.NODE_ENV': JSON.stringify('production')
+    })
 ]);
 
 module.exports = config;

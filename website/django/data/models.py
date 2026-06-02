@@ -1,8 +1,7 @@
 from django.db import models
 from django.db.models import JSONField
-
+from django.contrib.postgres.fields import ArrayField
 from postgres_copy import CopyManager
-
 
 # ------------------------------------------------------------------------
 # --- Base models
@@ -29,7 +28,7 @@ class DataRelease(models.Model):
 # --- Variant model
 # ------------------------------------------------------------------------
 
-class VariantManager(CopyManager):
+class VariantManager(models.Manager):
     def create_variant(self, row):
         return self.create(**row)
 

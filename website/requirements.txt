@@ -1,17 +1,19 @@
-# Django 5.1 LTS
-Django==5.1.*
+# Django 5.2 LTS
+Django==5.2.13
 
 # Django extensions
-django-cors-headers==4.6.0
-django-postgres-copy==2.7.4
-djangorestframework==3.15.*
+django-cors-headers==4.7.0
+django-extensions==4.1.0
+#django-postgres-copy==2.7.4 # removed - incompatible with Python 3.13
+djangorestframework==3.16.1
 
 # JWT Authentication (consider migrating to djangorestframework-simplejwt)
 djangorestframework-simplejwt==5.5.1
 PyJWT==2.10.0
 
-# Database
-psycopg2-binary==2.9.10
+# Database psycopg2-binary removed, incompatible with Python 3.13
+#psycopg2-binary==2.9.11
+psycopg==3.3.3
 
 # Utilities
 certifi>=2024.8.30
@@ -30,3 +32,6 @@ mailchimp3==3.0.21
 
 # Testing
 httmock==1.4.0
+
+# Note: mod_wsgi is installed separately via:
+# pip install mod_wsgi (requires apache2-dev and python3.13-dev)

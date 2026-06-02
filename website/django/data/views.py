@@ -17,6 +17,7 @@ from .models import (
     InSilicoPriors, Variant_in_Paper, Paper, VariantRepresentation
 )
 from django.views.decorators.http import require_http_methods
+from django.utils import timezone
 
 from datetime import datetime
 from operator import itemgetter
@@ -193,7 +194,6 @@ def variant_papers(request):
 
 def variant_to_dict(variant_object):
     variant_dict = model_to_dict(variant_object)
-
     return variant_dict
 
 
