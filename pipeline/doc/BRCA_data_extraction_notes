@@ -1,0 +1,128 @@
+# BRCA data extraction notes
+
+# extract umd
+mkdir umd
+wget http://www.umd.be/BRCA1/4DACTION/W_DMDT1/1 -O umd/umdBrca1.html
+wget http://www.umd.be/BRCA2/4DACTION/W_DMDT1/1 -O umd/umdBrca2.html
+grep ../../4DACTION/WV/[0-9]* umd/umdBrca1.html | egrep -o "/[0-9]{1,9}'" | tr -d '/' | tr -d "'" > umd/brca1Ids.txt
+grep ../../4DACTION/WV/[0-9]* umd/umdBrca2.html | egrep -o "/[0-9]{1,9}'" | tr -d '/' | tr -d "'" > umd/brca2Ids.txt
+
+mkdir -p umd/brca1Html umd/brca2Html
+for i in `cat umd/brca1Ids.txt`; do wget http://www.umd.be/BRCA2/4DACTION/WV/$i -O umd/umdHtml/brca1Html/; done
+for i in `cat umd/brca2Ids.txt`; do wget http://www.umd.be/BRCA2/4DACTION/WV/$i -O umd/umdHtml/brca2Html/; done
+
+//Cant extract data right now, database is not accessable currently
+
+## extract bic ##
+mkdir bic ; cd bic/
+login to https://research.nhgri.nih.gov/projects/bic
+click on Bic Database
+click on BRCA1 Mutation Database - Complete (Image Map) link
+download raw dump of BRCA1 tab delimited text file
+
+go back to BIC Database
+click on BRCA2 Mutation Database - Complete (Image Map) link
+download raw dump of BRCA2 tab delimited text file
+
+scp charles@hgwdev.cse.ucsc.edu:/hive/groups/cgl/brca/phase1/data/resources/bicAnnotation .
+../brca/bic/bic2vcf -i brca1_data.txt -a bicAnnotation -g ../../leidenv1.0/resources/hg19.fa -r ../../leidenv1.0/resources/refseq_annotation.hg19.gp -o bic_brca1.vcf -b 1 > stdout.brca1.txt
+../brca/bic/bic2vcf -i brca2_data.txt -a bicAnnotation -g ../../leidenv1.0/resources/hg19.fa -r ../../leidenv1.0/resources/refseq_annotation.hg19.gp -o bic_brca2.vcf -b 2 > stdout.brca2.txt
+vcf-concat bic_brca1.vcf bic_brca2.vcf > bic_brca12.vcf
+vcf-sort bic_brca12.vcf > bic_brca12.sorted.vcf
+bgzip bic_brca12.sorted.vcf
+bcftools index bic_brca12.sorted.vcf.gz
+CrossMap.py vcf ../brca/resources/hg19ToHg38.over.chain.gz bic_brca12.sorted.vcf.gz ../../leidenv1.0/resources/hg19.fa bic_brca12.sorted.hg38.vcf
+
+// Total entries: 29856
+// Failed to map: 5306
+
+bgzip bic_brca12.sorted.hg38.vcf
+bcftools index bic_brca12.sorted.hg38.vcf.gz
+
+## extract exLOVD ##
+mkdir exLOVD ; cd exLOVD/
+extract_data.py -u http://hci-exlovd.hci.utah.edu/ -l BRCA1 BRCA2 -o output_directory
+cd ..
+../brca/lovd/lovd2vcf -i output_directory/BRCA1.txt -g ../../leidenv1.0/resources/hg19.fa -r ../../leidenv1.0/resources/refseq_annotation.hg19.gp -o exLOVD_brca1.vcf -a exLOVDAnnotation -b 1 > stdout.brca1.txt
+../brca/lovd/lovd2vcf -i output_directory/BRCA2.txt -g ../../leidenv1.0/resources/hg19.fa -r ../../leidenv1.0/resources/refseq_annotation.hg19.gp -o exLOVD_brca2.vcf -a exLOVDAnnotation -b 2 > stdout.brca2.txt
+vcf-concat exLOVD_brca1.vcf exLOVD_brca2.vcf > exLOVD_brca12.vcf
+vcf-sort exLOVD_brca12.vcf > exLOVD_brca12.sorted.vcf
+bgzip exLOVD_brca12.sorted.vcf
+bcftools index exLOVD_brca12.sorted.vcf.gz
+CrossMap.py vcf ../brca/resources/hg19ToHg38.over.chain.gz exLOVD_brca12.sorted.vcf.gz ../../leidenv1.0/resources/hg19.fa exLOVD_brca12.sorted.hg38.vcf
+
+// Total entries: 297
+// Failed to map: 80
+
+bgzip exLOVD_brca12.sorted.hg38.vcf
+bcftools index exLOVD_brca12.sorted.hg38.vcf.gz
+
+## extract LOVD ##
+mkdir LOVD ; cd LOVD/
+extract_data.py -u http://databases.lovd.nl/shared/ -l BRCA1 BRCA2 -o output_directory
+cd ..
+../brca/lovd/lovd2vcf -i output_directory/BRCA1.txt -g ../../leidenv1.0/resources/hg19.fa -r ../../leidenv1.0/resources/refseq_annotation.hg19.gp -o sharedLOVD_brca1.vcf -a sharedLOVDAnnotation -b 1 > stdout.brca1.txt
+../brca/lovd/lovd2vcf -i output_directory/BRCA2.txt -g ../../leidenv1.0/resources/hg19.fa -r ../../leidenv1.0/resources/refseq_annotation.hg19.gp -o sharedLOVD_brca2.vcf -a sharedLOVDAnnotation -b 2 > stdout.brca2.txt
+vcf-concat sharedLOVD_brca1.vcf sharedLOVD_brca2.vcf > sharedLOVD_brca12.vcf
+vcf-sort sharedLOVD_brca12.vcf > sharedLOVD_brca12.sorted.vcf
+bgzip sharedLOVD_brca12.sorted.vcf
+bcftools index sharedLOVD_brca12.sorted.vcf.gz
+CrossMap.py vcf ../brca/resources/hg19ToHg38.over.chain.gz sharedLOVD_brca12.sorted.vcf.gz ../../leidenv1.0/resources/hg19.fa sharedLOVD_brca12.sorted.hg38.vcf
+
+// Total entries: 14129
+// Failed to map: 2588
+
+bgzip sharedLOVD_brca12.sorted.hg38.vcf
+bcftools index sharedLOVD_brca12.sorted.hg38.vcf.gz
+
+
+
+
+## extracting 1000_genomes data ##
+
+download chr13, chr17 vcf file from 10k genome ftp site:
+ftp:  ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/
+
+chr13 (BRCA2)
+
+file: release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+size of file before decompression: ~400Mb, size after decompression: 27Gb
+number of rows: 2858168 (252 rows of headers)
+number of columns: 2513 (2503 columns of samples/callsets)
+BRCA2 position: chr13:32889617-32973809 84193 bp
+line number of the file corresponding to BRCA2: 438362-440648 (position 32889656-32973779)
+ways to get those lines: head -n 440649 chr13.vcf | tail -2286 > chr13.brca2.vcf
+
+
+chr17 (BRCA1)
+file: release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+size of file before decompression: ~400Mb, size after decompression: 22Gb
+number of rows: 2329540 (252 rows of headers)
+number of columns: 2513 (2503 columns of samples/callsets)
+BRCA2 position: chr17:41196312-41277500 81189 bp
+line number of the file corresponding to BRCA2: 1144380-1146432 (position 41196363-41277492)
+ways to get those lines: head -1146433 chr17.vcf | tail -2052 > chr17.brca1.vcf
+check to find out that header of chr13 and chr17 is SAME
+
+cacatenate header, chr13.brca2.vcf, chr17.brca1.vcf into one file: 10k_genome.brca.vcf
+head -253 chr13.vcf > chr13.header.txt
+head -253 chr17.vcf > chr17.header.txt
+if 'diff chr13.header.txt chr17.header.txt' yields nothing then set one of them to be header.txt
+cat header.txt chr13.brca2.vcf chr17.brca1.vcf > 10k_genome.brca.vcf
+vcf-sort 10k_genome.brca.vcf > 10k_genome.brca.sorted.vcf
+CrossMap.py vcf ../brca/resources/hg19ToHg38.over.chain.gz 10k_genome.brca.sorted.vcf ../../leidenv1.0/resources/hg19.fa 10k_genome.brca.sorted.hg38.vcf
+
+// Total entries: 4338
+// Failed to map: 994
+
+bgzip 10k_genome.brca.sorted.hg38.vcf
+bcftools index 10k_genome.brca.sorted.hg38.vcf.gz
+
+
+# Notes:
+- Is 1000 genomes data aligned to hg19? If not, then BRCA1 and 2 positions need to be revised (vcf files will need to be parsed differently)
+
+
+
+
+

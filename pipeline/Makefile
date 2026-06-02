@@ -43,36 +43,6 @@ build-docker: ## build main pipeline docker image
 download-resources: ## download resources files
 	$(CODE_BASE)/pipeline/download_resources_files.sh $(RESOURCES_DIR) >> "$(LOG_DIR)/download_resources_$(RELEASE_TAG).log" 2>&1 || { echo "Downloading resource files failed"; exit 1; }
 
-VEP_CONTAINER    ?= vep-server
-VEP_PORT         ?= 8888
-VEP_CACHE_DIR    ?= /data/vep_cache
-VEP_FASTA        ?= /data/references/hg38.fa
-VEP_IMAGE        ?= brca-vep-server
-
-build-vep-server: ## Build the VEP REST server Docker image
-	docker build -t $(VEP_IMAGE) pipeline/vep_server/
-
-setup-vep-cache: ## Download Ensembl VEP homo_sapiens GRCh38 cache (~15 GB)
-	mkdir -p $(VEP_CACHE_DIR)
-	docker run --rm --user root -v $(VEP_CACHE_DIR):/vep_cache \
-	  ensemblorg/ensembl-vep:latest \
-	  INSTALL.pl --AUTO c --SPECIES homo_sapiens --ASSEMBLY GRCh38 \
-	             --CACHEDIR /vep_cache --NO_HTSLIB
-
-start-vep-server: ## Start VEP REST server on VEP_PORT (default 8888) if not already running
-	[ $$(docker ps -f name=$(VEP_CONTAINER) | wc -l) -gt 1 ] || \
-	docker run -d --name $(VEP_CONTAINER) \
-	  --restart unless-stopped \
-	  -p $(VEP_PORT):8080 \
-	  -v $(VEP_CACHE_DIR):/vep_cache \
-	  -v $(VEP_FASTA):/references/hg38.fa:ro \
-	  -v $(VEP_FASTA).fai:/references/hg38.fa.fai:ro \
-	  -e VEP_FASTA=/references/hg38.fa \
-	  $(VEP_IMAGE)
-
-stop-vep-server: ## Stop and remove the VEP REST server container
-	docker stop $(VEP_CONTAINER) && docker rm $(VEP_CONTAINER)
-
 start-local-uta: ## starting local uta docker container
 	[ `docker ps -f name=$(UTA_CONTAINER) | wc -l` -gt 1 ] || \
 	docker run -dit --name $(UTA_CONTAINER) \
@@ -213,22 +183,6 @@ setup-data-from-latest-release-tar: setup-files ## sets up brca output dir with 
 	tar -C $(OUT_DIR) -zxf $(PREVIOUS_RELEASE_PATH)
 
 setup-dev-env: build-docker setup-files download-resources ## setup development environment
-
-VCF_ASSEMBLY_OUT_DIR ?= ../../data_out
-VCF_ASSEMBLY_SEQ_REPO_DIR ?= /data/seqrepo/latest
-VCF_ASSEMBLY_GENE_CONFIG ?= /data/new_schema/code/pipeline/workflow/gene_config_brca_only.txt
-VCF_ASSEMBLY_UTA_DB_URL ?= postgresql://anonymous@localhost:50828/uta/uta_20241220
-
-run-variant-assembly: ## Run the VariantAssembly luigi task locally (no Docker)
-	HGVS_SEQREPO_DIR=$(VCF_ASSEMBLY_SEQ_REPO_DIR) \
-	UTA_DB_URL=$(VCF_ASSEMBLY_UTA_DB_URL) \
-	PYTHONPATH=/data/new_schema/code/pipeline \
-	python -m luigi --module workflow.variant_assembly workflow.variant_assembly.VCFAssembly \
-		--PipelineParams-gene-config-path $(VCF_ASSEMBLY_GENE_CONFIG) \
-		--PipelineParams-seq-repo-dir $(VCF_ASSEMBLY_SEQ_REPO_DIR) \
-		--PipelineParams-file-parent-dir $(VCF_ASSEMBLY_OUT_DIR) \
-		--PipelineParams-output-dir $(VCF_ASSEMBLY_OUT_DIR) \
-		--local-scheduler
 
 clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
