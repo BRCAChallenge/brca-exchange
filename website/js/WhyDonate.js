@@ -5,14 +5,14 @@ import React from 'react';
 import RawHTML from './RawHTML';
 import { Container as Grid, Row, Col, Button} from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-const content = require('./content');
+import content from './content';
 
 class WhyDonate extends React.Component {
     render() {
         return (
             <Grid id="main-grid" className="help-page">
                 <Row>
-                    <Col smOffset={1} sm={10}>
+                    <Col sm={{ span: 10, offset: 1 }} md={{ span: 10, offset: 1 }}>
                         <RawHTML html={content.pages.whyDonate} />
                         <h3 className="centered margin-top-forty">Will you help us improve genetic data and variant interpretations worldwide by donating today?</h3>
                         <Button variant="primary" className="d-block mx-auto donate-button" onClick={()=> window.open("https://secure.ucsc.edu/s/1069/bp18/interior.aspx?sid=1069&gid=1001&pgid=780&cid=1749&dids=1004", "_blank")}>
