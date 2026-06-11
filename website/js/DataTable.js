@@ -206,6 +206,7 @@ class DataTable extends React.Component {
 
         this.state = mergeState({
             data: [],
+	    loading: false,
             filtersOpen: false,
             filterValues,
             columnSelectorsOpen: false,
@@ -221,17 +222,21 @@ class DataTable extends React.Component {
 
         this.fetchq = new Subject();
         this.subs = this.fetchq.pipe(
-            map(props.fetch),
+            map(state => {
+                setTimeout(() => this.setState({loading: true}), 0);
+                return props.fetch(state);
+            }),
             debounceTime(100),
             switchMap(obs => obs)
         ).subscribe(
-            resp => this.setState(setPages(resp, this.state.pageLength)),
-            () => this.setState({error: 'Problem connecting to server'})
+            resp => this.setState({...setPages(resp, this.state.pageLength), loading: false}),
+            () => this.setState({error: 'Problem connecting to server', loading: false})
         );
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         return (
+	    this.state.loading !== nextState.loading ||
             this.state.filtersOpen !== nextState.filtersOpen ||
             this.state.columnSelectorsOpen !== nextState.columnSelectorsOpen ||
             this.state.page !== nextState.page ||
@@ -520,7 +525,16 @@ class DataTable extends React.Component {
                 </Row>
                 <Row>
                     <Col id="data-table-container" sm={12}>
-                        <div className="table-responsive">
+			{this.state.loading && (
+                            <div className="text-center" style={{padding: '30px'}}>
+                                <div className="spinner-border text-primary" role="status"
+                                    style={{width: '3rem', height: '3rem'}}>
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                                <p style={{marginTop: '10px', color: '#666'}}>Loading variants...</p>
+                            </div>
+                        )}
+                        <div className="table-responsive" style={{display: this.state.loading ? 'none' : 'block'}}>
                             <FastTable
                                 className={cx(className, "table table-hover table-bordered table-grayheader")}
                                 dataArray={data}
