@@ -182,6 +182,9 @@ class HomeRaw extends React.Component {
             <Grid id="main-grid" className='home'>
                 <Row>
                     <Col sm={{ span: 8, offset: 2 }}>
+			<h2 style={{fontWeight: 'bold'}}>
+                            Search for your BRCA variant of interest:
+                        </h2>
                        <VariantSearch
                            id='home-search'
                            onSearch={this.onSearch}/>
