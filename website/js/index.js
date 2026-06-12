@@ -443,7 +443,7 @@ class Database extends React.Component {
             d3TipDiv[0].style.opacity = '0';
             d3TipDiv[0].style.pointerEvents = 'none';
         }
-        this.transitionTo(`/help#${slugify(title)}`);
+        this.transitionTo(`/help`);
     }
 
     componentDidMount() {
