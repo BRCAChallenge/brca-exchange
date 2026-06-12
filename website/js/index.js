@@ -23,8 +23,8 @@ import 'font-awesome/css/font-awesome.min.css';
 //import 'css/bootstrap-xlgrid.css'; // adds xl, xxl, xxxl grid sizes to bootstrap 3
 import 'css/custom.css';
 
-var _ = require('underscore');
-var backend = require('./backend');
+import _ from 'underscore';
+import backend from './backend';
 import NavBarNew from './NavBarNew';
 // RxJS 6+ imports
 import { Subject } from 'rxjs';

@@ -2,12 +2,12 @@
 'use strict';
 
 // RxJS 7 imports - CHANGED
-const { ajax } = require('rxjs/ajax');
-const { map } = require('rxjs/operators');
+import { ajax } from 'rxjs/ajax';
+import { map } from 'rxjs/operators';
 
-var _ = require('underscore');
-var config = require('./config');
-var qs = require('qs');
+import _ from 'underscore';
+import config from './config';
+import qs from 'qs';
 var transpose = a => _.zip.apply(_, a);
 
 // URIs have a 2083 character size limit and some search terms exceed that.
@@ -117,7 +117,7 @@ function userLocations(search, roles) {
     return ajax.getJSON(url);
 }
 
-module.exports = {
+export default {
     data,
     variant,
     variantReports,

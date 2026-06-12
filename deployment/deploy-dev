@@ -2,7 +2,7 @@
 set -o nounset
 set -o errexit
 
-HOST=${HOST:-brca-dev.gi.ucsc.edu}
+HOST=${HOST:-brca-prod.gi.ucsc.edu}
 USER=brca
 
 # directory of this file
@@ -17,16 +17,21 @@ npm run build:prod
 rsync -rlptD -e 'ssh -4' --delete --rsync-path='rsync' build/ ${USER}@${HOST}:/var/www/html/beta
 rsync -rlptD -e 'ssh -4' --delete --exclude="/uploads" --exclude="/downloads/*" --rsync-path='rsync' django/ ${USER}@${HOST}:/var/www/backend/beta/django
 
-requirements=$(cat requirements.txt)
-requirements=$(echo ${requirements}) # drop carriage returns
+# copy requirements to server
+ssh -4 ${USER}@${HOST} "rm -f /tmp/requirements_deploy.txt"
+rsync -e 'ssh -4' requirements.txt ${USER}@${HOST}:/tmp/requirements_deploy.txt
+
 ssh -l${USER} ${HOST} <<-ENDSSH
     #set -o nounset # 'activate' accesses unbound vars
     set -o errexit
     cp ~/site_settings/config.beta.js /var/www/html/beta/config.js
     cp ~/site_settings/site_settings.beta.py /var/www/backend/beta/django/brca/site_settings.py
     sudo chown -R www-data:www-data /var/www/backend/beta/django/uploads
-    . /var/www/backend/beta/virtualenv3/bin/activate
-    pip3 install ${requirements}
-    python3 /var/www/backend/beta/django/manage.py migrate --noinput --verbosity 2
+    if [ ! -f /var/www/backend/beta/virtualenv3/bin/python3 ] || [ "$(/var/www/backend/beta/virtualenv3/bin/python3 --version 2>&1)" != "$(python3.13 --version 2>&1)" ]; then
+        rm -rf /var/www/backend/beta/virtualenv3
+        python3.13 -m venv /var/www/backend/beta/virtualenv3
+    fi 
+    /var/www/backend/beta/virtualenv3/bin/pip3 install -r /tmp/requirements_deploy.txt
+    /var/www/backend/beta/virtualenv3/bin/python3.13 /var/www/backend/beta/django/manage.py migrate --noinput --verbosity 2
     sudo apache2ctl restart
 ENDSSH
