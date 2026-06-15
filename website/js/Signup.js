@@ -162,7 +162,7 @@ class SignupInner extends React.Component {
         };
 
         var withGoogleMaps = function () {
-            var formData = this.refs.contactForm.getFormData();
+            var formData = this.contactFormRef.current.getFormData();
 
             address = determineAddressFromCityStateCountry(formData);
             if (address.length > 3) {

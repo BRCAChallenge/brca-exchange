@@ -113,7 +113,7 @@ class ProfileInner extends React.Component {
                     }
                 };
                 xhr.open('post', url);
-                xhr.setRequestHeader('Authorization', 'JWT ' + auth.token());
+                xhr.setRequestHeader('Authorization', 'Bearer ' + auth.token());
                 xhr.send(fd);
             };
 
@@ -170,7 +170,7 @@ class EditProfileForm extends React.Component {
     retrieveProfile() {
         var url = config.backend_url + '/accounts/get/';
         var token = auth.token();
-        var tokenValue = 'JWT ' + token;
+        var tokenValue = 'Bearer ' + token;
         var saveProfileData = (data) => {
             var imagePreviewUrl = '';
             if (data.user.has_image) {

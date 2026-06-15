@@ -7,10 +7,10 @@ import $ from 'jquery';
 import config from './config';
 
 class ConfirmEmailInner extends React.Component {
-  state = { success: null };
+  state = { success: null, loading: true };
 
   activate = (result) => {
-    this.setState({ success: !!(result && result.success) });
+    this.setState({ success: !!(result && result.success), loading: false });
   };
 
   componentDidMount() {
@@ -20,6 +20,7 @@ class ConfirmEmailInner extends React.Component {
   }
 
   render() {
+    if (this.state.loading) return <Grid id="main-grid"><Row>Loading...</Row></Grid>;
     return (
       <Grid id="main-grid">
         {this.state.success ? (

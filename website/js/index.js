@@ -11,7 +11,7 @@ import ComputationalPredictionTile from "./components/computationalprediction/Co
 import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
 import MupitStructure from './MupitStructure';
 
-require('./favicons');
+import './favicons';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import DisclaimerModal from './DisclaimerModal';
@@ -1638,7 +1638,7 @@ const routes = (
         <Route path='/signin' component={Signin}/>
         <Route path='/reset_password' component={ResetPassword}/>
 	<Route path='/profile' component={Profile}/>
-        <Route path='confirm/:activationCode' component={ConfirmEmail}/>
+        <Route path='/confirm/:activationCode' component={ConfirmEmail}/>
 	<Route path='/reset/:resetToken' component={ChangePassword}/>
     </Switch>
 );
