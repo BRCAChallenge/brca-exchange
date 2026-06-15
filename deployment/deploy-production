@@ -15,7 +15,7 @@ ssh -l${USER} ${HOST} <<-'ENDSSH'
     HTML=/var/www/html
     BACKEND=/var/www/backend
 
-    rsync -a --delete ${HTML}/${SRC}/ ${HTML}/${DST}
+    rsync -a --delete --exclude="/trackhubs" ${HTML}/${SRC}/ ${HTML}/${DST}
     rsync -a --delete --exclude="/uploads" --exclude="/downloads" ${BACKEND}/${SRC}/django/ ${BACKEND}/${DST}/django
 
     cp ~/site_settings/config.${DST}.js /var/www/html/${DST}/config.js
