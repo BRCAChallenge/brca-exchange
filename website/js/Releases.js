@@ -13,11 +13,11 @@ import anchorme from "anchorme";
 
 
 class Releases extends React.Component {
-    state = { releases: {} };
+    state = { releases: {}, loading: true };
     componentDidMount() {
         backend.releases().subscribe(
-            resp => this.setState(resp),
-            () => this.setState({error: 'Problem connecting to server'}));
+            resp => this.setState({...resp, loading: false}),
+            () => this.setState({error: 'Problem connecting to server', loading: false}));
     }
     getSourceRepresentations = (sources) => {
         // exLOVD was renamed ExUV in October 2017
@@ -42,6 +42,21 @@ class Releases extends React.Component {
                 <td>{release['variants_deleted']}</td>
             </tr>
         ));
+	if (this.state.loading) {
+            return (
+                <Grid id="main-grid" className="main-grid">
+                    <Row>
+                        <Col className="text-center" style={{padding: '50px'}}>
+                            <div className="spinner-border text-primary" role="status"
+                                style={{width: '3rem', height: '3rem'}}>
+                                <span className="visually-hidden">Loading...</span>
+                            </div>
+                            <p style={{marginTop: '10px', color: '#666'}}>Loading Data Releases...</p>
+                        </Col>
+                    </Row>
+                </Grid>
+            );
+        }    
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
