@@ -16,3 +16,6 @@ htmlcov
 /pipeline/genomeBrowserTrack/bedToBigBed
 /pipeline/genomeBrowserTrack/*.bed
 /pipeline/genomeBrowserTrack/*.as
+/deployment/site_settings/*prod*
+__pycache__/
+*.pyc
