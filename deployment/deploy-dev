@@ -15,7 +15,7 @@ npm run build:prod
 # deploy (not preserving owner/group)
 # Force rsync's ssh to use ipv4 to prevent "Cannot assign requested address" error
 rsync -rlptD -e 'ssh -4' --delete --rsync-path='rsync' build/ ${USER}@${HOST}:/var/www/html/beta
-rsync -rlptD -e 'ssh -4' --delete --exclude="/uploads" --exclude="/downloads/*" --rsync-path='rsync' django/ ${USER}@${HOST}:/var/www/backend/beta/django
+rsync -rlptD -e 'ssh -4' --delete --exclude="/uploads" --exclude="/downloads/*" --rsync-path='rsync' ${DEPLOYMENT}/../django/ ${USER}@${HOST}:/var/www/backend/beta/django
 
 # copy requirements to server
 ssh -4 ${USER}@${HOST} "rm -f /tmp/requirements_deploy.txt"
