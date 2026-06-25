@@ -4,6 +4,7 @@ set -o errexit
 
 HOST=${HOST:-brca-prod.gi.ucsc.edu}
 USER=brca
+PYTHON_VERSION=${PYTHON_VERSION:-python3.13}
 
 # directory of this file
 DEPLOYMENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -27,11 +28,11 @@ ssh -l${USER} ${HOST} <<-ENDSSH
     cp ~/site_settings/config.beta.js /var/www/html/beta/config.js
     cp ~/site_settings/site_settings.beta.py /var/www/backend/beta/django/brca/site_settings.py
     sudo chown -R www-data:www-data /var/www/backend/beta/django/uploads
-    if [ ! -f /var/www/backend/beta/virtualenv3/bin/python3 ] || [ "$(/var/www/backend/beta/virtualenv3/bin/python3 --version 2>&1)" != "$(python3.13 --version 2>&1)" ]; then
+    if [ ! -f /var/www/backend/beta/virtualenv3/bin/python3 ] || [ "$(/var/www/backend/beta/virtualenv3/bin/python3 --version 2>&1)" != "\$(${PYTHON_VERSION} --version 2>&1)" ]; then
         rm -rf /var/www/backend/beta/virtualenv3
-        python3.13 -m venv /var/www/backend/beta/virtualenv3
+        ${PYTHON_VERSION} -m venv /var/www/backend/beta/virtualenv3
     fi 
     /var/www/backend/beta/virtualenv3/bin/pip3 install -r /tmp/requirements_deploy.txt
-    /var/www/backend/beta/virtualenv3/bin/python3.13 /var/www/backend/beta/django/manage.py migrate --noinput --verbosity 2
+    /var/www/backend/beta/virtualenv3/bin/${PYTHON_VERSION} /var/www/backend/beta/django/manage.py migrate --noinput --verbosity 2
     sudo apache2ctl restart
 ENDSSH
