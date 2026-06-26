@@ -42,6 +42,7 @@
     "d3-dsv": "^3.0.1",
     "eslint": "^9.14.0",
     "eslint-plugin-react": "^7.37.2",
+    "eslint-formatter-junit": "^8.40.0",
     "exports-loader": "^5.0.0",
     "expose-loader": "^5.0.0",
     "file-loader": "^6.2.0",

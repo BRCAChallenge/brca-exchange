@@ -7,17 +7,21 @@ const globals = require("globals");
 module.exports = [
   js.configs.recommended,
   react.configs.flat.recommended,
+  react.configs.flat["jsx-runtime"],
   {
-    files: ["js/**/*.js", "test/**/*.js"],
+    files: ["js/**/*.js"],
     languageOptions: {
       ...react.configs.flat.recommended.languageOptions,
       parser: babelParser,
-      ecmaVersion: 2018,
+      ecmaVersion: "latest",
       sourceType: "module",
       parserOptions: {
         requireConfigFile: false,
         babelOptions: {
-          presets: ["@babel/preset-react"],
+          presets: [
+            ["@babel/preset-env", { modules: false }],
+            ["@babel/preset-react", { runtime: "automatic" }],
+          ],
         },
       },
       globals: {
@@ -57,14 +61,42 @@ module.exports = [
       "no-shadow": 0,
       "no-unused-vars": [2, { "vars": "local" }],
       "react/jsx-no-undef": 1,
-      "react/jsx-uses-react": 1,
-      "react/jsx-uses-vars": 1,
       "react/no-did-mount-set-state": 1,
       "react/no-did-update-set-state": 1,
       "react/no-unknown-property": 1,
-      "react/react-in-jsx-scope": 1,
       "react/self-closing-comp": 1,
       "react/jsx-wrap-multilines": 1,
+      "semi": [2, "always"],
+    },
+  },
+  {
+    files: ["test/**/*.js"],
+    languageOptions: {
+      ...react.configs.flat.recommended.languageOptions,
+      parser: babelParser,
+      ecmaVersion: "latest",
+      sourceType: "module",
+      parserOptions: {
+        requireConfigFile: false,
+        babelOptions: {
+          presets: [
+            ["@babel/preset-env", { modules: false }],
+            ["@babel/preset-react", { runtime: "automatic" }],
+          ],
+        },
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es6,
+        ...globals.mocha,
+      },
+    },
+    rules: {
+      "eqeqeq": [2, "allow-null"],
+      "curly": 2,
+      "no-undef": 2,
+      "no-unused-vars": [2, { "vars": "local" }],
       "semi": [2, "always"],
     },
   },
