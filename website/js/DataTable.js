@@ -1,4 +1,3 @@
-/*global module: false, require: false, URL: false, Blob: false */
 'use strict';
 
 import React from 'react';
@@ -100,7 +99,7 @@ class FastTable extends React.Component {
     onSort = (column) => {
         if (this.props.onSort) {
             const currentSort = this.props.sortBy;
-            const newOrder = (currentSort && currentSort.prop === column.prop && currentSort.order === 'asc') ? 'desc' : 'asc';
+            const newOrder = (currentSort && currentSort.prop === column.prop && currentSort.order === 'ascending') ? 'descending' : 'ascending';
             this.props.onSort({prop: column.prop, order: newOrder});
         }
     };
@@ -119,7 +118,6 @@ class FastTable extends React.Component {
                     <tr>
                         {columns.map((column, idx) => {
                             const isSorted = sortBy && sortBy.prop === column.prop;
-                            const sortIcon = isSorted ? (sortBy.order === 'asc' ? ' ▲' : ' ▼') : '';
 
                             return (
                                 <th
@@ -141,7 +139,7 @@ class FastTable extends React.Component {
 					    fontSize: '10px',
 					    color: isSorted ? '#888' : '#ccc'
 					}}>
-				        {isSorted ? (sortBy.order === 'asc' ? '▲' : '▼') : '▲▼'}
+				        {isSorted ? (sortBy.order === 'ascending' ? '▲' : '▼') : '▲▼'}
 					</span>
 				    </div>
                                 </th>
