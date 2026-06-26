@@ -21,11 +21,11 @@ function buildHeader(onClick, title) {
     return (
         <span>
             {title}
-            <span 
+            <span
                 onClick={ev => {ev.stopPropagation(); onClick(title); }}
                 className='help fa fa-question-circle'
-                style={{cursor: 'pointer', 
-			fontSize: '0.8em', 
+                style={{cursor: 'pointer',
+			fontSize: '0.8em',
 			color: '#888',
 			position: 'relative',
 			top: '-8px',
@@ -598,7 +598,7 @@ const researchModeColumns = [
 ];
 
 
-/*eslint-enable camelcase */
+
 
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
 // click and drag: if mouseup and mousedown occur on the same element, a click event is fired even if
@@ -780,8 +780,8 @@ var ResearchVariantTableSupplier = function (Component) {
 
         filterFormCols = (subColList, columnSelection) => {
             return _.map(subColList, ({title, prop}) =>
-                <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop || title} label={prop || title} title={title}
-                                initialCheck={columnSelection}/>);
+                (<ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop || title} label={prop || title} title={title}
+                                initialCheck={columnSelection}/>));
         };
 
         toggleSubcolOpen = (subColTitle) => {
@@ -799,7 +799,7 @@ var ResearchVariantTableSupplier = function (Component) {
 
         getColumnSelectors() {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
-                <Col sm={6} md={4} key={subColTitle}>
+                (<Col sm={6} md={4} key={subColTitle}>
                     <Card className="mb-3">
                         <Card.Header
                             onClick={() => this.toggleSubcolOpen(subColTitle)}
@@ -818,7 +818,7 @@ var ResearchVariantTableSupplier = function (Component) {
                             </div>
                         </Collapse>
                     </Card>
-                </Col>
+                </Col>)
             );
             return (<div className='control-label'>
                 <Card>
@@ -854,14 +854,14 @@ var ResearchVariantTableSupplier = function (Component) {
 
         getFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
-                <Col sm={6} md={3} key={name}>
+                (<Col sm={6} md={3} key={name}>
                     <Form.Check
                         type="checkbox"
                         onChange={v => this.setSource(name, v)}
                         checked={value > 0}
                         label={this.getSourceName(name)}
                     />
-                </Col>
+                </Col>)
             );
             return (<div className='source-filters'>
                 <Card className="top-buffer">

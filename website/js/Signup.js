@@ -4,7 +4,7 @@
 import React from 'react';
 import content from './content';
 import RawHTML from './RawHTML';
-var countries = require('raw-loader!../content/countries.txt').default.split("\n");
+var countries = require('raw-loader!../content/countries.txt')["default"].split("\n");
 var $ = require('jquery');
 var _ = require('underscore');
 import config from './config';
@@ -180,7 +180,7 @@ class SignupInner extends React.Component {
         } else {
             this.setState({error: <strong>Some information was missing:</strong>, fieldErrors: formErrors });
         }
-    }
+    };
 }
 
 export function $c(staticClassName, conditionalClassNames) {
@@ -272,7 +272,7 @@ class SignupForm extends React.Component {
 
         const roleVal = this._refs.role ? this._refs.role.value : "NONE";
         const roleLabel = Role.get(roleVal) ? Role.get(roleVal)[2] : "";
-        
+
 	var data = {
             "image": this.state.file,
             "email": this._refs.email?.value,
@@ -386,7 +386,7 @@ class SignupForm extends React.Component {
         var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={this.setRef(id)}>
-                <option key={id + "NONE"} value=""></option>
+                <option key={id + "NONE"} value="" />
                 {options}
             </select>
         );
@@ -430,7 +430,7 @@ class SignupForm extends React.Component {
         return this.renderField(id, "", checkbox);
     }
     renderCAPTCHA(id, label) {
-        return this.renderField(id, label, <div ref={this.setRef("signupCAPTCHA")}></div>);
+        return this.renderField(id, label, <div ref={this.setRef("signupCAPTCHA")} />);
     }
     renderField(id, label, field) {
         return (

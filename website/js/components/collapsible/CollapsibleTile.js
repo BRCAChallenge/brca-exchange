@@ -77,7 +77,7 @@ export default class CollapsibleTile extends React.Component {
         // inject props for allowing us to react to child sections' request to change their visibility
         const togglableKids = React.Children.map(this.props.children, (c) => {
             if (!React.isValidElement(c)) return c;
-	
+
 	    // Never inject custom props into DOM nodes like <div>
             if (typeof c.type === "string") return c;
 
@@ -90,7 +90,7 @@ export default class CollapsibleTile extends React.Component {
                 expanded: !!fieldExpansions[id],
                 relayoutGrid: this.props.relayoutGrid,
                 hideEmptyItems: this.props.hideEmptyItems
-            })
+            });
 	});
 
         return (

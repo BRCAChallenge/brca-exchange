@@ -42,9 +42,9 @@ function url(opts) {
         showDeleted
         } = opts,
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
-    
+
     search = trimSearchTerm(search);
-    
+
     return `${config.backend_url}/data/?${qs.stringify(_.pick({
         format,
         filter,
@@ -105,14 +105,14 @@ function users(opts) {
         'page_size': pageLength,
         'search': search
     }, v => v != null))}`;
-    
+
     // CHANGED: Use ajax.getJSON()
     return ajax.getJSON(usersUrl);
 }
 
 function userLocations(search, roles) {
     var url = `${config.backend_url}/accounts/user_locations/?${qs.stringify({search: search, 'roles[]': roles}, {indices: false})}`;
-    
+
     // CHANGED: Use ajax.getJSON()
     return ajax.getJSON(url);
 }

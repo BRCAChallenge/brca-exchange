@@ -131,7 +131,7 @@ export function generateLinkToGenomeBrowser(prop, value, hgvs) {
     if (!isEmptyField(hgvs)) {
         value = hgvs;
     }
-    return <a target="_blank" href={genomeBrowserUrl}>{value}</a>;
+    return <a target="_blank" href={genomeBrowserUrl} rel="noreferrer">{value}</a>;
 }
 
 
@@ -159,7 +159,7 @@ function formatConditionLink(db, id) {
         // No url for other sources
         return db;
     }
-    return <a target="_blank" href={formattedDbId}>{db}</a>;
+    return <a target="_blank" href={formattedDbId} rel="noreferrer">{db}</a>;
 }
 
 
@@ -170,7 +170,7 @@ export function getFormattedFieldByProp(prop, variant) {
         rowItem = <i>{variant[prop]}</i>;
     } else if (prop === "URL_ENIGMA") {
         if (variant[prop].length) {
-            rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
+            rowItem = <a target="_blank" href={variant[prop]} rel="noreferrer">link to multifactorial analysis</a>;
         }
     } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
         // Link all clinvar submissions back to clinvar
@@ -186,10 +186,10 @@ export function getFormattedFieldByProp(prop, variant) {
             }
 
             if (i < (accessions.length - 1)) {
-                rowItem.push(<span key={`scv-${accessions[i].trim()}-${i}`}><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>,</span>);
+                rowItem.push(<span key={`scv-${accessions[i].trim()}-${i}`}><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()} rel="noreferrer">{displayText}</a>,</span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a key={`scv-${accessions[i].trim()}-${i}`} target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>);
+                rowItem.push(<a key={`scv-${accessions[i].trim()}-${i}`} target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()} rel="noreferrer">{displayText}</a>);
             }
         }
     } else if (prop === "Condition_Value_ClinVar" && !isEmptyField(variant['Condition_DB_ID_ClinVar'])) {
@@ -224,22 +224,22 @@ export function getFormattedFieldByProp(prop, variant) {
         rowItem = [];
         for (let i = 0; i < ids.length; i++) {
             if (i < (ids.length - 1)) {
-                rowItem.push(<span key={`lovd-${ids[i].trim()}-${i}`}><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
+                rowItem.push(<span key={`lovd-${ids[i].trim()}-${i}`}><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()} rel="noreferrer">{ids[i]}</a>, </span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a key={`lovd-${ids[i].trim()}-${i}`} target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
+                rowItem.push(<a key={`lovd-${ids[i].trim()}-${i}`} target="_blank" href={"http://lovd.nl/" + ids[i].trim()} rel="noreferrer">{ids[i]}</a>);
             }
         }
     } else if (prop === "Assertion_method_citation_ENIGMA") {
-        rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
+        rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/" rel="noreferrer">Enigma Rules version Mar 26, 2015</a>;
     } else if (prop === "Source_URL") {
         if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
-            rowItem = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
+            rowItem = <a target="_blank" href={variant[prop].split(',')[0]} rel="noreferrer">link to multifactorial analysis</a>;
         }
     } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
         const pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
         rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), (piece, idx) =>
-            (/^[0-9]+$/.test(piece)) ? <a key={`pmid-${piece}-${idx}`} target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece);
+            (/^[0-9]+$/.test(piece)) ? <a key={`pmid-${piece}-${idx}`} target="_blank" href={pubmed + piece} rel="noreferrer">PMID: {piece}</a> : piece);
     } else if (prop === "HGVS_cDNA") {
         rowItem = variant[prop].split(":")[1];
     } else if (prop === "HGVS_Protein") {

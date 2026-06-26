@@ -34,7 +34,7 @@ function formatMatches(matches, count) {
 
     return ms.map((match, i) =>
         // we extract entries like <<<some text here>>>, keeping the first < as an indicator that the text is highlighted
-        <li key={i}>
+        (<li key={i}>
             <small>...
             {
                 _.unescape(match).split(/<<(<.*)>>>/g).map((x, j) =>
@@ -43,7 +43,7 @@ function formatMatches(matches, count) {
                         : <React.Fragment key={j}>{x}</React.Fragment>)
             }
             ...</small>
-        </li>
+        </li>)
     );
 
     // return ms.map(match => <div><small>... {_.unescape(match)} ...</small></div>);
@@ -144,7 +144,7 @@ class LiteratureTable extends React.Component {
             (this.props.params && this.props.params.id);
 
         if (!this.props.variant && routeId) {
-            const sub = backend.variant(routeId).subscribe(    
+            const sub = backend.variant(routeId).subscribe(
 	    resp => {
                     return this.setState({data: resp.data, error: null});
                 },
@@ -152,7 +152,7 @@ class LiteratureTable extends React.Component {
             );
 	    this.subscriptions.push(sub);
         }
-	
+
 	const papersId = this.props.variant ? this.props.variant.id : routeId;
 	if (papersId) {
 	    const sub = backend.variantPapers(papersId).subscribe(
@@ -164,7 +164,7 @@ class LiteratureTable extends React.Component {
 	    this.subscriptions.push(sub);
 	}
     }
-	
+
     componentWillUnmount() {
         if (this.subscriptions) {
             this.subscriptions.forEach(s => {
@@ -181,7 +181,7 @@ class LiteratureTable extends React.Component {
                     [title, authors, journal, year, keywords, pmid].join("\t")
                 )
               ).join("\n")
-            : "";    
+            : "";
     }
 
     toCitation() {

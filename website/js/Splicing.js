@@ -185,11 +185,11 @@ class Variant extends React.Component {
                 _.toPairs(events)
                     .filter((keyAndEvent) => keyAndEvent[1].widthBP > 0)
                     .map(([key, event]) =>
-                        <Region key={`event_${key}`} region={event.span}
+                        (<Region key={`event_${key}`} region={event.span}
                             className={`variant-region ${key}`}
                             x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} scale={scale}
                             mask={mask} nudgeable={true}
-                        />
+                        />)
                     )
             }
             </g>
@@ -263,14 +263,14 @@ class SegmentRegions extends React.Component {
                 flatDomains
                     .filter(({span}) => overlaps([span.start, span.end], [txStart, txEnd]))
                     .map(({org, name, code, span}, idx) =>
-                        <Region key={`cidomain_${org}_${name}_${idx}`}
+                        (<Region key={`cidomain_${org}_${name}_${idx}`}
                             className={`region cidomain domain-${code}`}
                             region={span} label={zoomed && `${org}: ${name}`}
                             x={0} width={width} height={height}
                             txStart={txStart} txEnd={txEnd} scale={scale}
                             mask={mask} // fill={CIDomainFills[org]}
                             selected={this.props.selectedDomain === `${org}_${name}`}
-                        />
+                        />)
                     )
             }
 
@@ -884,7 +884,7 @@ export class Splicing extends React.Component {
         //  child nodes of the element with React ID ``.
 
         return _.toPairs(meta.CIDomains).map(([org, orgMeta]) =>
-            <div key={org}>
+            (<div key={org}>
                 <label style={{display: 'inline-block', marginRight: '1em'}}>
                     <input key={`${org}_checkbox`} style={{marginRight: '0.5em'}} type="checkbox"
                         name={org} checked={this.state.drawCIDomains.has(org)} onChange={this.toggleCIDomain}
@@ -911,7 +911,7 @@ export class Splicing extends React.Component {
                         })
                     }
                 </ol>
-            </div>
+            </div>)
         );
     }
 }

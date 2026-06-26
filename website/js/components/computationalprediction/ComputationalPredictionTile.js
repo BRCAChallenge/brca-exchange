@@ -19,7 +19,7 @@ export default class ComputationalPredictionTile extends React.Component {
         return (
             <div className="func-assay-extras">
                 <span className="func-assay-result" style={{float: 'right', paddingRight: '10px'}}>Result: {result}</span>
-                <div style={{clear: 'both'}}></div>
+                <div style={{clear: 'both'}} />
             </div>
         );
     }
@@ -161,8 +161,8 @@ export default class ComputationalPredictionTile extends React.Component {
                             <td><span className={rowClass + "row-value"}>{rowItem}</span></td>
                         </tr>
                     );
-                })
-		    
+                });
+
                 let additionalRows = [];
 
                 const additionalRowData = ComputationalPredictionConstants.filter(obj => {return obj.Method === group;});
@@ -170,11 +170,11 @@ export default class ComputationalPredictionTile extends React.Component {
                 for (let [k, v] of Object.entries(additionalRowData[0])) {
                     const isEmptyValue = util.isEmptyField(v);
                     if (k === 'Method') continue;
-                    
+
                     let displayValue;
                     if (isEmptyValue) {
                         displayValue = '-';
-                    } 
+                    }
 		    const trKey = `cp-${group}-${k}`;
 		    if (k === "Publication" && v !== '-') {
 			additionalRows.push(

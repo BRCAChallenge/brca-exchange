@@ -609,7 +609,7 @@ class IsoGrid extends React.Component {
     }
 
     componentDidMount() {
-        const root= this._rootRef.current;
+        const root = this._rootRef.current;
 	if (!root || !this.masonry) {
             this.masonry = new Isotope(root, {
                 layoutMode: 'packery',
@@ -764,7 +764,7 @@ class VariantDetail extends React.Component {
                 this.setState({reports: groupedReports, error: null}, () => {
                     this.relayoutGrid();
                 });
-            }, 
+            },
 	    () => {
                 this.setState({reportError: 'Problem retrieving reports'});
                 console.warn("Couldn't retrieve reports!");
@@ -848,7 +848,7 @@ class VariantDetail extends React.Component {
     isGroupOpenLS(key) {
         // local state wins, otherwise read from storage (for initial render)
         if (this.state.openGroups.hasOwnProperty(key)) { return !!this.state.openGroups[key]; }
-        return isOpenFromStorage(key); 
+        return isOpenFromStorage(key);
     }
     toggleCard(key) {
        this.setState((prev) => {
@@ -933,7 +933,7 @@ class VariantDetail extends React.Component {
                             diffHTML.push(
                                 <span key={`diff-${i}-${j}-new`}>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
-                                    <span className='badge bg-success'><span className='fa fa-star'></span> New</span>
+                                    <span className='badge bg-success'><span className='fa fa-star' /> New</span>
                                     &nbsp;{`${added}`}
                                 </span>
                             );
@@ -950,7 +950,7 @@ class VariantDetail extends React.Component {
                             diffHTML.push(
                                 <span key={`diff-${i}-${j}-individual`}>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
-                                    {removed} <span className="fa fa-arrow-right"></span> {added}
+                                    {removed} <span className="fa fa-arrow-right" /> {added}
                                 </span>
                             );
 			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
@@ -1174,14 +1174,14 @@ class VariantDetail extends React.Component {
                         isEmptyValue = true;
                     } else {
                         let websiteUrl = `https://beacon-network.org/#/search?chrom=${variant.Chr}&pos=${variant.Hg37_Start}&ref=${variant.Ref}&allele=${variant.Alt}&rs=GRCh37`;
-                        rowItem = <a target="_blank" href={websiteUrl}>{websiteUrl}</a>;
+                        rowItem = <a target="_blank" href={websiteUrl} rel="noreferrer">{websiteUrl}</a>;
                         isEmptyValue = false;
                     }
                 }
 
                 if (!isEmptyValue && prop === "CA_ID") {
                     let websiteUrl = `http://reg.clinicalgenome.org/redmine/projects/registry/genboree_registry/by_canonicalid?canonicalid=${variant.CA_ID}`;
-                    rowItem = <a target="_blank" href={websiteUrl}>{variant[prop]}</a>;
+                    rowItem = <a target="_blank" href={websiteUrl} rel="noreferrer">{variant[prop]}</a>;
                     isEmptyValue = false;
                 }
 
@@ -1232,7 +1232,7 @@ class VariantDetail extends React.Component {
                             role="button"
                             aria-expanded={isOpen}
                             className="d-flex justify-content-between align-items-center"
-                            onClick={(event) => { event.preventDefault(); this.toggleCard(storageKey) }}
+                            onClick={(event) => { event.preventDefault(); this.toggleCard(storageKey); }}
                         >
                             <span className="title fw-bold">{groupTitle}</span>
                             <span className="d-flex align-items-center">
@@ -1451,7 +1451,7 @@ class VariantDetail extends React.Component {
                                                 role="button"
                                                 aria-expanded={splicingOpen}
                                                 className="d-flex justify-content-between align-items-center"
-                                                onClick={(e) => { e.preventDefault(); this.toggleCard(splicingKey) }}
+                                                onClick={(e) => { e.preventDefault(); this.toggleCard(splicingKey); }}
                                             >
                                                 <span className="title fw-bold">{`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}</span>
                                                 <span className="d-flex align-items-center">
@@ -1539,7 +1539,7 @@ class VariantDetail extends React.Component {
 }
 
 class Application extends React.Component {
-    constructor(props){
+    constructor(props) {
 	super(props);
 	this.state = {
 	    mode: localStorage.getItem('research-mode') === 'true' ? 'research_mode' : 'default',
@@ -1599,7 +1599,7 @@ class Application extends React.Component {
 		    history={this.props.history}
                     mode={this.state.mode}
                     toggleMode={this.onChildToggleMode}
-                    show={path.indexOf('variants') === 0} /> 
+                    show={path.indexOf('variants') === 0} />
 		)}
 		{path.indexOf('variant/') === 0 && (() => {
 		const variantId = path.split('variant/')[1]?.split('?')[0]?.split('#')[0];

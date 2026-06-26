@@ -16,7 +16,7 @@ export default class ProvisionalEvidenceTile extends React.Component {
         return (
             <div className="func-assay-extras">
                 <span className="func-assay-result" style={{float: 'right', paddingRight: '10px'}}>{result}</span>
-                <div style={{clear: 'both'}}></div>
+                <div style={{clear: 'both'}} />
             </div>
         );
     }

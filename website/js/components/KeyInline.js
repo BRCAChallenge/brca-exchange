@@ -20,7 +20,7 @@ class KeyInline extends React.PureComponent {
         if (noHelpLink || !tooltip) {
             return <td className='help-target'>{headerGroup ? this.getCaret() : ''}<b>{tableKey}</b></td>;
         }
-	
+
         // Popover id must be a valid HTML id (tableKey may include spaces/symbols)
         const popoverId = `tooltip_${String(tableKey).replace(/[^a-zA-Z0-9_-]/g, "_")}`;
 

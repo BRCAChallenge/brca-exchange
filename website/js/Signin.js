@@ -32,7 +32,7 @@ class ResetPassword extends React.Component {
                     {message}
                 </Row>
                 <Row>
-                    <Col md={{ span: 4, offset: 4 }} sm={{ span:6, offset: 3 }}>
+                    <Col md={{ span: 4, offset: 4 }} sm={{ span: 6, offset: 3 }}>
                         <h3>Forgot your password?</h3>
                         <div>Enter your email and we'll send you a link to reset your password.</div>
                         <br/>

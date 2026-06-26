@@ -71,8 +71,8 @@ class AlleleFrequencyField extends React.PureComponent {
                     {
                         isGnomad
                             ? isGenome
-                                ? <span className="allele-frequency-gnomad-header"><span className="genome-header">G</span><span className="fa fa-flag" style={{display: flag && !util.isEmptyField(flag) ? '' : 'none'}}></span></span>
-                                : <span className="allele-frequency-gnomad-header"><span className="exome-header">E</span><span className="fa fa-flag" style={{display: flag && !util.isEmptyField(flag) ? '' : 'none'}}></span></span>
+                                ? <span className="allele-frequency-gnomad-header"><span className="genome-header">G</span><span className="fa fa-flag" style={{display: flag && !util.isEmptyField(flag) ? '' : 'none'}} /></span>
+                                : <span className="allele-frequency-gnomad-header"><span className="exome-header">E</span><span className="fa fa-flag" style={{display: flag && !util.isEmptyField(flag) ? '' : 'none'}} /></span>
                             : ''
                     }
                     {
@@ -88,7 +88,7 @@ class AlleleFrequencyField extends React.PureComponent {
     }
 
     getPopMax(fieldName, variant) {
-        /*eslint-disable camelcase*/
+
         if (fieldName.includes("Genomes, Non-Cancer (Graphical)")) {
             let popmax = parseFloat(variant.faf95_popmax_genome_GnomADv3) ? parseFloat(variant.faf95_popmax_genome_GnomADv3).toPrecision(4) : '-';
             return popmax + ' (' + variant.faf95_popmax_population_genome_GnomADv3 + ')';
@@ -96,7 +96,7 @@ class AlleleFrequencyField extends React.PureComponent {
             let popmax = parseFloat(variant.faf95_popmax_exome_GnomAD) ? parseFloat(variant.faf95_popmax_exome_GnomAD).toPrecision(4) : '-';
             return popmax + ' (' + variant.faf95_popmax_population_exome_GnomAD + ')';
         }
-        /*eslint-enable camelcase*/
+
     }
 
     cleanRowTitle(title) {

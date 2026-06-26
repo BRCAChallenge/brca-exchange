@@ -8,7 +8,7 @@ import content from './content';
 
 class DisclaimerModal extends React.Component {
     state = { showModal: false };
-    
+
     close = () => {
         this.setState({ showModal: false });
     };

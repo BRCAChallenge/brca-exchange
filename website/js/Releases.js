@@ -56,7 +56,7 @@ class Releases extends React.Component {
                     </Row>
                 </Grid>
             );
-        }    
+        }
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
@@ -135,7 +135,7 @@ class Release extends React.Component {
                 </Row>
                 <Row>
                     <Col sm={{ span: 8, offset: 2 }} md={{ span: 6, offset: 3 }} className='text-start'>
-                        <p className='release-notes text-left' dangerouslySetInnerHTML={this.generateReleaseNotes()}></p>
+                        <p className='release-notes text-left' dangerouslySetInnerHTML={this.generateReleaseNotes()} />
 		    </Col>
 		    <div className='text-center'>
                         <h3>{release['variants_added']} new variant{s(release['variants_added'])}</h3>

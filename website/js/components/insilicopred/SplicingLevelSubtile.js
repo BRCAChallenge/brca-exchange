@@ -243,11 +243,11 @@ class SpliceSiteImpactTable extends React.Component {
                 <tbody>
                 {
                     splicingImpactFields.fields.map(x =>
-                        <tr key={x.key} className={prior === x.prob && (!x.check || x.check(data)) ? 'highlighted' : ''}>
+                        (<tr key={x.key} className={prior === x.prob && (!x.check || x.check(data)) ? 'highlighted' : ''}>
                             <td className={`pathos-prob-label-${x.key}`}>{x.label}</td>
                             <td>{splicingImpactFields.zScoreLabels[type][x.key]}</td>
                             <td>{x.prob}</td>
-                        </tr>
+                        </tr>)
                     )
                 }
                 </tbody>
