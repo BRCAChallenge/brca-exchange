@@ -32,6 +32,7 @@
   "author": "UCSC",
   "devDependencies": {
     "@babel/core": "^7.25.9",
+    "@babel/eslint-parser": "^7.25.0",
     "@babel/preset-env": "^7.25.9",
     "@babel/preset-react": "^7.25.9",
     "@babel/runtime": "^7.25.9",
@@ -44,6 +45,7 @@
     "exports-loader": "^5.0.0",
     "expose-loader": "^5.0.0",
     "file-loader": "^6.2.0",
+    "globals": "^15.0.0",
     "html-loader": "^5.1.0",
     "html-webpack-plugin": "^5.6.3",
     "imports-loader": "^5.0.0",
