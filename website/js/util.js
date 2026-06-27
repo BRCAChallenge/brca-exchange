@@ -1,6 +1,5 @@
 'use strict';
 
-import React from 'react';
 import moment from 'moment';
 import _ from 'underscore';
 

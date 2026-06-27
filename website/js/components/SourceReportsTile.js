@@ -1,5 +1,4 @@
 /*eslint-env browser */
-/*global require: false, module */
 'use strict';
 
 import React from "react";

@@ -1,5 +1,4 @@
 /*eslint-env browser */
-/*global require: false, module: false */
 'use strict';
 
 import jQuery from 'jquery';
@@ -241,7 +240,7 @@ export const helpContentResearch = [
 
 */
     {
-	section: "Getting Started\: Variants and How to Find Them",
+	section: "Getting Started: Variants and How to Find Them",
         tiles: [
             {
                 name: "How do I search for a variant?",

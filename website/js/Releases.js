@@ -109,7 +109,7 @@ class Release extends React.Component {
     generateReleaseNotes() {
         var release = this.state.releases[0];
         var releaseNotes = '';
-        if (release.hasOwnProperty('notes')) {
+        if (Object.prototype.hasOwnProperty.call(release, 'notes')) {
             // format linebreaks
             releaseNotes = release.notes.replace(/\n\s*\n/g, '\n\n');
             // format hyperlinks

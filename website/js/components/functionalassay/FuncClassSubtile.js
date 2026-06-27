@@ -39,8 +39,7 @@ export default class FuncClassSubtile extends React.Component {
         // Generate a histogram using twenty uniformly-spaced bins.
         const data = d3.histogram()
             .domain(x.domain())
-	    .thresholds(x.ticks(40))
-            (values);
+	    .thresholds(x.ticks(40))(values);
 
         const yMax = d3.max(data, d => d.length);
         // const yMin = d3.min(data, d => d.length);

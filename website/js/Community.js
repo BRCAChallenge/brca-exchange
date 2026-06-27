@@ -2,7 +2,6 @@
 
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import PureRenderMixin from './PureRenderMixin'; // deep-equals version of PRM
 import { Container as Grid, Col, Row, Button, Table } from 'react-bootstrap';
 import backend from './backend';
 import config from './config';

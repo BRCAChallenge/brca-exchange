@@ -1,9 +1,7 @@
-/*global require: false, module: false */
 'use strict';
 
 // RxJS 7 imports - CHANGED
 import { ajax } from 'rxjs/ajax';
-import { map } from 'rxjs/operators';
 
 import _ from 'underscore';
 import config from './config';

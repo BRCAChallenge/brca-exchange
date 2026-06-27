@@ -14,7 +14,6 @@
 // pass the free text unmodified. The effect of this is usually
 // zero matches, which is fine.
 
-/*global module: false, require: false */
 'use strict';
 
 var _ = require('underscore');

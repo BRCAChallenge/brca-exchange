@@ -1,4 +1,3 @@
-/*global grecaptcha: false */
 'use strict';
 
 import React from 'react';

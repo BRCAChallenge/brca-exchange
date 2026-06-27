@@ -1,4 +1,3 @@
-/*global module: false, require: false, window: false */
 'use strict';
 
 var {computeReviewStatusScore} = require("./components/VariantSubmitter");
@@ -372,7 +371,7 @@ const researchModeGroups = [
 // subColumns populate the column selection checkboxes.
 // They should match the variant detail groupings unless hideFromColumnSelection is true.
 const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !group.hideFromColumnSelection; }), function (group) {
-    if (group.hasOwnProperty('innerCols')) {
+    if (Object.prototype.hasOwnProperty.call(group, 'innerCols')) {
         return {
             subColTitle: group.groupTitle,
             // hide dummy columns from column selection
@@ -384,7 +383,7 @@ const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !
                 };
             })
         };
-    } else if (group.hasOwnProperty('reportBinding') && group.reportBinding.hasOwnProperty('cols')) {
+    } else if (Object.prototype.hasOwnProperty.call(group, 'reportBinding') && Object.prototype.hasOwnProperty.call(group.reportBinding, 'cols')) {
         return {
             subColTitle: group.groupTitle,
             // hide dummy columns from column selection
@@ -396,7 +395,7 @@ const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !
                 };
             })
         };
-    } else if (group.hasOwnProperty('innerGroups')) {
+    } else if (Object.prototype.hasOwnProperty.call(group, 'innerGroups')) {
         let subCols = group.innerGroups.map(function(innerGroup) {
             // hide dummy columns from column selection
             return _.map(_.filter(innerGroup.data, ({dummy}) => !dummy), function (col) {
@@ -680,17 +679,17 @@ var ResearchVariantTableSupplier = function (Component) {
 
             // Get query params.
             const urlParams = this.getQuery();
-            const useQueryParams = urlParams.hasOwnProperty("hide") || urlParams.hasOwnProperty("hideSources");
+            const useQueryParams = Object.prototype.hasOwnProperty.call(urlParams, "hide") || Object.prototype.hasOwnProperty.call(urlParams, "hideSources");
 
             if (useQueryParams) {
                 // If query params are present, use them for settings.
-                if (urlParams.hasOwnProperty("hide")) {
+                if (Object.prototype.hasOwnProperty.call(urlParams, "hide")) {
                     const columnsToHide = urlParams.hide;
                     for (let i = 0; i < columnsToHide.length; i++) {
                         selectedColumns[columnsToHide[i]] = false;
                     }
                 }
-                if (urlParams.hasOwnProperty("hideSources")) {
+                if (Object.prototype.hasOwnProperty.call(urlParams, "hideSources")) {
                     const sourcesToHide = urlParams.hideSources;
                     for (let i = 0; i < sourcesToHide.length; i++) {
                         selectedSources[sourcesToHide[i]] = 0;

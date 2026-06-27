@@ -1,4 +1,3 @@
-/*global require: false */
 'use strict';
 require('copy!./img/favicons/apple-touch-icon-57x57.png');
 require('copy!./img/favicons/apple-touch-icon-60x60.png');

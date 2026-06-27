@@ -1,5 +1,4 @@
 /*eslint-env browser */
-/*global require: false, module */
 'use strict';
 
 import React from "react";
@@ -295,15 +294,16 @@ class DeNovoDonorPathogenicityTable extends React.Component {
                                         <td colSpan={3} className="note-row">{x.text}</td>
                                     </tr>
                                 );
-                            case 'cond':
+                            case 'cond': {
                                 const found = x.options.find(x => x.check(data));
                                 return (<tr key={i}>
                                     <td colSpan={3} className="note-row">
                                         { found ? found.text : 'n/a'}
                                     </td>
                                 </tr>);
+			    }
                             default:
-                                return (<tr><td colSpan={3}>Unknown type: {x.type}</td></tr>);
+                                return (<tr key={i}><td colSpan={3}>Unknown type: {x.type}</td></tr>);
                         }
                     })
                 }

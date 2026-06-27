@@ -171,10 +171,6 @@ export default class ComputationalPredictionTile extends React.Component {
                     const isEmptyValue = util.isEmptyField(v);
                     if (k === 'Method') continue;
 
-                    let displayValue;
-                    if (isEmptyValue) {
-                        displayValue = '-';
-                    }
 		    const trKey = `cp-${group}-${k}`;
 		    if (k === "Publication" && v !== '-') {
 			additionalRows.push(

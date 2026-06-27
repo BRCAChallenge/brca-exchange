@@ -1,5 +1,4 @@
 /*eslint-env browser */
-/*global require: false */
 'use strict';
 
 import SourceReportsTile from "./components/SourceReportsTile";
@@ -437,7 +436,8 @@ class Database extends React.Component {
           }
     }
 
-    showHelp(title) {
+    // TODO: use `title` to link to a section-specific help page instead of the generic /help route
+    showHelp(_title) {
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
         if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
             d3TipDiv[0].style.opacity = '0';
@@ -747,7 +747,7 @@ class VariantDetail extends React.Component {
 	this._subs.push(
 	    backend.variant(id).subscribe(
             resp => {
-                if (resp.hasOwnProperty('redirect') && resp.redirect === true) {
+                if (Object.prototype.hasOwnProperty.call(resp, 'redirect') && resp.redirect === true) {
                     this.transitionTo('/variants', null, {search: resp.data});
                 } else {
                     this.setState({data: resp.data, error: null});
@@ -847,7 +847,7 @@ class VariantDetail extends React.Component {
     }
     isGroupOpenLS(key) {
         // local state wins, otherwise read from storage (for initial render)
-        if (this.state.openGroups.hasOwnProperty(key)) { return !!this.state.openGroups[key]; }
+        if (Object.prototype.hasOwnProperty.call(this.state.openGroups, key)) { return !!this.state.openGroups[key]; }
         return isOpenFromStorage(key);
     }
     toggleCard(key) {
@@ -975,7 +975,7 @@ class VariantDetail extends React.Component {
         this.setState((pstate) => {
             const k = `submitter-group-${sourceName}-${submitter}`;
             return {
-                [k]: !(!pstate.hasOwnProperty(k) || pstate[k])
+                [k]: !(!Object.prototype.hasOwnProperty.call(pstate, k) || pstate[k])
             };
         });
     }
@@ -1003,9 +1003,6 @@ class VariantDetail extends React.Component {
             cols = columns;
             groups = expertModeGroups;
         }
-
-        let groupsEmpty = 0;
-        let totalRowsEmpty = 0;
 
         const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding, alleleFrequencies, inSilicoPred, innerGroups }) => {
             let rowsEmpty = 0;
@@ -1194,7 +1191,6 @@ class VariantDetail extends React.Component {
                 // `prop` alone can collide or be undefined in some cases.
                 const rowKey = `vd-${groupTitle}-${prop || idx}`;
 
-                totalRowsEmpty += rowsEmpty;
                 return (
                     <tr key={rowKey} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         { rowDescriptor.tableKey !== false &&
@@ -1210,10 +1206,6 @@ class VariantDetail extends React.Component {
             });
 
             const allEmpty = rowsEmpty >= rows.length;
-            if (allEmpty) {
-                groupsEmpty += 1;
-            }
-
             const tileTable = (
                 <Table>
                     <tbody>
@@ -1258,14 +1250,14 @@ class VariantDetail extends React.Component {
         if (this.state.reports !== undefined) {
             let sortedSubmissions = {'ClinVar': {}, 'LOVD': {}};
 
-            if (this.state.reports.hasOwnProperty('ClinVar')) {
+            if (Object.prototype.hasOwnProperty.call(this.state.reports, 'ClinVar')) {
                 let clinvarSubmissions = this.state.reports.ClinVar;
                 for (var i = 0; i < clinvarSubmissions.length; i++) {
                     if (clinvarSubmissions[i].Diff === null || clinvarSubmissions[i].Diff === undefined) {
                         continue;
                     }
                     let key = clinvarSubmissions[i].SCV_ClinVar;
-                    if (sortedSubmissions.ClinVar.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(sortedSubmissions.ClinVar, key)) {
                         sortedSubmissions.ClinVar[key].push(clinvarSubmissions[i]);
                     } else {
                         sortedSubmissions.ClinVar[key] = [clinvarSubmissions[i]];
@@ -1273,14 +1265,14 @@ class VariantDetail extends React.Component {
                 }
             }
 
-            if (this.state.reports.hasOwnProperty('LOVD')) {
+            if (Object.prototype.hasOwnProperty.call(this.state.reports, 'LOVD')) {
                 let lovdSubmissions = this.state.reports.LOVD;
                 for (var j = 0; j < lovdSubmissions.length; j++) {
                     if (lovdSubmissions[j].Diff === null || lovdSubmissions[j].Diff === undefined) {
                         continue;
                     }
                     let key = lovdSubmissions[j].Submission_ID_LOVD;
-                    if (sortedSubmissions.LOVD.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(sortedSubmissions.LOVD, key)) {
                         sortedSubmissions.LOVD[key].push(lovdSubmissions[j]);
                     } else {
                         sortedSubmissions.LOVD[key] = [lovdSubmissions[j]];
