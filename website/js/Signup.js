@@ -10,6 +10,27 @@ import config from './config';
 const { Container: Grid, Row, Col, Button} = require('react-bootstrap');
 const { withRouter } = require('react-router-dom');
 
+// ---- Google Maps loader (async, no jsapi) ----
+function loadGoogleMaps(key, cb, onNoKey) {
+  if (!key) {
+    // If no key, keep registration functional (just skip lat/lng enrichment)
+    if (typeof onNoKey === 'function') onNoKey();
+    return;
+  }
+  if (window.google && window.google.maps) {
+    cb();
+    return;
+  }
+  const script = document.createElement('script');
+  window.__signupInitMap = cb;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
+    key
+  )}&callback=__signupInitMap&loading=async`;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+}
+
 export const Role = {
     ROLE_DATA_PROVIDER: 12,
     options: [
@@ -446,24 +467,3 @@ class SignupForm extends React.Component {
 const Signup = withRouter(SignupInner);
 export { Signup };
 export default Signup;
-
-// ---- Google Maps loader (async, no jsapi) ----
-function loadGoogleMaps(key, cb, onNoKey) {
-  if (!key) {
-    // If no key, keep registration functional (just skip lat/lng enrichment)
-    if (typeof onNoKey === 'function') onNoKey();
-    return;
-  }
-  if (window.google && window.google.maps) {
-    cb();
-    return;
-  }
-  const script = document.createElement('script');
-  window.__signupInitMap = cb;
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
-    key
-  )}&callback=__signupInitMap&loading=async`;
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
-}

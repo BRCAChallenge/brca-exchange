@@ -7,6 +7,33 @@ import Chart from './Chart';
 
 require('highcharts/modules/broken-axis')(Highcharts);
 
+/**
+ * On top of each column, draw a zigzag line where the axis break is.
+ */
+function pointBreakColumn(e) {
+    var point = e.point,
+        brk = e.brk,
+        shapeArgs = point.shapeArgs,
+        x = shapeArgs.x,
+        y = this.translate(brk.from, 0, 1, 0, 1),
+        w = shapeArgs.width,
+        key = ['brk', brk.from, brk.to],
+        path = ['M', x, y, 'L', x + w * 0.25, y + 4, 'L', x + w * 0.75, y - 4, 'L', x + w, y];
+
+    if (!point[key]) {
+        point[key] = this.chart.renderer.path(path)
+            .attr({
+                'stroke-width': 2,
+                stroke: point.series.options.borderColor
+            })
+            .add(point.graphic.parentGroup);
+    } else {
+        point[key].attr({
+            d: path
+        });
+    }
+}
+
 var defaultOptions = {
     chart: {
         plotBackgroundColor: null,
@@ -63,33 +90,6 @@ Highcharts.wrap(Highcharts.Axis.prototype, 'getLinePath', function (proceed, lin
     });
     return path;
 });
-
-/**
- * On top of each column, draw a zigzag line where the axis break is.
- */
-function pointBreakColumn(e) {
-    var point = e.point,
-        brk = e.brk,
-        shapeArgs = point.shapeArgs,
-        x = shapeArgs.x,
-        y = this.translate(brk.from, 0, 1, 0, 1),
-        w = shapeArgs.width,
-        key = ['brk', brk.from, brk.to],
-        path = ['M', x, y, 'L', x + w * 0.25, y + 4, 'L', x + w * 0.75, y - 4, 'L', x + w, y];
-
-    if (!point[key]) {
-        point[key] = this.chart.renderer.path(path)
-            .attr({
-                'stroke-width': 2,
-                stroke: point.series.options.borderColor
-            })
-            .add(point.graphic.parentGroup);
-    } else {
-        point[key].attr({
-            d: path
-        });
-    }
-}
 
 class BarChart extends React.Component {
     constructor(props) {

@@ -17,6 +17,27 @@ import auth from './auth';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
+// ---- Google Maps loader (async, no jsapi) ----
+function loadGoogleMaps(key, cb) {
+  if (!key) {
+    console.warn('Maps key missing; skipping map init');
+    return;
+  }
+  if (window.google && window.google.maps) {
+    cb();
+    return;
+  }
+  const script = document.createElement('script');
+  // async load + callback to your init function
+  window.__initMap = cb;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
+    key
+  )}&callback=__initMap&loading=async`;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+}
+
 class Community extends React.Component {
     constructor(props) {
 	super(props);
@@ -431,27 +452,6 @@ class CommunitySearch extends React.Component {
             </form>
         </div>);
     }
-}
-
-// ---- Google Maps loader (async, no jsapi) ----
-function loadGoogleMaps(key, cb) {
-  if (!key) {
-    console.warn('Maps key missing; skipping map init');
-    return;
-  }
-  if (window.google && window.google.maps) {
-    cb();
-    return;
-  }
-  const script = document.createElement('script');
-  // async load + callback to your init function
-  window.__initMap = cb;
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
-    key
-  )}&callback=__initMap&loading=async`;
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
 }
 
 export default withRouter(Community);
