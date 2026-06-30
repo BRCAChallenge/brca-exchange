@@ -27,8 +27,8 @@ class ProfileInner extends React.Component {
     render() {
         var message;
         if (this.state.error != null) {
-            let fieldErrors = _.map(this.state.fieldErrors, err => (<li>{err}</li>));
-            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map(group => <Col md={3}><ul>{group}</ul></Col>);
+            let fieldErrors = _.map(this.state.fieldErrors, (err, index) => (<li key={index}>{err}</li>));
+            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map((group, index) => <Col key={index} md={3}><ul>{group}</ul></Col>);
             message = (
                 <div className="alert alert-danger">
                     <Row><Col md={6}>{this.state.error}</Col></Row>
@@ -398,7 +398,7 @@ class EditProfileForm extends React.Component {
             }
             if (value.name === 'Other' && !kwargs.values.some(opt => opt.name === kwargs.defaultCheckedValue)) {defaultChecked = true;}
             return (
-				<label className="radio-inline">
+				<label key={value.ref} className="radio-inline">
 					<input type="radio" ref={this.setRef(id + value.ref)} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>
 					{value.name}
 				</label>);

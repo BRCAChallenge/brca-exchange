@@ -1,12 +1,9 @@
-/*eslint-env browser */
 'use strict';
+import React from 'react';
+import { Container as Grid, Row, Col } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
-const React = require('react');
-const {Grid, Row, Col} = require('react-bootstrap');
-const {Link} = require('react-router');
-
-const DonateDrive = React.createClass({
-
+class DonateDrive extends React.Component {
     render() {
         return (
             <Grid id="main-grid" className="help-page">
@@ -18,14 +15,14 @@ const DonateDrive = React.createClass({
                             <a href="https://www.cancer.net/research-and-advocacy/cancer-awareness-dates" target="_blank" rel="noreferrer">National HBOC Week</a> marks the transition between Ovarian Cancer
                             Awareness Month in September and Breast Cancer Awareness Month in October, recognizing the link between these cancers. An estimated 10% of breast cancers and 20% of ovarian cancers arise from heritable genetic risk,
                             most often from variation in the BRCA1 and BRCA2 genes; this variation also increases the risk of additional cancers including prostate,
-                            pancreatic and male breast cancer<sup><a href="https://www.cancer.net/cancer-types/hereditary-breast-and-ovarian-cancer" target="_blank" rel="noreferrer">1</a></sup>.  Knowing your risk can help you avoid these cancers.  A growing number of “previvors” were born
+                            pancreatic and male breast cancer<sup><a href="https://www.cancer.net/cancer-types/hereditary-breast-and-ovarian-cancer" target="_blank" rel="noreferrer">1</a></sup>.  Knowing your risk can help you avoid these cancers.  A growing number of &quot;previvors&quot; were born
                             predisposed to these cancers but have not had the disease, thanks in many cases to increased screening or risk-reducing surgeries.
                             We celebrate the courage of these individuals on September 30, National Previvor Day.
                         </p>
                         <p>
                             We at BRCA Exchange are passionate about helping individuals better understand and manage their heritable risk of cancer.
                             In partnership with the ENIGMA Consortium, the international authority on BRCA variant interpretation, we are gathering the evidence
-                            that scientists need to evaluate how genetic variation affects individuals’ disease risk.  Here are ways you can help.
+                            that scientists need to evaluate how genetic variation affects individuals&apos; disease risk.  Here are ways you can help.
                         </p>
                         <ol className="margin-ordered-list">
                             <li><Link to={`/whydonate`}>Donate!</Link>  Every dollar raised will help two or more families better understand their cancer risk.  We suggest donations of $40, to celebrate the 40K variants now available on BRCA Exchange.</li>
@@ -37,6 +34,6 @@ const DonateDrive = React.createClass({
             </Grid>
         );
     }
-});
+}
 
-module.exports = DonateDrive;
+export default DonateDrive;
