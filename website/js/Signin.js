@@ -34,7 +34,7 @@ class ResetPassword extends React.Component {
                 <Row>
                     <Col md={{ span: 4, offset: 4 }} sm={{ span: 6, offset: 3 }}>
                         <h3>Forgot your password?</h3>
-                        <div>Enter your email and we'll send you a link to reset your password.</div>
+                        <div>Enter your email and we&apos;ll send you a link to reset your password.</div>
                         <br/>
                         <ResetPasswordForm ref={this.contactFormRef}/>
 			<Button type="button" className="btn btn-primary w-100 mt-2" onClick={this.handleSubmit}>

@@ -1,4 +1,3 @@
-/*eslint-env browser */
 'use strict';
 
 import SourceReportsTile from "./components/SourceReportsTile";
@@ -1303,7 +1302,7 @@ class VariantDetail extends React.Component {
                                     {this.generateDiffRows(cols, submissions, true)}
                                 </tbody>
                             </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
                         </Col>
                     </Row>
                 );
@@ -1332,7 +1331,7 @@ class VariantDetail extends React.Component {
                                     {this.generateDiffRows(cols, submissions, true)}
                                 </tbody>
                             </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
                         </Col>
                     </Row>
                 );
@@ -1513,7 +1512,7 @@ class VariantDetail extends React.Component {
                                 {diffRows}
                             </tbody>
                         </Table>
-                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, as well as changes to corresponding submissions. Click "Show Detail View for this Variant" to see these changes.</p>
+                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, as well as changes to corresponding submissions. Click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
                     </Col>
                 </Row>
 

@@ -249,10 +249,10 @@ class SignupForm extends React.Component {
             errors.role = <span>Please select a <strong>Role</strong></span>;
         }
         if ((this._refs.email?.value || "") !== (this._refs.email_confirm?.value || "")) {
-            errors["email_confirm"] = <span>The <strong>emails</strong> don't match</span>;
+            errors["email_confirm"] = <span>The <strong>emails</strong> don&apos;t match</span>;
         }
         if ((this._refs.password?.value || "") !== (this._refs.password_confirm?.value || "")) {
-            errors["password_confirm"] = <span>The <strong>passwords</strong> don't match</span>;
+            errors["password_confirm"] = <span>The <strong>passwords</strong> don&apos;t match</span>;
         }
         if (this.state.captcha === "") {
             errors.captcha = <span>No <strong>CAPTCHA</strong> entered</span>;
