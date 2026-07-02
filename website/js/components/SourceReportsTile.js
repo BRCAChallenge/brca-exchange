@@ -29,6 +29,7 @@ export default class SourceReportsTile extends React.Component {
 
     defaultReportExpansions() {
         // keep track of how many non-enigma/bic entries we've seen
+	// (not a great solution b/c it introduces side effects into the map() below...)
         let nonEnigmaBics = 0;
 
         // temp because we may need to re-sort it
@@ -36,6 +37,7 @@ export default class SourceReportsTile extends React.Component {
 
         // sort the submissions if this source specifies a sort function
         if (this.props.reportBinding.sortBy) {
+	    // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
             submissions = submissions.concat().sort(this.props.reportBinding.sortBy);
         }
 
@@ -51,6 +53,8 @@ export default class SourceReportsTile extends React.Component {
             );
 
             if (!isEnigmaOrBic) {
+		// we only really care about the first, but this is the cleanest way to do this
+		// with a single var
                 nonEnigmaBics += 1;
             }
 
@@ -100,6 +104,7 @@ export default class SourceReportsTile extends React.Component {
 
         // sort the submissions if this source specifies a sort function
         if (this.props.reportBinding.sortBy) {
+	    // (side note: we concat() to clone before sort()ing, because sort() mutates the array)
             submissions = submissions.concat().sort(this.props.reportBinding.sortBy);
         }
 

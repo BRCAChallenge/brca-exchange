@@ -5,8 +5,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 // const ESLintPlugin = require('eslint-webpack-plugin'); // optional
 
-const databaseKey = require('./databaseKey');
-const keyParam = databaseKey.map(k => `key[]=${k}`).join('&');
 const mdih = require('./loaders/markdown-id-headers');
 
 const port = process.env.BRCAPORT || 8080;

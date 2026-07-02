@@ -466,6 +466,16 @@ class Database extends React.Component {
         });
     }
 
+	// XXX An oddity of the state flow here: we update the url when table settings
+	// change, so the page can be bookmarked, and forward/back buttons work. We
+	// do it on a timeout so we don't generate history entries for every keystroke,
+	// which would be bad for the user. Changing the url causes a re-render, passing
+	// in new props, which causes DataTable to overwrite its state with the
+	// same state that caused us to update the url. It's a bit circular.
+	// It would be less confusing if DataTable did not hold these params in state,
+	// but just read them from props, and all updates to the props occurred via
+	// transitionTo(). Consider for a later refactor.
+
     onChange(state) {
         if (this.props.show) {
             var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
@@ -570,6 +580,9 @@ class Database extends React.Component {
 }
 
 // get display name for a given key from VariantTable.js column specification
+// if we are in summary view mode, search summary view names then fall back to
+// all data, otherwise go straight to all data. Finally, if key is not found, replace
+// _ with space in the key and return that.
 function getDisplayName(key) {
     const researchMode = (localStorage.getItem("research-mode") === 'true');
     let displayName;
@@ -787,7 +800,13 @@ class VariantDetail extends React.Component {
             setTimeout(() => this.relayoutGrid(true), 0);
         }
 
-        // redirect logic (moved from componentWillUpdate)
+        // ensure that we're viewing the latest version of the variant, with the stable CA_ID URL.
+	// and redirect if we're not,
+	// unless the querystring param 'noRedirect=true' is specified, in which case we stay here.
+	// In the rare case there is no CA_ID, redirect to the latest version by numeric ID instead.
+	// (if someone *really* wants to link to the old variant, they may also specify 'noRedirectMsg=true'
+	// to silence the warning at the top of the page, too.)
+	// redirect logic (moved from componentWillUpdate)
         const { data } = this.state;
         const currentId = this.getParamId();
         if (data && data[0] && currentId !== data[0].CA_ID) {
@@ -1146,7 +1165,12 @@ class VariantDetail extends React.Component {
 
                 if (prop === "Mupit_Structure") {
                     rowItem = <MupitStructure variant={variant} prop={prop} onLoad={() => this.relayoutGrid()} />;
-                    if (util.getAminoAcidCode(variant["HGVS_Protein"]) === false) {
+                    /*
+                    Don't display mupit structures if they don't have an associated Amino Acid change.
+                    Note that there shouldn't be mupit structures for these variants in the first place,
+                    but there may be as getAminoAcidCode may change after the database is populated
+                    */
+		    if (util.getAminoAcidCode(variant["HGVS_Protein"]) === false) {
                         rowsEmpty += 1;
                         rowItem = false;
                     }
