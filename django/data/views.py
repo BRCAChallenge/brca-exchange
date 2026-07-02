@@ -382,11 +382,13 @@ def index(request):
 
         # create an in-memory StringIO object that we can use to buffer the results from the server
         # (it'll get released when it goes out of scope, so unlike a real file we don't need to close it)
-        f = io.StringIO()
+        f = io.BytesIO()
         query = "COPY ({}) TO STDOUT WITH DELIMITER '{}' CSV HEADER".format(query.query, '\t' if format == 'tsv' else ',')
         # HACK to add quotes around search terms
         query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
-        cursor.copy_expert(query, f)
+        with cursor.copy(query) as copy:
+            for block in copy:
+                f.write(block)
         f.seek(0)
 
         response = HttpResponse(f.read(), content_type='text/csv')
