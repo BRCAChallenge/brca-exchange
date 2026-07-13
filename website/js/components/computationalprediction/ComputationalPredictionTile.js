@@ -171,9 +171,9 @@ export default class ComputationalPredictionTile extends React.Component {
                     const isEmptyValue = util.isEmptyField(v);
                     if (k === 'Method') continue;
 
-		    const trKey = `cp-${group}-${k}`;
-		    if (k === "Publication" && v !== '-') {
-			additionalRows.push(
+                    const trKey = `cp-${group}-${k}`;
+                    if (k === "Publication" && v !== '-') {
+                        additionalRows.push(
                             <tr key={`${trKey}-pmid`} className={ (isEmptyValue && this.props.hideEmptyItems) ? rowClass + " variantfield-empty" : rowClass }>
                                 <KeyInline tableKey={k} noHelpLink={false}
                                     tooltip={this.props.tooltips && this.props.tooltips[slugify(k)]}
@@ -199,7 +199,7 @@ export default class ComputationalPredictionTile extends React.Component {
                             </tr>
                         );
                     }
-		}
+                }
 
                 const allRows = additionalRows.concat(rows);
 
