@@ -1,15 +1,35 @@
-/*global grecaptcha: false */
 'use strict';
 
 import React from 'react';
 import content from './content';
 import RawHTML from './RawHTML';
-var countries = require('raw-loader!../content/countries.txt').default.split("\n");
+var countries = require('raw-loader!../content/countries.txt')["default"].split("\n");
 var $ = require('jquery');
 var _ = require('underscore');
 import config from './config';
 const { Container: Grid, Row, Col, Button} = require('react-bootstrap');
 const { withRouter } = require('react-router-dom');
+
+// ---- Google Maps loader (async, no jsapi) ----
+function loadGoogleMaps(key, cb, onNoKey) {
+  if (!key) {
+    // If no key, keep registration functional (just skip lat/lng enrichment)
+    if (typeof onNoKey === 'function') onNoKey();
+    return;
+  }
+  if (window.google && window.google.maps) {
+    cb();
+    return;
+  }
+  const script = document.createElement('script');
+  window.__signupInitMap = cb;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
+    key
+  )}&callback=__signupInitMap&loading=async`;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+}
 
 export const Role = {
     ROLE_DATA_PROVIDER: 12,
@@ -180,7 +200,7 @@ class SignupInner extends React.Component {
         } else {
             this.setState({error: <strong>Some information was missing:</strong>, fieldErrors: formErrors });
         }
-    }
+    };
 }
 
 export function $c(staticClassName, conditionalClassNames) {
@@ -229,10 +249,10 @@ class SignupForm extends React.Component {
             errors.role = <span>Please select a <strong>Role</strong></span>;
         }
         if ((this._refs.email?.value || "") !== (this._refs.email_confirm?.value || "")) {
-            errors["email_confirm"] = <span>The <strong>emails</strong> don't match</span>;
+            errors["email_confirm"] = <span>The <strong>emails</strong> don&apos;t match</span>;
         }
         if ((this._refs.password?.value || "") !== (this._refs.password_confirm?.value || "")) {
-            errors["password_confirm"] = <span>The <strong>passwords</strong> don't match</span>;
+            errors["password_confirm"] = <span>The <strong>passwords</strong> don&apos;t match</span>;
         }
         if (this.state.captcha === "") {
             errors.captcha = <span>No <strong>CAPTCHA</strong> entered</span>;
@@ -272,7 +292,7 @@ class SignupForm extends React.Component {
 
         const roleVal = this._refs.role ? this._refs.role.value : "NONE";
         const roleLabel = Role.get(roleVal) ? Role.get(roleVal)[2] : "";
-        
+
 	var data = {
             "image": this.state.file,
             "email": this._refs.email?.value,
@@ -386,7 +406,7 @@ class SignupForm extends React.Component {
         var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={this.setRef(id)}>
-                <option key={id + "NONE"} value=""></option>
+                <option key={id + "NONE"} value="" />
                 {options}
             </select>
         );
@@ -430,7 +450,7 @@ class SignupForm extends React.Component {
         return this.renderField(id, "", checkbox);
     }
     renderCAPTCHA(id, label) {
-        return this.renderField(id, label, <div ref={this.setRef("signupCAPTCHA")}></div>);
+        return this.renderField(id, label, <div ref={this.setRef("signupCAPTCHA")} />);
     }
     renderField(id, label, field) {
         return (
@@ -447,24 +467,3 @@ class SignupForm extends React.Component {
 const Signup = withRouter(SignupInner);
 export { Signup };
 export default Signup;
-
-// ---- Google Maps loader (async, no jsapi) ----
-function loadGoogleMaps(key, cb, onNoKey) {
-  if (!key) {
-    // If no key, keep registration functional (just skip lat/lng enrichment)
-    if (typeof onNoKey === 'function') onNoKey();
-    return;
-  }
-  if (window.google && window.google.maps) {
-    cb();
-    return;
-  }
-  const script = document.createElement('script');
-  window.__signupInitMap = cb;
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
-    key
-  )}&callback=__signupInitMap&loading=async`;
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
-}

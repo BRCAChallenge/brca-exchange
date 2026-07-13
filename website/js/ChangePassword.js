@@ -1,7 +1,6 @@
 'use strict';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Container as Grid, Row, Col, Button } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import { $c } from './Signup';
@@ -9,12 +8,12 @@ import $ from 'jquery';
 import config from './config';
 
 class ChangePasswordInner extends React.Component {
-    state = { success: null, invalid_token: false, error: null };
+    state = { success: null, invalidToken: false, error: null };
     contactFormRef = React.createRef();
 
     receiveToken = (data) => {
         if (data && data.invalid_token) {
-            this.setState({ invalid_token: true });
+            this.setState({ invalidToken: true });
         }
     };
 
@@ -31,7 +30,7 @@ class ChangePasswordInner extends React.Component {
 
     render() {
         // If the token is invalid, show an error and don't show the form.
-        if (this.state.invalid_token) {
+        if (this.state.invalidToken) {
             return (
 				<Grid id="main-grid"> <Row id="message">
 					<div className="alert alert-danger">

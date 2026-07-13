@@ -1,4 +1,3 @@
-/*eslint-env browser */
 'use strict';
 
 import React from 'react';
@@ -22,9 +21,9 @@ class WhyDonate extends React.Component {
                             Your donations are tax-deductible. Donations to support BRCA Exchange are made through
                             the UCSC Foundation (Tax ID: 23-7394590), a registered 501(c)3.
                         </p>
-                        <p className="small"><sup>1 </sup>"<a href="https://www.cdc.gov/mmwr/volumes/66/ss/ss6615a1.htm">
+                        <p className="small"><sup>1 </sup>&quot;<a href="https://www.cdc.gov/mmwr/volumes/66/ss/ss6615a1.htm">
                             BRCA Genetic Testing and Receipt of Preventive Interventions Among Women Aged 18–64 Years with
-                            Employer-Sponsored Health Insurance in Nonmetropolitan and Metropolitan Areas — United States, 2009–2014</a>”,
+                            Employer-Sponsored Health Insurance in Nonmetropolitan and Metropolitan Areas — United States, 2009–2014</a>&quot;,
                             Center for Disease Control and Prevention.
                         </p>
                         <p className="small"><sup>2 </sup>

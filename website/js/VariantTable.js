@@ -1,4 +1,3 @@
-/*global module: false, require: false, window: false */
 'use strict';
 
 var {computeReviewStatusScore} = require("./components/VariantSubmitter");
@@ -21,11 +20,11 @@ function buildHeader(onClick, title) {
     return (
         <span>
             {title}
-            <span 
+            <span
                 onClick={ev => {ev.stopPropagation(); onClick(title); }}
                 className='help fa fa-question-circle'
-                style={{cursor: 'pointer', 
-			fontSize: '0.8em', 
+                style={{cursor: 'pointer',
+			fontSize: '0.8em',
 			color: '#888',
 			position: 'relative',
 			top: '-8px',
@@ -372,7 +371,7 @@ const researchModeGroups = [
 // subColumns populate the column selection checkboxes.
 // They should match the variant detail groupings unless hideFromColumnSelection is true.
 const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !group.hideFromColumnSelection; }), function (group) {
-    if (group.hasOwnProperty('innerCols')) {
+    if (Object.prototype.hasOwnProperty.call(group, 'innerCols')) {
         return {
             subColTitle: group.groupTitle,
             // hide dummy columns from column selection
@@ -384,7 +383,7 @@ const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !
                 };
             })
         };
-    } else if (group.hasOwnProperty('reportBinding') && group.reportBinding.hasOwnProperty('cols')) {
+    } else if (Object.prototype.hasOwnProperty.call(group, 'reportBinding') && Object.prototype.hasOwnProperty.call(group.reportBinding, 'cols')) {
         return {
             subColTitle: group.groupTitle,
             // hide dummy columns from column selection
@@ -396,7 +395,7 @@ const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !
                 };
             })
         };
-    } else if (group.hasOwnProperty('innerGroups')) {
+    } else if (Object.prototype.hasOwnProperty.call(group, 'innerGroups')) {
         let subCols = group.innerGroups.map(function(innerGroup) {
             // hide dummy columns from column selection
             return _.map(_.filter(innerGroup.data, ({dummy}) => !dummy), function (col) {
@@ -598,7 +597,7 @@ const researchModeColumns = [
 ];
 
 
-/*eslint-enable camelcase */
+
 
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
 // click and drag: if mouseup and mousedown occur on the same element, a click event is fired even if
@@ -680,17 +679,17 @@ var ResearchVariantTableSupplier = function (Component) {
 
             // Get query params.
             const urlParams = this.getQuery();
-            const useQueryParams = urlParams.hasOwnProperty("hide") || urlParams.hasOwnProperty("hideSources");
+            const useQueryParams = Object.prototype.hasOwnProperty.call(urlParams, "hide") || Object.prototype.hasOwnProperty.call(urlParams, "hideSources");
 
             if (useQueryParams) {
                 // If query params are present, use them for settings.
-                if (urlParams.hasOwnProperty("hide")) {
+                if (Object.prototype.hasOwnProperty.call(urlParams, "hide")) {
                     const columnsToHide = urlParams.hide;
                     for (let i = 0; i < columnsToHide.length; i++) {
                         selectedColumns[columnsToHide[i]] = false;
                     }
                 }
-                if (urlParams.hasOwnProperty("hideSources")) {
+                if (Object.prototype.hasOwnProperty.call(urlParams, "hideSources")) {
                     const sourcesToHide = urlParams.hideSources;
                     for (let i = 0; i < sourcesToHide.length; i++) {
                         selectedSources[sourcesToHide[i]] = 0;
@@ -780,8 +779,8 @@ var ResearchVariantTableSupplier = function (Component) {
 
         filterFormCols = (subColList, columnSelection) => {
             return _.map(subColList, ({title, prop}) =>
-                <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop || title} label={prop || title} title={title}
-                                initialCheck={columnSelection}/>);
+                (<ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop || title} label={prop || title} title={title}
+                                initialCheck={columnSelection}/>));
         };
 
         toggleSubcolOpen = (subColTitle) => {
@@ -799,7 +798,7 @@ var ResearchVariantTableSupplier = function (Component) {
 
         getColumnSelectors() {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
-                <Col sm={6} md={4} key={subColTitle}>
+                (<Col sm={6} md={4} key={subColTitle}>
                     <Card className="mb-3">
                         <Card.Header
                             onClick={() => this.toggleSubcolOpen(subColTitle)}
@@ -818,7 +817,7 @@ var ResearchVariantTableSupplier = function (Component) {
                             </div>
                         </Collapse>
                     </Card>
-                </Col>
+                </Col>)
             );
             return (<div className='control-label'>
                 <Card>
@@ -854,14 +853,14 @@ var ResearchVariantTableSupplier = function (Component) {
 
         getFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
-                <Col sm={6} md={3} key={name}>
+                (<Col sm={6} md={3} key={name}>
                     <Form.Check
                         type="checkbox"
                         onChange={v => this.setSource(name, v)}
                         checked={value > 0}
                         label={this.getSourceName(name)}
                     />
-                </Col>
+                </Col>)
             );
             return (<div className='source-filters'>
                 <Card className="top-buffer">

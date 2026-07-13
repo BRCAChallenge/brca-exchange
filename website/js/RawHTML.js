@@ -1,10 +1,8 @@
-/*global module: false, require: false */
 'use strict';
 
 import {HARDLINK_GLYPH, idHelpClicked} from "./components/help/HardlinkHelper";
 
 const React = require('react');
-const ReactDOM = require('react-dom');
 const $ = require('jquery');
 const PropTypes = require('prop-types');
 

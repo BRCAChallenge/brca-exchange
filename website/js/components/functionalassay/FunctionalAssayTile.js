@@ -25,7 +25,7 @@ export default class FunctionalAssayTile extends React.Component {
         return (
             <div className="func-assay-extras">
                 <span className="func-assay-result" style={{float: 'right', paddingRight: '10px'}}>Report: {result}</span>
-                <div style={{clear: 'both'}}></div>
+                <div style={{clear: 'both'}} />
             </div>
         );
     }

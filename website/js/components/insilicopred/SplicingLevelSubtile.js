@@ -1,5 +1,3 @@
-/*eslint-env browser */
-/*global require: false, module */
 'use strict';
 
 import React from "react";
@@ -243,11 +241,11 @@ class SpliceSiteImpactTable extends React.Component {
                 <tbody>
                 {
                     splicingImpactFields.fields.map(x =>
-                        <tr key={x.key} className={prior === x.prob && (!x.check || x.check(data)) ? 'highlighted' : ''}>
+                        (<tr key={x.key} className={prior === x.prob && (!x.check || x.check(data)) ? 'highlighted' : ''}>
                             <td className={`pathos-prob-label-${x.key}`}>{x.label}</td>
                             <td>{splicingImpactFields.zScoreLabels[type][x.key]}</td>
                             <td>{x.prob}</td>
-                        </tr>
+                        </tr>)
                     )
                 }
                 </tbody>
@@ -295,15 +293,16 @@ class DeNovoDonorPathogenicityTable extends React.Component {
                                         <td colSpan={3} className="note-row">{x.text}</td>
                                     </tr>
                                 );
-                            case 'cond':
+                            case 'cond': {
                                 const found = x.options.find(x => x.check(data));
                                 return (<tr key={i}>
                                     <td colSpan={3} className="note-row">
                                         { found ? found.text : 'n/a'}
                                     </td>
                                 </tr>);
+			    }
                             default:
-                                return (<tr><td colSpan={3}>Unknown type: {x.type}</td></tr>);
+                                return (<tr key={i}><td colSpan={3}>Unknown type: {x.type}</td></tr>);
                         }
                     })
                 }

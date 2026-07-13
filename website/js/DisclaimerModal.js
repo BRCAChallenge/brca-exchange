@@ -1,4 +1,3 @@
-/*global module: false, require: false */
 'use strict';
 
 import React from 'react';
@@ -8,7 +7,7 @@ import content from './content';
 
 class DisclaimerModal extends React.Component {
     state = { showModal: false };
-    
+
     close = () => {
         this.setState({ showModal: false });
     };

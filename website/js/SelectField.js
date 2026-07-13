@@ -1,4 +1,3 @@
-/*global module: false, require: false */
 'use strict';
 
 import { FormGroup, FormLabel, FormSelect } from 'react-bootstrap';

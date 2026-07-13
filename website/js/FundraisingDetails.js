@@ -1,4 +1,3 @@
-/*eslint-env browser */
 'use strict';
 
 const React = require('react');
@@ -13,19 +12,19 @@ class FundraisingDetails extends React.PureComponent {
                 <Row>
                     <Col sm={{ span: 10, offset: 1}}>
                         <RawHTML html={content.pages.fundraisingDetails} />
-                        <p className="small margin-top-forty"><sup>1 </sup>“<a href="https://www.cdc.gov/mmwr/volumes/66/ss/ss6615a1.htm">
+                        <p className="small margin-top-forty"><sup>1 </sup>&quot;<a href="https://www.cdc.gov/mmwr/volumes/66/ss/ss6615a1.htm">
                             BRCA Genetic Testing and Receipt of Preventive Interventions Among Women Aged 18–64 Years with
                             Employer-Sponsored Health Insurance in Nonmetropolitan and Metropolitan Areas — United States,
-                            2009–2014</a>", Center for Disease Control and Prevention.
+                            2009–2014</a>&quot;, Center for Disease Control and Prevention.
                         </p>
                         <p className="small"><sup>2 </sup>
-                            “<a href="https://www.jax.org/education-and-learning/clinical-and-continuing-education/cancer-resources/hereditary-breast-and-ovarian-cancer-syndrome-factsheet">
+                            &quot;<a href="https://www.jax.org/education-and-learning/clinical-and-continuing-education/cancer-resources/hereditary-breast-and-ovarian-cancer-syndrome-factsheet">
                                 Hereditary Breast and Ovarian Cancer Syndrome
                             </a>
-                            ", The Jackson Laboratory.
+                            &quot;, The Jackson Laboratory.
                         </p>
-                        <p className="small"><sup>3 </sup>“<a href="https://gnomad.broadinstitute.org">
-                            The Genome Aggregation Database (gnomAD)</a>", The Broad Institute.
+                        <p className="small"><sup>3 </sup>&quot;<a href="https://gnomad.broadinstitute.org">
+                            The Genome Aggregation Database (gnomAD)</a>&quot;, The Broad Institute.
                         </p>
                         <p className="small"><sup>4 </sup><a href="https://www.census.gov/popclock/">
                             https://www.census.gov/popclock/</a>

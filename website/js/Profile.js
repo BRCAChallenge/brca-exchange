@@ -1,7 +1,6 @@
 'use strict';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import _ from 'underscore';
 import config from './config';
@@ -9,7 +8,7 @@ import { Container as Grid, Row, Col, Button } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import auth from './auth';
 import { Role, $c } from './Signup';
-var countries = require('raw-loader!../content/countries.txt').default.split('\n');
+var countries = require('raw-loader!../content/countries.txt')["default"].split('\n');
 
 class ProfileInner extends React.Component {
     state = { success: null, error: null, fieldErrors: null };
@@ -28,8 +27,8 @@ class ProfileInner extends React.Component {
     render() {
         var message;
         if (this.state.error != null) {
-            let fieldErrors = _.map(this.state.fieldErrors, err => (<li>{err}</li>));
-            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map(group => <Col md={3}><ul>{group}</ul></Col>);
+            let fieldErrors = _.map(this.state.fieldErrors, (err, index) => (<li key={index}>{err}</li>));
+            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map((group, index) => <Col key={index} md={3}><ul>{group}</ul></Col>);
             message = (
                 <div className="alert alert-danger">
                     <Row><Col md={6}>{this.state.error}</Col></Row>
@@ -232,7 +231,7 @@ class EditProfileForm extends React.Component {
     }
 
     getFormData() {
-        const title = 
+        const title =
 	    (this.getNode('titlemd') && this.getNode('titlemd').checked && this.getNode('titlemd').value) ||
             (this.getNode('titlephd') && this.getNode('titlephd').checked && this.getNode('titlephd').value) ||
             (this.getNode('titleother') && this.getNode('titleother').checked && (this.getNode('titlecustom') ? this.getNode('titlecustom').value : ''));
@@ -379,7 +378,7 @@ class EditProfileForm extends React.Component {
         var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, label,
             <select className="form-control" id={id} ref={this.setRef(id)} value={defaultValue || ''} onChange={handleChange}>
-                <option key={id + "NONE"} value=""></option>
+                <option key={id + "NONE"} value="" />
                 {options}
             </select>
         );
@@ -390,7 +389,7 @@ class EditProfileForm extends React.Component {
         var otherValue = kwargs.defaultCheckedValue;
 		// XXX Not sure why eslint flags this bind, because 'this' is used in the handlers within the
 		// body of the function.
-        var options = kwargs.values.map((value) => { //eslint-disable-line no-extra-bind
+        var options = kwargs.values.map((value) => {
             var handleRadioChange = () => {var oldData = this.state.data; oldData[id] = value.name; this.setState({data: oldData}); };
             var defaultChecked = false;
             if (value.name === kwargs.defaultCheckedValue) {
@@ -399,7 +398,7 @@ class EditProfileForm extends React.Component {
             }
             if (value.name === 'Other' && !kwargs.values.some(opt => opt.name === kwargs.defaultCheckedValue)) {defaultChecked = true;}
             return (
-				<label className="radio-inline">
+				<label key={value.ref} className="radio-inline">
 					<input type="radio" ref={this.setRef(id + value.ref)} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>
 					{value.name}
 				</label>);

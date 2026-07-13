@@ -2,7 +2,6 @@
 
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import PureRenderMixin from './PureRenderMixin'; // deep-equals version of PRM
 import { Container as Grid, Col, Row, Button, Table } from 'react-bootstrap';
 import backend from './backend';
 import config from './config';
@@ -17,6 +16,27 @@ import auth from './auth';
 // RxJS imports
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+
+// ---- Google Maps loader (async, no jsapi) ----
+function loadGoogleMaps(key, cb) {
+  if (!key) {
+    console.warn('Maps key missing; skipping map init');
+    return;
+  }
+  if (window.google && window.google.maps) {
+    cb();
+    return;
+  }
+  const script = document.createElement('script');
+  // async load + callback to your init function
+  window.__initMap = cb;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
+    key
+  )}&callback=__initMap&loading=async`;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+}
 
 class Community extends React.Component {
     constructor(props) {
@@ -45,7 +65,7 @@ class Community extends React.Component {
             () => this.setState({error: 'Problem connecting to server'}));
     };
 
-    setStateFetch =(opts) => {
+    setStateFetch = (opts) => {
         var newState = {...this.state, ...opts};
         this.setState(newState);
         this.fetch(newState);
@@ -190,13 +210,13 @@ class Community extends React.Component {
                             totalPages={totalPages}
                             onChangePage={this.onChangePage} />
                         */}
-                        
+
                         {/* TEMPORARY: Basic pagination buttons until Pagination component is available */}
                         <div className="pagination pull-right-sm" style={{display: 'inline-block', marginLeft: '20px'}}>
-                            <Button 
+                            <Button
                                 variant="secondary"
                                 size="sm"
-                                disabled={page === 0} 
+                                disabled={page === 0}
                                 onClick={() => this.onChangePage(page - 1)}
                                 style={{marginRight: '5px'}}
                             >
@@ -205,10 +225,10 @@ class Community extends React.Component {
                             <span style={{padding: '0 10px'}}>
                                 Page {page + 1} of {totalPages}
                             </span>
-                            <Button 
+                            <Button
                                 variant="secondary"
                                 size="sm"
-                                disabled={page >= totalPages - 1} 
+                                disabled={page >= totalPages - 1}
                                 onClick={() => this.onChangePage(page + 1)}
                             >
                                 Next
@@ -270,9 +290,9 @@ class CommunityMap extends React.Component {
 
             var legendControl = document.createElement('div');
             var roleMarkers = Role.options.map(role =>
-                <div key={`role-${role[0]}`} className="map-legend-col" data-role={role[0]}>
+                (<div key={`role-${role[0]}`} className="map-legend-col" data-role={role[0]}>
                     <img src={require(`./img/map/${role[0]}key.png`)} /> {role.length === 3 ? role[2] : role[1]}
-                </div>
+                </div>)
             );
             roleMarkers = _.values(_.groupBy(roleMarkers, (item, index) => index % 4)).map((group, i) => <div key={`legend-row-${i}`} className="map-legend-row">{group}</div>);
 	    legendControl.innerHTML = ReactDOMServer.renderToStaticMarkup(
@@ -370,7 +390,7 @@ class CommunityMap extends React.Component {
         this.updateMap();
     }
 
-    componentWillUnmount() { 
+    componentWillUnmount() {
         window.removeEventListener('resize', this.handleResize);
         if (this.subs) {
             this.subs.unsubscribe();
@@ -378,7 +398,7 @@ class CommunityMap extends React.Component {
     }
 
     render() {
-        return <div id="communityMap"></div>;
+        return <div id="communityMap" />;
     }
 }
 
@@ -432,27 +452,6 @@ class CommunitySearch extends React.Component {
             </form>
         </div>);
     }
-}
-
-// ---- Google Maps loader (async, no jsapi) ----
-function loadGoogleMaps(key, cb) {
-  if (!key) {
-    console.warn('Maps key missing; skipping map init');
-    return;
-  }
-  if (window.google && window.google.maps) {
-    cb();
-    return;
-  }
-  const script = document.createElement('script');
-  // async load + callback to your init function
-  window.__initMap = cb;
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
-    key
-  )}&callback=__initMap&loading=async`;
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
 }
 
 export default withRouter(Community);

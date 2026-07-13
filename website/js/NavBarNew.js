@@ -69,7 +69,7 @@ class NavBarNew extends React.Component {
             this.state.showModal !== nextState.showModal ||
             this.props.path.split(/\?/)[0] !== nextProps.path.split(/\?/)[0];
     }
-    
+
     activePath(path, tab) {
         var navPath = (path === "") ? "home" : path.split("/")[0];
         return ((navPath === tab) ? "active" : "");
@@ -87,7 +87,7 @@ class NavBarNew extends React.Component {
                 this.forceUpdate();
             });
         }
-    }
+    };
 
     render() {
         const {path} = this.props;
@@ -128,9 +128,11 @@ class NavBarNew extends React.Component {
                 			<NavDropdown.Item href="https://brcaexchange.org/blog">Blog</NavDropdown.Item>
               			</NavDropdown>
             			</Nav>
-          		</Navbar.Collapse>    
+          		</Navbar.Collapse>
+		{/* Beta header disabled - re-enable by removing this comment block
 		{this.state.isBeta && false && <div className='beta-header'>This is a beta version of the BRCA Exchange. Please note that some variant information and website features displayed here are under review - for the most up-to-date finalized information, and to join our community, please refer to <a href="https://brcaexchange.org">www.brcaexchange.org</a>. If you encounter any issues while using the beta website, please report them to <a href="mailto:brcaexchange@gmail.com">brcaexchange@gmail.com</a>.</div>}
-                </Navbar>
+                */}
+		</Navbar>
 
                 {
                     this.state.showModal &&

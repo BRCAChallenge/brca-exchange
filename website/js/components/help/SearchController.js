@@ -157,7 +157,7 @@ class SearchController extends React.Component {
                 <input type="text" className="form-control" placeholder="Search" value={this.state.searchTerm} onChange={this.searchChanged} />
                 {
                     (this.state.matched > 0) && (
-			<span className="input-group-text"> 
+			<span className="input-group-text">
                             { this.state.currentMark !== null && `${this.state.currentMark + 1} / ` }
                             { this.state.matched}
 			</span>

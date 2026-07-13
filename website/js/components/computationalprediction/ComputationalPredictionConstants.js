@@ -1,4 +1,3 @@
-/*global module: false, require: false, URL: false, Blob: false */
 'use strict';
 
 const ComputationalPredictionConstants = [{
