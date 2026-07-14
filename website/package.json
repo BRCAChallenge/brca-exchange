@@ -26,6 +26,7 @@
     "start": "webpack serve --mode development --open --history-api-fallback",
     "build": "webpack --mode production",
     "build:prod": "webpack --config webpack.prod.js --mode production --devtool source-map",
+    "build:test": "webpack --config webpack.test.js",
     "prebuild": "npm run clean",
     "test": "mocha --timeout 0 build/testBundle"
   },
@@ -41,8 +42,8 @@
     "css-loader": "^7.1.2",
     "d3-dsv": "^3.0.1",
     "eslint": "^9.14.0",
-    "eslint-plugin-react": "^7.37.2",
     "eslint-formatter-junit": "^8.40.0",
+    "eslint-plugin-react": "^7.37.2",
     "exports-loader": "^5.0.0",
     "expose-loader": "^5.0.0",
     "file-loader": "^6.2.0",

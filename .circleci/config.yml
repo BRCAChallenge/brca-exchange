@@ -21,6 +21,10 @@ jobs:
              mkdir ~/test_reports
              npm run lint -- -f junit -o ~/test_reports/lint-results.xml
        - run:
+           name: build JavaScript test bundle
+           working_directory: ~/project/website
+           command: npm run build:test      
+       - run:
            name: run JavaScript tests
            working_directory: ~/project/website
            command: npm run test -- -R xunit --reporter-options output=~/test_reports/test-results.xml
