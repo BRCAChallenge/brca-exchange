@@ -38,7 +38,7 @@ jobs:
              source ~/project/website_virtualenv/bin/activate
              pip3 install -r ~/project/website/requirements.txt
              pip3 install -r ~/project/website/test-requirements.txt
-             cd ~/project/website/django && python3 manage.py migrate
+             cd ~/project/django && python3 manage.py migrate
              python3 manage.py test
        - store_test_results:
            path: ~/test_reports
