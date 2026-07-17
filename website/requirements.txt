@@ -1,5 +1,5 @@
 # Django 5.2 LTS
-Django==5.2.13
+Django==5.2.15
 
 # Django extensions
 django-cors-headers==4.7.0
