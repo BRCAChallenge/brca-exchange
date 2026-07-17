@@ -23,7 +23,7 @@ jobs:
        - run:
            name: build JavaScript test bundle
            working_directory: ~/project/website
-           command: npm run build:test      
+           command: npm run build:test
        - run:
            name: run JavaScript tests
            working_directory: ~/project/website
@@ -86,8 +86,24 @@ jobs:
                  StrictHostKeyChecking no
              EOF
        - run:
-           name: deploying to the beta machine 
+           name: deploying to the beta machine
            command: HOST=brcaexchange-prod.gi.ucsc.edu ~/project/deployment/deploy-dev
+   test-pipeline:
+     docker:
+       - image: cimg/base:current
+     steps:
+       - checkout
+       - run:
+           name: Run tests
+           command: echo "Tests disabled"
+   test-splicing-pipeline:
+     docker:
+       - image: cimg/base:current
+     steps:
+       - checkout
+       - run:
+           name: Run tests
+           command: echo "Tests disabled"
 workflows:
    version: 2
    build-n-deploy:
@@ -110,3 +126,13 @@ workflows:
                only: /v[0-9]+(\.[0-9]+)*/
              branches:
                ignore: /.*/
+   test-back-end:
+     jobs:
+       - test-pipeline:
+           filters:
+             tags:
+               only: /.*/
+       - test-splicing-pipeline:
+           filters:
+             tags:
+               only: /.*/
