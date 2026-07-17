@@ -1,11 +1,10 @@
 'use strict';
 
-var React = require('react');
-var moment = require('moment');
-var _ = require('underscore');
+import moment from 'moment';
+import _ from 'underscore';
 
 // keys that contain date values that need reformatting for the ui
-const dateKeys = [
+export const dateKeys = [
     "Date_Last_Updated_ClinVar",
     "DateSignificanceLastEvaluated_ClinVar",
     "Date_last_evaluated_ENIGMA",
@@ -39,7 +38,7 @@ const AminoAcids = {
 };
 
 
-function isEmptyField(value) {
+export function isEmptyField(value) {
     if (Array.isArray(value)) {
         value = value[0];
     }
@@ -52,15 +51,15 @@ function isEmptyField(value) {
     return v === '' || v === '-' || v === 'None';
 }
 
-function isNumeric(n) {
+export function isNumeric(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-function sentenceCase(str) {
+export function sentenceCase(str) {
     return str.replace(/\b\S/g, (t) => t.toUpperCase() );
 }
 
-function capitalize(w) {
+export function capitalize(w) {
     return w.charAt(0).toUpperCase() + w.substr(1);
 }
 
@@ -73,7 +72,7 @@ function extractValInsideParens(str) {
 // attempts to parse the given date string using a variety of formats,
 // returning the formatted result as something like '08 September 2016'.
 // just returns the input if every pattern fails to match
-function normalizeDateFieldDisplay(value) {
+export function normalizeDateFieldDisplay(value) {
     // extend this if there are more formats in the future
     const formats = ["MM/DD/YYYY", "YYYY-MM-DD"];
 
@@ -91,7 +90,7 @@ function normalizeDateFieldDisplay(value) {
 
 // replaces commas with comma-spaces to wrap long lines better, removes blank entries from comma-delimited lists,
 // and normalizes blank/null values to a single hyphen
-function normalizedFieldDisplay(value, prop) {
+export function normalizedFieldDisplay(value, prop) {
     if (value) {
         // leave underscores in Refence Sequence field
         if (prop !== "Reference_Sequence" && prop !== "VR_ID") {
@@ -118,7 +117,7 @@ function normalizedFieldDisplay(value, prop) {
 }
 
 
-function generateLinkToGenomeBrowser(prop, value, hgvs) {
+export function generateLinkToGenomeBrowser(prop, value, hgvs) {
     let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
     let genomicCoordinate = value;
     let genomicCoordinateElements = genomicCoordinate.split(':');
@@ -131,11 +130,11 @@ function generateLinkToGenomeBrowser(prop, value, hgvs) {
     if (!isEmptyField(hgvs)) {
         value = hgvs;
     }
-    return <a target="_blank" href={genomeBrowserUrl}>{value}</a>;
+    return <a target="_blank" href={genomeBrowserUrl} rel="noreferrer">{value}</a>;
 }
 
 
-function reformatDate(date) { //handles single dates or an array of dates
+export function reformatDate(date) { //handles single dates or an array of dates
     if (isEmptyField(date)) {
         return date;
     }
@@ -159,18 +158,18 @@ function formatConditionLink(db, id) {
         // No url for other sources
         return db;
     }
-    return <a target="_blank" href={formattedDbId}>{db}</a>;
+    return <a target="_blank" href={formattedDbId} rel="noreferrer">{db}</a>;
 }
 
 
-function getFormattedFieldByProp(prop, variant) {
+export function getFormattedFieldByProp(prop, variant) {
     let rowItem;
 
     if (prop === "Gene_Symbol") {
         rowItem = <i>{variant[prop]}</i>;
     } else if (prop === "URL_ENIGMA") {
         if (variant[prop].length) {
-            rowItem = <a target="_blank" href={variant[prop]}>link to multifactorial analysis</a>;
+            rowItem = <a target="_blank" href={variant[prop]} rel="noreferrer">link to multifactorial analysis</a>;
         }
     } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
         // Link all clinvar submissions back to clinvar
@@ -186,10 +185,10 @@ function getFormattedFieldByProp(prop, variant) {
             }
 
             if (i < (accessions.length - 1)) {
-                rowItem.push(<span><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>,</span>);
+                rowItem.push(<span key={`scv-${accessions[i].trim()}-${i}`}><a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()} rel="noreferrer">{displayText}</a>,</span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()}>{displayText}</a>);
+                rowItem.push(<a key={`scv-${accessions[i].trim()}-${i}`} target="_blank" href={"http://www.ncbi.nlm.nih.gov/clinvar/?term=" + accessions[i].trim()} rel="noreferrer">{displayText}</a>);
             }
         }
     } else if (prop === "Condition_Value_ClinVar" && !isEmptyField(variant['Condition_DB_ID_ClinVar'])) {
@@ -224,22 +223,22 @@ function getFormattedFieldByProp(prop, variant) {
         rowItem = [];
         for (let i = 0; i < ids.length; i++) {
             if (i < (ids.length - 1)) {
-                rowItem.push(<span><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>, </span>);
+                rowItem.push(<span key={`lovd-${ids[i].trim()}-${i}`}><a target="_blank" href={"http://lovd.nl/" + ids[i].trim()} rel="noreferrer">{ids[i]}</a>, </span>);
             } else {
                 // exclude trailing comma
-                rowItem.push(<a target="_blank" href={"http://lovd.nl/" + ids[i].trim()}>{ids[i]}</a>);
+                rowItem.push(<a key={`lovd-${ids[i].trim()}-${i}`} target="_blank" href={"http://lovd.nl/" + ids[i].trim()} rel="noreferrer">{ids[i]}</a>);
             }
         }
     } else if (prop === "Assertion_method_citation_ENIGMA") {
-        rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/">Enigma Rules version Mar 26, 2015</a>;
+        rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/" rel="noreferrer">Enigma Rules version Mar 26, 2015</a>;
     } else if (prop === "Source_URL") {
         if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
-            rowItem = <a target="_blank" href={variant[prop].split(',')[0]}>link to multifactorial analysis</a>;
+            rowItem = <a target="_blank" href={variant[prop].split(',')[0]} rel="noreferrer">link to multifactorial analysis</a>;
         }
     } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
         const pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
-        rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), piece =>
-            (/^[0-9]+$/.test(piece)) ? <a target="_blank" href={pubmed + piece}>PMID: {piece}</a> : piece);
+        rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), (piece, idx) =>
+            (/^[0-9]+$/.test(piece)) ? <a key={`pmid-${piece}-${idx}`} target="_blank" href={pubmed + piece} rel="noreferrer">PMID: {piece}</a> : piece);
     } else if (prop === "HGVS_cDNA") {
         rowItem = variant[prop].split(":")[1];
     } else if (prop === "HGVS_Protein") {
@@ -247,7 +246,7 @@ function getFormattedFieldByProp(prop, variant) {
     } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")];
-        rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number})</small>];
+        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({count} of {number})</small>];
     } else if (prop === "Allele_frequency_genome_GnomADv3" || prop === "Allele_frequency_exome_GnomAD") {
         let flag;
         if (prop === "Allele_frequency_genome_GnomADv3") {
@@ -256,7 +255,7 @@ function getFormattedFieldByProp(prop, variant) {
             flag = variant.Flags_GnomAD;
         }
         if (!isEmptyField(flag)) {
-            rowItem = [variant[prop], <small style={{float: 'right'}}><span className="glyphicon glyphicon-flag gnomad-flag"><span>{flag}</span></span></small>];
+            rowItem = [variant[prop], <small key={`${prop}-flag`} style={{float: 'right'}}><span className="fa fa-flag gnomad-flag"><span>{flag}</span></span></small>];
         } else {
             rowItem = normalizedFieldDisplay(variant[prop]);
         }
@@ -264,11 +263,11 @@ function getFormattedFieldByProp(prop, variant) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")],
             hom = variant[prop.replace("frequency", "count_hom")];
-        rowItem = [variant[prop], <small style={{float: 'right'}}>({count} of {number}, Hom={hom})</small>];
+        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({count} of {number}, Hom={hom})</small>];
     } else if (/count.*_GnomAD/.test(prop) || /number.*_GnomAD/.test(prop)) {
         rowItem = variant[prop];
     } else if (prop === "faf95_popmax_genome_GnomADv3") {
-        rowItem = [variant[prop], <small style={{float: 'right'}}>({variant.faf95_popmax_population_genome_GnomADv3})</small>];
+        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant.faf95_popmax_population_genome_GnomADv3})</small>];
     } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
         let hgvs;
         if (prop === "Genomic_Coordinate_hg38") {
@@ -293,14 +292,14 @@ function getFormattedFieldByProp(prop, variant) {
 }
 
 
-function abbreviatedSubmitter(originalSubmitter) {
+export function abbreviatedSubmitter(originalSubmitter) {
     return originalSubmitter
         .replace('Evidence-based Network for the Interpretation of Germline Mutant Alleles (ENIGMA)', 'ENIGMA')
         .replace('Breast Cancer Information Core (BIC)', 'BIC');
 }
 
 
-function getAminoAcidCode(hgvsProtein) {
+export function getAminoAcidCode(hgvsProtein) {
     let trimmedHgvs = hgvsProtein.replace(/[0-9()]/g, '');
     if (trimmedHgvs.length < 3) {
         return false;
@@ -314,7 +313,8 @@ function getAminoAcidCode(hgvsProtein) {
     }
 }
 
-module.exports = {
+// For backward compatibility with code that uses require()
+export default {
     getAminoAcidCode,
     isEmptyField,
     isNumeric,

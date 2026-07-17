@@ -1,29 +1,29 @@
 'use strict';
 
-var _ = require('underscore');
-var moment = require('moment');
+import _ from 'underscore';
+import moment from 'moment';
 
-var React = require('react');
-var {Link} = require('react-router');
-var {Table, Grid, Row, Col} = require('react-bootstrap');
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Container as Grid, Row, Col, Table } from 'react-bootstrap';
 
-var backend = require('./backend');
-var config = require('config');
-var anchorme = require("anchorme");
+import backend from './backend';
+import config from 'config';
+import anchorme from "anchorme";
 
 
-var Releases = React.createClass({
-    getInitialState: () => ({ releases: {} }),
-    componentWillMount: function() {
+class Releases extends React.Component {
+    state = { releases: {}, loading: true };
+    componentDidMount() {
         backend.releases().subscribe(
-            resp => this.setState(resp),
-            () => this.setState({error: 'Problem connecting to server'}));
-    },
-    getSourceRepresentations: (sources) => {
+            resp => this.setState({...resp, loading: false}),
+            () => this.setState({error: 'Problem connecting to server', loading: false}));
+    }
+    getSourceRepresentations = (sources) => {
         // exLOVD was renamed ExUV in October 2017
         return sources.replace(/exlovd/ig, 'ExUV');
-    },
-    render: function () {
+    };
+    render() {
         // Ensure releases are in descending order
         var releases = this.state.releases;
         if (Array.isArray(releases)) {
@@ -42,10 +42,25 @@ var Releases = React.createClass({
                 <td>{release['variants_deleted']}</td>
             </tr>
         ));
+	if (this.state.loading) {
+            return (
+                <Grid id="main-grid" className="main-grid">
+                    <Row>
+                        <Col className="text-center" style={{padding: '50px'}}>
+                            <div className="spinner-border text-primary" role="status"
+                                style={{width: '3rem', height: '3rem'}}>
+                                <span className="visually-hidden">Loading...</span>
+                            </div>
+                            <p style={{marginTop: '10px', color: '#666'}}>Loading Data Releases...</p>
+                        </Col>
+                    </Row>
+                </Grid>
+            );
+        }
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
-                    <Col smOffset={1} sm={10}>
+                    <Col sm={{ spin: 10, offset: 1 }}>
                         <h1>Data Releases</h1>
                         <br />
                         <div className="table-responsive table-responsive-outset">
@@ -70,24 +85,31 @@ var Releases = React.createClass({
                 </Row>
             </Grid>);
     }
-});
+}
 
-var Release = React.createClass({
-    getInitialState: () => ({ releases: [{}], latest: -1 }),
-    componentWillMount: function() {
-        backend.release(this.props.params.id).subscribe(
+class Release extends React.Component {
+    state = { releases: [{}], latest: -1 };
+    getReleaseId = (props = this.props) =>
+        (props.match && props.match.params && props.match.params.id) ||
+        (props.params && props.params.id);
+    componentDidMount() {
+        backend.release(this.getReleaseId()).subscribe(
             resp => this.setState(resp),
             () => this.setState({error: 'Problem connecting to server'}));
-    },
-    componentWillReceiveProps: function(nextProps) {
-        backend.release(nextProps.params.id).subscribe(
-            resp => this.setState(resp),
-            () => this.setState({error: 'Problem connecting to server'}));
-    },
-    generateReleaseNotes: function() {
+    }
+    componentDidUpdate(prevProps) {
+	const prevId = this.getReleaseId(prevProps);
+        const currId = this.getReleaseId(this.props);
+        if (prevId !== currId) {
+            backend.release(currId).subscribe(
+                resp => this.setState(resp),
+                () => this.setState({error: 'Problem connecting to server'}));
+        }
+    }
+    generateReleaseNotes() {
         var release = this.state.releases[0];
         var releaseNotes = '';
-        if (release.hasOwnProperty('notes')) {
+        if (Object.prototype.hasOwnProperty.call(release, 'notes')) {
             // format linebreaks
             releaseNotes = release.notes.replace(/\n\s*\n/g, '\n\n');
             // format hyperlinks
@@ -98,48 +120,49 @@ var Release = React.createClass({
             releaseNotes = releaseNotes.replace(/exlovd/ig, 'ExUV');
         }
         return {__html: releaseNotes};
-    },
-    render: function () {
+    }
+    render() {
         var release = this.state.releases[0],
             latest = this.state.latest,
             s = n => n === 1 ? '' : 's';
         return (
             <Grid fluid={true}>
                 <Row>
-                    <Col sm={8} smOffset={2} md={6} mdOffset={3} className='text-left'>
+                    <Col sm={{ span: 8, offset: 2 }} md={{ span: 6, offset: 3 }} className='text-left'>
                         <h1>{release.id === latest && 'Current'} Release Notes</h1>
                         {release.id !== latest && <p>* Note that this is not the most current release. Click <Link to={`/release/${latest}`}>here</Link> to see the most current release.</p>}
                     </Col>
                 </Row>
                 <Row>
-                    <Col sm={8} smOffset={2} md={6} mdOffset={3} className='text-center'>
-                        <p className='release-notes text-left' dangerouslySetInnerHTML={this.generateReleaseNotes()}></p>
+                    <Col sm={{ span: 8, offset: 2 }} md={{ span: 6, offset: 3 }} className='text-start'>
+                        <p className='release-notes text-left' dangerouslySetInnerHTML={this.generateReleaseNotes()} />
+		    </Col>
+		    <div className='text-center'>
                         <h3>{release['variants_added']} new variant{s(release['variants_added'])}</h3>
                         <h3>{release['variants_classified']} new classification{s(release['variants_classified'])}</h3>
                         <h3>{release['variants_modified']} changed/updated variant{s(release['variants_modified'])}</h3>
                         <h3>{release['variants_deleted']} removed variant{s(release['variants_deleted'])}</h3>
-                    </Col>
+                    </div>
                 </Row>
                 <Row>
-                    <Col sm={4} smOffset={4}>
+                    <Col sm={{ span: 4, offset: 4 }}>
                         <Table bordered>
-                            <tr>
-                                <td className="active"><b>Link to Data</b></td>
-                                <td><a href={release.archive ? `${config.backend_url}/downloads/releases/${release.archive.split('.')[0]}/${release.archive}` : ''}>Link</a></td>
-                            </tr>
-                            <tr>
-                                <td className="active"><b>Date</b></td>
-                                <td>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
-                            </tr>
+			    <tbody>
+                            	<tr>
+                                    <td className="active"><b>Link to Data</b></td>
+                                    <td><a href={release.archive ? `${config.backend_url}/downloads/releases/${release.archive.split('.')[0]}/${release.archive}` : ''}>Link</a></td>
+                            	</tr>
+                            	<tr>
+                                    <td className="active"><b>Date</b></td>
+                                    <td>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</td>
+                            	</tr>
+			    </tbody>
                         </Table>
                 {release['data_sources']}
                     </Col>
                 </Row>
             </Grid>);
     }
-});
+}
 
-module.exports = ({
-    Releases: Releases,
-    Release: Release,
-});
+export { Releases, Release };

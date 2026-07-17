@@ -1,24 +1,19 @@
 'use strict';
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var {Grid, Row, Col, Button} = require('react-bootstrap');
-var {State, Navigation, Link} = require('react-router');
-var auth = require('./auth');
-var {$c} = require('./Signup');
-var config  = require('./config');
-var $ = require('jquery');
-var _ = require('underscore');
+import React from 'react';
+import {Container as Grid, Row, Col, Button} from 'react-bootstrap';
+import {Link, withRouter} from 'react-router-dom';
+import auth from './auth';
+import {$c} from './Signup';
+import config from './config';
+import $ from 'jquery';
+import _ from 'underscore';
 
-var ResetPassword = React.createClass({
-    mixins: [State, Navigation],
-    getInitialState: function () {
-        return {
-            submitted: null,
-            success: null
-        };
-    },
-    render: function () {
+class ResetPassword extends React.Component {
+    state = { submitted: null, success: null, error: null };
+    contactFormRef = React.createRef();
+
+    render() {
         var message;
         if (this.state.error != null) {
             message = (
@@ -37,33 +32,25 @@ var ResetPassword = React.createClass({
                     {message}
                 </Row>
                 <Row>
-                    <Col md={8} mdOffset={3}>
+                    <Col md={{ span: 4, offset: 4 }} sm={{ span: 6, offset: 3 }}>
                         <h3>Forgot your password?</h3>
-                        <div>Enter your email and we'll send you a link to reset your password.</div>
+                        <div>Enter your email and we&apos;ll send you a link to reset your password.</div>
                         <br/>
-                    </Col>
-                </Row>
-                <Row id="form">
-                    <Col md={8} mdOffset={2}>
-                        <ResetPasswordForm ref="contactForm"/>
-                    </Col>
-                </Row>
-                <Row id="submit">
-                    <Col md={6} mdOffset={3}>
-                        <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
+                        <ResetPasswordForm ref={this.contactFormRef}/>
+			<Button type="button" className="btn btn-primary w-100 mt-2" onClick={this.handleSubmit}>
                             Reset Password
                         </Button>
                     </Col>
                 </Row>
             </Grid>);
-    },
+    }
 
-    handleSubmit: function () {
+    handleSubmit = () => {
         var showSuccess = () => {this.setState({success: true});};
         var showFailure = msg => {this.setState({error: msg});};
         var url = config.backend_url + '/accounts/password_reset/';
-        if (this.refs.contactForm.isValid()) {
-            var formData = this.refs.contactForm.getFormData();
+        if (this.contactFormRef.current && this.contactFormRef.current.isValid()) {
+            var formData = this.contactFormRef.current.getFormData();
             $.post({
                 url: url,
                 data: formData,
@@ -78,64 +65,60 @@ var ResetPassword = React.createClass({
                 }
             });
         }
-    }
-});
+    };
+}
 
 
-var ResetPasswordForm = React.createClass({
-    getInitialState: function () {
-        return {errors: {}};
-    },
-    isValid: function () {
+class ResetPasswordForm extends React.Component {
+    state = { errors: {} };
+    emailRef = React.createRef();
+
+    isValid = () => {
         var compulsoryFields = ['email'];
         var errors = {};
-        compulsoryFields.forEach(function (field) {
-            var value = ReactDOM.findDOMNode(this.refs[field]).value.trim();
+        compulsoryFields.forEach((field) => {
+	    const node = field === 'email' ? this.emailRef.current : null;
+            var value = (node && node.value ? node.value : '').trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
-        }.bind(this));
+        });
         this.setState({errors: errors});
 		return Object.keys(errors).length === 0;
-    },
-    getFormData: function () {
+    };
+    getFormData = () => {
         var data = {
-            email: ReactDOM.findDOMNode(this.refs.email).value
+		email: this.emailRef.current ? this.emailRef.current.value : ''
         };
         return data;
-    },
-    render: function () {
+    };
+    render() {
         return (
 			<div className="form-horizontal">
 				{this.renderTextInput('email', 'Email')}
 			</div>);
-    },
-    renderTextInput: function (id, label) {
+    }
+    renderTextInput(id, label) {
         return this.renderField(id, label,
-            <input type="text" className="form-control" id={id} ref={id}/>
+            <input type="text" className="form-control" id={id} ref={this.emailRef}/>
         );
-    },
-   renderField: function (id, label, field) {
+    }
+    renderField(id, label, field) {
         return (
-			<div className={$c('form-group', {'has-error': id in this.state.errors})}>
-				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
-				<div className="col-sm-6">
+			<div className={$c('mb-3', {'has-error': id in this.state.errors})}>
+				<label htmlFor={id} className="form-label">{label}</label>
+				<div>
 					{field}
 				</div>
 			</div>);
     }
-});
+}
 
-var Signin = React.createClass({
-    mixins: [State, Navigation],
-    getInitialState: function () {
-        return {
-            submitted: null,
-            success: null,
-            successMessage: null
-        };
-    },
-    render: function () {
+class SigninInner extends React.Component {
+    state = { submitted: null, success: null, successMessage: null, error: null };
+    contactFormRef = React.createRef();
+
+    render() {
         var message;
         if (this.state.error != null) {
             message = (
@@ -154,40 +137,30 @@ var Signin = React.createClass({
                     {message}
                 </Row>
                 <Row id="form">
-                    <Col md={8} mdOffset={2}>
-                        <SigninForm onSubmit={e => { this.handleSubmit(); e.preventDefault(); }} ref="contactForm"/>
-                    </Col>
-                </Row>
-                <Row id="submit">
-                    <Col md={8} mdOffset={2}>
-                            <div className="form-group" style={{marginLeft: "-15px", marginRight: "-15px"}}>
-                                <label className="col-sm-4 control-label"></label>
-                                <Col sm={6}>
-                                    <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
-                                        Sign in
-                                    </Button>
-                                </Col>
-                            </div>
-                    </Col>
-                </Row>
-                <Row id="submit">
-                    <Col sm={10} md={6} mdOffset={3}>
-                        <Link className="pull-right" to='/reset_password'><Button bsStyle="link">Forgot your password?</Button></Link>
-                    </Col>
+                    <Col md={{ span: 4, offset: 4 }} sm={{ span: 6, offset: 3}}>
+                        <SigninForm onSubmit={e => { this.handleSubmit(); e.preventDefault(); }} ref={this.contactFormRef}/>
+                        <Button type="button" className="btn btn-primary w-100 mt-2" onClick={this.handleSubmit}>
+                            Sign in
+                        </Button>
+                    	<div className="text-end mt-2">
+                            <Link to='/reset_password'><Button variant="link">Forgot your password?</Button></Link>
+                    	</div>
+		    </Col>
                 </Row>
             </Grid>);
-    },
+    }
 
-    handleSubmit: function () {
-        if (this.refs.contactForm.isValid()) {
-            var formData = this.refs.contactForm.getFormData();
+    handleSubmit = () => {
+        if (this.contactFormRef.current && this.contactFormRef.current.isValid()) {
+            var formData = this.contactFormRef.current.getFormData();
             auth.login(formData.email, formData.password, (loggedIn, error) => {
                 if (loggedIn) {
-                    var target = this.getQuery().target;
+                    const query = new URLSearchParams(this.props.location?.search || '');
+		    var target = query.get('target');
                     if (target == null) {
                         target = '/profile';
                     }
-                    this.transitionTo(target);
+                    this.props.history.push(target);
                 } else {
                     if (_.contains(error.non_field_errors, 'User account is disabled.')) {
                         var showSuccess = () => {this.setState({success: true, successMessage: "Activation email sent."});};
@@ -222,63 +195,63 @@ var Signin = React.createClass({
         } else {
             this.setState({error: "Some information was missing"});
         }
-    }
-});
+    };
+}
 
-var SigninForm = React.createClass({
-    getInitialState: function () {
-        return {errors: {}};
-    },
+class SigninForm extends React.Component {
+    state = { errors: {} };
+    emailRef = React.createRef();
+    passwordRef = React.createRef();
 
-    isValid: function () {
+    isValid = () => {
         var compulsoryFields = ['email', 'password'];
         var errors = {};
-        compulsoryFields.forEach(function (field) {
-            var value = ReactDOM.findDOMNode(this.refs[field]).value.trim();
+        compulsoryFields.forEach((field) => {
+	    const node = field === 'email' ? this.emailRef.current : this.passwordRef.current;
+            var value = (node && node.value ? node.value : '').trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
-        }.bind(this));
+        });
         this.setState({errors: errors});
 		return Object.keys(errors).length === 0;
-    },
-    getFormData: function () {
+    };
+    getFormData = () => {
         var data = {
-            email: ReactDOM.findDOMNode(this.refs.email).value
-            , password: ReactDOM.findDOMNode(this.refs.password).value
+	    email: this.emailRef.current ? this.emailRef.current.value : '',
+            password: this.passwordRef.current ? this.passwordRef.current.value : ''
         };
         return data;
-    },
-    render: function () {
+    };
+    render() {
         return (
-            <form className="form-horizontal" onSubmit={this.props.onSubmit}>
+            <form className="form" onSubmit={this.props.onSubmit}>
                 {this.renderTextInput('email', 'Email')}
                 {this.renderPassword('password', 'Password')}
-                <input type="submit" className="hidden" />
+                <input type="submit" className="d-none" />
             </form>);
-    },
-    renderTextInput: function (id, label) {
+    }
+    renderTextInput(id, label) {
         return this.renderField(id, label,
-            <input type="text" className="form-control" id={id} ref={id}/>
+            <input type="text" className="form-control" id={id} ref={this.emailRef}/>
         );
-    },
-    renderPassword: function (id, label) {
+    }
+    renderPassword(id, label) {
         return this.renderField(id, label,
-            <input type="password" className="form-control" id={id} ref={id}/>
+            <input type="password" className="form-control" id={id} ref={this.passwordRef}/>
         );
-    },
-    renderField: function (id, label, field) {
+    }
+    renderField(id, label, field) {
         return (
-			<div className={$c('form-group', {'has-error': id in this.state.errors})}>
-				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
-				<div className="col-sm-6">
-					{field}
+			<div className={$c('mb-3', {'has-error': id in this.state.errors})}>
+				<label htmlFor={id} className="form-label">{label}</label>
+				<div>
+				    {field}
 				</div>
 			</div>);
     }
-});
+}
 
-module.exports = ({
-    Signin: Signin,
-    ResetPassword: ResetPassword
-});
+const Signin = withRouter(SigninInner);
+export { Signin, ResetPassword };
+export default { Signin, ResetPassword };

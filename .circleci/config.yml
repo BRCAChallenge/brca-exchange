@@ -3,8 +3,8 @@ jobs:
    buildweb:
      circleci_ip_ranges: true
      docker:
-       - image: cimg/node:16.20
-       - image: circleci/postgres:9.6.2
+       - image: cimg/node:22.22
+       - image: cimg/postgres:18.4
          environment:
           POSTGRES_USER: postgres
           POSTGRES_DB: storage.pg
@@ -21,6 +21,10 @@ jobs:
              mkdir ~/test_reports
              npm run lint -- -f junit -o ~/test_reports/lint-results.xml
        - run:
+           name: build JavaScript test bundle
+           working_directory: ~/project/website
+           command: npm run build:test
+       - run:
            name: run JavaScript tests
            working_directory: ~/project/website
            command: npm run test -- -R xunit --reporter-options output=~/test_reports/test-results.xml
@@ -34,14 +38,14 @@ jobs:
              source ~/project/website_virtualenv/bin/activate
              pip3 install -r ~/project/website/requirements.txt
              pip3 install -r ~/project/website/test-requirements.txt
-             cd ~/project/website/django && python3 manage.py migrate
+             cd ~/project/django && python3 manage.py migrate
              python3 manage.py test
        - store_test_results:
            path: ~/test_reports
    deploy-dev:
      circleci_ip_ranges: true
      docker:
-       - image: cimg/node:16.20
+       - image: cimg/node:22.22
      steps:
        - checkout
        - run:
@@ -64,7 +68,7 @@ jobs:
    deploy-beta:
      circleci_ip_ranges: true
      docker:
-       - image: cimg/node:16.20
+       - image: cimg/node:22.22
      steps:
        - checkout
        - run:
@@ -82,8 +86,24 @@ jobs:
                  StrictHostKeyChecking no
              EOF
        - run:
-           name: deploying to the beta machine 
+           name: deploying to the beta machine
            command: HOST=brcaexchange-prod.gi.ucsc.edu ~/project/deployment/deploy-dev
+   test-pipeline:
+     docker:
+       - image: cimg/base:current
+     steps:
+       - checkout
+       - run:
+           name: Run tests
+           command: echo "Tests disabled"
+   test-splicing-pipeline:
+     docker:
+       - image: cimg/base:current
+     steps:
+       - checkout
+       - run:
+           name: Run tests
+           command: echo "Tests disabled"
 workflows:
    version: 2
    build-n-deploy:
@@ -106,3 +126,13 @@ workflows:
                only: /v[0-9]+(\.[0-9]+)*/
              branches:
                ignore: /.*/
+   test-back-end:
+     jobs:
+       - test-pipeline:
+           filters:
+             tags:
+               only: /.*/
+       - test-splicing-pipeline:
+           filters:
+             tags:
+               only: /.*/

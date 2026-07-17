@@ -5,8 +5,9 @@ set -o errexit
 
 HOST=${HOST:-brcaexchange.org}
 USER=brca
+export PYTHON_VERSION=${PYTHON_VERSION:-python3.13}
 
-ssh -l${USER} ${HOST} <<-'ENDSSH'
+ssh -l${USER} ${HOST} PYTHON_VERSION="${PYTHON_VERSION}" bash <<-'ENDSSH'
     set -x
     #set -o nounset # 'activate' accesses unbound vars
     set -o errexit
@@ -15,7 +16,7 @@ ssh -l${USER} ${HOST} <<-'ENDSSH'
     HTML=/var/www/html
     BACKEND=/var/www/backend
 
-    rsync -a --delete ${HTML}/${SRC}/ ${HTML}/${DST}
+    rsync -a --delete --exclude="/trackhubs" ${HTML}/${SRC}/ ${HTML}/${DST}
     rsync -a --delete --exclude="/uploads" --exclude="/downloads" ${BACKEND}/${SRC}/django/ ${BACKEND}/${DST}/django
 
     cp ~/site_settings/config.${DST}.js /var/www/html/${DST}/config.js
@@ -25,8 +26,12 @@ ssh -l${USER} ${HOST} <<-'ENDSSH'
     requirements=$(pip3 freeze)
     deactivate
     requirements=$(echo ${requirements}) # drop carriage returns
+    if [ ! -f /var/www/backend/${DST}/virtualenv3/bin/python3 ] || [ "$(/var/www/backend/${DST}/virtualenv3/bin/python3 --version 2>&1)" != "$(${PYTHON_VERSION} --version 2>&1)" ]; then
+        rm -rf /var/www/backend/${DST}/virtualenv3
+        ${PYTHON_VERSION} -m venv /var/www/backend/${DST}/virtualenv3
+    fi 
     . /var/www/backend/${DST}/virtualenv3/bin/activate
     pip3 install ${requirements}
-    python3 /var/www/backend/production/django/manage.py migrate --noinput --verbosity 2
+    ${PYTHON_VERSION} /var/www/backend/${DST}/django/manage.py migrate --noinput --verbosity 2
     sudo apache2ctl restart
 ENDSSH

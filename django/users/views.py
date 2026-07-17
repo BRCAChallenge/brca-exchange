@@ -9,13 +9,13 @@ from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
 from django.db.models import Q
 from django.http import JsonResponse
-from django.template import Context
 from django.template.loader import get_template
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from mailchimp3 import MailChimp, mailchimpclient
 
 from brca import settings, site_settings
@@ -26,7 +26,7 @@ import logging
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
-@authentication_classes((JSONWebTokenAuthentication,))
+@authentication_classes((JWTAuthentication,))
 def retrieve(request):
     user = request.user
     query = MyUser.objects.filter(email=user)
@@ -39,7 +39,7 @@ def retrieve(request):
     mc_client = MailChimp(mc_api=settings.MAILCHIMP_KEY, timeout=10.0)
 
     try:
-        mc_user = client.lists.members.get(list_id=settings.MAILCHIMP_LIST, subscriber_hash=subscriber_hash)
+        mc_user = mc_client.lists.members.get(list_id=settings.MAILCHIMP_LIST, subscriber_hash=subscriber_hash)
         is_subscribed = (mc_user['status'] == 'pending' or mc_user['status'] == 'subscribed')
         response = JsonResponse({'user': data, 'mailinglist': is_subscribed})
         return response
@@ -53,7 +53,7 @@ def retrieve(request):
 @never_cache
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
-@authentication_classes((JSONWebTokenAuthentication,))
+@authentication_classes((JWTAuthentication,))
 def update(request):
     user = MyUser.objects.filter(email=request.user)
 
@@ -80,6 +80,7 @@ def update(request):
 
     return JsonResponse({'success': True})
 
+@csrf_exempt
 def register(request):
     fields = user_fields(request)
     image = None
@@ -115,22 +116,25 @@ def register(request):
         created_user.save()
 
         # Sign up for mailchimp
-        mc_client = MailChimp(mc_api=settings.MAILCHIMP_KEY, timeout=10.0)
-        mc_client.lists.members.create(settings.MAILCHIMP_LIST, {
-            'email_address': created_user.email,
-            'status': 'subscribed',
-            'merge_fields': {
-                'FNAME': created_user.firstName,
-                'LNAME': created_user.lastName,
-            },
-        })
+        try:
+            mc_client = MailChimp(mc_api=settings.MAILCHIMP_KEY, timeout=10.0)
+            mc_client.lists.members.create(settings.MAILCHIMP_LIST, {
+                'email_address': created_user.email,
+                'status': 'subscribed',
+                'merge_fields': {
+                    'FNAME': created_user.firstName,
+                    'LNAME': created_user.lastName,
+                },
+            })
+        except mailchimpclient.MailChimpError as e:
+            logging.error(repr(e))
 
         # Send activation email
         url = "{0}confirm/{1}".format(site_settings.URL_FRONTEND, activation_key)
         plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.txt'))
         html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.html'))
 
-        d = Context({'firstname': created_user.firstName, 'url': url})
+        d = {'firstname': created_user.firstName, 'url': url}
 
         subject, from_email, to = 'BRCAExchange account confirmation', 'noreply@brcaexchange.org', created_user.email
         text_content = plaintext_email.render(d)
@@ -162,7 +166,7 @@ def resend_activation(request):
     plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.txt'))
     html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.html'))
 
-    d = Context({'firstname': user.firstName, 'url': url})
+    d = {'firstname': user.firstName, 'url': url}
 
     subject, from_email, to = 'BRCAExchange account confirmation', 'noreply@brcaexchange.org', user.email
     text_content = plaintext_email.render(d)
@@ -210,7 +214,7 @@ def password_reset(request):
     url = "{0}reset/{1}".format(site_settings.URL_FRONTEND, password_reset_token)
     plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'password_reset_email.txt'))
     html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'password_reset_email.html'))
-    d = Context({'firstname': user.firstName, 'url': url, 'hours': email_duration_days * 24})
+    d = {'firstname': user.firstName, 'url': url, 'hours': email_duration_days * 24}
 
     subject, from_email, to = 'BRCAExchange password reset', 'noreply@brcaexchange.org', user.email
     text_content = plaintext_email.render(d)

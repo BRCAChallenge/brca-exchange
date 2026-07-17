@@ -17,6 +17,7 @@ from .models import (
     InSilicoPriors, VariantPaper, Paper, VariantRepresentation
 )
 from django.views.decorators.http import require_http_methods
+from django.utils import timezone
 
 import google.protobuf.json_format as json_format
 from datetime import datetime
@@ -303,12 +304,12 @@ def report_to_dict(report_object):
 
     if report_object.Source == "ClinVar":
         # don't display ClinVar report diffs prior to April 2018
-        cutoff_date = datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p')
+        cutoff_date = timezone.make_aware(datetime.strptime('Apr 1 2018  12:00AM', '%b %d %Y %I:%M%p'))
     elif report_object.Source == "LOVD":
         # don't display LOVD report diffs prior to December 2 2019 (we
         # updated the definition of LOVD submissions in the early December
         # release, so it only makes sense to show diffs from following releases)
-        cutoff_date = datetime.strptime('Dec 2 2018  12:00AM', '%b %d %Y %I:%M%p')
+        cutoff_date = timezone.make_aware(datetime.strptime('Dec 2 2018  12:00AM', '%b %d %Y %I:%M%p'))
     try:
         if report_dict["Data_Release"]["date"] < cutoff_date:
             report_dict["Diff"] = None
@@ -381,11 +382,13 @@ def index(request):
 
         # create an in-memory StringIO object that we can use to buffer the results from the server
         # (it'll get released when it goes out of scope, so unlike a real file we don't need to close it)
-        f = io.StringIO()
+        f = io.BytesIO()
         query = "COPY ({}) TO STDOUT WITH DELIMITER '{}' CSV HEADER".format(query.query, '\t' if format == 'tsv' else ',')
         # HACK to add quotes around search terms
         query = re.sub(r'LIKE UPPER\((.+?)\)', r"LIKE UPPER('\1')", query)
-        cursor.copy_expert(query, f)
+        with cursor.copy(query) as copy:
+            for block in copy:
+                f.write(block)
         f.seek(0)
 
         response = HttpResponse(f.read(), content_type='text/csv')

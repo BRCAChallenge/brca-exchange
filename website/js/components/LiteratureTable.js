@@ -1,11 +1,12 @@
 'use strict';
 
-const React = require('react'),
-    { Link } = require('react-router'),
-    { Grid, Row, Col, ButtonToolbar, Button, DropdownButton, Table } = require('react-bootstrap'),
-    backend = require('../backend'),
-    util = require('../util'),
-    _ = require('underscore');
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Link, withRouter } from 'react-router-dom';
+import { Container, Row, Col, ButtonToolbar, Button, DropdownButton, Dropdown, Table } from 'react-bootstrap';
+import backend from '../backend';
+import util from '../util';
+import _ from 'underscore';
 
 import BetaTag from "./BetaTag";
 
@@ -31,18 +32,18 @@ const pubsOrdering = function(pub1, pub2) {
 function formatMatches(matches, count) {
     let ms = matches.slice(0, count);
 
-    return ms.map(match =>
+    return ms.map((match, i) =>
         // we extract entries like <<<some text here>>>, keeping the first < as an indicator that the text is highlighted
-        <li>
+        (<li key={i}>
             <small>...
             {
-                _.unescape(match).split(/<<(<.*)>>>/g).map(
-                    x => x.startsWith('<')
-                        ? <span style={{backgroundColor: 'yellow', borderRadius: 2, border: 'solid 1px #bca723'}}>{x.slice(1)}</span>
-                        : x)
+                _.unescape(match).split(/<<(<.*)>>>/g).map((x, j) =>
+                    x.startsWith('<')
+                        ? <span key={j} style={{backgroundColor: 'yellow', borderRadius: 2, border: 'solid 1px #bca723'}}>{x.slice(1)}</span>
+                        : <React.Fragment key={j}>{x}</React.Fragment>)
             }
             ...</small>
-        </li>
+        </li>)
     );
 
     // return ms.map(match => <div><small>... {_.unescape(match)} ...</small></div>);
@@ -125,39 +126,62 @@ class AuthorList extends React.Component {
 }
 
 AuthorList.propTypes = {
-    authors: React.PropTypes.string,
-    maxCount: React.PropTypes.number
+    authors: PropTypes.string,
+    maxCount: PropTypes.number
 };
 
 class LiteratureTable extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
+	this.clipboardRef = React.createRef();
+	this.subscriptions = [];
     }
 
-    componentWillMount() {
-        if (!this.props.variant) {
-            backend.variant(this.props.params.id).subscribe(
-                resp => {
+    componentDidMount() {
+        const routeId =
+            (this.props.match && this.props.match.params && this.props.match.params.id) ||
+            (this.props.params && this.props.params.id);
+
+        if (!this.props.variant && routeId) {
+            const sub = backend.variant(routeId).subscribe(
+	    resp => {
                     return this.setState({data: resp.data, error: null});
                 },
                 () => { this.setState({error: 'Problem connecting to server'}); }
             );
+	    this.subscriptions.push(sub);
         }
 
-        backend.variantPapers(this.props.variant ? this.props.variant.id : this.props.params.id).subscribe(
+	const papersId = this.props.variant ? this.props.variant.id : routeId;
+	if (papersId) {
+	    const sub = backend.variantPapers(papersId).subscribe(
             resp => {
                 this.setState({papers: resp.data, paperError: null});
             },
             () => { this.setState({paperError: 'Problem retrieving papers'}); }
-        );
+            );
+	    this.subscriptions.push(sub);
+	}
+    }
 
+    componentWillUnmount() {
+        if (this.subscriptions) {
+            this.subscriptions.forEach(s => {
+                if (s && typeof s.unsubscribe === 'function') s.unsubscribe();
+            });
+        }
     }
 
     toTSV() {
         const headerRow = ["title", "authors", "journal", "year", "keywords", "pmid"].join("\t");
-        return this.state.papers ? this.state.papers.map(({title, authors, journal, year, keywords, pmid}) =>
-            headerRow + "\n" + [title, authors, journal, year, keywords, pmid].join("\t")).join("\n") : "";
+        return this.state.papers
+            ? [headerRow].concat(
+                this.state.papers.map(({title, authors, journal, year, keywords, pmid}) =>
+                    [title, authors, journal, year, keywords, pmid].join("\t")
+                )
+              ).join("\n")
+            : "";
     }
 
     toCitation() {
@@ -179,7 +203,8 @@ class LiteratureTable extends React.Component {
     }
 
     copyTable() {
-        let textarea = this.refs.clipboardContent.getDOMNode();
+        const textarea = this.clipboardRef.current;
+	if (!textarea) return;
         textarea.value = this.toCitation();
         textarea.select();
         document.execCommand('copy');
@@ -233,11 +258,13 @@ class LiteratureTable extends React.Component {
     }
 
     getSearchTerm() {
-        let geneSymbol = this.props.variant.Gene_Symbol;
+        const variant = this.props.variant || (this.state.data && this.state.data[0]);
+	if (!variant) return '';
+	let geneSymbol = variant.Gene_Symbol;
         let terms = new Set();
-        terms.add(this.getProteinChange(this.props.variant.Protein_Change));
-        terms.add(this.getCDNA(this.props.variant.HGVS_cDNA));
-        terms = new Set([...terms, ...this.getRelevantDataFromSynonyms(this.props.variant.Synonyms)]);
+        terms.add(this.getProteinChange(variant.Protein_Change));
+        terms.add(this.getCDNA(variant.HGVS_cDNA));
+        terms = new Set([...terms, ...this.getRelevantDataFromSynonyms(variant.Synonyms)]);
         let searchTerm = `${geneSymbol}+AND+("${[...terms].join('"+OR+"')}")`;
         return searchTerm;
     }
@@ -246,6 +273,7 @@ class LiteratureTable extends React.Component {
         if (!this.props.variant && !this.state.data) {
             return (<div />);
         }
+	const variant = this.props.variant || (this.state.data && this.state.data[0]);
 
         // if no lit results exist, return a 'no lit results' placeholder
         let litResultsExist = false;
@@ -265,7 +293,7 @@ class LiteratureTable extends React.Component {
             }
 
             litRows = litRows.map(({title, authors, journal, year, mentions, pmid}) => (
-                <tr>
+                <tr key={pmid}>
                     <td>
                         <b style={{fontSize: '16px'}}>{title}</b>
 
@@ -283,7 +311,7 @@ class LiteratureTable extends React.Component {
                         </div>
                     </td>
                     <td style={{width: '12%'}}>
-                        <div className="pmid">PMID: <a onClick={this.trackLitAccess} href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank'>{pmid}</a></div>
+                        <div className="pmid">PMID: <a onClick={this.trackLitAccess} href={`https://www.ncbi.nlm.nih.gov/pubmed/${pmid}`} target='_blank' rel="noopener noreferrer">{pmid}</a></div>
                         <div>{year}</div>
                         <div>{journal}</div>
                     </td>
@@ -304,7 +332,7 @@ class LiteratureTable extends React.Component {
                 <h4>Literature Search Results{crawlDate && ` (as of ${crawlDate})`}: <BetaTag margin="0.25em" verticalALign="top" hoverText="Literature Search is a beta feature, so please beware of erroneous or missing results. You are welcome to contact us about observed errors." /></h4>
                     <Table className='nopointer literature-rows' bordered>
                         <thead>
-                            <tr className="active">
+                            <tr className="table-active">
                                 <th>Publications Mentioning this Variant</th>
                                 <th style={{width: '12%'}}>Citation Info</th>
                             </tr>
@@ -314,9 +342,9 @@ class LiteratureTable extends React.Component {
                         </tbody>
                     </Table>
 
-                    { this.state.papers && this.state.papers.length > this.props.maxRows
+                    { this.state.papers && this.state.papers.length > this.props.maxRows && variant
                         ? ( <div style={{textAlign: "center", marginBottom: '1em'}}>
-                                <Link to={`/variant_literature/${this.props.variant.id}`}>
+                                <Link to={`/variant_literature/${variant.id}`}>
                                     View {`${this.state.papers.length - this.props.maxRows}`} more publications...
                                 </Link>
                             </div>
@@ -324,23 +352,23 @@ class LiteratureTable extends React.Component {
                     }
 
                     <div>
-                        <em className="pull-left" style={{marginBottom: '1em'}}>
+                        <em className="float-start" style={{marginBottom: '1em'}}>
                             To report a false positive, or to include a paper that should be in the list, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org">contact us</a>.
                             <br />
                             To search for additional content, click here to search <a href={googleSearchLink}>Google</a> or <a href={pubmedSearchLink}>PubMed</a>.
                              These searches can have a high false positive rate, but can also find additional content that was missed in the pre-computed searches.
                         </em>
 
-                        <ButtonToolbar className='pull-right'>
+                        <ButtonToolbar className='float-end'>
                             <Button onClick={this.copyTable.bind(this)}>Copy To Clipboard</Button>
-                            <DropdownButton id="download_table_dropdown" title="Export" className='pull-right'>
-                                <li><a href={toTSVURL} download='variant-literature.tsv'>Excel (.tsv format)</a></li>
-                                <li><a href={toJSONURL} download='variant-literature.json'>JSON</a></li>
-                            </DropdownButton>
+                            <DropdownButton id="download_table_dropdown" title="Export" align="end">
+                                <Dropdown.Item as="a" href={toTSVURL} download="variant-literature.tsv">Excel (.tsv format)</Dropdown.Item>
+                                <Dropdown.Item as="a" href={toJSONURL} download="variant-literature.json">JSON</Dropdown.Item>
+			    </DropdownButton>
                         </ButtonToolbar>
                     </div>
 
-                <textarea ref='clipboardContent' style={{padding: '0', width: '0', height: '0', marginLeft: '-99999999px' }}/>
+                <textarea ref={this.clipboardRef} style={{padding: '0', width: '0', height: '0', marginLeft: '-99999999px' }}/>
             </div>
         );
 
@@ -348,17 +376,17 @@ class LiteratureTable extends React.Component {
             return component;
         } else {
             return (
-                <Grid>
+                <Container>
                     <Row>
                         <Col md={12} className="variant-literature-col">
                             <h3>{this.state.data[0]["HGVS_cDNA"]}</h3>
                             {component}
                         </Col>
                     </Row>
-                </Grid>
+                </Container>
             );
         }
     }
 }
 
-export default LiteratureTable;
+export default withRouter(LiteratureTable);

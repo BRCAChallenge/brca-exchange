@@ -1,99 +1,162 @@
-/*eslint-env browser */
-/*global require: false, module: false */
 'use strict';
 
-var jQuery = require('jquery');
-
+import jQuery from 'jquery';
 import flattenDeep from 'lodash/flattenDeep';
 import _ from 'lodash';
 
+// Content pages
+import homeMd from '../content/home.md';
+import historyMd from '../content/history.md';
+import variationMd from '../content/variationAndCancer.md';
+import disclaimerMd from '../content/disclaimer.md';
+import thisSiteMd from '../content/thisSite.md';
+import dataSubmissionPolicyMd from '../content/dataSubmissionPolicy.md';
+import apiMd from '../content/api.md';
+import variantsDefaultMd from '../content/variantsDefault.md';
+import variantsResearchMd from '../content/variantsResearch.md';
+import researchWarningMd from '../content/researchWarning.md';
+import signupMessageMd from '../content/signupMessage.md';
+import insilcoScoringMd from '../content/help/research/insilico/insilico-scoring.md';
+import moreOnNamingMd from '../content/help/default/variant-naming/more-on-naming.md';
+import appMd from '../content/about/app.md';
+import whyDonateMd from '../content/whyDonate.md';
+import whyDonateSubtextMd from '../content/whyDonateSubtext.md';
+import fundraisingDetailsMd from '../content/fundraisingDetails.md';
+
+// MuPIT images
+import mupit1t15 from '../content/mupit/1t15.png';
+import mupit1jm7 from '../content/mupit/1jm7.png';
+import mupit4igk from '../content/mupit/4igk.png';
+import mupitENSP from '../content/mupit/fENSP00000380152_7.png';
+
+// Help content - Default
+import howDoISearchMd from '../content/help/default/how-do-i-search-for-a-variant.md';
+import variantClassificationsPathogenicMd from '../content/help/default/variant-classifications-pathogenic.md';
+import variantClassificationsBenignMd from '../content/help/default/variant-classifications-benign.md';
+import variantClassificationsVUSMd from '../content/help/default/variant-classifications-VUS.md';
+import variantClassificationsNotYetReviewedMd from '../content/help/default/variant-classifications-not-yet-reviewed.md';
+import whatDoesItMeanNotYetReviewedMd from '../content/help/default/what-does-it-mean-if-a-variant-is-not-yet-reviewed.md';
+import demystifyingVariantNamingMd from '../content/help/default/variant-naming/demystifying-variant-naming.md';
+import whyCantIFindVariantMd from '../content/help/default/why-cant-i-find-the-variant-i-searched.md';
+import variantDetailsFieldsMd from '../content/help/default/variant-details-fields.md';
+import howIsDataUpdatedMd from '../content/help/default/how-is-the-data-on-this-site-updated.md';
+import whatIsBRCAExchangeMd from '../content/help/default/what-is-the-brca-exchange.md';
+import whatMakesBRCADifferentMd from '../content/help/default/what-makes-brca-exchange-different-from-other-public-databases.md';
+import whatIsEnigmaMd from '../content/help/default/what-is-enigma-and-how-does-it-determine-variant-classifications.md';
+import outsideResourcesMd from '../content/help/default/outside-resources-on-brca-genes.md';
+
+// Help content - Research
+import howDoISearchResearchMd from '../content/help/research/how-do-i-search-for-a-variant.md';
+import whyCantIFindVariantResearchMd from '../content/help/research/why-cant-i-find-the-variant-i-searched.md';
+import usingColumnSelectorsMd from '../content/help/research/using-column-selectors.md';
+import variantNomenclatureMd from '../content/help/research/variant-nomenclature.md';
+import clinicalSignificanceEnigmaMd from '../content/help/research/clinical-significance-enigma.md';
+import clinicalSignificanceClinvarMd from '../content/help/research/clinical-significance-clinvar.md';
+import clinicalSignificanceLovdMd from '../content/help/research/clinical-significance-lovd.md';
+import transcriptVisualizationMd from '../content/help/research/transcript-visualization.md';
+import multifactorialLikelihoodMd from '../content/help/research/multifactorial-likelihood-analysis.md';
+import alleleFrequencyRefSetsMd from '../content/help/research/allele-frequency-reference-sets.md';
+import alleleFrequencyGnomadMd from '../content/help/research/allele-frequency-gnomad.md';
+import acmgVariantEvidenceCodesMd from '../content/help/research/acmg-variant-evidence-codes-provisional-assignment.md';
+import acmgPopulationFrequencyMd from '../content/help/research/acmg-variant-evidence-codes-population-frequency.md';
+import acmgComputationalPredictionMd from '../content/help/research/acmg-variant-evidence-codes-computational-prediction.md';
+import functionalAssayDisclaimerMd from '../content/help/research/functional-assay-disclaimer.md';
+import functionalAssaysMd from '../content/help/research/functional-assays.md';
+import computationalPredictionsMd from '../content/help/research/computational-predictions.md';
+import insilicoPredMd from '../content/help/research/insilico/insilico-pred.md';
+import cravatMupitMd from '../content/help/research/cravat-mupit.md';
+import literatureSearchMd from '../content/help/research/literature-search.md';
+import whatGenomeBuildMd from '../content/help/research/what-genome-build-is-this-site-using.md';
+import howIsDataUpdatedResearchMd from '../content/help/research/how-is-the-data-on-this-site-updated.md';
+import downloadingVariantDataMd from '../content/help/research/downloading-variant-data.md';
+
 const content = {
-    home: require('../content/home.md'),
-    history: require('../content/history.md'),
-    variation: require('../content/variationAndCancer.md'),
-    disclaimer: require('../content/disclaimer.md'),
-    thisSite: require('../content/thisSite.md'),
-    dataSubmissionPolicy: require('../content/dataSubmissionPolicy.md'),
-    api: require('../content/api.md'),
-    variantsDefault: require('../content/variantsDefault.md'),
-    variantsResearch: require('../content/variantsResearch.md'),
-    researchWarning: require('../content/researchWarning.md'),
-    signupMessage: require('../content/signupMessage.md'),
-    insilicoScoring: require('../content/help/research/insilico/insilico-scoring.md'),
-    moreOnNaming: require('../content/help/default/variant-naming/more-on-naming.md'),
-    app: require('../content/about/app.md'),
-    whyDonate: require('../content/whyDonate.md'),
-    whyDonateSubtext: require('../content/whyDonateSubtext.md'),
-    fundraisingDetails: require('../content/fundraisingDetails.md')
+    home: homeMd,
+    history: historyMd,
+    variation: variationMd,
+    disclaimer: disclaimerMd,
+    thisSite: thisSiteMd,
+    dataSubmissionPolicy: dataSubmissionPolicyMd,
+    api: apiMd,
+    variantsDefault: variantsDefaultMd,
+    variantsResearch: variantsResearchMd,
+    researchWarning: researchWarningMd,
+    signupMessage: signupMessageMd,
+    insilicoScoring: insilcoScoringMd,
+    moreOnNaming: moreOnNamingMd,
+    app: appMd,
+    whyDonate: whyDonateMd,
+    whyDonateSubtext: whyDonateSubtextMd,
+    fundraisingDetails: fundraisingDetailsMd
 };
 
-const mupitStructures = [
+export const mupitStructures = [
     {
         "name": "1t15",
-        "image": require('../content/mupit/1t15.png'),
+        "image": mupit1t15,
         "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=1t15&addtlinfo=brca",
         "humanReadableName": "BRCA1 BRCT Domain"
     },
     {
         "name": "1jm7",
-        "image": require('../content/mupit/1jm7.png'),
+        "image": mupit1jm7,
         "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=1jm7&addtlinfo=brca",
         "humanReadableName": "BRCA1 Ring Domain"
     },
     {
         "name": "4igk",
-        "image": require('../content/mupit/4igk.png'),
+        "image": mupit4igk,
         "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=4igk&addtlinfo=brca",
         "humanReadableName": "BRCA1 BRCT Domain"
     },
     {
         "name": "fENSP00000380152_7",
-        "image": require('../content/mupit/fENSP00000380152_7.png'),
+        "image": mupitENSP,
         "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive/?gene=BRCA2&addtlinfo=brca",
         "humanReadableName": "BRCA2 Homology Model"
     }
 ];
 
-const helpContentDefault = [
+export const helpContentDefault = [
     {
 	section: "Getting Started: Variants and How to Find Them",
         tiles: [
            {
                 name: "How do I search for a variant?",
-                contents: require("../content/help/default/how-do-i-search-for-a-variant.md")
+                contents: howDoISearchMd
            },
            {
                 name: "What does a variant's classification mean?",
                 list: [
                     {
                         name: "Pathogenic",
-                        contents: require("../content/help/default/variant-classifications-pathogenic.md")
+                        contents: variantClassificationsPathogenicMd
                     },
                     {
                         name: "Benign/Little Clinical Significance",
-                        contents: require("../content/help/default/variant-classifications-benign.md")
+                        contents: variantClassificationsBenignMd
                     },
                     {
                         name: "Variant of Uncertain Significance",
-                        contents: require("../content/help/default/variant-classifications-VUS.md")
+                        contents: variantClassificationsVUSMd
                     },
                     {
                         name: "Not Yet Reviewed",
-                        contents: require("../content/help/default/variant-classifications-not-yet-reviewed.md")
+                        contents: variantClassificationsNotYetReviewedMd
                     },
                   ]
            },
            {
 		   name: "What does it mean if a variant is \"Not Yet Reviewed\"?",
-		   contents: require("../content/help/default/what-does-it-mean-if-a-variant-is-not-yet-reviewed.md")
+		   contents: whatDoesItMeanNotYetReviewedMd
            },
            {
                    name: "How do variants get their names?",
-                   contents: require("../content/help/default/variant-naming/demystifying-variant-naming.md")
+                   contents: demystifyingVariantNamingMd
            },
            {
                    name: "Why can't I find the variant I searched?",
-                   contents: require("../content/help/default/why-cant-i-find-the-variant-i-searched.md")
+                   contents: whyCantIFindVariantMd
            },
         ]
     },
@@ -102,11 +165,11 @@ const helpContentDefault = [
         tiles: [
            {
                 name: "What do the fields in the Variant Details Page mean?",
-                contents: require("../content/help/default/variant-details-fields.md")
+                contents: variantDetailsFieldsMd
            },
            {
 		   name: "How is the data on this site updated?",
-                contents: require("../content/help/default/how-is-the-data-on-this-site-updated.md")
+                contents: howIsDataUpdatedMd
 	   },
 	]
     },
@@ -115,15 +178,15 @@ const helpContentDefault = [
         tiles: [
             {
                 name: "What is the BRCA Exchange?",
-                contents: require("../content/help/default/what-is-the-brca-exchange.md")
+                contents: whatIsBRCAExchangeMd
             },
             {
                 name: "What makes BRCA Exchange different from other public databases?",
-                contents: require("../content/help/default/what-makes-brca-exchange-different-from-other-public-databases.md")
+                contents: whatMakesBRCADifferentMd
             },
             {
                 name: "What is ENIGMA and how does it determine variant classifications?",
-                contents: require("../content/help/default/what-is-enigma-and-how-does-it-determine-variant-classifications.md")
+                contents: whatIsEnigmaMd
             },
         ]
     },
@@ -132,13 +195,13 @@ const helpContentDefault = [
         tiles: [
             {
                 name: "Where can I find additional information on BRCA Genes, Genetic Testing, and Cancer Risk?",
-                contents: require("../content/help/default/outside-resources-on-brca-genes.md")
+                contents: outsideResourcesMd
             },
         ]
     },
 ];
 
-const helpContentResearch = [
+export const helpContentResearch = [
 /* Examples:
 
     {
@@ -176,19 +239,19 @@ const helpContentResearch = [
 
 */
     {
-	section: "Getting Started\: Variants and How to Find Them",
+	section: "Getting Started: Variants and How to Find Them",
         tiles: [
             {
                 name: "How do I search for a variant?",
-                contents: require("../content/help/research/how-do-i-search-for-a-variant.md")
+                contents: howDoISearchResearchMd
             },
             {
                 name: "Why can't I find the variant I searched?",
-                contents: require("../content/help/research/why-cant-i-find-the-variant-i-searched.md")
+                contents: whyCantIFindVariantResearchMd
             },
             {
                 name: "How do I use column selectors?",
-                contents: require("../content/help/research/using-column-selectors.md")
+                contents: usingColumnSelectorsMd
             },
             /* No content yet
             {
@@ -204,7 +267,7 @@ const helpContentResearch = [
             {
                 name: "What are the fields in the Variant Nomenclature Tile?",
                 id: "variant-nomenclature",
-                contents: require("../content/help/research/variant-nomenclature.md")
+                contents: variantNomenclatureMd
             },
             {
                 name: "What data sources and fields are provided in Clinical Significance Tiles?",
@@ -212,107 +275,107 @@ const helpContentResearch = [
                     {
                         name: "ENIGMA",
                         id: "clinical-significance-enigma",
-                        contents: require("../content/help/research/clinical-significance-enigma.md")
+                        contents: clinicalSignificanceEnigmaMd
                     },
                     {
                         name: "ClinVar",
                         id: "clinical-significance-clinvar",
-                        contents: require("../content/help/research/clinical-significance-clinvar.md")
+                        contents: clinicalSignificanceClinvarMd
                     },
                     {
                         name: "Leiden Open Variation Database (LOVD)",
                         id: "clinical-significance-lovd",
-                        contents: require("../content/help/research/clinical-significance-lovd.md")
+                        contents: clinicalSignificanceLovdMd
                     },
                 ]
             },
             {
                 name: "What information is displayed in the Transcript Visualization?",
                 id: "transcript-visualization",
-                contents: require("../content/help/research/transcript-visualization.md")
+                contents: transcriptVisualizationMd
             },
             {
                 name: "What data is used in Multifactorial Likelihood Analysis?",
                 id: "multifactorial-likelihood-analysis",
-                contents: require("../content/help/research/multifactorial-likelihood-analysis.md"),
+                contents: multifactorialLikelihoodMd,
                 // reference: "https://www.ncbi.nlm.nih.gov/pubmed/21990134"
             },
             {
                 name: "What information is provided in the Allele Frequency Reference Sets tile?",
                 id: "allele-frequency-reference-sets",
-                contents: require("../content/help/research/allele-frequency-reference-sets.md"),
+                contents: alleleFrequencyRefSetsMd,
                 list: [
                     {
                         name: "gnomAD: Genome Aggregation Database (non-cancer cohort)",
-                        contents: require("../content/help/research/allele-frequency-gnomad.md")
+                        contents: alleleFrequencyGnomadMd
                     },
                 ]
             },
             {
                 name: "What information is provided in the ACMG Variant Evidence Codes, Provisional Assignment tile?",
                 id: "acmg-variant-evidence-codes-provisional-assignment",
-                contents: require("../content/help/research/acmg-variant-evidence-codes-provisional-assignment.md"),
+                contents: acmgVariantEvidenceCodesMd,
                 list: [
                     {
                         name: "Population Frequency",
                         id: "acmg-variant-evidence-codes-population-frequency",
-                        contents: require("../content/help/research/acmg-variant-evidence-codes-population-frequency.md")
+                        contents: acmgPopulationFrequencyMd
                     },
                     {
                         name: "Computational Prediction",
                         id: "acmg-variant-evidence-codes-computational-prediction",
-                        contents: require("../content/help/research/acmg-variant-evidence-codes-computational-prediction.md")
+                        contents: acmgComputationalPredictionMd
                     },
                 ]
             },
             {
                 name: "What sources are available in the Functional Assay Results tile?",
                 id: "functional-assay-results",
-                contents: require("../content/help/research/functional-assay-disclaimer.md"),
+                contents: functionalAssayDisclaimerMd,
                 list: [
                     {
                         name: "Functional Assay Scores",
-                        contents: require("../content/help/research/functional-assays.md")
+                        contents: functionalAssaysMd
                     },
                 ]
             },
             {
                 name: "What sources are available in the Computational Predictions tile?",
                 id: "computational-predictions",
-                contents: require("../content/help/research/computational-predictions.md"),
+                contents: computationalPredictionsMd,
                 list: [
                     {
                         name: "Computational Predictions",
-                        contents: require("../content/help/research/computational-predictions.md")
+                        contents: computationalPredictionsMd
                     },
                 ]
             },
             {
                 name: "What are In Silico Prior Probabilities of Pathogenicity?",
                 id: "in-silico-prior-probabilities-of-pathogenicity",
-                contents: require("../content/help/research/insilico/insilico-pred.md")
+                contents: insilicoPredMd
             },
             {
                 name: "How do I interpret the CRAVAT/MuPIT Interactive Protein Structure Viewer?",
                 id: "cravat-mupit-3d-protein-view",
-                contents: require("../content/help/research/cravat-mupit.md")
+                contents: cravatMupitMd
             },
             {
                 name: "How does the BRCA Exchange provide Literature Search Results for variants?",
-                contents: require("../content/help/research/literature-search.md"),
+                contents: literatureSearchMd,
                 isBeta: true
             },
             {
                 name: "What genome build is this site using?",
-                contents: require("../content/help/research/what-genome-build-is-this-site-using.md")
+                contents: whatGenomeBuildMd
             },
             {
                 name: "How is the data on this site updated?",
-                contents: require("../content/help/research/how-is-the-data-on-this-site-updated.md"),
+                contents: howIsDataUpdatedResearchMd,
             },
             {
                 name: "How do I Download Variant Data?",
-                contents: require("../content/help/research/downloading-variant-data.md")
+                contents: downloadingVariantDataMd
             }
         ]
     },
@@ -321,15 +384,15 @@ const helpContentResearch = [
         tiles: [
             {
                 name: "What is the BRCA Exchange?",
-                contents: require("../content/help/default/what-is-the-brca-exchange.md")
+                contents: whatIsBRCAExchangeMd
             },
             {
                 name: "What makes BRCA Exchange different from other public databases?",
-                contents: require("../content/help/default/what-makes-brca-exchange-different-from-other-public-databases.md")
+                contents: whatMakesBRCADifferentMd
             },
             {
                 name: "What is ENIGMA and how does it determine variant classifications?",
-                contents: require("../content/help/default/what-is-enigma-and-how-does-it-determine-variant-classifications.md")
+                contents: whatIsEnigmaMd
             },
         ]
     },
@@ -370,7 +433,7 @@ function extractNonHeaders(x) {
     return result.html().trim();
 }
 
-function parseContentForTips(helpContent) {
+export function parseContentForTips(helpContent) {
     // we enclose the payload in a div because otherwise jQuery can't find top-level elements in the blob
     const helpElem = jQuery.parseHTML("<div>" + helpContent + "</div>");
 
@@ -393,7 +456,7 @@ function parseContentForTips(helpContent) {
  * @param isResearchMode specifies whether to scrape the research mode or expert-reviewed help docs
  * @returns {*} a mapping from slugified field names to HTML help text
  */
-function parseTooltips(isResearchMode) {
+export function parseTooltips(isResearchMode) {
     // extract help text depending on the research mode
     // this recursively searches the nested help structure for 'contents' markdown nodes to scrape
     const nodes = flattenDeep(findContentNodes(isResearchMode ? helpContentResearch : helpContentDefault));
@@ -402,7 +465,11 @@ function parseTooltips(isResearchMode) {
     return _.reduce(nodes.map(node => parseContentForTips(node)), _.extend);
 }
 
-module.exports = {
+// Named export for pages
+export const pages = content;
+
+// Default export for backward compatibility
+export default {
     pages: content,
     mupitStructures,
     parseTooltips,

@@ -1,35 +1,36 @@
-// A table for variants.
-//
-// The intent here was to split the generic table code
-// in DataTable from the variant domain knowledge, which
-// would be here. That division has broken down due to
-// peculiarities of react-data-components DataMixin, and
-// time pressure. Knowledge about variants is in both files.
-// This needs to be revisited.
-
-/*global module: false, require: false, window: false */
 'use strict';
 
 var {computeReviewStatusScore} = require("./components/VariantSubmitter");
 
 var React = require('react');
-var PureRenderMixin = require('./PureRenderMixin');
-var DataTable = require('./DataTable');
+import DataTable from './DataTable';
 var _ = require('underscore');
-var {Col, Panel, Button, Checkbox} = require('react-bootstrap');
-var ColumnCheckbox = require('./ColumnCheckbox');
+
+// React-Bootstrap v2 replacements
+import { Card, Col, Row, Collapse, Form, Button } from 'react-bootstrap';
+
+import ColumnCheckbox from './ColumnCheckbox';
 var {getDefaultExpertColumns, getDefaultResearchColumns, getAllSources} = require('./VariantTableDefaults');
-var {State} = require('react-router');
 var alleleFrequencyCharts = require('./AlleleFrequencyCharts');
 
-require('react-data-components-brcaex/css/table-twbs.css');
+// TODO: Re-enable or replace after upgrading react-data-components-brcaex
+// require('react-data-components-brcaex/css/table-twbs.css');
 
 function buildHeader(onClick, title) {
     return (
         <span>
             {title}
-            <span onClick={ev => {ev.stopPropagation(); onClick(title); }}
-                  className='help glyphicon glyphicon-question-sign superscript'/>
+            <span
+                onClick={ev => {ev.stopPropagation(); onClick(title); }}
+                className='help fa fa-question-circle'
+                style={{cursor: 'pointer',
+			fontSize: '0.8em',
+			color: '#888',
+			position: 'relative',
+			top: '-8px',
+			left: '4px'
+		}}
+            />
         </span>
     );
 }
@@ -370,7 +371,7 @@ const researchModeGroups = [
 // subColumns populate the column selection checkboxes.
 // They should match the variant detail groupings unless hideFromColumnSelection is true.
 const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !group.hideFromColumnSelection; }), function (group) {
-    if (group.hasOwnProperty('innerCols')) {
+    if (Object.prototype.hasOwnProperty.call(group, 'innerCols')) {
         return {
             subColTitle: group.groupTitle,
             // hide dummy columns from column selection
@@ -382,7 +383,7 @@ const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !
                 };
             })
         };
-    } else if (group.hasOwnProperty('reportBinding') && group.reportBinding.hasOwnProperty('cols')) {
+    } else if (Object.prototype.hasOwnProperty.call(group, 'reportBinding') && Object.prototype.hasOwnProperty.call(group.reportBinding, 'cols')) {
         return {
             subColTitle: group.groupTitle,
             // hide dummy columns from column selection
@@ -394,7 +395,7 @@ const subColumns = _.map(_.filter(researchModeGroups, function(group) { return !
                 };
             })
         };
-    } else if (group.hasOwnProperty('innerGroups')) {
+    } else if (Object.prototype.hasOwnProperty.call(group, 'innerGroups')) {
         let subCols = group.innerGroups.map(function(innerGroup) {
             // hide dummy columns from column selection
             return _.map(_.filter(innerGroup.data, ({dummy}) => !dummy), function (col) {
@@ -593,15 +594,10 @@ const researchModeColumns = [
     {title: 'Delta Position Acceptor Loss SpliceAI', prop: 'DP_AL_spliceAI'},
     {title: 'Delta Position Donor Gain SpliceAI', prop: 'DP_DG_spliceAI'},
     {title: 'Delta Position Donor Loss SpliceAI', prop: 'DP_DL_spliceAI'}
-
-
-
-
-
 ];
 
 
-/*eslint-enable camelcase */
+
 
 // Work-around to allow the user to select text in the table. The browser does not distinguish between
 // click and drag: if mouseup and mousedown occur on the same element, a click event is fired even if
@@ -619,9 +615,13 @@ const researchModeColumns = [
 // text areas to look clickable instead of selectable..
 var hasSelection = () => !(window.getSelection && window.getSelection().isCollapsed);
 
-var Table = React.createClass({
-    mixins: [PureRenderMixin],
-    render: function () {
+class Table extends React.Component {
+    constructor(props) {
+	super(props);
+	this.dataTableRef = React.createRef();
+    }
+
+    render() {
         // Expert portal always shows all sources and default columns
         var {data, onHeaderClick, onRowClick, hiddenSources, mode, columnSelection, sourceSelection, ...opts} = this.props;
         if (mode === "default") {
@@ -633,7 +633,7 @@ var Table = React.createClass({
         }
         return (
             <DataTable
-                ref='table'
+                ref={this.dataTableRef}
                 className='row-clickable data-table table-grayheader'
                 {...opts}
                 columnSelection={columnSelection}
@@ -654,13 +654,11 @@ var Table = React.createClass({
                 mode={mode}/>
         );
     }
-});
+}
 
 var ResearchVariantTableSupplier = function (Component) {
-    var ResearchVariantTableComponent = React.createClass({
-        mixins: [State, PureRenderMixin],
-
-        getInitialState: function () {
+    class ResearchVariantTableComponent extends React.Component {
+        state = (() => {
             /*
             Selections take the following order of priority:
                 1. Query params in URL
@@ -681,17 +679,17 @@ var ResearchVariantTableSupplier = function (Component) {
 
             // Get query params.
             const urlParams = this.getQuery();
-            const useQueryParams = urlParams.hasOwnProperty("hide") || urlParams.hasOwnProperty("hideSources");
+            const useQueryParams = Object.prototype.hasOwnProperty.call(urlParams, "hide") || Object.prototype.hasOwnProperty.call(urlParams, "hideSources");
 
             if (useQueryParams) {
                 // If query params are present, use them for settings.
-                if (urlParams.hasOwnProperty("hide")) {
+                if (Object.prototype.hasOwnProperty.call(urlParams, "hide")) {
                     const columnsToHide = urlParams.hide;
                     for (let i = 0; i < columnsToHide.length; i++) {
                         selectedColumns[columnsToHide[i]] = false;
                     }
                 }
-                if (urlParams.hasOwnProperty("hideSources")) {
+                if (Object.prototype.hasOwnProperty.call(urlParams, "hideSources")) {
                     const sourcesToHide = urlParams.hideSources;
                     for (let i = 0; i < sourcesToHide.length; i++) {
                         selectedSources[sourcesToHide[i]] = 0;
@@ -712,25 +710,64 @@ var ResearchVariantTableSupplier = function (Component) {
                 }
             }
 
+            // initialize open state for each sub-column panel from localStorage (RB0.33 defaultExpanded logic)
+            const openSubcols = {};
+            subColumns.forEach(({ subColTitle }) => {
+                const key = "collapse-subcol_" + subColTitle;
+                openSubcols[subColTitle] = localStorage.getItem(key) !== "true";
+            });
+
             return {
                 sourceSelection: selectedSources,
                 columnSelection: selectedColumns,
-                changeInProgress: false
+                changeInProgress: false,
+                openSubcols
             };
-        },
-        componentWillReceiveProps: function() {
+        })();
+        componentDidUpdate(prevProps) {
             // Change is now complete (has propagated all the way
             // down and back up through the parent component)
-            this.setState({changeInProgress: false});
-        },
-        toggleColumns: function (prop) {
+	    if (this.state.changeInProgress && prevProps !== this.props) {
+                this.setState({ changeInProgress: false });
+            }
+        }
+
+        getQuery() {
+            const search =
+                (this.props.location && this.props.location.search) ||
+                (typeof window !== "undefined" ? window.location.search : "") ||
+                "";
+
+            const params = new URLSearchParams(search);
+            const out = {};
+
+            const readMulti = (key) => {
+                const vals = params.getAll(key);
+                if (!vals || vals.length === 0) return null;
+                return vals
+                    .flatMap(v => String(v).split(','))
+                    .map(s => s.trim())
+                    .filter(Boolean);
+            };
+
+            const hide = readMulti("hide");
+            if (hide) out.hide = hide;
+
+            const hideSources = readMulti("hideSources");
+            if (hideSources) out.hideSources = hideSources;
+
+            return out;
+        }
+
+        toggleColumns = (prop) => {
             let {columnSelection} = this.state,
                 val = columnSelection[prop],
                 cs = {...columnSelection, [prop]: !val};
             localStorage.setItem('columnSelection', JSON.stringify(cs));
             this.setState({columnSelection: cs, changeInProgress: true});
-        },
-        setSource: function (prop, event) {
+        };
+
+        setSource = (prop, event) => {
             // this function uses 1, 0 and -1 to accommodate excluding sources as well as not-including them
             // currently only uses 1 and 0 because exclusion is not being used
             let {sourceSelection} = this.state;
@@ -738,54 +775,63 @@ var ResearchVariantTableSupplier = function (Component) {
             let ss = {...sourceSelection, [prop]: value};
             localStorage.setItem('sourceSelection', JSON.stringify(ss));
             this.setState({sourceSelection: ss, changeInProgress: true});
-        },
-        filterFormCols: function (subColList, columnSelection) {
+        };
+
+        filterFormCols = (subColList, columnSelection) => {
             return _.map(subColList, ({title, prop}) =>
-                <ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop || title} label={prop || title} title={title}
-                                initialCheck={columnSelection}/>);
-        },
-        onChangeSubcolVisibility(subColTitle, event) {
-            // stop the page from scrolling to the top (due to navigating to the fragment '#')
-            event.preventDefault();
+                (<ColumnCheckbox onChange={() => this.toggleColumns(prop)} key={prop || title} label={prop || title} title={title}
+                                initialCheck={columnSelection}/>));
+        };
 
-            const collapsingElem = event.target;
+        toggleSubcolOpen = (subColTitle) => {
+	   const key = "collapse-subcol_" + subColTitle;
+	   this.setState((prev) => {
+	     const isOpen = !!prev.openSubcols[subColTitle];
+	     const nextOpen = !isOpen;
+	     // store "true" when collapsed (matches old semantics)
+	     localStorage.setItem(key, nextOpen ? "false" : "true");
+	     return {
+	       openSubcols: { ...prev.openSubcols, [subColTitle]: nextOpen }
+	     };
+	   });
+        };
 
-            // FIXME: there must be a better way to get at the panel's state than reading the class
-            // maybe we'll subclass Panel and let it handle its own visibility persistence
-
-            const isCollapsed = (collapsingElem.getAttribute("class") === "collapsed");
-            localStorage.setItem("collapse-subcol_" + subColTitle, !isCollapsed);
-        },
         getColumnSelectors() {
             var filterFormSubCols = _.map(subColumns, ({subColTitle, subColList}) =>
-                <Col sm={6} md={4} key={subColTitle}>
-                    <Panel
-                        collapsible={true}
-                        defaultExpanded={localStorage.getItem("collapse-subcol_" + subColTitle) !== "true"}
-                        onSelect={(event) => this.onChangeSubcolVisibility(subColTitle, event)}>
-                        <Panel.Heading>
-                            <Panel.Title>{subColTitle}</Panel.Title>
-                        </Panel.Heading>
-                        <Panel.Collapse>
-                            <Panel.Body>
-                            {this.filterFormCols(subColList, this.state.columnSelection)}
-                            </Panel.Body>
-                        </Panel.Collapse>
-                    </Panel>
-                </Col>
+                (<Col sm={6} md={4} key={subColTitle}>
+                    <Card className="mb-3">
+                        <Card.Header
+                            onClick={() => this.toggleSubcolOpen(subColTitle)}
+                            role="button"
+                            aria-expanded={!!this.state.openSubcols[subColTitle]}
+                            className="d-flex justify-content-between align-items-center"
+                        >
+                            <span className="fw-bold">{subColTitle}</span>
+                            <i className={`fa fa-chevron-${this.state.openSubcols[subColTitle] ? 'down' : 'right'}`} aria-hidden="true" />
+                        </Card.Header>
+                        <Collapse in={!!this.state.openSubcols[subColTitle]}>
+                            <div>
+                                <Card.Body>
+                                    {this.filterFormCols(subColList, this.state.columnSelection)}
+                                </Card.Body>
+                            </div>
+                        </Collapse>
+                    </Card>
+                </Col>)
             );
-            return (<label className='control-label'>
-                <Panel>
-                    <Panel.Heading>
-                        <Panel.Title>Column Selection</Panel.Title>
-                    </Panel.Heading>
-                    <Panel.Body>
-                    {filterFormSubCols}
-                    </Panel.Body>
-                </Panel>
-            </label>);
-        },
-        getSourceName: function(name) {
+            return (<div className='control-label'>
+                <Card>
+                    <Card.Header className="fw-bold">Column Selection</Card.Header>
+                    <Card.Body>
+		    	<Row>
+                    	    {filterFormSubCols}
+		    	</Row>
+                    </Card.Body>
+                </Card>
+            </div>);
+        }
+
+        getSourceName(name) {
             let source = name.substring(11).replace(/_/g, " ");
             if (source.toLowerCase() === "exlovd") {
                 source = "ExUV";
@@ -803,42 +849,50 @@ var ResearchVariantTableSupplier = function (Component) {
                 source = "1000 Genomes (deprecated)";
             }
             return source;
-        },
-        getFilters: function() {
+        }
+
+        getFilters() {
             var sourceCheckboxes = _.map(this.state.sourceSelection, (value, name) =>
-                <Col sm={6} md={3} key={name}>
-                    <Checkbox
+                (<Col sm={6} md={3} key={name}>
+                    <Form.Check
+                        type="checkbox"
                         onChange={v => this.setSource(name, v)}
                         checked={value > 0}
-                    >{this.getSourceName(name)}</Checkbox>
-                </Col>
+                        label={this.getSourceName(name)}
+                    />
+                </Col>)
             );
-            return (<label className='control-label source-filters'>
-                <Panel className="top-buffer">
-                    <Panel.Heading>
-                        <Panel.Title>Source Selection</Panel.Title>
-                    </Panel.Heading>
-                    <Panel.Body>
-                    {sourceCheckboxes}
-                    </Panel.Body>
-                </Panel>
-            </label>);
-        },
-        getDownloadButton: function (callback) {
-            return <Button className="btn-default rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
-        },
-        getColumns: function () {
+            return (<div className='source-filters'>
+                <Card className="top-buffer">
+                    <Card.Header className="fw-bold">Source Selection</Card.Header>
+                    <Card.Body>
+		    	<Row>
+                    	    {sourceCheckboxes}
+		    	</Row>
+                    </Card.Body>
+                </Card>
+            </div>);
+        }
+
+        getDownloadButton(callback) {
+            return <Button variant="secondary" className="rgt-buffer" download="variants.tsv" href={callback()}>Download</Button>;
+        }
+
+        getColumns() {
             return researchModeColumns;
-        },
-        getDefaultColumnSelections: function() {
+        }
+
+        getDefaultColumnSelections() {
             return _.object(_.map(researchModeColumns,
                 c => _.contains(getDefaultResearchColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
             );
-        },
-        getDefaultSourceSelections: function() {
+        }
+
+        getDefaultSourceSelections() {
             return getAllSources();
-        },
-        researchVariantTableRestoreDefaults: function(callback) {
+        }
+
+        researchVariantTableRestoreDefaults = (callback) => {
             const columnSelection = this.getDefaultColumnSelections();
             const sourceSelection = this.getDefaultSourceSelections();
             this.setState({columnSelection: columnSelection,
@@ -846,8 +900,9 @@ var ResearchVariantTableSupplier = function (Component) {
                            function() {
                                 this.props.restoreDefaults(callback);
                            });
-        },
-        render: function () {
+        };
+
+        render() {
             return (
                 <Component
                     {...this.props}
@@ -861,20 +916,19 @@ var ResearchVariantTableSupplier = function (Component) {
                     changeInProgress={this.state.changeInProgress}/>
             );
         }
-    });
+    }
     return ResearchVariantTableComponent;
 };
 
 var VariantTableSupplier = function (Component) {
-    var VariantTableComponent = React.createClass({
-        mixins: [PureRenderMixin],
-        getColumns: function () {
+    class VariantTableComponent extends React.PureComponent {
+        getColumns() {
             return columns;
-        },
-        expertVariantTableRestoreDefaults: function(callback) {
+        }
+        expertVariantTableRestoreDefaults = (callback) => {
             this.props.restoreDefaults(callback);
-        },
-        render: function () {
+        };
+        render() {
             let expertColumns = _.object(_.map(this.getColumns(),
                 c => _.contains(getDefaultExpertColumns(), c.prop) ? [c.prop, true] : [c.prop, false])
             );
@@ -890,16 +944,18 @@ var VariantTableSupplier = function (Component) {
                     downloadButton={()=> null}/>
             );
         }
-    });
+    }
     return VariantTableComponent;
 };
 
+const VariantTable = VariantTableSupplier(Table);
+const ResearchVariantTable = ResearchVariantTableSupplier(Table);
 
-module.exports = {
-    VariantTable: VariantTableSupplier(Table),
-    ResearchVariantTable: ResearchVariantTableSupplier(Table),
-    researchModeColumns: researchModeColumns,
-    columns: columns,
-    researchModeGroups: researchModeGroups,
-    expertModeGroups: expertModeGroups
+export {
+    VariantTable,
+    ResearchVariantTable,
+    researchModeColumns,
+    columns,
+    researchModeGroups,
+    expertModeGroups
 };

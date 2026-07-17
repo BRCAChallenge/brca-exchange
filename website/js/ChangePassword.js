@@ -1,38 +1,36 @@
 'use strict';
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var {Grid, Row, Col, Button} = require('react-bootstrap');
-var {State, Navigation} = require('react-router');
-var {$c} = require('./Signup');
+import React from 'react';
+import { Container as Grid, Row, Col, Button } from 'react-bootstrap';
+import { withRouter } from 'react-router-dom';
+import { $c } from './Signup';
+import $ from 'jquery';
+import config from './config';
 
-var $ = require('jquery');
-var config = require('./config');
+class ChangePasswordInner extends React.Component {
+    state = { success: null, invalidToken: false, error: null };
+    contactFormRef = React.createRef();
 
+    receiveToken = (data) => {
+        if (data && data.invalid_token) {
+            this.setState({ invalidToken: true });
+        }
+    };
 
-var ChangePassword = React.createClass({
-    mixins: [State, Navigation],
-    getInitialState: function () {
-        return {
-            success: null
-        };
-    },
-	receiveToken: function(data) {
-		if (data.invalid_token) {
-			this.setState({'invalid_token': true});
-		}
-	},
-    componentDidMount: function () {
-        var resetToken = this.context.router.getCurrentParams().resetToken;
+    componentDidMount() {
+        const resetToken =
+            (this.props.match && this.props.match.params && this.props.match.params.resetToken) ||
+            (this.props.params && this.props.params.resetToken);
         var url = config.backend_url + '/accounts/check_password_token/' + resetToken + '/';
         $.post({
             url: url,
             success: this.receiveToken
         });
-	},
-    render: function () {
+    }
+
+    render() {
         // If the token is invalid, show an error and don't show the form.
-        if (this.state.invalid_token) {
+        if (this.state.invalidToken) {
             return (
 				<Grid id="main-grid"> <Row id="message">
 					<div className="alert alert-danger">
@@ -41,8 +39,14 @@ var ChangePassword = React.createClass({
 				</Row> </Grid>);
         }
 
-        var message;
-       if (this.state.success) {
+       var message;
+       if (this.state.error != null) {
+            message = (
+                <div className="alert alert-danger">
+                    <p>{this.state.error}</p>
+                </div>
+            );
+	} else if (this.state.success) {
             message = (
 				<div className="alert alert-success">
 					<p>Your password has been updated. You can now sign in using it.</p>
@@ -53,32 +57,36 @@ var ChangePassword = React.createClass({
                 {message}
             </Row>
                 <Row>
-                    <Col md={8} mdOffset={3}>
+                    <Col md={{ span: 8, offset: 3 }}>
                         <h3>Create a new password</h3>
                     </Col>
                 </Row>
                 <Row id="form">
-                    <Col md={8} mdOffset={2}>
-                        <ChangePasswordForm ref="contactForm"/>
+                    <Col md={{ span: 8, offset: 2 }}>
+                        <ChangePasswordForm ref={this.contactFormRef}/>
                     </Col>
                 </Row>
                 <Row id="submit">
-                    <Col md={6} mdOffset={3}>
+                    <Col md={{ span: 6, offset: 3 }}>
                         <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
                             Save
                         </Button>
                     </Col>
                 </Row>
             </Grid>);
-    },
-    handleSubmit: function () {
+    }
+
+    handleSubmit = () => {
         var showSuccess = () => {this.setState({success: true});};
         var showFailure = msg => {this.setState({error: msg});};
-        var resetToken = this.context.router.getCurrentParams().resetToken;
+        const resetToken =
+            (this.props.match && this.props.match.params && this.props.match.params.resetToken) ||
+            (this.props.params && this.props.params.resetToken);
 
         var url = config.backend_url + '/accounts/update_password/' + resetToken + '/';
-        if (this.refs.contactForm.isValid()) {
-            var formData = this.refs.contactForm.getFormData();
+	const form = this.contactFormRef.current;
+        if (form && form.isValid()) {
+            var formData = form.getFormData();
             $.post({
                 url: url,
                 data: formData,
@@ -93,49 +101,57 @@ var ChangePassword = React.createClass({
                 }
             });
         }
-    }
-});
+    };
+}
 
 
-var ChangePasswordForm = React.createClass({
-    getInitialState: function () {
-        return {errors: {}};
-    },
-    isValid: function () {
+class ChangePasswordForm extends React.Component {
+    state = { errors: {} };
+    passwordRef = React.createRef();
+    passwordConfirmRef = React.createRef();
+
+    isValid = () => {
         var compulsoryFields = ['password', 'passwordConfirm'];
         var errors = {};
-        if (ReactDOM.findDOMNode(this.refs.password).value !== ReactDOM.findDOMNode(this.refs.passwordConfirm).value) {
+        const pw = this.passwordRef.current ? this.passwordRef.current.value : '';
+        const pw2 = this.passwordConfirmRef.current ? this.passwordConfirmRef.current.value : '';
+        if (pw !== pw2) {
             errors.passwordConfirm = "The passwords don't match";
         }
         compulsoryFields.forEach(function (field) {
-            var value = ReactDOM.findDOMNode(this.refs[field]).value.trim();
+            const node = field === 'password' ? this.passwordRef.current : this.passwordConfirmRef.current;
+	    var value = (node && node.value ? node.value : '').trim();
             if (!value) {
                 errors[field] = 'This field is required';
             }
         }.bind(this));
         this.setState({errors: errors});
 		return Object.keys(errors).length === 0;
-    },
-    getFormData: function () {
+    };
+
+    getFormData = () => {
         var data = {
-            password: ReactDOM.findDOMNode(this.refs.password).value,
-			passwordConfirm: ReactDOM.findDOMNode(this.refs.passwordConfirm).value
+		password: this.passwordRef.current ? this.passwordRef.current.value : '',
+		passwordConfirm: this.passwordConfirmRef.current ? this.passwordConfirmRef.current.value : ''
         };
         return data;
-    },
-    render: function () {
+    };
+
+    render() {
         return (
 			<div className="form-horizontal">
 				{this.renderPassword('password', 'Password')}
 				{this.renderPassword('passwordConfirm', 'Confirm Password')}
 			</div>);
-    },
-    renderPassword: function (id, label) {
+    }
+
+    renderPassword(id, label) {
         return this.renderField(id, label,
-            <input type="password" className="form-control" id={id} ref={id}/>
+            <input type="password" className="form-control" id={id} ref={id === 'password' ? this.passwordRef : this.passwordConfirmRef}/>
         );
-    },
-    renderField: function (id, label, field) {
+    }
+
+    renderField(id, label, field) {
         return (
 			<div className={$c('form-group', {'has-error': id in this.state.errors})}>
 				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
@@ -144,9 +160,8 @@ var ChangePasswordForm = React.createClass({
 				</div>
 			</div>);
     }
-});
+}
 
-
-module.exports = ({
-    ChangePassword: ChangePassword
-});
+const ChangePassword = withRouter(ChangePasswordInner);
+export { ChangePassword };
+export default ChangePassword;

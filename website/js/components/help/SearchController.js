@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import Mark from "mark.js";
 import {debounce} from "lodash";
 import {navbarHeight} from "../../Help";
@@ -17,15 +18,17 @@ export const EXTRA_SEARCH_PADDING = 8;
  *
  * When the site's mode is toggled, search results will be cleared since they won't be valid for the new text anyway.
  */
-const SearchController = React.createClass({
-    getInitialState() {
-        return {
-            searchTerm: '',
-            searching: false,
-            matched: 0,
-            currentMark: null
-        };
-    },
+class SearchController extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { searchTerm: '', searching: false, matched: 0, currentMark: null };
+        this.searcher = new Mark(this.props.target);
+        this.debouncedSearchResponse = debounce(this.searchResponse.bind(this), 300);
+        this.searchChanged = this.searchChanged.bind(this);
+        this.navMarks = this.navMarks.bind(this);
+        this.navForward = this.navMarks.bind(this, true);
+        this.navBackward = this.navMarks.bind(this, false);
+    }
 
     searchChanged(e) {
         this.setState({
@@ -34,71 +37,71 @@ const SearchController = React.createClass({
         }, () => {
             this.debouncedSearchResponse();
         });
-    },
+    }
 
     searchResponse() {
-        if (!this.state.searchTerm || this.state.searchTerm === '') {
-            // remove any marks if they cleared the search
-            this.setState({
-                matched: 0,
-                currentMark: null,
-                searching: false
-            }, () => {
-                this.searcher.unmark();
+	if (!this.state.searchTerm || this.state.searchTerm === '') {
+	    this.setState({ matched: 0, currentMark: null, searching: false });
+	    this.searcher.unmark();
+	    $('*[data-expander-id]').each((idx, elem) => {
+		this.props.setExpansion($(elem).data('expander-id'), false);
+	    });
+	    return;
+	}
 
-                $(this.props.target).find('*[data-expander-id]').each((idx, elem) => {
-                    this.props.setExpansion($(elem).data('expander-id'), false);
-                });
-            });
-            return;
-        }
+	// PASS 1: find which cards contain matches, expand them, but don't keep marks
+	this.searcher.unmark({
+	    done: () => {
+		const expandSet = new Set();
 
-        // perform full matching against 'target'
-        // (first we unmark, then mark, then deal with the match results)
-        this.searcher.unmark({
-            done: () => {
-                this.pendingUpdate = new Set();
+		this.searcher.mark(this.state.searchTerm, {
+		    element: 'span',
+		    className: 'highlighted',
+		    each: (elem) => {
+			$(elem).parents('*[data-expander-id]').each((idx, parent) => {
+			    expandSet.add($(parent).data('expander-id'));
+			});
+		    },
+		    done: () => {
+			// expand cards with matches, collapse those without
+			$('*[data-expander-id]').each((idx, elem) => {
+			    const id = $(elem).data('expander-id');
+			    this.props.setExpansion(id, expandSet.has(id));
+			});
 
-                // then iteratively expand while searching for marks
-                this.searcher.mark(this.state.searchTerm, {
-                    element: 'span',
-                    className: 'highlighted',
-                    done: (totalMarks) => {
-                        this.setState({
-                            searching: false,
-                            currentMark: null,
-                            matched: totalMarks
-                        });
+			// PASS 2: after React re-renders and Collapse animates, re-apply marks
+			setTimeout(() => {
+			    this.searcher.unmark({
+				done: () => {
+				    this.searcher.mark(this.state.searchTerm, {
+					element: 'span',
+					className: 'highlighted',
+					each: (elem) => {
+					    $(elem).click(function() {
+						const $highlightSet = $('.highlighted').removeClass("focused");
+						$(this).addClass("focused");
+						this.setState({ currentMark: $highlightSet.index(this) });
+					    }.bind(this));
+					},
+					done: (totalMarks) => {
+					    this.setState({
+						searching: false,
+						currentMark: null,
+						matched: totalMarks
+					    });
+					}
+				    });
+				}
+			    });
+			}, 400); // wait for Collapse animation + React re-render
+		    }
+		});
+	    }
+	});
+    }
 
-                        // set all the elements that can be toggled to their match status
-                        $('*[data-expander-id]').each((idx, elem) => {
-                            const targetID = $(elem).data('expander-id');
-                            this.props.setExpansion(targetID, this.pendingUpdate.has(targetID));
-                        });
-                    },
-                    each: (elem) => {
-                        const me = this;
-
-                        // check if it has ancestors that need to be expanded and add them to the expanded list
-                        $(elem)
-                            .click(function() {
-                                const $highlightSet = $('.highlighted').removeClass("focused");
-
-                                // set this element to the currently-selected index
-                                $(this).addClass("focused");
-                                me.setState({ currentMark: $highlightSet.index(this) });
-                            })
-                            .parents('*[data-expander-id]').each((idx, elem) => {
-                                this.pendingUpdate.add($(elem).data('expander-id'));
-                            });
-                    }
-                });
-            }
-        });
-    },
-
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.researchMode !== this.props.researchMode) {
+    componentDidUpdate(prevProps) {
+        if (prevProps.researchMode !== this.props.researchMode) {
             // reinitialize if they've switched help page modes
             this.setState({
                 searchTerm: '',
@@ -114,15 +117,7 @@ const SearchController = React.createClass({
                 }
             });
         }
-    },
-
-    componentWillMount() {
-        this.searcher = new Mark(this.props.target);
-        this.debouncedSearchResponse = debounce(this.searchResponse, 300);
-
-        this.navForward = this.navMarks.bind(this, true);
-        this.navBackward = this.navMarks.bind(this, false);
-    },
+    }
 
     navMarks(forward) {
         const $highlightSet = $('.highlighted').removeClass("focused");
@@ -151,38 +146,38 @@ const SearchController = React.createClass({
                 behavior: 'smooth'
             });
         });
-    },
+    }
 
     render() {
         return (
             <div className="input-group has-feedback has-search">
-                <div className="input-group-addon">
-                    <span className={`glyphicon ${this.state.searching ? "glyphicon-refresh glyphicon-spin" : "glyphicon-search"}`} />
-                </div>
+		<span className="input-group-text">
+                    <span className={`fa ${this.state.searching ? "fa-refresh fa-spin" : "fa-search"}`} />
+                </span>
                 <input type="text" className="form-control" placeholder="Search" value={this.state.searchTerm} onChange={this.searchChanged} />
                 {
                     (this.state.matched > 0) && (
-                        <span className="input-group-addon">
-                         { this.state.currentMark !== null && `${this.state.currentMark + 1} / ` }
+			<span className="input-group-text">
+                            { this.state.currentMark !== null && `${this.state.currentMark + 1} / ` }
                             { this.state.matched}
-                        </span>
+			</span>
                     )
                 }
-                <div className="input-group-btn">
-                    <button type="button" disabled={this.state.matched <= 0} onClick={this.navForward} className="btn btn-default">
-                        <span className="glyphicon glyphicon-triangle-bottom" />
-                    </button>
-                    <button type="button" disabled={this.state.matched <= 0} onClick={this.navBackward} className="btn btn-default">
-                        <span className="glyphicon glyphicon-triangle-top" />
-                    </button>
-                </div>
+                <button type="button" disabled={this.state.matched <= 0} onClick={this.navForward} className="btn btn-default">
+                    <span className="fa fa-caret-down" />
+                </button>
+                <button type="button" disabled={this.state.matched <= 0} onClick={this.navBackward} className="btn btn-default">
+                    <span className="fa fa-caret-up" />
+                </button>
             </div>
         );
     }
-});
+}
 SearchController.propTypes = {
-    target: React.PropTypes.string.isRequired,
-    setExpansion: React.PropTypes.func.isRequired
+    target: PropTypes.string.isRequired,
+    setExpansion: PropTypes.func.isRequired,
+    researchMode: PropTypes.any,
+    headerElem: PropTypes.object
 };
 
 export default SearchController;

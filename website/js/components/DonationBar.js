@@ -1,19 +1,17 @@
-/*eslint-env browser */
-/*global require: false */
 'use strict';
 
 import React from 'react';
 
-const DonationBar = React.createClass({
+class DonationBar extends React.PureComponent {
     render() {
         return (
         	<div className="donation-bar">
     		    <p>
-			On Friday, March 20, BRCA Exchange will be down for maintenance while we update the system software.  We apologize in advance for the inconvenience.
+			Changes are coming to BRCA Exchange!  Please visit our <a style={{textDecoration: 'underline'}} href="https://brcaexchange.org/blog/index.php/2026/05/14/changes-are-coming-to-brca-exchange/">blog</a> for the latest news.
 	        	</p>
         	</div>
         );
     }
-});
+}
 
 export default DonationBar;

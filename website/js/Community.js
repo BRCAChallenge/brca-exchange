@@ -1,93 +1,128 @@
 'use strict';
 
-var React = require('react');
-var ReactDOMServer = require('react-dom/server');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var {Grid, Col, Row, Button, Table} = require('react-bootstrap');
-var backend = require('backend');
-var config  = require('./config');
-var {Role} = require('./Signup');
-var {Navigation, Link} = require('react-router');
-var {Pagination} = require('react-data-components-brcaex');
-var _ = require('underscore');
-var placeholder = require('./img/placeholder.png');
-var auth = require('./auth');
-var Rx = require('rx');
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+import { Container as Grid, Col, Row, Button, Table } from 'react-bootstrap';
+import backend from './backend';
+import config from './config';
+import { Role } from './Signup';
+import { Link, withRouter } from 'react-router-dom';
+// TODO: Uncomment when react-data-components-brcaex is updated/replaced
+// import { Pagination } from 'react-data-components-brcaex';
+import _ from 'underscore';
+import placeholder from './img/placeholder.png';
+import auth from './auth';
 
-var Community = React.createClass({
-    mixins: [PureRenderMixin, Navigation],
-    componentWillMount: function () {
-        this.fetch(this.state);
-    },
-    getInitialState: function () {
-        return {
+// RxJS imports
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+
+// ---- Google Maps loader (async, no jsapi) ----
+function loadGoogleMaps(key, cb) {
+  if (!key) {
+    console.warn('Maps key missing; skipping map init');
+    return;
+  }
+  if (window.google && window.google.maps) {
+    cb();
+    return;
+  }
+  const script = document.createElement('script');
+  // async load + callback to your init function
+  window.__initMap = cb;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
+    key
+  )}&callback=__initMap&loading=async`;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+}
+
+class Community extends React.Component {
+    constructor(props) {
+	super(props);
+	this.state = {
             data: [],
             search: "",
             pageLength: 10,
             page: 0,
             totalPages: 1
         };
-    },
-    setPages: function({data, count}) {
+	this.communitySearchRef = React.createRef();
+    }
+
+    setPages = ({data, count}) => {
         return {
             data,
             count,
             totalPages: Math.ceil(count / this.state.pageLength)
         };
-    },
-    fetch: function (state) {
+    };
+
+    fetch = (state) => {
         backend.users(state).subscribe(
             resp => this.setState(this.setPages(resp)), // set data, count, totalPages
             () => this.setState({error: 'Problem connecting to server'}));
-    },
-    setStateFetch: function (opts) {
+    };
+
+    setStateFetch = (opts) => {
         var newState = {...this.state, ...opts};
         this.setState(newState);
         this.fetch(newState);
-    },
-    onChangePage: function (pageNumber) {
+    };
+
+    onChangePage = (pageNumber) => {
         this.setStateFetch({page: pageNumber});
-    },
-    onChangeSearch: function (search) {
+    };
+
+    onChangeSearch = (search) => {
         this.setStateFetch({search: search, page: 0});
-    },
-    onFilterRole: function (role) {
-        if (Role.get(role).length === 3) {
-            this.refs['community-search'].appendSearch(Role.get(role)[2]);
+    };
+
+    onFilterRole = (role) => {
+        if (Role.get(role).length === 3 && this.communitySearchRef.current) {
+            this.communitySearchRef.current.appendSearch(Role.get(role)[2]);
         }
-    },
-    logout: function() {
+    };
+
+    logout = () => {
         auth.logout();
         this.forceUpdate();
-    },
+    };
+
     componentDidMount() {
-        var searchq = this.searchq = new Rx.Subject();
-        this.subs = searchq.debounce(500).subscribe(this.onChangeSearch);
-    },
+	this.fetch(this.state);
+        var searchq = this.searchq = new Subject();
+        this.subs = searchq.pipe(
+            debounceTime(500)
+        ).subscribe(this.onChangeSearch);
+    };
+
     componentWillUnmount() {
-        this.subs.dispose();
-    },
-    render: function () {
-        var queryParams = this.context.router.getCurrentQuery();
+        this.subs.unsubscribe();
+    }
+
+    render() {
+        const query = new URLSearchParams(this.props.location?.search || "");
         var message;
-        if (queryParams.registrationSuccess === "true") {
+        if (query.get("registrationSuccess") === "true") {
             message = (
 				<div className="alert alert-success">
 					<p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration. After you complete your registration our administrator will confirm your profile and it will appear on the Community Pages.</p>
 				</div>);
-        } else if (queryParams.updateSuccess === "true") {
+        } else if (query.get("updateSuccess") === "true") {
             message = (
                 <div className="alert alert-success">
-                    {queryParams.subscribe === "true" &&
+                    {query.get("subscribe") === "true" &&
                         <p>Your profile has been edited successfully, and you have been added to the mailing list.</p>}
-                    {queryParams.subscribe === "false" &&
+                    {query.get("subscribe") === "false" &&
                         <p>Your profile has been edited successfully, and you have been removed from the mailing list.</p>}
-                    {queryParams.subscribe === undefined &&
+                    {!query.has("subscribe") &&
                         <p>Your profile has been edited successfully.</p>}
                 </div>);
         }
         var {data, page, totalPages, error} = this.state;
-        var rows = _.map(data, row => {
+        var rows = _.map(data, (row, i) => {
 
             var avatar;
             if (row.has_image) {
@@ -100,7 +135,7 @@ var Community = React.createClass({
             var {city, state, country} = row;
             var locationString = _.values(_.pick({city, state, country}, v => v)).join(', ');
 
-            return (<tr>
+            return (<tr key={row.id ?? i}>
                 <td width="120px">
                     {avatar}
                 </td>
@@ -118,17 +153,17 @@ var Community = React.createClass({
             <Grid id="main-grid">
                 <Row id="message"> {message} </Row>
                 <Row>
-                    <Col md={10} mdOffset={1} sm={12}>
+                    <Col md={{ span: 10, offset: 1 }} sm={12}>
                         <p className="community-message">The BRCA Exchange supports the exchange of information about BRCA1 and BRCA2 variants. Show your support by joining our global community!  By showing your support, you will help us demonstrate the value of this resource, which will help keep it freely available to all.</p>
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={10} mdOffset={1} sm={12}>
+                    <Col md={{ span: 10, offset: 1 }} sm={12}>
                         <CommunityMap onFilterRole={this.onFilterRole} search={this.state.search}/>
                     </Col>
                 </Row>
                 <Row>
-                    <Col className="text-center" md={10} mdOffset={1} sm={12}>
+                    <Col className="text-center" md={{ span: 10, offset: 1 }} sm={12}>
                         <Link to="/signup"><Button disabled={config.environment === 'beta'}>Join the community</Button></Link>&nbsp;
                         <p className="community-disclaimer">We will add you to the BRCA Exchange News mailing list. You can unsubscribe at any time.</p>
                         <p>To update or remove your profile, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=Update Personal Information">contact us</a>.</p>
@@ -141,17 +176,19 @@ var Community = React.createClass({
 
                 </Row>
                 <Row>
-                    <Col className="btm-buffer" md={10} mdOffset={1} sm={12}>
-                        <Col sm={6} lg={5} style={{paddingRight: "0"}}>
-                            <h4>Search for a community member:</h4>
-                        </Col>
-                        <Col sm={6} lg={7}>
-                            <CommunitySearch ref="community-search" onChange={s => this.searchq.onNext(s)}/>
-                        </Col>
+                    <Col className="btm-buffer" md={{ span: 10, offset: 1 }} sm={12}>
+                        <Row>
+			    <Col sm={6} lg={5} style={{paddingRight: "0"}}>
+                        	<h4>Search for a community member:</h4>
+                            </Col>
+                            <Col sm={6} lg={7}>
+                        	<CommunitySearch ref={this.communitySearchRef} onChange={s => this.searchq.next(s)}/>
+                            </Col>
+			</Row>
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={10} mdOffset={1} sm={12}>
+                    <Col md={{ span: 10, offset: 1 }} sm={12}>
                         <Table className="community" striped bordered>
                             <tbody>
                                 {rows}
@@ -160,35 +197,68 @@ var Community = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={10} mdOffset={1} sm={12}>
+                    <Col md={{ span: 10, offset: 1 }} sm={12}>
                         <p style={{verticalAlign: 'bottom', display: 'inline-block'}}>
                         {`${(this.state.page * this.state.pageLength) + 1}-${Math.min((this.state.page + 1) * this.state.pageLength, this.state.count)} out of ${this.state.count} members`}
                         </p>
 
+                        {/* TODO: Uncomment when react-data-components-brcaex is updated/replaced */}
+                        {/*
                         <Pagination
                             className="pagination pull-right-sm"
                             currentPage={page}
                             totalPages={totalPages}
                             onChangePage={this.onChangePage} />
+                        */}
+
+                        {/* TEMPORARY: Basic pagination buttons until Pagination component is available */}
+                        <div className="pagination pull-right-sm" style={{display: 'inline-block', marginLeft: '20px'}}>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={page === 0}
+                                onClick={() => this.onChangePage(page - 1)}
+                                style={{marginRight: '5px'}}
+                            >
+                                Previous
+                            </Button>
+                            <span style={{padding: '0 10px'}}>
+                                Page {page + 1} of {totalPages}
+                            </span>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={page >= totalPages - 1}
+                                onClick={() => this.onChangePage(page + 1)}
+                            >
+                                Next
+                            </Button>
+                        </div>
                     </Col>
                 </Row>
             </Grid>
         );
     }
-});
+}
 
-var CommunityMap = React.createClass({
-    getInitialState: () => ({ roles: [] }),
+class CommunityMap extends React.Component {
+    constructor(props) {
+	super(props);
+	this.state = { roles: [] };
+    }
+
     shouldComponentUpdate({search}) {
         return this.props.search !== search;
-    },
-    onFilterRole: function(role) {
+    }
+
+    onFilterRole = (role) => {
         var roles = this.state.roles.slice();
         roles[role] = !roles[role];
         this.setState({ roles: roles });
-        this.filterSub.onNext(role);
-    },
-    componentDidMount: function() {
+        this.filterSub.next(role);
+    };
+
+    componentDidMount() {
 
         var initMap = function () {
             var self = this;
@@ -220,12 +290,12 @@ var CommunityMap = React.createClass({
 
             var legendControl = document.createElement('div');
             var roleMarkers = Role.options.map(role =>
-                <div className="map-legend-col" data-role={role[0]}>
+                (<div key={`role-${role[0]}`} className="map-legend-col" data-role={role[0]}>
                     <img src={require(`./img/map/${role[0]}key.png`)} /> {role.length === 3 ? role[2] : role[1]}
-                </div>
+                </div>)
             );
-            roleMarkers = _.values(_.groupBy(roleMarkers, (item, index) => index % 4)).map(group => <div className="map-legend-row">{group}</div>);
-            legendControl.innerHTML = ReactDOMServer.renderToStaticMarkup(
+            roleMarkers = _.values(_.groupBy(roleMarkers, (item, index) => index % 4)).map((group, i) => <div key={`legend-row-${i}`} className="map-legend-row">{group}</div>);
+	    legendControl.innerHTML = ReactDOMServer.renderToStaticMarkup(
                 <div>
                     <img src={require("./img/map/1.png")} className="map-legend-icon" />
                     <div className="map-legend-slide">
@@ -307,47 +377,63 @@ var CommunityMap = React.createClass({
                 infowindow = undefined;
             }).bind(this);
             this.updateMap();
-            var filterSub = this.filterSub = new Rx.Subject();
-            this.subs = filterSub.debounce(500).subscribe(this.updateMap);
+            var filterSub = this.filterSub = new Subject();
+            this.subs = filterSub.pipe(
+                debounceTime(500)
+            ).subscribe(this.updateMap);
         };
 
-
-        google.load('maps', '3', {callback: initMap.bind(this), "other_params": "key=" + config.maps_key});
-    },
-
-    componentDidUpdate: function() {
-        this.updateMap();
-    },
-    componentWillUnmount: function() { window.removeEventListener('resize', this.handleResize); },
-
-    render: function() {
-        return <div id="communityMap"></div>;
+	loadGoogleMaps(config.maps_key, initMap.bind(this));
     }
-});
 
-var CommunitySearch = React.createClass({
-    getInitialState: () => ({
-        search: "",
-        placeholder: "name, organization, city, etc."
-     }),
-    onChange: function(e) {
+    componentDidUpdate() {
+        this.updateMap();
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.handleResize);
+        if (this.subs) {
+            this.subs.unsubscribe();
+        }
+    }
+
+    render() {
+        return <div id="communityMap" />;
+    }
+}
+
+class CommunitySearch extends React.Component {
+    constructor(props) {
+	super(props);
+	this.state = {
+	    search: "",
+            placeholder: "name, organization, city, etc."
+	};
+    }
+
+    onChange = (e) => {
         this.setState({search: e.target.value});
         this.props.onChange(e.target.value);
-    },
-    onSubmit: function (ev) {
+    };
+
+    onSubmit = (ev) => {
         ev.preventDefault();
-    },
-    onBlur: function () {
+    };
+
+    onBlur = () => {
         this.setState({placeholder: "name, organization, city, etc."});
-    },
-    onFocus: function () {
+    };
+
+    onFocus = () => {
         this.setState({placeholder: ""});
-    },
-    appendSearch: function(term) {
+    };
+
+    appendSearch = (term) => {
         this.setState({search: `${this.state.search.trim()} ${term}`.trim()});
         this.props.onChange(this.state.search);
-    },
-    render: function() {
+    };
+
+    render() {
         return (<div className='search-box'>
             <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
                 <input type='submit' className='input-sm'style={{display: 'none'}} />
@@ -360,12 +446,12 @@ var CommunitySearch = React.createClass({
                                type='text'
                                onChange={this.onChange}
                                value={this.state.search} />
-                        <span className="glyphicon glyphicon-search search-box-icon"/>
+                        <span className="fa fa-search search-box-icon"/>
                     </div>
                 </div>
             </form>
         </div>);
     }
-});
+}
 
-module.exports = Community;
+export default withRouter(Community);

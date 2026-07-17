@@ -1,18 +1,18 @@
-/*eslint-env browser */
-/*global require: false */
 'use strict';
 
 import React from 'react';
 
-const GroupHelpButton = React.createClass({
+class GroupHelpButton extends React.PureComponent {
     render() {
-        const {onClick} = this.props;
+        const { onClick, style } = this.props;
         return (
-            <span role='button' onClick={onClick} aria-label="Help" style={this.props.style}
-                className='panel-help-btn glyphicon glyphicon-question-sign'
+            <span role='button' tabIndex={0} onClick={onClick} onKeyDown={(e) => {
+		    if (e.key === 'Enter' || e.key === ' ') onClick?.(e);
+	    }} aria-label="Help" style={style}
+                className='panel-help-btn fa fa-question-circle'
             />
         );
     }
-});
+}
 
 export default GroupHelpButton;

@@ -43,7 +43,7 @@ function intronSizeTx() {
     return intronWidth;
 }
 
-function variantInfo(variant) {
+export function variantInfo(variant) {
     // let [before, after] = _.map(variant.Genomic_Coordinate_hg38.split(':').pop().split('>'), e => e.length);
     let before = variant.Ref.length, after = variant.Alt.length;
 
@@ -63,7 +63,7 @@ function sortCoords([a, b]) {
 }
 
 // given the intervals (a: [a1, a2], b: [b1, b2]), return true if the two overlap (inclusive)
-function overlaps(a, b) {
+export function overlaps(a, b) {
     // ensure the pairs are internally sorted
     const as = (a[0] <= a[1]) ? a : [a[1], a[0]];
     const bs = (b[0] <= b[1]) ? b : [b[1], b[0]];
@@ -76,7 +76,7 @@ function overlaps(a, b) {
 
 // given an array, returns pairs of successive elements; e.g. [1,2,3] produces [[1,2],[2,3]]
 // (used to create introns between pairs of exons later in the code)
-function pairwise(seq) {
+export function pairwise(seq) {
     return _.zip(_.take(seq, seq.length - 1), _.tail(seq));
 }
 
@@ -185,11 +185,11 @@ class Variant extends React.Component {
                 _.toPairs(events)
                     .filter((keyAndEvent) => keyAndEvent[1].widthBP > 0)
                     .map(([key, event]) =>
-                        <Region key={`event_${key}`} region={event.span}
+                        (<Region key={`event_${key}`} region={event.span}
                             className={`variant-region ${key}`}
                             x={0} width={width} height={height} txStart={txStart} txEnd={txEnd} scale={scale}
                             mask={mask} nudgeable={true}
-                        />
+                        />)
                     )
             }
             </g>
@@ -263,14 +263,14 @@ class SegmentRegions extends React.Component {
                 flatDomains
                     .filter(({span}) => overlaps([span.start, span.end], [txStart, txEnd]))
                     .map(({org, name, code, span}, idx) =>
-                        <Region key={`cidomain_${org}_${name}_${idx}`}
+                        (<Region key={`cidomain_${org}_${name}_${idx}`}
                             className={`region cidomain domain-${code}`}
                             region={span} label={zoomed && `${org}: ${name}`}
                             x={0} width={width} height={height}
                             txStart={txStart} txEnd={txEnd} scale={scale}
                             mask={mask} // fill={CIDomainFills[org]}
                             selected={this.props.selectedDomain === `${org}_${name}`}
-                        />
+                        />)
                     )
             }
 
@@ -550,15 +550,15 @@ class Zoom extends React.Component {
     }
 }
 
-const SettingsPanel = React.createClass({
-    onHandleToggle: function (e) {
+class SettingsPanel extends React.Component {
+    onHandleToggle = (e) => {
         e.preventDefault();
 
         // ask our parent to toggle us
         this.props.onToggled();
-    },
+    };
 
-    render: function() {
+    render() {
         const settings = (
             <div className="container-fluid">
                 <div className="row">
@@ -623,15 +623,15 @@ const SettingsPanel = React.createClass({
                     onEntered={this.props.relayoutGrid}
                     onExited={this.props.relayoutGrid}
                 >
-                {settings}
+                    <div>{settings}</div>
                 </Collapse>
             </div>
         );
     }
-});
+}
 
 
-class Splicing extends React.Component {
+export class Splicing extends React.Component {
     constructor(props) {
         super(props);
 
@@ -884,7 +884,7 @@ class Splicing extends React.Component {
         //  child nodes of the element with React ID ``.
 
         return _.toPairs(meta.CIDomains).map(([org, orgMeta]) =>
-            <div key={org}>
+            (<div key={org}>
                 <label style={{display: 'inline-block', marginRight: '1em'}}>
                     <input key={`${org}_checkbox`} style={{marginRight: '0.5em'}} type="checkbox"
                         name={org} checked={this.state.drawCIDomains.has(org)} onChange={this.toggleCIDomain}
@@ -911,12 +911,13 @@ class Splicing extends React.Component {
                         })
                     }
                 </ol>
-            </div>
+            </div>)
         );
     }
 }
 
-module.exports = {
+// Default export for backward compatibility
+export default {
     Splicing,
     variantInfo,
     overlaps,

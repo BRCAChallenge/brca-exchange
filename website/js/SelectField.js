@@ -1,32 +1,28 @@
-/*global module: false, require: false */
 'use strict';
 
-import {FormGroup, ControlLabel, FormControl} from 'react-bootstrap';
+import { FormGroup, FormLabel, FormSelect } from 'react-bootstrap';
 
-var React = require('react');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
+import React from 'react';
 var _ = require('underscore');
 
-var SelectField = React.createClass({
-    mixins: [PureRenderMixin],
+class SelectField extends React.PureComponent {
 
-    onChange: function (e) {
-        return this.props.onChange(e.target.value);
-    },
+    onChange = (e) => this.props.onChange(e.target.value);
 
-    render: function () {
-        const {options, label, value} = this.props;
-        const opels = _.map(options, v => <option key={v} value={v}>{v}</option>);
+    render() {
+        const { options, label, value } = this.props;
+        const opels = _.map(options, v => <option key={String(v)} value={v}>{v}</option>);
 
         return (
-            <FormGroup controlId="formControlsSelect">
-                <ControlLabel>{label}</ControlLabel>
-                <FormControl value={value} componentClass="select" onChange={this.onChange} placeholder="select">
+            <FormGroup controlId="formControlsSelect" className="d-flex align-items-center gap-2 mb-0">
+                {label ? <FormLabel className="mb-0 text-nowrap fw-bold">{label}</FormLabel> : null}
+                <FormSelect value={value} onChange={this.onChange}>
                     {opels}
-                </FormControl>
+                </FormSelect>
             </FormGroup>
         );
-    },
-});
+    }
+}
 
-module.exports = SelectField;
+export default SelectField;
+

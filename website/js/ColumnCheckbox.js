@@ -1,23 +1,17 @@
-/*global module: false, require: false */
 'use strict';
 
-var React = require('react');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var {Checkbox} = require('react-bootstrap');
+import React from 'react';
+import { Form } from 'react-bootstrap';
 
-var ColumnCheckbox = React.createClass({
-    mixins: [PureRenderMixin],
-    onChange: function (e) {
-        return this.props.onChange(e.target.value);
-    },
-    render: function () {
-        var {label, title, initialCheck} = this.props;
+class ColumnCheckbox extends React.PureComponent {
+    render() {
+        const {label, title, initialCheck, onChange} = this.props;
         return (
             <div>
-            <Checkbox checked={initialCheck[label]} onChange={this.onChange}>{title}</Checkbox>
+                <Form.Check type="checkbox" label={title} checked={!!(initialCheck && initialCheck[label])} onChange={onChange}/>
             </div>
         );
     }
-});
+}
 
-module.exports = ColumnCheckbox;
+export default ColumnCheckbox;

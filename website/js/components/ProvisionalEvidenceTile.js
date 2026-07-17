@@ -16,7 +16,7 @@ export default class ProvisionalEvidenceTile extends React.Component {
         return (
             <div className="func-assay-extras">
                 <span className="func-assay-result" style={{float: 'right', paddingRight: '10px'}}>{result}</span>
-                <div style={{clear: 'both'}}></div>
+                <div style={{clear: 'both'}} />
             </div>
         );
     }
@@ -36,7 +36,7 @@ export default class ProvisionalEvidenceTile extends React.Component {
                 // 'variantfield-empty': (isEmptyValue && this.props.hideEmptyItems),
             });
             return (
-                <tr key={prop} className={rowClasses}>
+                <tr key={`prov-${source}-${prop}`} className={rowClasses}>
                     <td>{title}</td>
                     <td><span className={"row-value" }>{rowItem}</span></td>
                 </tr>
@@ -57,7 +57,7 @@ export default class ProvisionalEvidenceTile extends React.Component {
 
             // TEMPORARY - hide ComputationalPrediction subsection until data is populated
             if (groupSource === "Computational Prediction") {
-                return ( <div id={groupSource}/> );
+                return ( <div key={`prov-section-${groupSource}`} id={groupSource}/> );
             }
 
             // Attempt to retrieve the prop name of the provisional code so we can put the value in the subsection header
@@ -71,6 +71,7 @@ export default class ProvisionalEvidenceTile extends React.Component {
             let extraHeaderValue = extraHeaderProp ? util.getFormattedFieldByProp(extraHeaderProp, variant) : "-";
 
             return ( <CollapsibleSection
+		    key={`prov-section-${groupSource}`}
                     fieldName={groupSource}
                     id={groupSource} // id needed so that when you collapse one the others don't also collapse
                     extraHeaderItems={this.generateHeader(extraHeaderValue)}

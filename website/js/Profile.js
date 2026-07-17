@@ -1,37 +1,34 @@
 'use strict';
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var $ = require('jquery');
-var _ = require('underscore');
-var config  = require('./config');
-var {Grid, Row, Col, Button} = require('react-bootstrap');
-var {Navigation} = require('react-router');
-var auth = require('./auth');
-var {Role, $c} = require('./Signup');
-var countries = require('raw!../content/countries.txt').split('\n');
+import React from 'react';
+import $ from 'jquery';
+import _ from 'underscore';
+import config from './config';
+import { Container as Grid, Row, Col, Button } from 'react-bootstrap';
+import { withRouter } from 'react-router-dom';
+import auth from './auth';
+import { Role, $c } from './Signup';
+var countries = require('raw-loader!../content/countries.txt')["default"].split('\n');
 
-var Profile = React.createClass({
-    statics: {
-        willTransitionTo: function (transition) {
-            if (!auth.loggedIn()) {
-                transition.redirect('/signin', {}, {
-                    target: transition.path
-                });
-            }
+class ProfileInner extends React.Component {
+    state = { success: null, error: null, fieldErrors: null };
+    contactFormRef = React.createRef();
+
+    componentDidMount() {
+        if (!auth.loggedIn()) {
+            const target = (this.props.location && this.props.location.pathname) || '/profile';
+            this.props.history.replace({
+                pathname: '/signin',
+                search: `?target=${encodeURIComponent(target)}`
+            });
         }
-    },
-    mixins: [Navigation],
-    getInitialState: function () {
-        return {
-            success: null,
-        };
-    },
-    render: function () {
+    }
+
+    render() {
         var message;
         if (this.state.error != null) {
-            let fieldErrors = _.map(this.state.fieldErrors, err => (<li>{err}</li>));
-            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map(group => <Col md={3}><ul>{group}</ul></Col>);
+            let fieldErrors = _.map(this.state.fieldErrors, (err, index) => (<li key={index}>{err}</li>));
+            fieldErrors = _.values(_.groupBy(fieldErrors, (item, index) => Math.floor(index / 2) )).map((group, index) => <Col key={index} md={3}><ul>{group}</ul></Col>);
             message = (
                 <div className="alert alert-danger">
                     <Row><Col md={6}>{this.state.error}</Col></Row>
@@ -50,34 +47,41 @@ var Profile = React.createClass({
                     {message}
                 </Row>
                 <Row id="form">
-                    <Col md={8} mdOffset={2}>
-                        <EditProfileForm ref="contactForm"/>
+                    <Col md={{ span: 8, offset: 2 }}>
+                        <EditProfileForm ref={this.contactFormRef} history={this.props.history}/>
                     </Col>
                 </Row>
                 <Row id="submit">
-                    <Col md={6} mdOffset={3}>
+                    <Col md={{ span: 6, offset: 3 }}>
                         <Button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>
                             Update
                         </Button>
                     </Col>
                 </Row>
             </Grid>);
-    },
+    }
 
-    handleChange: function (field, e) {
+    handleChange = (field, e)  => {
         var nextState = {};
         nextState[field] = e.target.checked;
         this.setState(nextState);
-    },
+    };
 
-    handleSubmit: function () {
+    handleSubmit = () => {
         var self = this;
-        var showSuccess = () => this.transitionTo('/community', null, {updateSuccess: true, subscribe: this.refs.contactForm.getSubscribeAction()});
+	const form = this.contactFormRef.current;
+        const subscribe = form ? form.getSubscribeAction() : undefined;
+        var showSuccess = () => {
+            const qs = new URLSearchParams();
+            qs.set('updateSuccess', 'true');
+            if (subscribe !== undefined) qs.set('subscribe', String(!!subscribe));
+            this.props.history.push({ pathname: '/community', search: `?${qs.toString()}` });
+        };
         var showFailure = msg => {this.setState({error: msg || "An error occurred."});};
 
         var withGoogleMaps = function () {
             var geo = new google.maps.Geocoder();
-            var formData = self.refs.contactForm.getFormData();
+            var formData = form.getFormData();
             var address = "" + formData.institution + "," + formData.city + "," + formData.state + "," + formData.country;
 
             var submit = function() {
@@ -89,8 +93,8 @@ var Profile = React.createClass({
                     fd.append(k, v);
                 });
 
-                if(self.refs.contactForm.getSubscribeAction() !== undefined) {
-                    fd.append("subscribe", self.refs.contactForm.getSubscribeAction());
+                if(subscribe !== undefined) {
+                    fd.append("subscribe", subscribe);
                 }
 
                 var xhr = new XMLHttpRequest();
@@ -108,7 +112,7 @@ var Profile = React.createClass({
                     }
                 };
                 xhr.open('post', url);
-                xhr.setRequestHeader('Authorization', 'JWT ' + auth.token());
+                xhr.setRequestHeader('Authorization', 'Bearer ' + auth.token());
                 xhr.send(fd);
             };
 
@@ -134,32 +138,38 @@ var Profile = React.createClass({
             }
         };
 
-        var formErrors = this.refs.contactForm.getFormErrors();
+        var formErrors = form && form.getFormErrors ? form.getFormErrors() : { form: 'Form not ready' };
         if (formErrors === false) {
             google.load('maps', '3', {callback: withGoogleMaps, "other_params": "key=" + config.maps_key});
         } else {
             this.setState({error: <strong>Some information was missing:</strong>, fieldErrors: formErrors });
         }
-    }
-});
+    };
+}
 
-var EditProfileForm = React.createClass({
-    mixins: [Navigation],
-    componentDidMount: function () {
+class EditProfileForm extends React.Component {
+    state = { errors: {}, data: {}, imagePreviewUrl: '', otherRole: false };
+    _refs = {};
+    setRef = (name) => (el) => { if (el) this._refs[name] = el; else delete this._refs[name]; };
+    getNode = (name) => this._refs[name] || null;
+
+    componentDidMount() {
         this.retrieveProfile();
-    },
-    getSubscribeAction: function () {
+    }
+
+    getSubscribeAction() {
         // returns undefined to do nothing, true to subscribe, false to unsubscribe
         return (
             this.state.mailingList !== this.state.oldMailingList
                 ? this.state.mailingList
                 : undefined
         );
-    },
-    retrieveProfile: function () {
+    }
+
+    retrieveProfile() {
         var url = config.backend_url + '/accounts/get/';
         var token = auth.token();
-        var tokenValue = 'JWT ' + token;
+        var tokenValue = 'Bearer ' + token;
         var saveProfileData = (data) => {
             var imagePreviewUrl = '';
             if (data.user.has_image) {
@@ -176,24 +186,26 @@ var EditProfileForm = React.createClass({
                 saveProfileData(data);
             },
             error: function () {
-                this.transitionTo('/signin', {}, {target: '/profile'});
+                if (this.props.history) {
+                    this.props.history.replace({ pathname: '/signin', search: `?target=${encodeURIComponent('/profile')}` });
+                }
             }.bind(this)
         });
-    },
-    getInitialState: function () {
-        return {errors: {}, data: {}};
-    },
-    getFormErrors: function () {
+    }
+
+    getFormErrors() {
         var errors = {};
-        if (ReactDOM.findDOMNode(this.refs.role).value === "NONE") {
-            errors.role = <span>Please select a <strong>Roll</strong></span>;
+	const roleNode = this.getNode('role');
+        if (roleNode && roleNode.value === "NONE") {
+            errors.role = <span>Please select a <strong>Role</strong></span>;
         }
         if (this.state.captcha === "") {
             errors.captcha = <span>No <strong>CAPTCHA</strong> entered</span>;
         }
         this.getCompulsoryFields().forEach(function (field) {
-            var value = ReactDOM.findDOMNode(this.refs[field]).value.trim();
-            if (!value) {
+            const node = this.getNode(field);
+            var value = (node && node.value ? node.value : '').trim();
+	    if (!value) {
                 errors[field] = <span><strong>{ field.replace(/([A-Z])/g, ' $1').replace(/^./, function(str) { return str.toUpperCase(); }) }</strong> is required</span>;
             }
         }.bind(this));
@@ -204,40 +216,47 @@ var EditProfileForm = React.createClass({
         } else {
             return errors;
         }
-    },
-    getCompulsoryFields: function () {
+    }
+
+    getCompulsoryFields() {
         var fields = [];
-        if (!this.refs || !this.refs.role || parseInt(ReactDOM.findDOMNode(this.refs.role).value) !== Role.ROLE_DATA_PROVIDER) {
+	const roleNode = this.getNode('role');
+        if (!roleNode || parseInt(roleNode.value) !== Role.ROLE_DATA_PROVIDER) {
             fields.push('firstName', 'lastName');
         }
         if (this.state.otherRole) {
             fields.push('role_other');
         }
         return fields;
-    },
-    getFormData: function () {
-        var title = ReactDOM.findDOMNode(this.refs.titlemd).checked && ReactDOM.findDOMNode(this.refs.titlemd).value ||
-            ReactDOM.findDOMNode(this.refs.titlephd).checked && ReactDOM.findDOMNode(this.refs.titlephd).value ||
-            ReactDOM.findDOMNode(this.refs.titleother).checked && ReactDOM.findDOMNode(this.refs.titlecustom).value;
+    }
+
+    getFormData() {
+        const title =
+	    (this.getNode('titlemd') && this.getNode('titlemd').checked && this.getNode('titlemd').value) ||
+            (this.getNode('titlephd') && this.getNode('titlephd').checked && this.getNode('titlephd').value) ||
+            (this.getNode('titleother') && this.getNode('titleother').checked && (this.getNode('titlecustom') ? this.getNode('titlecustom').value : ''));
 
         var data = {
             "image": this.state.file,
             "deleteImage": this.state.imageDelete,
-            "firstName": ReactDOM.findDOMNode(this.refs.firstName).value,
-            "lastName": ReactDOM.findDOMNode(this.refs.lastName).value,
+            "firstName": (this.getNode('firstName') && this.getNode('firstName').value) || '',
+            "lastName": (this.getNode('lastName') && this.getNode('lastName').value) || '',
             "title": title,
-            "role": ReactDOM.findDOMNode(this.refs.role).value,
-            "role_other": this.state.otherRole ? ReactDOM.findDOMNode(this.refs.role_other).value : Role.get(ReactDOM.findDOMNode(this.refs.role).value)[2],
-            "institution": ReactDOM.findDOMNode(this.refs.institution).value,
-            "city": ReactDOM.findDOMNode(this.refs.city).value,
-            "state": ReactDOM.findDOMNode(this.refs.state).value,
-            "country": ReactDOM.findDOMNode(this.refs.country).value,
-            "phone_number": ReactDOM.findDOMNode(this.refs.phone_number).value,
-            "hide_number": ReactDOM.findDOMNode(this.refs.hide_number).checked,
-            "hide_email": ReactDOM.findDOMNode(this.refs.hide_email).checked
+            "role": (this.getNode('role') && this.getNode('role').value) || '',
+	    "role_other": this.state.otherRole
+                ? ((this.getNode('role_other') && this.getNode('role_other').value) || '')
+                : (Role.get(((this.getNode('role') && this.getNode('role').value) || 0)) || [])[2],
+            "institution": (this.getNode('institution') && this.getNode('institution').value) || '',
+            "city": (this.getNode('city') && this.getNode('city').value) || '',
+            "state": (this.getNode('state') && this.getNode('state').value) || '',
+            "country": (this.getNode('country') && this.getNode('country').value) || '',
+            "phone_number": (this.getNode('phone_number') && this.getNode('phone_number').value) || '',
+            "hide_number": !!(this.getNode('hide_number') && this.getNode('hide_number').checked),
+            "hide_email": !!(this.getNode('hide_email') && this.getNode('hide_email').checked)
         };
         return data;
-    },
+    }
+
     handleImageChange(e) {
         e.preventDefault();
 
@@ -260,14 +279,10 @@ var EditProfileForm = React.createClass({
             }
         };
         reader.readAsDataURL(file);
-    },
-    render: function () {
-        var onChange = function() {
-            var value = ReactDOM.findDOMNode(this.refs.role).value;
-            this.setState({otherRole: Role.other(value)});
-        };
+    }
+    render() {
         return (
-        <div className="form-horizontal" onChange={onChange.bind(this)}>
+        <div className="form-horizontal">
             {this.renderImageUpload('image', 'Profile picture')}
             {
                 /* {this.renderPassword('password', 'Password')}
@@ -292,8 +307,9 @@ var EditProfileForm = React.createClass({
             {this.renderCheckBox('hide_email', "Don't display my email on this website", this.state.data.hide_email)}
             {this.renderMailingList('mailinglist', "Subscribed to mailing list?", this.state.mailingList)}
         </div>);
-    },
-    renderImageUpload: function (id, label) {
+    }
+
+    renderImageUpload(id, label) {
         var handleImageDelete = ()=>
             this.setState({
                 imageDelete: true,
@@ -308,7 +324,7 @@ var EditProfileForm = React.createClass({
                 <div>
                     <div><img src={imagePreviewUrl} className="img-thumbnail"
                               style={{maxHeight: '160px', maxWidth: '160px'}}/></div>
-                    <div ><Button bsStyle="link" onClick={handleImageDelete}>Remove picture</Button></div>
+                    <div ><Button variant="link" onClick={handleImageDelete}>Remove picture</Button></div>
                 </div>
             );
         }
@@ -321,13 +337,14 @@ var EditProfileForm = React.createClass({
                 {imagePreview}
                 {error}
             </div>);
-    },
-    renderTextInput: function (id, label, defaultValue) {
-        var handleChange = () => {var oldData = this.state.data; oldData[id] = ReactDOM.findDOMNode(this.refs[id]).value; this.setState({data: oldData});};
+    }
+
+    renderTextInput(id, label, defaultValue) {
+        var handleChange = (e) => {var oldData = this.state.data; oldData[id] = e.target.value; this.setState({data: oldData});};
         return this.renderField(id, label,
-            <input type="text" className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
+            <input type="text" className="form-control" id={id} ref={this.setRef(id)} value={defaultValue || ''} onChange={handleChange}/>
         );
-    },
+    }
 /*
     renderPassword: function (id, label) {
         return this.renderField(id, label,
@@ -335,42 +352,44 @@ var EditProfileForm = React.createClass({
         );
     },
 */
-    renderTextarea: function (id, label, defaultValue) {
-        var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].value; this.setState({data: oldData});};
+    renderTextarea(id, label, defaultValue) {
+        var handleChange = (e) => {var oldData = this.state.data; oldData[id] = e.target.value; this.setState({data: oldData});};
         return this.renderField(id, label,
-            <textarea className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}/>
+            <textarea className="form-control" id={id} ref={this.setRef(id)} value={defaultValue} onChange={handleChange}/>
         );
-    },
-    renderRoles: function (defaultValue) {
+    }
+    renderRoles(defaultValue) {
         var id = 'role';
-        var handleChange = () => {
+        var handleChange = (e) => {
             var oldData = this.state.data;
-            oldData[id] = this.refs[id].value;
-            this.setState({data: oldData});
+            oldData[id] = e.target.value;
+            this.setState({otherRole: Role.other(e.target.value)});
         };
         var options = Role.options.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, 'Role',
-            <select className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}>
+            <select className="form-control" id={id} ref={this.setRef(id)} value={defaultValue || ''} onChange={handleChange}>
                 {options}
             </select>
         );
-    },
-    renderSelect: function(id, label, opts, defaultValue) {
-        var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].checked; this.setState({data: oldData});};
+    }
+
+    renderSelect(id, label, opts, defaultValue) {
+        var handleChange = (e) => {var oldData = this.state.data; oldData[id] = e.target.value; this.setState({data: oldData});};
         var options = opts.map(value => <option key={id + value[0]} value={value[0]}>{value[1]}</option>);
         return this.renderField(id, label,
-            <select className="form-control" id={id} ref={id} value={defaultValue} onChange={handleChange}>
-                <option key={id + "NONE"} value=""></option>
+            <select className="form-control" id={id} ref={this.setRef(id)} value={defaultValue || ''} onChange={handleChange}>
+                <option key={id + "NONE"} value="" />
                 {options}
             </select>
         );
-    },
-    renderRadioInlines: function (id, label, kwargs) {
-        var handleTextChange = () => {var oldData = this.state.data; oldData[id] = ReactDOM.findDOMNode(this.refs.titlecustom).value; this.setState({data: oldData});};
+    }
+
+    renderRadioInlines(id, label, kwargs) {
+        var handleTextChange = (e) => {var oldData = this.state.data; oldData[id] = e.target.value; this.setState({data: oldData});};
         var otherValue = kwargs.defaultCheckedValue;
 		// XXX Not sure why eslint flags this bind, because 'this' is used in the handlers within the
 		// body of the function.
-        var options = kwargs.values.map(function (value) { //eslint-disable-line no-extra-bind
+        var options = kwargs.values.map((value) => {
             var handleRadioChange = () => {var oldData = this.state.data; oldData[id] = value.name; this.setState({data: oldData}); };
             var defaultChecked = false;
             if (value.name === kwargs.defaultCheckedValue) {
@@ -379,36 +398,38 @@ var EditProfileForm = React.createClass({
             }
             if (value.name === 'Other' && !kwargs.values.some(opt => opt.name === kwargs.defaultCheckedValue)) {defaultChecked = true;}
             return (
-				<label className="radio-inline">
-					<input type="radio" ref={id + value.ref} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>
+				<label key={value.ref} className="radio-inline">
+					<input type="radio" ref={this.setRef(id + value.ref)} name={id} value={value.name} checked={defaultChecked} onChange={handleRadioChange}/>
 					{value.name}
 				</label>);
-        }.bind(this));
+        });
         options = <span className="col-sm-9">{options}</span>;
         var other =
             (<span className="col-sm-3">
-            <input className="form-control" type="text" ref="titlecustom" name="titlecustom" value={otherValue} onChange={handleTextChange}/>
+            <input className="form-control" type="text" ref={this.setRef('titlecustom')} name="titlecustom" value={otherValue || ''} onChange={handleTextChange}/>
             </span>);
-        var optionsWithOther = {options, other};
-        return this.renderField(id, label, optionsWithOther);
-    },
-    renderCheckBox: function (id, label, defaultValue) {
-        var handleChange = () => {var oldData = this.state.data; oldData[id] = this.refs[id].checked; this.setState({data: oldData});};
+        return this.renderField(id, label, <>{options}{other}</>);
+    }
+
+    renderCheckBox(id, label, defaultValue) {
+        var handleChange = (e) => {var oldData = this.state.data; oldData[id] = e.target.checked; this.setState({data: oldData});};
         var checkbox = (<label className="radio-inline">
-            <input type='checkbox' ref={id} checked={defaultValue} onChange={handleChange} />
+            <input type='checkbox' ref={this.setRef(id)} checked={!!defaultValue} onChange={handleChange} />
             &nbsp;{label}
         </label>);
         return this.renderField(id, "", checkbox);
-    },
-    renderMailingList: function (id, label, defaultValue) {
-        var handleChange = () => {this.setState({mailingList: !!ReactDOM.findDOMNode(this.refs[id]).checked});};
+    }
+
+    renderMailingList(id, label, defaultValue) {
+        var handleChange = (e) => {this.setState({mailingList: !!e.target.checked});};
         var checkbox = (<label className="radio-inline">
-            <input type='checkbox' ref={id} checked={defaultValue} onChange={handleChange} />
+            <input type='checkbox' ref={this.setRef(id)} checked={!!defaultValue} onChange={handleChange} />
             &nbsp;{label}
         </label>);
         return this.renderField(id, "", checkbox);
-    },
-    renderField: function (id, label, field) {
+    }
+
+    renderField(id, label, field) {
         return (
 			<div className={$c('form-group', {'has-error': id in this.state.errors})}>
 				<label htmlFor={id} className="col-sm-4 control-label">{label}</label>
@@ -417,8 +438,8 @@ var EditProfileForm = React.createClass({
 				</div>
 			</div>);
     }
-});
+}
 
-module.exports = ({
-    Profile: Profile
-});
+const Profile = withRouter(ProfileInner);
+export { Profile };
+export default Profile;

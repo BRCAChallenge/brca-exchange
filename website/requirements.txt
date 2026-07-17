@@ -1,21 +1,37 @@
-certifi==2018.11.29
-chardet==3.0.4
-Django==1.9.13
-django-cors-headers==1.1.0
-django-jwt-auth==0.0.2
-django-postgres-copy==2.3.7
-django-utils==0.0.2
-djangorestframework==3.4.3
-djangorestframework-jwt==1.8.0
-httmock==1.2.6
-humanize==0.5.1
-idna==2.7
-protobuf==3.1.0
-psycopg2==2.8.5
-PyJWT==1.4.2
-pyyaml==4.2b1
-requests==2.20.0
-six==1.12.0
-tqdm==4.25.0
-urllib3==1.24.1
-mailchimp3==3.0.14
+# Django 5.2 LTS
+Django==5.2.13
+
+# Django extensions
+django-cors-headers==4.7.0
+django-extensions==4.1.0
+#django-postgres-copy==2.7.4 # removed - incompatible with Python 3.13
+djangorestframework==3.16.1
+
+# JWT Authentication (consider migrating to djangorestframework-simplejwt)
+djangorestframework-simplejwt==5.5.1
+PyJWT==2.10.0
+
+# Database psycopg2-binary removed, incompatible with Python 3.13
+#psycopg2-binary==2.9.11
+psycopg==3.3.3
+
+# Utilities
+certifi>=2024.8.30
+chardet==5.2.0
+humanize==4.11.0
+idna==3.10
+protobuf==5.28.3
+pyyaml>=6.0.2
+requests>=2.32.3
+six==1.16.0
+tqdm==4.67.1
+urllib3>=2.2.3
+
+# Mailchimp
+mailchimp3==3.0.21
+
+# Testing
+httmock==1.4.0
+
+# Note: mod_wsgi is installed separately via:
+# pip install mod_wsgi (requires apache2-dev and python3.13-dev)

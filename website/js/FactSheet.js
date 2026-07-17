@@ -1,12 +1,11 @@
 'use strict';
 
 var React = require('react');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var {Grid, Col, Row, Alert} = require('react-bootstrap');
-var backend = require('backend');
+var { Container: Grid, Col, Row, Alert } = require('react-bootstrap');
+import backend from 'backend';
 
-var PieChart = require('./PieChart');
-var BarChart = require('./BarChart');
+import PieChart from './PieChart';
+import BarChart from './BarChart';
 var Highcharts = require('highcharts');
 require('highcharts/modules/broken-axis')(Highcharts);
 
@@ -61,16 +60,28 @@ var chartOptions2 = {
     }]
 };
 
-var FactSheet = React.createClass({
-    mixins: [PureRenderMixin],
-    getInitialState: function() {
-        return {};
-    },
-    componentWillMount: function() {
-        backend.variantCounts().subscribe(
+class FactSheet extends React.Component {
+    constructor(props) {
+	super(props);
+	this.state = {};
+	this.chart1Ref = React.createRef();
+	this.chart2Ref = React.createRef();
+    }
+    componentDidMount() {
+        this._sub = backend.variantCounts().subscribe(
             resp => {
-                var chart1 = this.refs.chart1.getChart();
-                var chart2 = this.refs.chart2.getChart();
+		const chart1 = this.chart1Ref.current && this.chart1Ref.current.getChart
+                    ? this.chart1Ref.current.getChart()
+                    : null;
+                const chart2 = this.chart2Ref.current && this.chart2Ref.current.getChart
+                    ? this.chart2Ref.current.getChart()
+                    : null;
+
+                // If charts aren't mounted (or we navigated away), just store the data.
+                if (!chart1 || !chart2) {
+                    this.setState(resp);
+                    return;
+                }
 
                 chart1.series[0].setData([resp.brca1.benign, resp.brca2.benign], false);
                 chart1.series[1].setData([resp.brca1.likelyBenign, resp.brca2.likelyBenign], false);
@@ -81,12 +92,17 @@ var FactSheet = React.createClass({
                 this.setState(resp);
             },
             () => this.setState({error: 'Problem connecting to server'}));
-    },
-    render: function () {
+    }
+
+    componentWillUnmount() {
+	if (this._sub && typeof this._sub.unsubscribe === 'function') this._sub.unsubscribe();
+    }
+
+    render() {
         return (
             <Grid id="main-grid" className="main-grid">
                 <Row>
-                    <Col smOffset={1} sm={10}>
+                    <Col sm={{ span: 10, offset: 1}}>
                         <h1>BRCA Exchange: Facts & Stats</h1>
                         <hr />
                         <h3>BRCA Exchange Web Portal</h3>
@@ -98,12 +114,14 @@ var FactSheet = React.createClass({
                         <p><u>Web portal statistics:</u></p>
                         {this.state.error ? <p>&nbsp;&nbsp;&nbsp;({this.state.error})</p> :
                         <div>
-                            <Col md={6}>
-                                <BarChart ref='chart1' container='chart1' options={chartOptions1} />
-                            </Col>
-                            <Col md={6}>
-                                <PieChart ref='chart2' container='chart2' options={chartOptions2} />
-                            </Col>
+			    <Row>
+                        	<Col md={6}>
+                        	    <BarChart ref={this.chart1Ref} container='chart1' options={chartOptions1} />
+                                 </Col>
+                                 <Col md={6}>
+                                    <PieChart ref={this.chart2Ref} container='chart2' options={chartOptions2} />
+                                 </Col>
+			    </Row>
                             <br />
                             <ul>
                                 <li>Number of unique BRCA variants in the portal: {Number(this.state.total).toLocaleString()}</li>
@@ -126,7 +144,7 @@ var FactSheet = React.createClass({
                         <br />
                         <br />
                         <div className='image-with-caption'>
-                            <img src={require('../content/BRCA_scaled.JPG')}></img>
+                            <img src={require('../content/BRCA_scaled.JPG')} />
                             <small className='image-caption'><em>Source: https://commons.wikimedia.org/wiki/File:BRCA_1.JPG</em></small>
                         </div>
 
@@ -152,7 +170,7 @@ var FactSheet = React.createClass({
                             <li>With advances in DNA sequencing, individuals can have genetic testing performed to screen their DNA for specific known BRCA variants. Testing involves taking a blood or saliva sample from the individual. The results are interpreted by a clinical geneticist or licenced genetic counselor.</li>
                             <li>Genetic testing centres each hold a portion of the world’s knowledge about BRCA variants. By aggregating this knowledge together into one shared resource, scientists around the world can have access to greater amounts of information to assist them in classifying variants as ‘pathogenic’ or ‘benign’. This means more accurate and consistent information for doctors, patients, and families.</li>
                         </ul>
-                        <Alert bsStyle="info">
+                        <Alert variant="info">
                             <p>For more information about BRCA genes and cancer, please see:</p>
                             <ul>
                                 <li><a href='http://www.cancer.gov/about-cancer/causes-prevention/genetics/brca-fact-sheet'>http://www.cancer.gov/about-cancer/causes-prevention/genetics/brca-fact-sheet</a></li>
@@ -201,15 +219,15 @@ var FactSheet = React.createClass({
                         </ul>
                         <br />
                     </Col>
-                    <Col md={6} mdOffset={3}>
+                    <Col md={{ span: 6, offset: 3 }}>
                         <div className='image-with-caption'>
-                            <img src={require('../content/DNA_cyclepath_to_Shelford_-_geograph.org.uk_-_538440.jpg')}></img>
+                            <img src={require('../content/DNA_cyclepath_to_Shelford_-_geograph.org.uk_-_538440.jpg')} />
                             <small className='image-caption'><em>The BRCA genes loom large in public awareness. This photo shows a bicycle path in Shelford, England that depicts the sequence of the BRCA2 gene. The lanes of the path are separated by colored stripes. Each stripe represents one base of BRCA2, with the stripes color-coded according to the nucleotide. See also <a href='http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england'>http://www.bshs.org.uk/travel-guide/dna-cycle-path-cambridge-england</a></em></small>
                         </div>
                     </Col>
-                    <Col md={8} mdOffset={2}>
+                    <Col md= {{ span: 8, offset: 2 }}>
                         <br />
-                        <Alert bsStyle='info'>
+                        <Alert variant='info'>
                             <p>For more information about the BRCA Challenge and GA4GH, please visit:</p>
                             <ul>
                                 <li><a href="http://www.genomicsandhealth.org/">Global Alliance for Genomics and Health</a> (GA4GH)</li>
@@ -220,6 +238,6 @@ var FactSheet = React.createClass({
             </Grid>
         );
     }
-});
+}
 
-module.exports = FactSheet;
+export default FactSheet;

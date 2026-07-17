@@ -1,12 +1,11 @@
-/*global require: false, module: false */
 'use strict';
 
-var Rx = require('rx');
-require('rx-dom');
-var _ = require('underscore');
-var config = require('./config');
-var qs = require('qs');
+// RxJS 7 imports - CHANGED
+import { ajax } from 'rxjs/ajax';
 
+import _ from 'underscore';
+import config from './config';
+import qs from 'qs';
 var transpose = a => _.zip.apply(_, a);
 
 // URIs have a 2083 character size limit and some search terms exceed that.
@@ -40,8 +39,8 @@ function url(opts) {
         changeTypes,
         showDeleted
         } = opts,
-
         [filter, filterValue] = transpose(_.pairs(_.pick(filterValues, v => v)));
+
     search = trimSearchTerm(search);
 
     return `${config.backend_url}/data/?${qs.stringify(_.pick({
@@ -63,31 +62,38 @@ function url(opts) {
 }
 
 function data(opts) {
-    return Rx.DOM.get(url(opts)).map(xhr => JSON.parse(xhr.responseText));
+    // CHANGED: Use ajax.getJSON() which automatically parses JSON
+    return ajax.getJSON(url(opts));
 }
 
 function variant(variant) {
-    return Rx.DOM.get(`${config.backend_url}/data/variant/?variant_id=${variant}`).map(xhr => JSON.parse(xhr.responseText));
+    // CHANGED: Fixed template literal syntax and use ajax.getJSON()
+    return ajax.getJSON(`${config.backend_url}/data/variant/?variant_id=${variant}`);
 }
 
 function variantReports(variant) {
-    return Rx.DOM.get(`${config.backend_url}/data/variant/${variant}/reports`).map(xhr => JSON.parse(xhr.responseText));
+    // CHANGED: Fixed template literal syntax and use ajax.getJSON()
+    return ajax.getJSON(`${config.backend_url}/data/variant/${variant}/reports`);
 }
 
 function variantPapers(variant) {
-    return Rx.DOM.get(`${config.backend_url}/data/variantpapers/?variant_id=${variant}`).map(xhr => JSON.parse(xhr.responseText));
+    // CHANGED: Fixed template literal syntax and use ajax.getJSON()
+    return ajax.getJSON(`${config.backend_url}/data/variantpapers/?variant_id=${variant}`);
 }
 
 function variantCounts() {
-    return Rx.DOM.get(`${config.backend_url}/data/variantcounts`).map(xhr => JSON.parse(xhr.responseText));
+    // CHANGED: Fixed template literal syntax and use ajax.getJSON()
+    return ajax.getJSON(`${config.backend_url}/data/variantcounts`);
 }
 
 function releases() {
-    return Rx.DOM.get(`${config.backend_url}/data/releases`).map(xhr => JSON.parse(xhr.responseText));
+    // CHANGED: Fixed template literal syntax and use ajax.getJSON()
+    return ajax.getJSON(`${config.backend_url}/data/releases`);
 }
 
 function release(id) {
-    return Rx.DOM.get(`${config.backend_url}/data/releases?release_id=${id}`).map(xhr => JSON.parse(xhr.responseText));
+    // CHANGED: Fixed template literal syntax and use ajax.getJSON()
+    return ajax.getJSON(`${config.backend_url}/data/releases?release_id=${id}`);
 }
 
 function users(opts) {
@@ -97,15 +103,19 @@ function users(opts) {
         'page_size': pageLength,
         'search': search
     }, v => v != null))}`;
-    return Rx.DOM.get(usersUrl).map(xhr => JSON.parse(xhr.responseText));
+
+    // CHANGED: Use ajax.getJSON()
+    return ajax.getJSON(usersUrl);
 }
 
 function userLocations(search, roles) {
     var url = `${config.backend_url}/accounts/user_locations/?${qs.stringify({search: search, 'roles[]': roles}, {indices: false})}`;
-    return Rx.DOM.get(url).map(xhr => JSON.parse(xhr.responseText));
+
+    // CHANGED: Use ajax.getJSON()
+    return ajax.getJSON(url);
 }
 
-module.exports = {
+export default {
     data,
     variant,
     variantReports,

@@ -1,7 +1,4 @@
-/*eslint-env browser */
-/*global require: false */
 'use strict';
-
 
 import SourceReportsTile from "./components/SourceReportsTile";
 import AlleleFrequenciesTile from "./components/AlleleFrequenciesTile";
@@ -12,31 +9,28 @@ import ComputationalPredictionTile from "./components/computationalprediction/Co
 import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
 import MupitStructure from './MupitStructure';
 
-// shims for older browsers
-require('babel/polyfill');
-require('es5-shim');
-require('es5-shim/es5-sham');
+import './favicons';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import DisclaimerModal from './DisclaimerModal';
+import RawHTML from './RawHTML';
 
-require('./favicons');
-var React = require('react');
-var ReactDOM = require('react-dom');
-var PureRenderMixin = require('./PureRenderMixin'); // deep-equals version of PRM
-var DisclaimerModal = require('./DisclaimerModal');
-var RawHTML = require('./RawHTML');
-require('bootstrap/dist/css/bootstrap.css');
-require('font-awesome-webpack');
-require('css/bootstrap-xlgrid.css'); // adds xl, xxl, xxxl grid sizes to bootstrap 3
-require('css/custom.css');
-var _ = require('underscore');
-var backend = require('./backend');
-var {NavBarNew} = require('./NavBarNew');
-var Rx = require('rx');
-require('rx-dom');
+// Keep your existing CSS includes
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'font-awesome/css/font-awesome.min.css';
+//import 'css/bootstrap-xlgrid.css'; // adds xl, xxl, xxxl grid sizes to bootstrap 3
+import 'css/custom.css';
+
+import _ from 'underscore';
+import backend from './backend';
+import NavBarNew from './NavBarNew';
+// RxJS 6+ imports
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 var moment = require('moment');
-var DonationBar = require('./components/DonationBar');
+import DonationBar from './components/DonationBar';
 
-
-// faisal: includes for masonry/isotope
+// masonry/isotope
 var Isotope = require('isotope-layout');
 require('isotope-packery');
 import debounce from 'lodash/debounce';
@@ -46,32 +40,32 @@ var logos = require('./logos');
 var slugify = require('./slugify');
 
 import content, {parseTooltips} from './content';
-var Community = require('./Community');
-var FactSheet = require('./FactSheet');
-var WhyDonate = require('./WhyDonate');
-var FundraisingDetails = require('./FundraisingDetails');
+import Community from './Community';
+import FactSheet from './FactSheet';
+import WhyDonate from './WhyDonate';
+import FundraisingDetails from './FundraisingDetails';
 import {Splicing} from'./Splicing';
+import { withRouter, BrowserRouter, Switch, Route, Link } from 'react-router-dom';
 
 var databaseKey = require('../databaseKey');
 var util = require('./util');
 
-var {Grid, Col, Row, Table, Button, Modal, Panel} = require('react-bootstrap');
+// React-Bootstrap v2+ imports (Bootstrap 5)
+import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } from 'react-bootstrap';
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
-var {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} = require('./VariantTable');
-var {Signup} = require('./Signup');
-var {Signin, ResetPassword} = require('./Signin');
-var {ConfirmEmail} = require('./ConfirmEmail');
-var {ChangePassword} = require('./ChangePassword');
-var {Profile} = require('./Profile');
-var VariantSearch = require('./VariantSearch');
-var {Navigation, State, Route, RouteHandler,
-    HistoryLocation, run, DefaultRoute, Link} = require('react-router');
-var {Releases, Release} = require('./Releases.js');
-var Help = require('./Help.js');
+import {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} from './VariantTable';
+import Signup from './Signup';
+import {Signin, ResetPassword} from './Signin';
+import {ConfirmEmail} from './ConfirmEmail';
+import {ChangePassword} from './ChangePassword';
+import {Profile} from './Profile';
+import VariantSearch from './VariantSearch';
+import { Releases, Release } from './Releases.js';
+import Help from './Help.js';
 
-var KeyInline = require('./components/KeyInline');
-var GroupHelpButton = require('./components/GroupHelpButton');
+import KeyInline from './components/KeyInline';
+import GroupHelpButton from './components/GroupHelpButton';
 
 var variantPathJoin = row => _.map(databaseKey, k => encodeURIComponent(row[k])).join('@@');
 
@@ -103,12 +97,12 @@ function clean(obj) {
     }
 }
 
-var Footer = React.createClass({
-    mixins: [PureRenderMixin],
-    render: function() {
+class Footer extends React.PureComponent {
+    render() {
         return (
             <div className="container footer">
-                <div className="col-sm-5 left-footer">
+		<div className = "row">
+                    <div className="col-sm-5 left-footer">
                     <ul>
                         <li><a href="/">Home</a></li>
                         <li><a href="/about/history">About</a></li>
@@ -116,11 +110,11 @@ var Footer = React.createClass({
                         <li><a href="/about/api">API</a></li>
                         <li><a href="https://brcaexchange.org/blog">Blog</a></li>
                     </ul>
-                </div>
-                <div className="col-sm-2 logo-footer">
-                    <img href="#" src={brcaLogo} alt="brca exchange logo" />
-                </div>
-                <div className="col-sm-5 right-footer">
+                    </div>
+                    <div className="col-sm-2 logo-footer">
+                        <img src={brcaLogo} alt="brca exchange logo" />
+                    </div>
+                    <div className="col-sm-5 right-footer">
                     <ul>
                         <li>
                             <a href="/whydonate">Donate</a>
@@ -140,25 +134,28 @@ var Footer = React.createClass({
                         </li>
                         <li><a href="/help">Help</a></li>
                     </ul>
-                </div>
+                    </div>
+		</div>
             </div>
         );
     }
-});
+}
 
-var Home = React.createClass({
-    mixins: [Navigation],
-    getInitialState() {
-        return {
+class HomeRaw extends React.Component {
+    constructor(props) {
+        super(props);
+	this.state = {
             index: 0,
             direction: null,
             showModal: false
         };
-    },
+	this.onSearch = this.onSearch.bind(this);
+    }
     onSearch(value) {
-        this.transitionTo('/variants', null, {search: value});
-    },
-    render: function() {
+	const query = value ? `?search=${encodeURIComponent(value)}` : '';
+        this.props.history.push(`/variants${query}`);
+    }
+    render() {
         let currentSupporters = _.filter(logos, function(logo) {
                                     return logo.currentSupporter;
                                 });
@@ -182,10 +179,13 @@ var Home = React.createClass({
         return (
             <Grid id="main-grid" className='home'>
                 <Row>
-                    <Col smOffset={2} sm={8}>
-                        <VariantSearch
-                            id='home-search'
-                            onSearch={this.onSearch}/>
+                    <Col sm={{ span: 8, offset: 2 }}>
+			<h2 style={{fontWeight: 'bold'}}>
+                            Search for your BRCA variant of interest:
+                        </h2>
+                       <VariantSearch
+                           id='home-search'
+                           onSearch={this.onSearch}/>
                     </Col>
                 </Row>
                 <Row>
@@ -195,9 +195,9 @@ var Home = React.createClass({
                 </Row>
 
                 <Row>
-                    <Col lg={4} lgOffset={1} md={8} mdOffset={2} xs={12}>
-                        <div className="embed-responsive embed-responsive-16by9">
-                            <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/199396428" webkitallowfullscreen mozallowfullscreen allowFullScreen />
+                    <Col lg={{ span: 4, offset: 1 }} md={{ span: 8, offset: 2 }} xs={12}>
+                        <div className="ratio ratio-16x9">
+                            <iframe className="vimeo-video" src="https://player.vimeo.com/video/199396428" allowFullScreen />
                         </div>
                         <div className="homepage-under-image-text-container center-block">
                             <div className="homepage-caption">
@@ -209,9 +209,9 @@ var Home = React.createClass({
                         </div>
                     </Col>
 
-                    <Col lg={4} lgOffset={2} md={8} mdOffset={2} xs={12}>
-                        <div className="embed-responsive embed-responsive-16by9">
-                            <iframe className="vimeo-video embed-responsive-item" src="https://player.vimeo.com/video/351028818" webkitallowfullscreen mozallowfullscreen allowFullScreen />
+                    <Col lg={{ span: 4, offset: 2 }} md={{ span: 8, offset: 2 }} xs={12}>
+                        <div className="ratio ratio-16x9">
+                            <iframe className="vimeo-video" src="https://player.vimeo.com/video/351028818" allowFullScreen />
                         </div>
                         <div className="homepage-under-image-text-container center-block">
                             <div className="homepage-caption">
@@ -236,12 +236,16 @@ var Home = React.createClass({
             </Grid>
         );
     }
-});
+}
+const Home = withRouter(HomeRaw);
 
-var About = React.createClass({
-    render: function() {
-        let {page} = this.props.params;
-        if (page === "thisSite") {
+class About extends React.Component {
+    render() {
+        const { page } =
+		(this.props.match && this.props.match.params) ||
+ 	      	this.props.params ||
+		{};
+	if (page === "thisSite") {
             let currentSupporters = _.filter(logos, function(logo) {
                                         return logo.currentSupporter;
                                     });
@@ -265,7 +269,7 @@ var About = React.createClass({
             return (
                 <Grid id="main-grid" className="main-grid">
                     <Row>
-                        <Col smOffset={1} sm={10}>
+                        <Col sm={{ span: 10, offset: 1 }}>
                             <RawHTML html={content.pages[page]} />
                         </Col>
                     </Row>
@@ -282,7 +286,7 @@ var About = React.createClass({
             return (
                 <Grid id="main-grid" className="main-grid">
                     <Row>
-                        <Col smOffset={1} sm={10}>
+                        <Col sm={{ span: 10, offset: 1 }}>
                             <RawHTML html={content.pages[page]} />
                         </Col>
                     </Row>
@@ -290,7 +294,7 @@ var About = React.createClass({
             );
         }
     }
-});
+}
 
 function toNumber(v) {
     return _.isString(v) ? parseInt(v) : v;
@@ -298,6 +302,20 @@ function toNumber(v) {
 
 function databaseParams(paramsIn) {
     var {filter, filterValue, hide, hideSources, excludeSources, orderBy, order, search = '', changeTypes} = paramsIn;
+
+    const asArray = (v) => {
+        if (v === null || v === undefined) return [];
+        if (Array.isArray(v)) return v;
+        if (typeof v === 'string') return v.length ? [v] : [];
+        return [v];
+    };
+
+    filter = asArray(filter);
+    filterValue = asArray(filterValue);
+    hide = asArray(hide);
+    hideSources = asArray(hideSources);
+    excludeSources = asArray(excludeSources);
+    changeTypes = asArray(changeTypes);
     var numParams = _.mapObject(_.pick(paramsIn, 'page', 'pageLength', 'release'), toNumber);
     var sortBy = {prop: orderBy, order};
     var columnSelection = _.object(hide, _.map(hide, _.constant(false)));
@@ -342,17 +360,64 @@ function urlFromDatabase(state) {
 
 }
 
-var Database = React.createClass({
+class Database extends React.Component {
     // Note this is not a pure component because of the calls to
     // getQuery().
-    mixins: [Navigation, State],
-    getInitialState: function () {
-        return {
-            showModal: false,
-            restoringDefaults: false
-        };
-    },
-    showVariant: function (row, event) {
+    constructor(props) {
+        super(props);
+        this.state = { showModal: false, restoringDefaults: false };
+	this.tableRef = React.createRef();
+        this.showVariant = this.showVariant.bind(this);
+        this.showHelp = this.showHelp.bind(this);
+        this.onChange = this.onChange.bind(this);
+        this.restoreDefaults = this.restoreDefaults.bind(this);
+        this.toggleMode = this.toggleMode.bind(this);
+    }
+
+    // replacement for react-router State mixin getQuery()
+    getQuery() {
+        const search = (this.props.location && this.props.location.search) || '';
+        const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+        const out = {};
+        params.forEach((v, k) => {
+            // preserve repeated keys as arrays
+            if (Object.prototype.hasOwnProperty.call(out, k)) {
+                out[k] = Array.isArray(out[k]) ? out[k].concat(v) : [out[k], v];
+            } else {
+                out[k] = v;
+            }
+        });
+        return out;
+    }
+
+    // replacement for react-router Navigation mixin transitionTo()
+    transitionTo(path, _params, query) { // _params kept for callsite compatibility
+        let search = '';
+        if (query && Object.keys(query).length) {
+	const sp = new URLSearchParams();
+            Object.entries(query).forEach(([k, v]) => {
+                if (v === undefined || v === null) return;
+                if (Array.isArray(v)) v.forEach(x => sp.append(k, String(x)));
+                else sp.set(k, String(v));
+            });
+            const qs = sp.toString();
+            search = qs ? `?${qs}` : '';
+        }
+
+        // support history/router injection patterns
+        const router = this.props.router || this.props.history || (this.context && this.context.router);
+        const nextLoc = { pathname: path, search };
+
+        if (router) {
+            if (typeof router.push === 'function') return router.push(nextLoc);
+            if (typeof router.transitionTo === 'function') return router.transitionTo(path, _params, query);
+        }
+
+        // last resort
+        window.location.assign(path + search);
+    }
+
+    showVariant(row, event) {
           var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
           if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
               d3TipDiv[0].style.opacity = '0';
@@ -368,42 +433,49 @@ var Database = React.createClass({
               // open it in the current window
               this.transitionTo(`/variant/${variantPathJoin(row)}`);
           }
-    },
-    showHelp: function (title) {
+    }
+
+    // TODO: use `title` to link to a section-specific help page instead of the generic /help route
+    showHelp(_title) {
         var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
         if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
             d3TipDiv[0].style.opacity = '0';
             d3TipDiv[0].style.pointerEvents = 'none';
         }
-        this.transitionTo(`/help#${slugify(title)}`);
-    },
-    componentDidMount: function () {
-        var q = this.urlq = new Rx.Subject();
-        this.subs = q.debounce(500).subscribe(this.onChange);
-    },
-    componentWillUnmount: function () {
-        this.subs.dispose();
-    },
-    restoreDefaults: function(callback) {
-        this.setState({restoringDefaults: true}, function() {
-            this.transitionTo('/variants', null, null);
+        this.transitionTo(`/help`);
+    }
+
+    componentDidMount() {
+        this.urlq = new Subject();
+        this.subs = this.urlq.pipe(debounceTime(500)).subscribe(this.onChange);
+    }
+
+    componentWillUnmount() {
+        if (this.subs) this.subs.unsubscribe();
+    }
+
+    restoreDefaults(callback) {
+        this.setState({restoringDefaults: true}, () => {
+            this.transitionTo('/variants');
 
             // Callback resets filters in DataTable.
             // HACK: wrapped in setTimeout to ensure that it happens
             // after transitionTo is complete.
             setTimeout(callback, 0);
         });
-    },
-    // XXX An oddity of the state flow here: we update the url when table settings
-    // change, so the page can be bookmarked, and forward/back buttons work. We
-    // do it on a timeout so we don't generate history entries for every keystroke,
-    // which would be bad for the user. Changing the url causes a re-render, passing
-    // in new props, which causes DataTable to overwrite its state with the
-    // same state that caused us to update the url. It's a bit circular.
-    // It would be less confusing if DataTable did not hold these params in state,
-    // but just read them from props, and all updates to the props occurred via
-    // transitionTo(). Consider for a later refactor.
-    onChange: function (state) {
+    }
+
+	// XXX An oddity of the state flow here: we update the url when table settings
+	// change, so the page can be bookmarked, and forward/back buttons work. We
+	// do it on a timeout so we don't generate history entries for every keystroke,
+	// which would be bad for the user. Changing the url causes a re-render, passing
+	// in new props, which causes DataTable to overwrite its state with the
+	// same state that caused us to update the url. It's a bit circular.
+	// It would be less confusing if DataTable did not hold these params in state,
+	// but just read them from props, and all updates to the props occurred via
+	// transitionTo(). Consider for a later refactor.
+
+    onChange(state) {
         if (this.props.show) {
             var d3TipDiv = document.getElementsByClassName('d3-tip-selection');
             if (d3TipDiv.length !== 0 && d3TipDiv[0].style.opacity !== '0') {
@@ -411,22 +483,21 @@ var Database = React.createClass({
                 d3TipDiv[0].style.pointerEvents = 'none';
             }
             if (!this.state.showModal && !this.state.restoringDefaults) {
-                // Don't change url if modal is open -- user is still deciding whether to change modes.
                 this.transitionTo('/variants', {}, urlFromDatabase(state));
             } else if (this.state.restoringDefaults) {
-                // If restoring defaults, transition to is already being called with different params.
                 this.setState({restoringDefaults: false});
             }
         }
-    },
-    toggleMode: function () {
+    }
+
+    toggleMode() {
         this.props.toggleMode();
         this.setState({ showModal: false });
-    },
-    render: function () {
+    }
+
+    render() {
         var {show} = this.props,
             params = databaseParams(this.getQuery());
-        // XXX is 'keys' used?
         var table, message;
         if (this.state.restoringDefaults) {
             params.columnSelection = {};
@@ -436,12 +507,12 @@ var Database = React.createClass({
         if (this.props.mode === 'research_mode') {
             table = (
 				<ResearchVariantTable
-					ref='table'
+					ref={this.tableRef}
 					initialState={params}
 					{...params}
 					fetch={backend.data}
 					url={backend.url}
-					onChange={s => this.urlq.onNext(s)}
+					onChange={s => this.urlq.next(s)}
 					onToggleMode={this}
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
@@ -455,12 +526,12 @@ var Database = React.createClass({
             params.sourceSelection = {};
             table = (
 				<VariantTable
-					ref='table'
+					ref={this.tableRef}
 					initialState={params}
 					{...params}
 					fetch={backend.data}
 					url={backend.url}
-					onChange={s => this.urlq.onNext(s)}
+					onChange={s => this.urlq.next(s)}
 					onToggleMode={this}
 					keys={databaseKey}
 					onHeaderClick={this.showHelp}
@@ -475,34 +546,39 @@ var Database = React.createClass({
                 {table}
             </Grid>
         );
-    },
-    renderMessage: function(message) {
+    }
+
+    renderMessage(message) {
         return  (
 			<Row>
 				<Col className="jumbotron colorized-jumbo">
 					{this.props.mode === 'default' && <img id='enigma-logo' src={require('./img/enigma_logo.jpeg')} />}
-					<RawHTML ref='content' html={message}/>
-					{this.props.mode === 'research_mode' && <Button className="btn-default" onClick={this.toggleMode}>
+					<RawHTML html={message}/>
+					{this.props.mode === 'research_mode' && <Button variant="secondary" onClick={this.toggleMode}>
 						Show Summary Data Only
 					</Button>}
 					{this.props.mode === 'default' &&
-					<Button className="btn-default" onClick={() =>this.setState({showModal: true})}>
+					<Button variant="secondary" onClick={() =>this.setState({showModal: true})}>
 						Show Detail View
 					</Button>}
 					{
 					    this.props.mode === 'default' && this.state.showModal &&
                         <Modal show={true} onHide={() => this.setState({ showModal: false })}>
-                            <RawHTML html={content.pages.researchWarning}/>
-                            <Button onClick={() => {this.toggleMode();}}>Yes</Button>
-                            <Button onClick={() => this.setState({ showModal: false })}>No</Button>
+                            <Modal.Body>
+                                <RawHTML html={content.pages.researchWarning}/>
+                            </Modal.Body>
+                            <Modal.Footer>
+                                <Button variant="primary" onClick={() => {this.toggleMode();}}>Yes</Button>
+                                <Button variant="secondary" onClick={() => this.setState({ showModal: false })}>No</Button>
+                            </Modal.Footer>
                         </Modal>
 					}
 				</Col>
 			</Row>);
     }
-});
+}
 
-// get display name for a given key from VariantTable.js column specification,
+// get display name for a given key from VariantTable.js column specification
 // if we are in summary view mode, search summary view names then fall back to
 // all data, otherwise go straight to all data. Finally, if key is not found, replace
 // _ with space in the key and return that.
@@ -513,12 +589,10 @@ function getDisplayName(key) {
         displayName = columns.find(e => e.prop === key);
         displayName = displayName && displayName.title;
     }
-    // we are not in summary view anymore, or key wasn't found in summary view columns
     if (displayName === undefined) {
         displayName = researchModeColumns.find(e => e.prop === key);
         displayName = displayName && displayName.title;
     }
-    // key was not found at all
     if (displayName === undefined) {
         displayName = key.replace(/_/g, " ");
     }
@@ -529,23 +603,27 @@ function isEmptyDiff(value) {
     return value === null || value.length < 1;
 }
 
-const IsoGrid = React.createClass({
-    displayName: 'IsoGrid',
+class IsoGrid extends React.Component {
+    static displayName = 'IsoGrid';
 
-    // wraps contents in a masonry-managed container
-    render: function () {
-        const children = this.props.children;
+    constructor(props) {
+	super(props);
+	this._rootRef = React.createRef();
+	this.masonry = null;
+    }
+
+    render() {
         return (
-            <div className="isogrid">
-            {children}
+            <div className="isogrid" ref={this._rootRef}>
+            {this.props.children}
             </div>
         );
-    },
+    }
 
-    // create masonry object to manage children's positions
-    componentDidMount: function() {
-        if (!this.masonry) {
-            this.masonry = new Isotope('.isogrid', {
+    componentDidMount() {
+        const root = this._rootRef.current;
+	if (!root || !this.masonry) {
+            this.masonry = new Isotope(root, {
                 layoutMode: 'packery',
                 itemSelector: '.isogrid-item',
                 packery: {
@@ -554,162 +632,267 @@ const IsoGrid = React.createClass({
                 }
             });
         }
-    },
+    }
 
-    relayout: function(fullRefresh) {
+    componentWillUnmount() {
+	// prevent leaks / dangling observers
+	if (this.masonry && typeof this.masonry.destroy === 'function') {
+	    this.masonry.destroy();
+	}
+	this.masonry = null;
+    }
+
+    relayout(fullRefresh) {
         if (!this.masonry) {
             return;
         }
-
         if (fullRefresh) {
             this.masonry.reloadItems();
         }
-
         this.masonry.arrange();
     }
-});
+}
 
-var VariantDetail = React.createClass({
-    mixins: [Navigation, State],
-    showHelp: function (event, title) {
+// Helpers for new Card/Collapse behavior
+function isOpenFromStorage(key) {
+    // legacy semantics: localStorage "true" means collapsed
+    return localStorage.getItem(key) !== "true";
+}
+
+class VariantDetail extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            hideEmptyItems: (localStorage.getItem("hide-empties") === 'true'),
+            tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true'),
+            // track open/closed state for cards (keyed by localStorage key)
+            openGroups: {}
+        };
+
+        // bind methods passed as callbacks / props
+        this.showHelp = this.showHelp.bind(this);
+        this.relayoutOnCollapsed = this.relayoutOnCollapsed.bind(this);
+        this.onChangeGroupVisibility = this.onChangeGroupVisibility.bind(this);
+        this.isGroupOpenLS = this.isGroupOpenLS.bind(this);
+        this.toggleCard = this.toggleCard.bind(this);
+        this.setEmptyRowVisibility = this.setEmptyRowVisibility.bind(this);
+        this.determineDiffRowColor = this.determineDiffRowColor.bind(this);
+        this.getPathogenicity = this.getPathogenicity.bind(this);
+        this.generateDiffRows = this.generateDiffRows.bind(this);
+        this.toggleSubmitterGroup = this.toggleSubmitterGroup.bind(this);
+
+        // debounce relayout (same behavior as before)
+        this.relayoutGrid = debounce((fullRefresh) => {
+            if (this.isogrid) this.isogrid.relayout(fullRefresh);
+        }, 100);
+
+        this._subs = [];
+    }
+
+    // ---- router helpers (replace Navigation/State mixins) ----
+    getParamId() {
+        return (
+            (this.props.params && this.props.params.id) ||
+            (this.props.match && this.props.match.params && this.props.match.params.id)
+        );
+    }
+
+    getQuery() {
+        const search = (this.props.location && this.props.location.search) || '';
+        const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+        const out = {};
+        params.forEach((v, k) => {
+            if (Object.prototype.hasOwnProperty.call(out, k)) {
+                out[k] = Array.isArray(out[k]) ? out[k].concat(v) : [out[k], v];
+            } else {
+                out[k] = v;
+            }
+        });
+        return out;
+    }
+
+    buildURL(path, query) {
+        if (!query || !Object.keys(query).length) return path;
+        const [base, hash = ''] = path.split('#', 2);
+        const sp = new URLSearchParams();
+        Object.entries(query).forEach(([k, v]) => {
+            if (v === undefined || v === null) return;
+            if (Array.isArray(v)) v.forEach(x => sp.append(k, String(x)));
+            else sp.set(k, String(v));
+        });
+        const qs = sp.toString();
+        return base + (qs ? `?${qs}` : '') + (hash ? `#${hash}` : '');
+    }
+
+    transitionTo(path, _params, query) {
+        const url = this.buildURL(path, query);
+        const router = this.props.router || this.props.history || (this.context && this.context.router);
+        if (router) {
+            if (typeof router.push === 'function') return router.push(url);
+            if (typeof router.transitionTo === 'function') return router.transitionTo(path, _params, query);
+        }
+        window.location.assign(url);
+    }
+
+    replaceWith(pathTemplate, params, query) {
+        const path = params && params.id
+            ? pathTemplate.replace(':id', params.id)
+            : pathTemplate;
+        const url = this.buildURL(path, query);
+        const router = this.props.router || this.props.history || (this.context && this.context.router);
+        if (router) {
+            if (typeof router.replace === 'function') return router.replace(url);
+            if (typeof router.replaceWith === 'function') return router.replaceWith(pathTemplate, params, query);
+        }
+        window.location.replace(url);
+    }
+
+    showHelp(event, title) {
         event.preventDefault();
-
         this.transitionTo(`/help#${slugify(title)}`);
-    },
-    getInitialState: () => ({
-        hideEmptyItems: (localStorage.getItem("hide-empties") === 'true'),
-        tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true')
-    }),
-    componentWillMount: function () {
-        backend.variant(this.props.params.id).subscribe(
+    }
+
+    componentDidMount() {
+        const id = this.getParamId();
+
+	this._subs.push(
+	    backend.variant(id).subscribe(
             resp => {
-                if (resp.hasOwnProperty('redirect') && resp.redirect === true) {
+                if (Object.prototype.hasOwnProperty.call(resp, 'redirect') && resp.redirect === true) {
                     this.transitionTo('/variants', null, {search: resp.data});
                 } else {
                     this.setState({data: resp.data, error: null});
                 }
             },
             () => { this.setState({error: 'Problem connecting to server'}); }
+	    )
         );
 
-        backend.variantReports(this.props.params.id).subscribe(
-            resp => {
-                // we always want reports grouped by source, so we'll do so centrally here
+        this._subs.push(
+            backend.variantReports(id).subscribe(
+	    resp => {
                 const groupedReports = _.groupBy(resp.data, 'Source');
-
                 this.setState({reports: groupedReports, error: null}, () => {
                     this.relayoutGrid();
                 });
-            }, () => {
+            },
+	    () => {
                 this.setState({reportError: 'Problem retrieving reports'});
                 console.warn("Couldn't retrieve reports!");
             }
+	    )
         );
 
-    },
-    componentWillUpdate: function(nextProps, nextState) {
-        // reparse the tooltips since they're mode-specific
-        if (nextProps.mode !== this.props.mode) {
-            this.setState({
-                tooltips: parseTooltips(nextProps.mode === 'research_mode')
-            });
+    }
+
+    componentWillUnmount() {
+        this._subs.forEach(s => s && typeof s.unsubscribe === 'function' && s.unsubscribe());
+        if (this.relayoutGrid && this.relayoutGrid.cancel) this.relayoutGrid.cancel();
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        // mode change => refresh tooltips + relayout
+        if (prevProps.mode !== this.props.mode) {
+            console.log('VariantDetail mode changed from', prevProps.mode, 'to', this.props.mode);
+	    this.setState({ tooltips: parseTooltips(this.props.mode === 'research_mode') });
+            setTimeout(() => this.relayoutGrid(true), 0);
         }
 
         // ensure that we're viewing the latest version of the variant, with the stable CA_ID URL.
-        // and redirect if we're not,
-        // unless the querystring param 'noRedirect=true' is specified, in which case we stay here.
-        // In the rare case there is no CA_ID, redirect to the latest version by numeric ID instead.
-        // (if someone *really* wants to link to the old variant, they may also specify 'noRedirectMsg=true'
-        // to silence the warning at the top of the page, too.)
-        const { data } = nextState;
-        if (data && this.props.params.id !== data[0].CA_ID) {
+	// and redirect if we're not,
+	// unless the querystring param 'noRedirect=true' is specified, in which case we stay here.
+	// In the rare case there is no CA_ID, redirect to the latest version by numeric ID instead.
+	// (if someone *really* wants to link to the old variant, they may also specify 'noRedirectMsg=true'
+	// to silence the warning at the top of the page, too.)
+	// redirect logic (moved from componentWillUpdate)
+        const { data } = this.state;
+        const currentId = this.getParamId();
+        if (data && data[0] && currentId !== data[0].CA_ID) {
             const { noRedirect } = this.getQuery();
             if (noRedirect !== "true") {
-                // Redirect to CA_ID if it exists, or the latest numeric id if CA_ID doesn't exist.
-                const redirectToID = data[0].CA_ID  || data[0].id ;
-
-                // If we were already at the latest numeric ID, redirect without a redirectedFrom message.
-                if (parseInt(this.props.params.id) === data[0].id) {
+                const redirectToID = data[0].CA_ID || data[0].id;
+                if (parseInt(currentId) === data[0].id) {
                     this.replaceWith(`/variant/:id`, { id: redirectToID }, {});
-                }
-                // Otherwise include redirectedFrom.
-                else {
-                    this.replaceWith(`/variant/:id`, { id: redirectToID }, { redirectedFrom: this.props.params.id });
+                } else if (!prevState.data || prevState.data !== data || prevProps.params?.id !== currentId) {
+                    this.replaceWith(`/variant/:id`, { id: redirectToID }, { redirectedFrom: currentId });
                 }
             }
         }
-    },
 
-    componentDidUpdate: function(prevProps, prevState) {
-        if (prevProps.mode !== this.props.mode) {
-            // if the mode changed, we have to relayout the page on the next available frame
-            setTimeout(() => {
-                this.relayoutGrid(true);
-            }, 0);
-        }
-
-        // update the title only when the variant info is first populated
+        // set document title once data arrives
         if (!prevState.data && this.state.data) {
-            const data = this.state.data;
-            const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
-            const variant = data[variantVersionIdx] || data[0];
-
+            const dataNow = this.state.data;
+            const variantVersionIdx = dataNow.findIndex(x => x.id === parseInt(this.getParamId()));
+            const variant = dataNow[variantVersionIdx] || dataNow[0];
             document.title = `${variant['HGVS_cDNA'].split(":")[1]} (${variant['Gene_Symbol']}) - BRCA Exchange`;
         }
-    },
-    pathogenicityChanged: function(pathogenicityDiff) {
-        return (pathogenicityDiff.added || pathogenicityDiff.removed) ? true : false;
-    },
-    setEmptyRowVisibility: function(hideEmptyItems) {
-        localStorage.setItem('hide-empties', hideEmptyItems);
+    }
 
+    pathogenicityChanged(pathogenicityDiff) {
+        return (pathogenicityDiff.added || pathogenicityDiff.removed) ? true : false;
+    }
+
+    setEmptyRowVisibility(hideEmptyItems) {
+        localStorage.setItem('hide-empties', hideEmptyItems);
         this.setState({
             hideEmptyItems: hideEmptyItems
         }, () => {
             this.relayoutGrid();
         });
-    },
-    truncateData: function(field) {
+    }
+
+    truncateData(field) {
         const fieldsToTruncate = ["Genomic_Coordinate_hg38", "Genomic_Coordinate_hg37"];
         if (fieldsToTruncate.indexOf(field) > -1) {
             return true;
         } else {
             return false;
         }
-    },
-    relayoutGrid: debounce(function(fullRefresh) {
-        if (this.isogrid) {
-            this.isogrid.relayout(fullRefresh);
-        }
-    }, 100),
-    relayoutOnCollapsed: function(/* collapser */) {
+    }
+
+    relayoutOnCollapsed(/* collapser */) {
         console.warn("Deprecated relayoutOnCollapsed; replace relayoutOnCollapsed handlers w/direct calls to relayoutGrid() in your collapsing components");
-
-        // migration path:
-        // 1. remove references to bootstrap's deprecated CollapsableMixin
-        // 2. replace collapsible elements (i.e., ones that implement getCollapsableDOMNode,
-        //    getCollapsableDimensionValue) with the Collapse element. remove those functions.
-        // 3. instead of references to relayoutOnCollapsed, pass refs to this.relayoutGrid down to
-        //    collapsible components.
-        // 4. call this.relayoutGrid() in Collapse's onEntered, onExited events.
-    },
+    }
+    // legacy API kept for callers; now just flips storage and local openGroups
     onChangeGroupVisibility(groupTitle, event) {
-        // stop the page from scrolling to the top (due to navigating to the fragment '#')
         event.preventDefault();
+        const key = "collapse-group_" + groupTitle;
+        const willBeCollapsed = localStorage.getItem(key) !== "true";
+        localStorage.setItem(key, willBeCollapsed ? "true" : "false");
+        const willBeOpen = !willBeCollapsed;
+        this.setState({ openGroups: { ...this.state.openGroups, [key]: willBeOpen } });
+    }
+    isGroupOpenLS(key) {
+        // local state wins, otherwise read from storage (for initial render)
+        if (Object.prototype.hasOwnProperty.call(this.state.openGroups, key)) { return !!this.state.openGroups[key]; }
+        return isOpenFromStorage(key);
+    }
+    toggleCard(key) {
+       this.setState((prev) => {
+       const currentlyOpen =
+           Object.prototype.hasOwnProperty.call(prev.openGroups, key)
+           ? prev.openGroups[key]
+           : (localStorage.getItem(key) !== "true");
 
-        // if there's no existing key or if it's not true, this group is visible and thus collapsing
-        const willBeCollapsed = localStorage.getItem("collapse-group_" + groupTitle) !== "true";
-        localStorage.setItem("collapse-group_" + groupTitle, willBeCollapsed ? "true" : "false");
+       const nowOpen = !currentlyOpen;
+       // store "true" when collapsed (legacy semantics)
+       localStorage.setItem(key, nowOpen ? "false" : "true");
 
-        // this.relayoutOnCollapsed(collapser);
-        // this.relayoutGrid();
-        // note: anything listening to the localstorage setting above should relayout the grid
-        // itself, now that collapsing is handled by Collapse elements.
-    },
-    determineDiffRowColor: function(highlightRow) {
-        return highlightRow ? 'danger' : '';
-    },
-    getPathogenicity: function(version, isReport) {
+       console.log('toggleCard:', key, 'was', currentlyOpen, 'now', nowOpen);
+       return { openGroups: { ...prev.openGroups, [key]: nowOpen } };
+   }, () => {
+       // Callback to ensure relayout happens after state update
+       console.log('State updated, openGroups:', this.state.openGroups);
+       if (this.relayoutGrid) {
+           this.relayoutGrid();
+       }
+   });
+    }
+    determineDiffRowColor(highlightRow) {
+        return highlightRow ? 'table-danger' : '';
+    }
+    getPathogenicity(version, isReport) {
         if (isReport) {
             if (version.Source === "ClinVar") {
                 return util.getFormattedFieldByProp("Clinical_Significance_ClinVar", version);
@@ -717,14 +900,11 @@ var VariantDetail = React.createClass({
                 return util.getFormattedFieldByProp("Classification_LOVD", version);
             }
         } else {
-            // Only concerned about expert pathogenicity for diff
             return util.getFormattedFieldByProp("Pathogenicity_expert", version);
         }
-    },
-    generateDiffRows: function(cols, data, isReports) {
+    }
+    generateDiffRows(cols, data, isReports) {
         var diffRows = [];
-
-        // In research_mode, only show research_mode changes.
         var relevantFieldsToDisplayChanges = cols.map(function(col) {
             return col.prop;
         });
@@ -769,26 +949,29 @@ var VariantDetail = React.createClass({
                     if (added !== null || removed !== null) {
                         if (util.isEmptyField(removed)) {
                             diffHTML.push(
-                                <span>
+                                <span key={`diff-${i}-${j}-new`}>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
-                                    <span className='label label-success'><span className='glyphicon glyphicon-star'></span> New</span>
+                                    <span className='badge bg-success'><span className='fa fa-star' /> New</span>
                                     &nbsp;{`${added}`}
-                                </span>, <br />
+                                </span>
                             );
+			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
                         } else if (fieldDiff.field_type === "list") {
                             diffHTML.push(
-                                <span>
+                                <span key={`diff-${i}-${j}-list`}>
                                     <strong>{ getDisplayName(fieldName) }: </strong> <br />
                                     { !isEmptyDiff(added) && `+${added}` }{ !!(!isEmptyDiff(added) && !isEmptyDiff(removed)) && ', '}{ !isEmptyDiff(removed) && `-${removed}` }
-                                </span>, <br />
+                                </span>
                             );
+			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
                         } else if (fieldDiff.field_type === "individual") {
                             diffHTML.push(
-                                <span>
+                                <span key={`diff-${i}-${j}-individual`}>
                                     <strong>{ getDisplayName(fieldName) }: </strong>
-                                    {removed} <span className="glyphicon glyphicon-arrow-right"></span> {added}
-                                </span>, <br />
+                                    {removed} <span className="fa fa-arrow-right" /> {added}
+                                </span>
                             );
+			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
                         }
                     }
                 }
@@ -804,27 +987,26 @@ var VariantDetail = React.createClass({
         }
 
         return diffRows;
-    },
-    toggleSubmitterGroup: function(sourceName, submitter) {
-        this.setState((pstate) => {
-            // the key under the state collection for the visibility of this source-submitter group
-            const k = `submitter-group-${sourceName}-${submitter}`;
+    }
 
-            // if the key doesn't exist, set it to false; otherwise, invert it
+    toggleSubmitterGroup(sourceName, submitter) {
+        this.setState((pstate) => {
+            const k = `submitter-group-${sourceName}-${submitter}`;
             return {
-                [k]: !(!pstate.hasOwnProperty(k) || pstate[k])
+                [k]: !(!Object.prototype.hasOwnProperty.call(pstate, k) || pstate[k])
             };
         });
-    },
+    }
+
     // render for VariantDetail
-    render: function () {
-        const {data, error} = this.state;
+    render() {
+        console.log('VariantDetail render, mode prop:', this.props.mode);
+	const {data, error} = this.state;
         if (!data) {
             return <div />;
         }
 
-
-        const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.props.params.id));
+        const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.getParamId()));
         const variant = data[variantVersionIdx] || data[0];
         const release = variant["Data_Release"];
         let cols, groups;
@@ -840,24 +1022,13 @@ var VariantDetail = React.createClass({
             groups = expertModeGroups;
         }
 
-        // FAISAL: rather than directly map cols, we create a higher-level groups structure
-        // the higher-level groups structure maps a subset of columns to that group
-        let groupsEmpty = 0;
-        let totalRowsEmpty = 0;
-
         const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding, alleleFrequencies, inSilicoPred, innerGroups }) => {
             let rowsEmpty = 0;
 
-            // if it's a report source (i.e. the key reportSource is defined), then we defer
-            // to our custom nested-report-rendering method to generate this entire group
             if (reportSource) {
-                // hide this panel if we have no reports, or specifically none for this source
                 if (!this.state.reports || !this.state.reports[reportSource]) {
                     return null;
                 }
-
-                // also hide this reportSource, but with a warning, if we don't have metadata for that source
-                // (we expect to have metadata for the source, since we both request the source and define its meta)
                 if (!reportBinding) {
                     console.warn("Source report rendering requested for source with missing metadata: ", reportSource);
                     return null;
@@ -865,7 +1036,7 @@ var VariantDetail = React.createClass({
 
                 return (
                     <SourceReportsTile
-                        key="source-reports-tile"
+                        key={`tile-${groupTitle}`}
                         groupTitle={groupTitle}
                         sourceName={reportSource}
                         reportBinding={reportBinding}
@@ -883,7 +1054,7 @@ var VariantDetail = React.createClass({
             if (alleleFrequencies) {
                 return (
                     <AlleleFrequenciesTile
-                        key="allele-frequency-tile"
+                        key={`tile-${groupTitle}`}
                         alleleFrequencyData={innerGroups}
                         groupTitle={groupTitle}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
@@ -899,7 +1070,7 @@ var VariantDetail = React.createClass({
             if (inSilicoPred) {
                 return (
                     <SilicoPredTile
-                        key="silico-pred-tile"
+                        key={`tile-${groupTitle}`}
                         groupTitle='silico-pred-tile'
                         priors={variant.priors}
                         displayTitle={<span><i>In Silico</i> Prior Prediction (prior to considering other evidence)</span>}
@@ -930,7 +1101,7 @@ var VariantDetail = React.createClass({
 
                 return (
                     <FunctionalAssayTile
-                        key="source-reports-tile"
+                        key={`tile-${groupTitle}`}
                         groupTitle='functional-assay-tile'
                         results={results}
                         displayTitle="Functional Assay Results"
@@ -949,7 +1120,7 @@ var VariantDetail = React.createClass({
             if (groupTitle === "Computational Predictions") {
                 return (
                     <ComputationalPredictionTile
-                        key="source-reports-tile"
+                        key={`tile-${groupTitle}`}
                         groupTitle='functional-assay-tile'
                         displayTitle="Computational Predictions"
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
@@ -967,6 +1138,7 @@ var VariantDetail = React.createClass({
             if (groupTitle === "ACMG Variant Evidence Codes, Provisional Assignment") {
                 return (
                     <ProvisionalEvidenceTile
+			key={`tile-${groupTitle}`}
                         groupTitle={groupTitle}
                         onChangeGroupVisibility={this.onChangeGroupVisibility}
                         relayoutGrid={this.relayoutGrid}
@@ -975,12 +1147,11 @@ var VariantDetail = React.createClass({
                         variant={variant}
                         innerGroups={innerGroups}
                     />
-
                 );
             }
 
-            // now map the group's columns to a list of row objects
-            const rows = _.map(innerCols, (rowDescriptor) => {
+            // standard 2-column table tile
+            const rows = _.map(innerCols, (rowDescriptor, idx) => {
                 let {prop, title, noHelpLink} = rowDescriptor;
                 let rowItem;
 
@@ -988,25 +1159,20 @@ var VariantDetail = React.createClass({
                     title = "Abbreviated AA Change";
                 }
 
-                // get mupit structures if they're available
                 if (prop === "Mupit_Structure") {
                     rowItem = <MupitStructure variant={variant} prop={prop} onLoad={() => this.relayoutGrid()} />;
-
                     /*
                     Don't display mupit structures if they don't have an associated Amino Acid change.
                     Note that there shouldn't be mupit structures for these variants in the first place,
                     but there may be as getAminoAcidCode may change after the database is populated
                     */
-                    if (util.getAminoAcidCode(variant["HGVS_Protein"]) === false) {
+		    if (util.getAminoAcidCode(variant["HGVS_Protein"]) === false) {
                         rowsEmpty += 1;
                         rowItem = false;
                     }
-
-                    // mupit structures are not displayed if they're empty
                     if (rowItem === false) {
                         return false;
                     }
-
                     if (!variant[prop]) {
                         rowsEmpty += 1;
                         return false;
@@ -1028,14 +1194,14 @@ var VariantDetail = React.createClass({
                         isEmptyValue = true;
                     } else {
                         let websiteUrl = `https://beacon-network.org/#/search?chrom=${variant.Chr}&pos=${variant.Hg37_Start}&ref=${variant.Ref}&allele=${variant.Alt}&rs=GRCh37`;
-                        rowItem = <a target="_blank" href={websiteUrl}>{websiteUrl}</a>;
+                        rowItem = <a target="_blank" href={websiteUrl} rel="noreferrer">{websiteUrl}</a>;
                         isEmptyValue = false;
                     }
                 }
 
                 if (!isEmptyValue && prop === "CA_ID") {
                     let websiteUrl = `http://reg.clinicalgenome.org/redmine/projects/registry/genboree_registry/by_canonicalid?canonicalid=${variant.CA_ID}`;
-                    rowItem = <a target="_blank" href={websiteUrl}>{variant[prop]}</a>;
+                    rowItem = <a target="_blank" href={websiteUrl} rel="noreferrer">{variant[prop]}</a>;
                     isEmptyValue = false;
                 }
 
@@ -1044,9 +1210,12 @@ var VariantDetail = React.createClass({
                     rowItem = '-';
                 }
 
-                totalRowsEmpty += rowsEmpty;
+                // Make sure keys are unique within each tile table.
+                // `prop` alone can collide or be undefined in some cases.
+                const rowKey = `vd-${groupTitle}-${prop || idx}`;
+
                 return (
-                    <tr key={prop} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
+                    <tr key={rowKey} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
                         { rowDescriptor.tableKey !== false &&
                             (<KeyInline
                                 tableKey={title} noHelpLink={noHelpLink}
@@ -1059,13 +1228,7 @@ var VariantDetail = React.createClass({
                 );
             });
 
-            // check if all our rows are empty, in which case our group should be flagged as empty
             const allEmpty = rowsEmpty >= rows.length;
-
-            if (allEmpty) {
-                groupsEmpty += 1;
-            }
-
             const tileTable = (
                 <Table>
                     <tbody>
@@ -1074,30 +1237,31 @@ var VariantDetail = React.createClass({
                 </Table>
             );
 
+            const storageKey = "collapse-group_" + groupTitle;
+            const isOpen = this.isGroupOpenLS(storageKey);
+
             return (
                 <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
-                    <Panel
-                        defaultExpanded={localStorage.getItem("collapse-group_" + groupTitle) !== "true"}
-                    >
-                        <Panel.Heading>
-                            <Panel.Title componentClass="h3">
-                                <Panel.Toggle componentClass="a" className="title"
-                                    onClick={(event) => this.onChangeGroupVisibility(groupTitle, event)}
-                                >
-                                    {groupTitle}
-                                </Panel.Toggle>
-                                <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
-                            </Panel.Title>
-                        </Panel.Heading>
-                        <Panel.Collapse
-                            onEntered={this.relayoutGrid}
-                            onExited={this.relayoutGrid}
+                    <Card className="shadow">
+                        <Card.Header
+                            role="button"
+                            aria-expanded={isOpen}
+                            className="d-flex justify-content-between align-items-center"
+                            onClick={(event) => { event.preventDefault(); this.toggleCard(storageKey); }}
                         >
-                            <Panel.Body>
-                                {tileTable}
-                            </Panel.Body>
-                        </Panel.Collapse>
-                    </Panel>
+                            <span className="title fw-bold">{groupTitle}</span>
+                            <span className="d-flex align-items-center">
+                                <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
+                            </span>
+                        </Card.Header>
+                        <Collapse in={isOpen} onEntered={this.relayoutGrid} onExited={this.relayoutGrid}>
+                            <div>
+                                <Card.Body>
+                                    {tileTable}
+                                </Card.Body>
+                            </div>
+                        </Collapse>
+                    </Card>
                 </div>
             );
         });
@@ -1109,16 +1273,14 @@ var VariantDetail = React.createClass({
         if (this.state.reports !== undefined) {
             let sortedSubmissions = {'ClinVar': {}, 'LOVD': {}};
 
-            // get all versions of clinvar submissions organized by accession number
-            if (this.state.reports.hasOwnProperty('ClinVar')) {
+            if (Object.prototype.hasOwnProperty.call(this.state.reports, 'ClinVar')) {
                 let clinvarSubmissions = this.state.reports.ClinVar;
                 for (var i = 0; i < clinvarSubmissions.length; i++) {
                     if (clinvarSubmissions[i].Diff === null || clinvarSubmissions[i].Diff === undefined) {
-                        // don't show empty diffs for reports
                         continue;
                     }
                     let key = clinvarSubmissions[i].SCV_ClinVar;
-                    if (sortedSubmissions.ClinVar.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(sortedSubmissions.ClinVar, key)) {
                         sortedSubmissions.ClinVar[key].push(clinvarSubmissions[i]);
                     } else {
                         sortedSubmissions.ClinVar[key] = [clinvarSubmissions[i]];
@@ -1126,17 +1288,14 @@ var VariantDetail = React.createClass({
                 }
             }
 
-
-            // get all versions of lovd submissions organized by submission id
-            if (this.state.reports.hasOwnProperty('LOVD')) {
+            if (Object.prototype.hasOwnProperty.call(this.state.reports, 'LOVD')) {
                 let lovdSubmissions = this.state.reports.LOVD;
                 for (var j = 0; j < lovdSubmissions.length; j++) {
                     if (lovdSubmissions[j].Diff === null || lovdSubmissions[j].Diff === undefined) {
-                        // don't show empty diffs for reports
                         continue;
                     }
                     let key = lovdSubmissions[j].Submission_ID_LOVD;
-                    if (sortedSubmissions.LOVD.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(sortedSubmissions.LOVD, key)) {
                         sortedSubmissions.LOVD[key].push(lovdSubmissions[j]);
                     } else {
                         sortedSubmissions.LOVD[key] = [lovdSubmissions[j]];
@@ -1144,20 +1303,20 @@ var VariantDetail = React.createClass({
                 }
             }
 
-            var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions) {
+            var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions, key) {
                 let newestSubmission = submissions ? submissions[0] : '';
                 let oldestSubmission = submissions ? submissions[submissions.length - 1] : '';
                 const significance = util.sentenceCase(util.getFormattedFieldByProp("Clinical_Significance_ClinVar", newestSubmission)
                 .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
                 const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitter_ClinVar", newestSubmission));
                 return (
-                    <Row>
+                    <Row key={`clinvar-${key}`}>
                         <Col md={12} className="variant-history-col">
                             <h3>ClinVar Submission: {newestSubmission["SCV_ClinVar"]} ({submitter}; {significance})</h3>
                             <h4>Previous Versions of this Submission (since {util.reformatDate(oldestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
-                                    <tr className='active'>
+                                    <tr className='table-active'>
                                         <th>Release Date</th>
                                         <th>Clinical Significance</th>
                                         <th>Changes</th>
@@ -1167,26 +1326,26 @@ var VariantDetail = React.createClass({
                                     {this.generateDiffRows(cols, submissions, true)}
                                 </tbody>
                             </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
                         </Col>
                     </Row>
                 );
             }, this);
 
-            var lovdDiffRows = _.map(sortedSubmissions.LOVD, function(submissions) {
+            var lovdDiffRows = _.map(sortedSubmissions.LOVD, function(submissions, key) {
                 let newestSubmission = submissions ? submissions[0] : '';
                 let oldestSubmission = submissions ? submissions[submissions.length - 1] : '';
                 const significance = util.sentenceCase(util.getFormattedFieldByProp("Classification_LOVD", newestSubmission)
                 .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
                 const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitters_LOVD", newestSubmission));
                 return (
-                    <Row>
+                    <Row key={`lovd-${key}`}>
                         <Col md={12} className="variant-history-col">
                             <h3>LOVD Submission: {newestSubmission["DBID_LOVD"]} ({submitter}; {significance})</h3>
                             <h4>Previous Versions of this Submission (since {util.normalizeDateFieldDisplay(oldestSubmission.Data_Release.date)}):</h4>
                             <Table className='variant-history nopointer' responsive bordered>
                                 <thead>
-                                    <tr className='active'>
+                                    <tr className='table-active'>
                                         <th>Release Date</th>
                                         <th>Clinical Significance</th>
                                         <th>Changes</th>
@@ -1196,7 +1355,7 @@ var VariantDetail = React.createClass({
                                     {this.generateDiffRows(cols, submissions, true)}
                                 </tbody>
                             </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click "Show Detail View for this Variant" to see these changes.</p>
+                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
                         </Col>
                     </Row>
                 );
@@ -1208,24 +1367,26 @@ var VariantDetail = React.createClass({
             : `col-xs-12 col-md-6 col-lg-6 col-xl-4`;
         const splicingTileSizeClassse = 'col-xs-12 col-md-12 col-lg-12 col-xl-8';
 
+        // splicing panel open state
+        const splicingKey = "collapse-group_transcript-visualization";
+        const splicingOpen = this.isGroupOpenLS(splicingKey);
+
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
                     {
                         (this.props.mode !== "research_mode")
                             ? (
-                                /* display new header w/genomic coordinates in expert-reviewed mode */
-                                <span>
-                                    <Col md={2}>
+                                <>
+                                    <Col lg={2}>
                                         <h3>Variant Details</h3>
                                     </Col>
-                                    <Col md={8} className="vcenterblock">
+                                    <Col lg={8} className="vcenterblock">
                                         <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
                                             <h1 style={{marginTop: 30}}>{variant.Genomic_HGVS_38 ? variant.Genomic_HGVS_38 : variant.Genomic_Coordinate_hg38}</h1>
                                             <div><i>or</i></div>
                                             <h3 style={{marginTop: 10}}>
                                                 {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
-
                                                 {
                                                     (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
                                                         " " + variant['HGVS_Protein'].split(":")[1]
@@ -1233,22 +1394,22 @@ var VariantDetail = React.createClass({
                                             </h3>
                                         </div>
                                     </Col>
-                                </span>
+                                </>
                             )
                             : (
-                                /* display old header if we're in research mode */
-                                <Col xs={4} sm={4} smOffset={4} md={4} mdOffset={4} className="vcenterblock">
+                                <Col xs={4} sm={{ span: 4, offset: 4 }} md={{ span: 4, offset: 4 }} className="vcenterblock">
                                     <div className='text-center Variant-detail-title'>
                                         <h3>Variant Details</h3>
                                     </div>
                                 </Col>
                             )
                     }
-                    <Col md={2} className={(this.props.mode !== "research_mode") ? "vlowerblock" : "vcenterblock"}>
+                    <Col lg={2} xs={12} className={`d-flex align-items-end ${(this.props.mode !== "research_mode") ? "vlowerblock" : "vcenterblock"}`}>
                         <div className="Variant-detail-headerbar">
                             <Button
                                 onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                bsStyle={"default"}>
+                                variant="secondary"
+				className="text-nowrap">
                                 { this.state.hideEmptyItems ?
                                     <span>Show Empty Items</span> :
                                     <span>Hide Empty Items</span>
@@ -1267,14 +1428,10 @@ var VariantDetail = React.createClass({
 
                     {
                         (variant.id !== data[0].id && noRedirectMsg !== "true") && (
-                        // if we're not on the latest variant version, show a message with link
-                          <Col xs={12} classname="vcenterblock">
-                              <div className="variant-message outdated-variant-message panel panel-danger">
-                                  <div className="panel-body panel-danger">
-                                      <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
-
-                                      The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].CA_ID}`}>Click here for updated data on this variant.</a>
-                                  </div>
+                          <Col xs={12} className="vcenterblock">
+                              <div className="variant-message outdated-variant-message alert alert-danger">
+                                  <h3 style={{marginTop: 0}}>There is new data available on this variant.</h3>
+                                  The data below is from {util.reformatDate(variant.Data_Release.date)} (Release {variant.Data_Release.name}). <a href={`/variant/${data[0].CA_ID}`}>Click here for updated data on this variant.</a>
                               </div>
                           </Col>
                         )
@@ -1282,16 +1439,13 @@ var VariantDetail = React.createClass({
 
                     {
                         redirectedFromVariant && (
-                          <Col xs={12} classname="vcenterblock">
-                              <div className="variant-message redirected-variant-msg panel panel-primary">
-                                  <div className="panel-body panel-primary">
-                                      <h3 style={{marginTop: 0}}>You are viewing the most recent data on this variant.</h3>
-
-                                      The variant url you requested only has data up to {util.reformatDate(redirectedFromVariant.Data_Release.date)}. You have been automatically redirected to the newest data.<br />
-                                      <a href={`/variant/${redirectedFrom}?noRedirect=true`}>
-                                          Click here to view variant data from {util.reformatDate(redirectedFromVariant.Data_Release.date)} (Release {redirectedFromVariant.Data_Release.name}).
-                                      </a>
-                                  </div>
+                          <Col xs={12} className="vcenterblock">
+                              <div className="variant-message redirected-variant-msg alert alert-primary">
+                                  <h3 style={{marginTop: 0}}>You are viewing the most recent data on this variant.</h3>
+                                  The variant url you requested only has data up to {util.reformatDate(redirectedFromVariant.Data_Release.date)}. You have been automatically redirected to the newest data.<br />
+                                  <a href={`/variant/${redirectedFrom}?noRedirect=true`}>
+                                      Click here to view variant data from {util.reformatDate(redirectedFromVariant.Data_Release.date)} (Release {redirectedFromVariant.Data_Release.name}).
+                                  </a>
                               </div>
                           </Col>
                         )
@@ -1304,45 +1458,38 @@ var VariantDetail = React.createClass({
                             <div className={`isogrid-sizer ${tileSizeClasses}`} />
 
                             {
-                                // show the splicing vis if we're in research mode
                                 this.props.mode === "research_mode" && (
                                     <Col key="splicing_vis"
-                                        className={`variant-detail-group isogrid-item ${splicingTileSizeClassse}`}>
-                                        <Panel
-                                            collapsible={true}
-                                            defaultExpanded={localStorage.getItem("collapse-group_transcript-visualization") !== "true"}
-                                        >
-                                            <Panel.Heading>
-                                                <Panel.Title componentClass="h3">
-                                                    <Panel.Toggle componentClass="a" className="title"
-                                                        onClick={(event) => this.onChangeGroupVisibility("transcript-visualization", event)}
-                                                    >
-                                                        {`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}
-                                                    </Panel.Toggle>
-                                                    <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />
-                                                </Panel.Title>
-                                            </Panel.Heading>
-                                            <Panel.Collapse
-                                                onEntered={this.relayoutGrid}
-                                                onExited={this.relayoutGrid}
+                                        className={`variant-detail-group isogrid-item ${splicingTileSizeClassse} p-2`}>
+                                        <Card className="shadow">
+                                            <Card.Header
+                                                role="button"
+                                                aria-expanded={splicingOpen}
+                                                className="d-flex justify-content-between align-items-center"
+                                                onClick={(e) => { e.preventDefault(); this.toggleCard(splicingKey); }}
                                             >
-                                                <Panel.Body>
-                                                    <Splicing variant={variant}
-                                                        relayoutGrid={this.relayoutGrid}
-                                                    />
-                                                </Panel.Body>
-                                            </Panel.Collapse>
-                                        </Panel>
+                                                <span className="title fw-bold">{`${variant['Gene_Symbol']} ${variant['HGVS_cDNA']} Transcript Visualization`}</span>
+                                                <span className="d-flex align-items-center">
+                                                    <GroupHelpButton group={"transcript-visualization"} onClick={(event) => { this.showHelp(event, "transcript-visualization"); return true; }} />
+                                                </span>
+                                            </Card.Header>
+                                            <Collapse in={splicingOpen} onEntered={this.relayoutGrid} onExited={this.relayoutGrid}>
+                                                <div>
+                                                    <Card.Body>
+                                                        <Splicing variant={variant} relayoutGrid={this.relayoutGrid} />
+                                                    </Card.Body>
+                                                </div>
+                                            </Collapse>
+                                        </Card>
                                     </Col>
                                 )
                             }
 
                             {
-                                // we're mapping each group into a column so we can horizontally stack them
                                 groupTables.map((x, i) => {
                                     return (
                                         <Col key={"group_col-" + i}
-                                            className={`variant-detail-group isogrid-item ${tileSizeClasses}`}>
+                                            className={`variant-detail-group isogrid-item ${tileSizeClasses} p-2`}>
                                             {x}
                                         </Col>
                                     );
@@ -1379,7 +1526,7 @@ var VariantDetail = React.createClass({
                         <p>Variant nomenclature may change between releases, please review submission history below for further details.</p>
                         <Table className='variant-history nopointer' responsive bordered>
                             <thead>
-                                <tr className='active'>
+                                <tr className='table-active'>
                                     <th>Release Date</th>
                                     <th>Clinical Significance</th>
                                     <th>Changes</th>
@@ -1389,7 +1536,7 @@ var VariantDetail = React.createClass({
                                 {diffRows}
                             </tbody>
                         </Table>
-                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, as well as changes to corresponding submissions. Click "Show Detail View for this Variant" to see these changes.</p>
+                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, as well as changes to corresponding submissions. Click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
                     </Col>
                 </Row>
 
@@ -1397,85 +1544,129 @@ var VariantDetail = React.createClass({
                 {this.props.mode === "research_mode" ? lovdDiffRows : ''}
 
                 <Row>
-                    <Col md={12} mdOffset={0}>
+                    <Col md={{ span: 12, offset: 0 }}>
                         <DisclaimerModal buttonModal onToggleMode={this.props.toggleMode} text="Show Detail View for this Variant"/>
                     </Col>
                 </Row>
             </Grid>
         );
     }
-});
+}
 
-var Application = React.createClass({
-    mixins: [State],
-    onChildToggleMode: function() {
+class Application extends React.Component {
+    constructor(props) {
+	super(props);
+	this.state = {
+	    mode: localStorage.getItem('research-mode') === 'true' ? 'research_mode' : 'default',
+	};
+    }
+
+	onChildToggleMode = () => {
         this.toggleMode();
-    },
-    getInitialState: function () {
-        return {
-            mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default',
-        };
-    },
+    };
+
     componentDidUpdate() {
-        let localStorageMode = (localStorage.getItem("research-mode") === "true") ? "research_mode" : "default";
+        const localStorageMode = localStorage.getItem("research-mode") === "true" ? "research_mode" : "default";
         if (localStorageMode !== this.state.mode) {
             this.setMode();
         }
-    },
-    setMode: function () {
-        this.setState({mode: (localStorage.getItem("research-mode") === 'true') ? 'research_mode' : 'default'});
-    },
-    toggleMode: function () {
-        if (this.state.mode === 'research_mode') {
+    }
+
+    setMode = () => {
+        this.setState({mode: localStorage.getItem("research-mode") === 'true' ? 'research_mode' : 'default'});
+    };
+
+    toggleMode = () => {
+        console.log('toggleMode called, current mode:', this.state.mode);
+    	if (this.state.mode === 'research_mode') {
             localStorage.setItem('research-mode', false);
-            this.setState({mode: 'default'});
-        } else {
+            this.setState({mode: 'default'}, () => {
+               console.log('State updated to:', this.state.mode);
+            });
+    	} else {
             localStorage.setItem('research-mode', true);
-            this.setState({mode: 'research_mode'});
-        }
-    },
-    render: function () {
-        const path = this.getPath().slice(1);
+            this.setState({mode: 'research_mode'}, () => {
+            	console.log('State updated to:', this.state.mode);
+            });
+    	}
+    };
+
+    render() {
+        const path = (this.props.location && this.props.location.pathname ? this.props.location.pathname : '/').slice(1);
         return (
             <div>
                 <NavBarNew path={path} mode={this.state.mode} toggleMode={this.toggleMode}/>
                 <DonationBar />
-                <RouteHandler toggleMode={this.onChildToggleMode} mode={this.state.mode} />
-                <Database
+                {/* If children are rendered here via a parent Route, pass props along */}
+         	{this.props.children &&
+           		React.Children.map(this.props.children, child => {
+			    if (React.isValidElement(child)) {
+				return React.cloneElement(child, {
+             			   toggleMode: this.onChildToggleMode,
+             			   mode: this.state.mode,
+				});
+			    }
+			    return child;
+           	})}
+		{path.indexOf('variants') === 0 && (
+		<Database
+		    location={this.props.location}
+		    history={this.props.history}
                     mode={this.state.mode}
                     toggleMode={this.onChildToggleMode}
                     show={path.indexOf('variants') === 0} />
+		)}
+		{path.indexOf('variant/') === 0 && (() => {
+		const variantId = path.split('variant/')[1]?.split('?')[0]?.split('#')[0];
+    		console.log('Rendering VariantDetail from Application, mode:', this.state.mode, 'id:', variantId);
+    		return (
+        	<VariantDetail
+            	location={this.props.location}
+            	history={this.props.history}
+            	match={{ params: { id: variantId } }}
+            	params={{ id: variantId }}
+            	mode={this.state.mode}
+            	toggleMode={this.onChildToggleMode}
+       		/>
+	       	);
+	    	})()}
                 <Footer />
             </div>
         );
     }
-});
+}
 
-var routes = (
-    <Route handler={Application}>
-        <DefaultRoute handler={Home}/>
-        <Route path='about/:page' handler={About}/>
-        <Route path='factsheet' handler={FactSheet}/>
-        <Route path='whydonate' handler={WhyDonate}/>
-        <Route path='fundraisingdetails' handler={FundraisingDetails}/>
-        <Route path='help' handler={Help}/>
-        <Route path='community' handler={Community}/>
-        <Route path='signup' handler={Signup}/>
-        <Route path='signin' handler={Signin}/>
-        <Route path='reset_password' handler={ResetPassword}/>
-        <Route path='profile' handler={Profile}/>
-        <Route path='confirm/:activationCode' handler={ConfirmEmail}/>
-        <Route path='reset/:resetToken' handler={ChangePassword}/>
-        <Route path='variants' />
-        <Route path='variant/:id' handler={VariantDetail}/>
-        <Route path='variant_literature/:id' handler={LiteratureTable}/>
-        <Route path='releases' handler={Releases}/>
-        <Route path='release/:id' handler={Release}/>
-    </Route>
+// Wrap Application with withRouter so it gets location/history props
+const ApplicationWithRouter = withRouter(Application);
+
+const routes = (
+    <Switch>
+        <Route exact path='/' component={Home}/>
+	<Route path='/about/:page' component={About}/>
+	<Route path='/community' component={Community}/>
+	<Route path='/help' component={Help}/>
+	<Route path='/factsheet' component={FactSheet}/>
+	<Route path='/releases' component={Releases}/>
+        <Route path='/release/:id' component={Release}/>
+        <Route path='/whydonate' component={WhyDonate}/>
+        <Route path='/fundraisingdetails' component={FundraisingDetails}/>
+	{/*<Route path='/variant/:id' component={VariantDetail}/>*/}
+        <Route path='/variant_literature/:id' component={LiteratureTable}/>
+        <Route path='/signup' component={Signup}/>
+        <Route path='/signin' component={Signin}/>
+        <Route path='/reset_password' component={ResetPassword}/>
+	<Route path='/profile' component={Profile}/>
+        <Route path='/confirm/:activationCode' component={ConfirmEmail}/>
+	<Route path='/reset/:resetToken' component={ChangePassword}/>
+    </Switch>
 );
 
-var main = document.getElementById('main');
-
-run(routes, HistoryLocation, (Root) => {
-  ReactDOM.render(<Root/>, main);
-});
+const container = document.getElementById('main');
+const root = createRoot(container);
+root.render(
+    <BrowserRouter>
+	<ApplicationWithRouter>
+		{routes}
+	</ApplicationWithRouter>
+    </BrowserRouter>
+);

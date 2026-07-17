@@ -1,22 +1,18 @@
-/*global require: false, module: false */
-/*eslint-env browser */
 'use strict';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import slugify from './slugify';
-import {Navigation} from 'react-router';
+import { withRouter } from 'react-router-dom';
 import AutoSuggest from 'react-autosuggest';
-import * as _ from 'underscore';
-import * as $ from 'jquery';
+import _ from 'underscore';
+import $ from 'jquery';
 import config from './config';
 
 import './css/Autosuggest.css';
 
-
 function getSuggestions(value, callback, release) {
-    var matchStr = encodeURIComponent(value.toLowerCase());
-    var suggestionsEndpoint = `${config.backend_url}/data/suggestions/?term=${matchStr}`;
+    const matchStr = encodeURIComponent(value.toLowerCase());
+    let suggestionsEndpoint = `${config.backend_url}/data/suggestions/?term=${matchStr}`;
     // If a release is specified, include it in the request
     if (release) {
         suggestionsEndpoint += `&release=${release}`;
@@ -44,86 +40,91 @@ function renderSuggestion(suggestion, { query }) {
     );
 }
 
-var VariantSearch = React.createClass({
-    mixins: [Navigation],
-    onClick: function (ev) {
+class VariantSearchInner extends React.Component {
+    static defaultProps = { onSearch: () => {} };
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            value: props.value || '',
+            release: props.release,
+            placeholder: 'search for "c.1105G>A", "brca1" or "IVS7+1037T>C"',
+            suggestions: []
+        };
+
+        this.onClick = this.onClick.bind(this);
+        this.onClickSearchButton = this.onClickSearchButton.bind(this);
+        this.showHelp = this.showHelp.bind(this);
+        this.onChange = this.onChange.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
+        this.onFocus = this.onFocus.bind(this);
+        this.onBlur = this.onBlur.bind(this);
+        this.onFetchSuggestions = this.onFetchSuggestions.bind(this);
+        this.onClearSuggestions = this.onClearSuggestions.bind(this);
+    }
+
+    onClick(ev) {
         ev.stopPropagation();
-        var value = ReactDOM.findDOMNode(this.refs.input).value;
-        this.props.onSearch(value);
-    },
-
-    onClickSearchButton: function () {
         this.props.onSearch(this.state.value);
-    },
+    }
 
-    showHelp: function (title) {
-        this.transitionTo(`/help#${slugify(title)}`);
-    },
+    onClickSearchButton() {
+        this.props.onSearch(this.state.value);
+    }
 
-    onChange: function (event, { newValue: value }) {
-        var {onChange} = this.props;
-        // XXX We're getting an onChange event when props are updated, which
-        // leads to a loop of sorts. Check if value has actually changed before
-        // calling.
+    showHelp(title) {
+        this.props.history.push(`/help#${slugify(title)}`);
+    }
+
+    onChange(event, { newValue: value }) {
+        const { onChange } = this.props;
+        // Avoid loops when props update triggers onChange
         if (value !== this.state.value && onChange) {
             onChange(value);
         }
-        this.setState({value: value || '', release: this.props.release});
-    },
+        this.setState({ value: value || '', release: this.props.release });
+    }
 
-    componentWillUnmount: function () {
-        clearTimeout(this.cb);
-    },
-
-    onSubmit: function (ev) {
+    onSubmit(ev) {
         ev.preventDefault();
         this.props.onSearch(this.state.value);
-    },
+    }
 
-    getDefaultProps: function () {
-        return {
-            onSearch: () => {}
-        };
-    },
+    onFocus() {
+        this.setState({ placeholder: '' });
+    }
 
-    getInitialState: function () {
-        return {
-            value: this.props.value || '',
-            release: this.props.release,
-            placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\"",
-            suggestions: []
-        };
-    },
-
-    onFocus: function () {
-        this.setState({placeholder: ""});
-    },
-
-    onBlur: function() {
-        this.setState({placeholder: "search for \"c.1105G>A\", \"brca1\" or \"IVS7+1037T>C\""});
-    },
+    onBlur() {
+        this.setState({ placeholder: 'search for "c.1105G>A", "brca1" or "IVS7+1037T>C"' });
+    }
 
     onFetchSuggestions({ value }) {
-        getSuggestions(value, (error, results) => {
-            this.setState({ suggestions: results });
-        }, this.state.release);
-    },
+        getSuggestions(
+            value,
+            (_error, results) => {
+                this.setState({ suggestions: results });
+            },
+            this.state.release
+        );
+    }
 
     onClearSuggestions() {
         this.setState({ suggestions: [] });
-    },
+    }
 
-    componentWillReceiveProps: function (newProps) {
-        this.setState({value: newProps.value || ''});
-    },
+    componentDidUpdate(prevProps) {
+        if (prevProps.value !== this.props.value) {
+            this.setState({ value: this.props.value || '' });
+        }
+    }
 
-    render: function () {
-        const {id, onSearch} = this.props;
-        const {value, suggestions} = this.state;
+    render() {
+        const { id, onSearch } = this.props;
+        const { value, suggestions } = this.state;
 
         return (
             <div className='search-box'>
-                <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
+                <form onSubmit={this.onSubmit} style={{ display: 'inline' }}>
                     <div className='text-nowrap help-target'>
                         <AutoSuggest
                             id={id}
@@ -143,18 +144,21 @@ var VariantSearch = React.createClass({
                             suggestions={suggestions}
                             onSuggestionSelected={(event, { suggestionValue }) => onSearch(suggestionValue)}
                             renderSuggestion={renderSuggestion}
-                            ref='input'
                         />
 
                         <span
-                            className="glyphicon glyphicon-search search-box-icon"
+                            className="fa fa-search search-box-icon"
+			    role="button"
+			    tabIndex={0}
+			    aria-label="Search"
                             onClick={this.onClickSearchButton}
                         />
                     </div>
                 </form>
             </div>
         );
-    },
-});
+    }
+}
 
-module.exports = VariantSearch;
+export default withRouter(VariantSearchInner);
+

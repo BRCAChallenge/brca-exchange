@@ -1,5 +1,3 @@
-/*eslint-env browser */
-/*global require: false, module */
 'use strict';
 
 import React from "react";
@@ -18,7 +16,7 @@ const marksToReviewStatuses = {
     0: ['no_assertion_criteria_provided', 'no_assertion_provided'],
 };
 
-function computeReviewStatusScore(status) {
+export function computeReviewStatusScore(status) {
     // determine how many marks correspond to this review status
     for (let marksStatus of Object.entries(marksToReviewStatuses)) {
         if (marksStatus[1].includes(status)) {
@@ -50,16 +48,16 @@ function getMarksForReviewStatus(status) {
     );
 }
 
-const VariantSubmitter = React.createClass({
-    onHandleToggle: function(e) {
+export class VariantSubmitter extends React.PureComponent {
+    onHandleToggle = (e) => {
         e.preventDefault();
 
         // ask our parent to toggle us
         this.props.onReportToggled(this.props.idx);
-    },
+    };
 
     // source-specific headers
-    generateHeader: function(source, submitter, data) {
+    generateHeader(source, submitter, data) {
         let extraHeaderItems = null;
 
         if (source === 'ClinVar') {
@@ -118,9 +116,9 @@ const VariantSubmitter = React.createClass({
                 </div>
             </div>
         );
-    },
+    }
 
-    render: function() {
+    render() {
         const {submitter, cols, data} = this.props;
 
         // for each panel, construct key-value pairs as a row of the table
@@ -163,9 +161,4 @@ const VariantSubmitter = React.createClass({
             </div>
         );
     }
-});
-
-module.exports = {
-    VariantSubmitter,
-    computeReviewStatusScore
-};
+}

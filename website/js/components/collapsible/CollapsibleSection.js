@@ -1,19 +1,17 @@
-/*eslint-env browser */
-/*global require: false, module */
 'use strict';
 
 import React from "react";
 import {Collapse} from "react-bootstrap";
 
-const CollapsibleSection = React.createClass({
-    handleToggle: function(e, id) {
+class CollapsibleSection extends React.PureComponent {
+    handleToggle = (e, id) => {
         e.preventDefault();
 
         // ask our parent to toggle us
         this.props.onFieldToggled(id);
-    },
+    };
 
-    generateHeader: function(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction, varLoc) {
+    generateHeader(id, fieldName, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction, varLoc) {
         let loc;
         let caret;
         if (assay) {
@@ -80,9 +78,9 @@ const CollapsibleSection = React.createClass({
                 }
             </div>
         );
-    },
+    }
 
-    render: function() {
+    render() {
         const {id, fieldName, hideEmptyItems, extraHeaderItems, twoColumnExtraHeader, assay, computationalPrediction, varLoc} = this.props;
 
         let allEmpty = false;
@@ -105,11 +103,10 @@ const CollapsibleSection = React.createClass({
             </div>
         );
     }
-});
+}
 
 CollapsibleSection.defaultProps = {
     defaultVisible: false
 };
 
-module.exports = CollapsibleSection;
 export default CollapsibleSection;
