@@ -398,6 +398,18 @@ export const helpContentResearch = [
     },
 ];
 
+export const resources = [
+    {
+        section: "General Resources",
+        tiles: [
+            {
+                name: "Where can I find additional information on BRCA Genes, Genetic Testing, and Cancer Risk?",
+                contents: outsideResourcesMd
+            },
+        ]
+    }
+]
+
 /**
  * Recursively descends into the object 'head', looking for fields named 'content'. Returns an array of the values of these fields.
  * @param head the object in which to look for content nodes
@@ -475,4 +487,5 @@ export default {
     parseTooltips,
     helpContentDefault,
     helpContentResearch,
+    resources,
 };
