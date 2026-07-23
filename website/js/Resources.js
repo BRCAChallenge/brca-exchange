@@ -2,8 +2,7 @@
 
 import React from 'react';
 import RawHTML from './RawHTML';
-import { Container as Grid, Row, Col, Button} from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Container as Grid, Row, Col} from 'react-bootstrap';
 import { resources } from './content';
 
 class Resources extends React.Component {
@@ -32,4 +31,4 @@ class Resources extends React.Component {
     }
 }
 
-export default Resources
+export default Resources;

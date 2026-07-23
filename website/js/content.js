@@ -408,7 +408,7 @@ export const resources = [
             },
         ]
     }
-]
+];
 
 /**
  * Recursively descends into the object 'head', looking for fields named 'content'. Returns an array of the values of these fields.
