@@ -8,7 +8,7 @@ import { resources } from './content';
 class Resources extends React.Component {
     render() {
 	return (
-            <Grid id="main-grid" className="help-page">
+            <Grid id="main-grid" className="help-page" style={{paddingTop: '40px'}}>
                 {resources.map((section, sectionIdx) => (
                     <div key={sectionIdx}>
                         <Row>
@@ -19,7 +19,7 @@ class Resources extends React.Component {
                         {section.tiles.map((tile, tileIdx) => (
                             <Row key={tileIdx}>
                                 <Col sm={{ span: 10, offset: 1 }}>
-                                    <h4>{tile.name}</h4>
+                                    <p>{tile.name}</p>
                                     <RawHTML html={tile.contents} />
                                 </Col>
                             </Row>

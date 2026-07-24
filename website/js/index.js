@@ -190,6 +190,11 @@ class HomeRaw extends React.Component {
                            onSearch={this.onSearch}/>
                     </Col>
                 </Row>
+		<Row>
+		   <h3>
+			Find educational and support information on our <Link to={'/resources'}>Resources</Link> page.
+		   </h3>
+		</Row>
                 <Row>
                     <div className="jumbotron homepage-jumbotron">
                         <RawHTML html={content.pages.home} />

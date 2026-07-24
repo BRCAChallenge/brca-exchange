@@ -26,6 +26,7 @@
 #### Data Sharing Information & Initiatives:
 * [ClinGen: Learn How You Can Share Your Data](https://www.clinicalgenome.org/share-your-data/)
 * [Susan G. Komen: ShareForCures](https://www.komen.org/shareforcures/)
+* [Breast Cancer Family Registry](https://www.bcfamilyregistry.org/)
 
 #### International Resources
 * [Cancer Research UK](https://www.cancerresearchuk.org/)

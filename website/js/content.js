@@ -400,10 +400,10 @@ export const helpContentResearch = [
 
 export const resources = [
     {
-        section: "General Resources",
+        section: "General Resources on BRCA Genes, Genetic Testing, and Cancer Risk",
         tiles: [
             {
-                name: "Where can I find additional information on BRCA Genes, Genetic Testing, and Cancer Risk?",
+                name: "This page has links to informational resources from governmental agencies and cancer organizations.  Below is information on finding doctors and genetic counselors, how to interpret your genetic test results, as well as some international organizations.  In the Data Sharing Information & Initiatives section are some links to groups where you share your data and treatment journey.",
                 contents: outsideResourcesMd
             },
         ]
