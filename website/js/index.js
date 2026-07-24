@@ -63,6 +63,7 @@ import {Profile} from './Profile';
 import VariantSearch from './VariantSearch';
 import { Releases, Release } from './Releases.js';
 import Help from './Help.js';
+import Resources from './Resources.js';
 
 import KeyInline from './components/KeyInline';
 import GroupHelpButton from './components/GroupHelpButton';
@@ -107,6 +108,7 @@ class Footer extends React.PureComponent {
                         <li><a href="/">Home</a></li>
                         <li><a href="/about/history">About</a></li>
                         <li><a href="/variants">Variants</a></li>
+			<li><a href="/resources">Resources</a></li>
                         <li><a href="/about/api">API</a></li>
                         <li><a href="https://brcaexchange.org/blog">Blog</a></li>
                     </ul>
@@ -188,6 +190,11 @@ class HomeRaw extends React.Component {
                            onSearch={this.onSearch}/>
                     </Col>
                 </Row>
+		<Row>
+		   <h3>
+			Find educational and support information on our <Link to={'/resources'}>Resources</Link> page.
+		   </h3>
+		</Row>
                 <Row>
                     <div className="jumbotron homepage-jumbotron">
                         <RawHTML html={content.pages.home} />
@@ -1658,6 +1665,7 @@ const routes = (
 	<Route path='/profile' component={Profile}/>
         <Route path='/confirm/:activationCode' component={ConfirmEmail}/>
 	<Route path='/reset/:resetToken' component={ChangePassword}/>
+	<Route path='/resources' component={Resources}/>
     </Switch>
 );
 

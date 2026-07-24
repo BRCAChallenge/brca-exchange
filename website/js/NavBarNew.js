@@ -115,6 +115,7 @@ class NavBarNew extends React.Component {
             			<Nav className="ms-auto">
               				<Nav.Link as={Link} to="/">Home</Nav.Link>
               				<Nav.Link as={Link} to="/variants">Variants</Nav.Link>
+					<Nav.Link as={Link} to="/resources">Resources</Nav.Link>
               				<Nav.Link as={Link} to="/community">Community</Nav.Link>
               				<Nav.Link as={Link} to="/help">Help</Nav.Link>
               				<NavDropdown id="about-dropdown" title="More" align="end" className={this.activePath(path || '', 'about')}>
