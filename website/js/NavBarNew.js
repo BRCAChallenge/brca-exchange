@@ -119,7 +119,7 @@ class NavBarNew extends React.Component {
               				<Nav.Link as={Link} to="/community">Community</Nav.Link>
               				<Nav.Link as={Link} to="/help">Help</Nav.Link>
               				<NavDropdown id="about-dropdown" title="About" align="end" className={this.activePath(path || '', 'about')}>
-                			<NavDropdown.Item as={Link} to="/about/thisSite" onClick={this.close}>BRCA Exchange Website</NavDropdown.Item>
+                			<NavDropdown.Item as={Link} to="/about/thisSite" onClick={this.close}>About This Site</NavDropdown.Item>
                 			<NavDropdown.Item as={Link} to="/about/history" onClick={this.close}>History of the BRCA Exchange</NavDropdown.Item>
                 			<NavDropdown.Item as={Link} to="/factsheet" onClick={this.close}>BRCA Variants: Facts &amp; Stats</NavDropdown.Item>
                 			<NavDropdown.Item as={Link} to="/releases" onClick={this.close}>BRCA Variants: Data Releases</NavDropdown.Item>
