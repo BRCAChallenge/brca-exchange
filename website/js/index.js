@@ -106,7 +106,7 @@ class Footer extends React.PureComponent {
                     <div className="col-sm-5 left-footer">
                     <ul>
                         <li><a href="/">Home</a></li>
-                        <li><a href="/about/history">About</a></li>
+                        <li><a href="/about/thisSite">About</a></li>
                         <li><a href="/variants">Variants</a></li>
 			<li><a href="/resources">Resources</a></li>
                         <li><a href="/about/api">API</a></li>
