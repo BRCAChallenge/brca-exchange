@@ -118,10 +118,11 @@ class NavBarNew extends React.Component {
 					<Nav.Link as={Link} to="/resources">Resources</Nav.Link>
               				<Nav.Link as={Link} to="/community">Community</Nav.Link>
               				<Nav.Link as={Link} to="/help">Help</Nav.Link>
-              				<NavDropdown id="about-dropdown" title="More" align="end" className={this.activePath(path || '', 'about')}>
-                			<NavDropdown.Item as={Link} to="/about/thisSite" onClick={this.close}>This Site</NavDropdown.Item>
-                			<NavDropdown.Item as={Link} to="/factsheet" onClick={this.close}>Facts &amp; Stats</NavDropdown.Item>
-                			<NavDropdown.Item as={Link} to="/releases" onClick={this.close}>Data Releases</NavDropdown.Item>
+              				<NavDropdown id="about-dropdown" title="About" align="end" className={this.activePath(path || '', 'about')}>
+                			<NavDropdown.Item as={Link} to="/about/thisSite" onClick={this.close}>BRCA Exchange Website</NavDropdown.Item>
+                			<NavDropdown.Item as={Link} to="/about/history" onClick={this.close}>History of the BRCA Exchange</NavDropdown.Item>
+                			<NavDropdown.Item as={Link} to="/factsheet" onClick={this.close}>BRCA Variants: Facts &amp; Stats</NavDropdown.Item>
+                			<NavDropdown.Item as={Link} to="/releases" onClick={this.close}>BRCA Variants: Data Releases</NavDropdown.Item>
                 			<NavDropdown.Item as={Link} to="/about/api" onClick={this.close}>Webservices for API Data Access</NavDropdown.Item>
                 			<NavDropdown.Item as={Link} to="/about/dataSubmissionPolicy" onClick={this.close}>Data Submission Policy</NavDropdown.Item>
                 			<NavDropdown.Item as={Link} to="/whydonate" onClick={this.close}>Donate</NavDropdown.Item>
