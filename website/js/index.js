@@ -192,7 +192,7 @@ class HomeRaw extends React.Component {
                 </Row>
 		<Row>
 		   <h3>
-			If you have questions about BRCA Genes, Genetic Testing, or Cancer Risk visit  our <Link to={'/resources'}>Resources</Link> page.
+			If you have questions about BRCA Genes, Genetic Testing, or Cancer Risk, visit  our <Link to={'/resources'}>Resources</Link> page.
 		   </h3>
 		</Row>
                 <Row>
