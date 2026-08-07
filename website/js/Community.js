@@ -125,9 +125,9 @@ class Community extends React.Component {
         var rows = _.map(data, (row, i) => {
 
             var avatar;
-            if (row.has_image) {
-                var avatarLink = config.backend_url + '/site_media/media/' + row.id;
-                avatar = <img className="avatar" src={avatarLink} type="image/image"/>;
+	    // Keep if/else logic in case we want to have different avatar logos 
+            if (true) {
+                avatar = <img className="avatar" src={require('./img/brca_logo.png')} />;
             } else {
                 avatar = <img src={placeholder}/>;
             }
@@ -332,9 +332,9 @@ class CommunityMap extends React.Component {
                     _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude, has_image})  => {
                         if (latitude !== "" || longitude !== "") {
                             var avatar;
-                            if (has_image) {
-                                let avatar_link = config.backend_url + '/site_media/media/' + id;
-                                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>;
+			    // Keep if/else logic
+                            if (true) {
+                                avatar = <img className="avatar" src={require('./img/brca_logo.png')} />;
                             } else {
                                 avatar = <img className="avatar" src={placeholder}/>;
                             }
