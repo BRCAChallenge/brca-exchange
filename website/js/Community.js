@@ -144,7 +144,6 @@ class Community extends React.Component {
                     <span id="role"><h4>{Role.other(row.role) ? row["role_other"] : Role.get(row.role)[2]}</h4></span>
                     <span id="institution">{row.institution}</span>
                     <span id="location">{locationString}</span>
-                    <span id="contact">{row.email} {row["phone_number"]}</span>
                 </td>
             </tr>);
         });
@@ -166,7 +165,8 @@ class Community extends React.Component {
                     <Col className="text-center" md={{ span: 10, offset: 1 }} sm={12}>
                         <Link to="/signup"><Button disabled={config.environment === 'beta'}>Join the community</Button></Link>&nbsp;
                         <p className="community-disclaimer">We will add you to the BRCA Exchange News mailing list. You can unsubscribe at any time.</p>
-                        <p>To update or remove your profile, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=Update Personal Information">contact us</a>.</p>
+			<p>To update your profile, please <Link to={'/signin'}>Sign In</Link>.</p>
+			<p>To remove your profile, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=Update Personal Information">contact us</a>.</p>
                     </Col>
                 </Row>
                 <Row>
@@ -175,16 +175,14 @@ class Community extends React.Component {
                     </Col>
 
                 </Row>
-                <Row>
-                    <Col className="btm-buffer" md={{ span: 10, offset: 1 }} sm={12}>
-                        <Row>
-			    <Col sm={6} lg={5} style={{paddingRight: "0"}}>
-                        	<h4>Search for a community member:</h4>
-                            </Col>
-                            <Col sm={6} lg={7}>
+                <Row className="align-items-center mb-3">
+                    <Col md={{ span: 10, offset: 1 }} sm={12}>
+			<div className="d-flex align-items-center gap-3">
+                            <h4 className="mb-0 text-nowrap">Search for a community member:</h4>
+                            <div className="flex-grow-1">
                         	<CommunitySearch ref={this.communitySearchRef} onChange={s => this.searchq.next(s)}/>
-                            </Col>
-			</Row>
+                            </div>
+			</div>
                     </Col>
                 </Row>
                 <Row>
@@ -387,7 +385,9 @@ class CommunityMap extends React.Component {
     }
 
     componentDidUpdate() {
-        this.updateMap();
+    	if (typeof this.updateMap === 'function') {
+            this.updateMap();
+    	}
     }
 
     componentWillUnmount() {
@@ -436,9 +436,8 @@ class CommunitySearch extends React.Component {
     render() {
         return (<div className='search-box'>
             <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
-                <input type='submit' className='input-sm'style={{display: 'none'}} />
-                <div className='text-nowrap help-target'>
-                    <div>
+                <input type='submit' className='input-sm' style={{display: 'none'}} />
+                <div className='text-nowrap'>
                         <input className='community-search-input'
                                onBlur={this.onBlur}
                                onFocus={this.onFocus}
@@ -446,8 +445,7 @@ class CommunitySearch extends React.Component {
                                type='text'
                                onChange={this.onChange}
                                value={this.state.search} />
-                        <span className="fa fa-search search-box-icon"/>
-                    </div>
+                        <span className="fa fa-search search-box-icon" />
                 </div>
             </form>
         </div>);
