@@ -24,6 +24,16 @@ class Resources extends React.Component {
                                 </Col>
                             </Row>
                         ))}
+			<Row>
+    			    <Col sm={{ span: 10, offset: 1 }}>
+        			<hr />
+    			    </Col>
+			</Row>
+			<Row>
+			   <Col sm={{ span: 10, offset: 1 }}>
+				<p>Don’t see your resource here, please <a href="mailto:brcaexchange@gmail.com?subject=BRCA Exchange website">contact us</a>.</p>
+			   </Col>
+			</Row>
                     </div>
                 ))}
             </Grid>

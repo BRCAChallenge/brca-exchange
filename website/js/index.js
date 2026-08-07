@@ -106,7 +106,7 @@ class Footer extends React.PureComponent {
                     <div className="col-sm-5 left-footer">
                     <ul>
                         <li><a href="/">Home</a></li>
-                        <li><a href="/about/history">About</a></li>
+                        <li><a href="/about/thisSite">About</a></li>
                         <li><a href="/variants">Variants</a></li>
 			<li><a href="/resources">Resources</a></li>
                         <li><a href="/about/api">API</a></li>
@@ -192,7 +192,7 @@ class HomeRaw extends React.Component {
                 </Row>
 		<Row>
 		   <h3>
-			Find educational and support information on our <Link to={'/resources'}>Resources</Link> page.
+			If you have questions about BRCA genes, genetic testing, or cancer risk, visit  our <Link to={'/resources'}>Resources</Link> page.
 		   </h3>
 		</Row>
                 <Row>
