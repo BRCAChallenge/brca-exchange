@@ -31,7 +31,7 @@ class Resources extends React.Component {
 			</Row>
 			<Row>
 			   <Col sm={{ span: 10, offset: 1 }}>
-				<p>Don’t see your resource here, please <a href="mailto:brcaexchange@gmail.com?subject=BRCA Exchange website">contact us</a>.</p>
+				<p>Don’t see your resource here? <a href="mailto:brcaexchange@gmail.com?subject=BRCA Exchange website">Contact us</a>!</p>
 			   </Col>
 			</Row>
                     </div>
