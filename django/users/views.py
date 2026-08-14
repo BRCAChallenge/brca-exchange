@@ -316,20 +316,13 @@ def users(request):
                         )
     query = query.filter(search_query)
 
-    whitelist = ['id','email','firstName','lastName','title','role','role_other','institution','city','state','country','phone_number','hide_number','hide_email','is_active','is_admin','has_image','is_approved']
+    whitelist = ['id','firstName','lastName','title','role','role_other','institution','city','state','country','is_active','is_admin','is_approved']
 
     count = query.count()
 
     start = page_num * page_size
     end = start + page_size
     data = list(query[start:end].values(*whitelist))
-
-
-    for user in data:
-        if user['hide_email']:
-            user['email'] = ""
-        if user['hide_number']:
-            user['phone_number'] = ""
 
     response = JsonResponse({'data': data, 'count': count})
     response['Access-Control-Allow-Origin'] = '*'
@@ -350,7 +343,7 @@ def user_locations(request):
                         )
     query = query.filter(search_query)
 
-    fields = ['id', 'firstName', 'lastName', 'title', 'role', 'role_other', 'institution', 'city', 'state', 'country', 'latitude', 'longitude', 'has_image']
+    fields = ['id', 'firstName', 'lastName', 'title', 'role', 'role_other', 'institution', 'city', 'state', 'country', 'latitude', 'longitude']
     response = JsonResponse({'data': list(query.values(*fields))})
     response['Access-Control-Allow-Origin'] = '*'
     return response
