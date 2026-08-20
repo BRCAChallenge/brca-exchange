@@ -108,7 +108,7 @@ class Community extends React.Component {
         if (query.get("registrationSuccess") === "true") {
             message = (
 				<div className="alert alert-success">
-					<p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration. After you complete your registration our administrator will confirm your profile and it will appear on the Community Pages.</p>
+					<p>Thanks for signing up.  Our administrator will confirm your profile and it will appear on the Community Pages.</p>
 				</div>);
         } else if (query.get("updateSuccess") === "true") {
             message = (
