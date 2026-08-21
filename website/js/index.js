@@ -57,7 +57,7 @@ import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } fro
 import {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} from './VariantTable';
 import Signup from './Signup';
 import {Signin, ResetPassword} from './Signin';
-import {ConfirmEmail} from './ConfirmEmail';
+// import {ConfirmEmail} from './ConfirmEmail';
 import {ChangePassword} from './ChangePassword';
 import {Profile} from './Profile';
 import VariantSearch from './VariantSearch';

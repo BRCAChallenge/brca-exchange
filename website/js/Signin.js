@@ -7,7 +7,7 @@ import auth from './auth';
 import {$c} from './Signup';
 import config from './config';
 import $ from 'jquery';
-import _ from 'underscore';
+// import _ from 'underscore';
 
 class ResetPassword extends React.Component {
     state = { submitted: null, success: null, error: null };

@@ -10,7 +10,7 @@ import { Link, withRouter } from 'react-router-dom';
 // TODO: Uncomment when react-data-components-brcaex is updated/replaced
 // import { Pagination } from 'react-data-components-brcaex';
 import _ from 'underscore';
-import placeholder from './img/placeholder.png';
+// import placeholder from './img/placeholder.png';
 import auth from './auth';
 
 // RxJS imports
@@ -125,12 +125,12 @@ class Community extends React.Component {
         var rows = _.map(data, (row, i) => {
 
             var avatar;
-	    // Keep if/else logic in case we want to have different avatar logos 
-            if (true) {
-                avatar = <img className="avatar" src={require('./img/brca_logo.png')} />;
-            } else {
-                avatar = <img src={placeholder}/>;
-            }
+	    // Keep if/else logic in case we want to have different avatar logos
+            // if (true) {
+            avatar = <img className="avatar" src={require('./img/brca_logo.png')} />;
+            // } else {
+            //     avatar = <img src={placeholder}/>;
+            // }
 
             var {city, state, country} = row;
             var locationString = _.values(_.pick({city, state, country}, v => v)).join(', ');
@@ -329,15 +329,15 @@ class CommunityMap extends React.Component {
                     });
                     markers = self.markers = newMarkers;
                     /*eslint-disable camelcase*/
-                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude, has_image})  => {
+                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude})  => {
                         if (latitude !== "" || longitude !== "") {
                             var avatar;
 			    // Keep if/else logic
-                            if (true) {
-                                avatar = <img className="avatar" src={require('./img/brca_logo.png')} />;
-                            } else {
-                                avatar = <img className="avatar" src={placeholder}/>;
-                            }
+                            // if (true) {
+                            avatar = <img className="avatar" src={require('./img/brca_logo.png')} />;
+                            // } else {
+                            //     avatar = <img className="avatar" src={placeholder}/>;
+                            // }
                             var userInfo = (<div className="map-info-window">
                                 {avatar}
                                 <div>
