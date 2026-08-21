@@ -39,6 +39,10 @@ This tile organizes ENIGMA classifications and contextual information for the va
     The most definitive, expertly reviewed interpretation for the variant according to [ENIGMA criteria](https://enigmaconsortium.org/wp-content/uploads/2017/12/ENIGMA_Rules_2017-06-29.pdf).
 * #### IARC Class ((Clinical_significance_ENIGMA))
     Clinical Classification provided by the [International Agency for Research on Cancer](http://monographs.iarc.fr/ENG/Classification/).
+* #### Date Last Evaluated ((Date_last_evaluated_ENIGMA))
+    Most recent date this variant was evaluated by the ENIGMA consortium.
+* #### Evaluation Method ((Assertion_method_ENIGMA))
+    Information on BRCA1/2 variant curation methods according to [ENIGMA Classification Criteria](https://enigmaconsortium.org/enigma-classification-criteria/)
 
 * The rest of the fields in this this tile contain various citations, evidence, and other sources related to ENIGMA’s assessments
 

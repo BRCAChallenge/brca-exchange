@@ -671,7 +671,7 @@ class VariantDetail extends React.Component {
         super(props);
 
         this.state = {
-            hideEmptyItems: (localStorage.getItem("hide-empties") === 'true'),
+            hideEmptyItems: (this.props.mode === "research_mode") && (localStorage.getItem("hide-empties") === 'true'),
             tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true'),
             // track open/closed state for cards (keyed by localStorage key)
             openGroups: {}
@@ -1029,7 +1029,7 @@ class VariantDetail extends React.Component {
             groups = expertModeGroups;
         }
 
-        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding, alleleFrequencies, inSilicoPred, innerGroups }) => {
+        const groupTables = _.map(groups, ({ groupTitle, subtitle, innerCols, reportSource, reportBinding, alleleFrequencies, inSilicoPred, innerGroups }) => {
             let rowsEmpty = 0;
 
             if (reportSource) {
@@ -1163,7 +1163,7 @@ class VariantDetail extends React.Component {
                 let rowItem;
 
                 if (prop === "Protein_Change") {
-                    title = "Abbreviated AA Change";
+                    title = "Abbreviated Protein Change";
                 }
 
                 if (prop === "Mupit_Structure") {
@@ -1256,7 +1256,10 @@ class VariantDetail extends React.Component {
                             className="d-flex justify-content-between align-items-center"
                             onClick={(event) => { event.preventDefault(); this.toggleCard(storageKey); }}
                         >
-                            <span className="title fw-bold">{groupTitle}</span>
+			    <div>
+                            	<span className="title fw-bold">{groupTitle}</span>
+				{subtitle && <div className="text-muted" style={{fontSize: '0.85em', fontWeight: 'normal'}}>{subtitle}</div>}
+			    </div>
                             <span className="d-flex align-items-center">
                                 <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
                             </span>
@@ -1411,19 +1414,21 @@ class VariantDetail extends React.Component {
                                 </Col>
                             )
                     }
-                    <Col lg={2} xs={12} className={`d-flex align-items-end ${(this.props.mode !== "research_mode") ? "vlowerblock" : "vcenterblock"}`}>
-                        <div className="Variant-detail-headerbar">
-                            <Button
-                                onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                variant="secondary"
-				className="text-nowrap">
-                                { this.state.hideEmptyItems ?
-                                    <span>Show Empty Items</span> :
-                                    <span>Hide Empty Items</span>
-                                }
-                            </Button>
-                        </div>
-                    </Col>
+                    {this.props.mode === "research_mode" && (
+                        <Col lg={2} xs={12} className="vcenterblock">
+                            <div className="Variant-detail-headerbar">
+                                <Button
+                                    onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
+                                    variant="secondary"
+                                    className="text-nowrap">
+                                    { this.state.hideEmptyItems ?
+                                        <span>Show Empty Items</span> :
+                                        <span>Hide Empty Items</span>
+                                    }
+                                </Button>
+                            </div>
+                        </Col>
+                    )}
 
                     {variant['Change_Type'] === 'deleted' &&
                         (<Col xs={12} className="vcenterblock">
@@ -1458,6 +1463,26 @@ class VariantDetail extends React.Component {
                         )
                     }
                 </Row>
+
+		{this.props.mode !== "research_mode" && (
+                    <Row>
+                        <Col xs={12} className="vcenterblock mt-3">
+                            <h2 className="text-center">
+                                <strong>Clinical Significance: </strong>{util.getFormattedFieldByProp('Pathogenicity_expert', variant)}
+                            </h2>
+                        </Col>
+                    </Row>
+                )}
+
+                {this.props.mode !== "research_mode" && (
+                    <Row>
+                        <Col xs={12} className="vcenterblock mt-3">
+                            <p className="text-center variant-resources-note">
+                                For educational resources, and for links to support communities and other guidance options, please visit our <Link to="/resources">Resources</Link> page.
+                            </p>
+                        </Col>
+                    </Row>
+                )}
 
                 <Row>
                     <div className="container-fluid variant-details-body">
@@ -1506,17 +1531,19 @@ class VariantDetail extends React.Component {
                     </div>
                 </Row>
 
-                <Row>
-                    <Col md={12} className="variant-history-col">
-                        <h3>
-                            {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
-                            {
-                                (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
-                                " " + variant['HGVS_Protein'].split(":")[1]
-                            }
-                        </h3>
-                    </Col>
-                </Row>
+                {this.props.mode === "research_mode" && (
+                    <Row>
+                        <Col md={12} className="variant-history-col">
+                            <h3>
+                                {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+                                {
+                                    (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                    " " + variant['HGVS_Protein'].split(":")[1]
+                                }
+                            </h3>
+                        </Col>
+                    </Row>
+                )}
 
                 { this.props.mode === "research_mode" && (
                     <Row>
@@ -1526,7 +1553,7 @@ class VariantDetail extends React.Component {
                     </Row>
                     )
                 }
-
+		{this.props.mode === "research_mode" && (
                 <Row>
                     <Col md={12} className="variant-history-col">
                         <h4>Variant History:</h4>
@@ -1546,6 +1573,7 @@ class VariantDetail extends React.Component {
                         <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, as well as changes to corresponding submissions. Click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
                     </Col>
                 </Row>
+		)}
 
                 {this.props.mode === "research_mode" ? clinvarDiffRows : ''}
                 {this.props.mode === "research_mode" ? lovdDiffRows : ''}
