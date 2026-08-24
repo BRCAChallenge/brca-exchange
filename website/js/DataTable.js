@@ -544,6 +544,12 @@ class DataTable extends React.Component {
                                 sortBy={this.state.sortBy}
                                 onSort={this.onSort} />
                         </div>
+                        {!this.state.loading && this.state.count === 0 && search && (
+                            <div className="text-center" style={{padding: '20px', color: '#666'}}>
+                                <p><strong>{search}</strong> not found, if you have another name for your variant of interest, try searching that.</p>
+                                <p>Variants may not be found if they have not been evaluated by ClinGen.</p>
+                            </div>
+                        )}
                     </Col>
                 </Row>
                 <Row>
