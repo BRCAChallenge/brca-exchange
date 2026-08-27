@@ -148,11 +148,16 @@ export default class SourceReportsTile extends React.Component {
                     <Card.Header as="div" className="d-flex align-items-center fw-bold">
                         <span
                             role="button"
-                            className="title text-decoration-none flex-grow-1"
+                            className="title text-decoration-none flex-grow-1 d-flex flex-column"
                             onClick={this.toggleGroupOpen}
                             aria-expanded={this.state.groupOpen}
                         >
-                            {this.props.groupTitle}
+                            <span>{this.props.groupTitle}</span>
+                            {this.props.subtitle && (
+                                <span className="text-muted" style={{fontSize: '0.85em', fontWeight: 'normal'}}>
+                                    {this.props.subtitle}
+				</span>
+			    )}
                         </span>
 
                         <span

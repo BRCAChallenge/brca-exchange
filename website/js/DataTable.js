@@ -104,7 +104,7 @@ class FastTable extends React.Component {
         }
     };
     render() {
-        let {dataArray, columns, className, buildRowOptions, onRowClick, buildHeader, sortBy} = this.props;
+        let {dataArray, columns, className, buildRowOptions, onRowClick, buildHeader, sortBy, search} = this.props;
 
         if (dataArray.length > 0) {
             dataArray = _.map(dataArray, function(variantData) {
@@ -151,7 +151,13 @@ class FastTable extends React.Component {
                     {dataArray.length === 0 ? (
                         <tr>
                             <td colSpan={columns.length} style={{textAlign: 'center', padding: '20px'}}>
-                                No variants found
+                                {search
+                                    ? <>
+                                        <p><strong>{search}</strong> not found in our database. If there is another name for your variant, please search for that.</p>
+                                        <p>Variants may not be found if they are not in any public databases. Many, but not all variants revealed in genetic testing are found in public databases.</p>
+                                      </>
+                                    : "No variants found"
+                                }	
                             </td>
                         </tr>
                     ) : (
@@ -542,14 +548,9 @@ class DataTable extends React.Component {
                                 onRowClick={this.props.onRowClick}
                                 buildHeader={this.props.buildHeader}
                                 sortBy={this.state.sortBy}
+				search={search}
                                 onSort={this.onSort} />
                         </div>
-                        {!this.state.loading && this.state.count === 0 && search && (
-                            <div className="text-center" style={{padding: '20px', color: '#666'}}>
-                                <p><strong>{search}</strong> not found, if you have another name for your variant of interest, try searching that.</p>
-                                <p>Variants may not be found if they have not been evaluated by ClinGen.</p>
-                            </div>
-                        )}
                     </Col>
                 </Row>
                 <Row>

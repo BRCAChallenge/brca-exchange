@@ -72,6 +72,38 @@ const expertModeGroups = [
         // {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA'},
         // {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'}
     ]},
+
+    {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', subtitle: 'Clinical significance assessments shared with ClinVar.', reportSource: 'ClinVar',
+        reportBinding: {
+            sortBy: (a, b) => {
+                // sort first by stars, then by date in reverse chronological order
+                const starDiff = (
+                    computeReviewStatusScore(b['Review_Status_ClinVar']) -
+                    computeReviewStatusScore(a['Review_Status_ClinVar'])
+                );
+
+                const datetimeDiff = (
+                    new Date(b['Date_Last_Updated_ClinVar']).getTime() -
+                    new Date(a['Date_Last_Updated_ClinVar']).getTime()
+                );
+
+                return starDiff || datetimeDiff;
+            },
+            submitter: {title: 'Submitter', prop: 'Submitter_ClinVar'},
+            helpKey: 'clinical-significance-clinvar',
+            cols: [
+                {title: 'Submitter', prop: 'Submitter_ClinVar'},
+                {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
+                {title: 'Date Significance Last Evaluated', prop: 'DateSignificanceLastEvaluated_ClinVar'},
+                {title: 'Date Submission Last Updated', prop: 'Date_Last_Updated_ClinVar'},
+                {title: 'Submission Type', prop: 'Method_ClinVar'},
+                {title: 'SCV Accession', prop: 'SCV_ClinVar'},
+                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true},
+                {title: 'Supporting Observations', prop: 'Description_ClinVar', dummy: true},
+                {title: 'Review Status', prop: 'Review_Status_ClinVar', dummy: true},
+            ]
+        }
+    },
 ];
 
 const researchModeGroups = [

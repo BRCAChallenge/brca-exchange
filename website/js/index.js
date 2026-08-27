@@ -1045,6 +1045,7 @@ class VariantDetail extends React.Component {
                     <SourceReportsTile
                         key={`tile-${groupTitle}`}
                         groupTitle={groupTitle}
+			subtitle={subtitle}
                         sourceName={reportSource}
                         reportBinding={reportBinding}
                         submissions={this.state.reports[reportSource]}
@@ -1384,51 +1385,17 @@ class VariantDetail extends React.Component {
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    {
-                        (this.props.mode !== "research_mode")
-                            ? (
-                                <>
-                                    <Col lg={2}>
-                                        <h3>Variant Details</h3>
-                                    </Col>
-                                    <Col lg={8} className="vcenterblock">
-                                        <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
-                                            <h1 style={{marginTop: 30}}>{variant.Genomic_HGVS_38 ? variant.Genomic_HGVS_38 : variant.Genomic_Coordinate_hg38}</h1>
-                                            <div><i>or</i></div>
-                                            <h3 style={{marginTop: 10}}>
-                                                {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
-                                                {
-                                                    (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
-                                                        " " + variant['HGVS_Protein'].split(":")[1]
-                                                }
-                                            </h3>
-                                        </div>
-                                    </Col>
-                                </>
-                            )
-                            : (
-                                <Col xs={4} sm={{ span: 4, offset: 4 }} md={{ span: 4, offset: 4 }} className="vcenterblock">
-                                    <div className='text-center Variant-detail-title'>
-                                        <h3>Variant Details</h3>
-                                    </div>
-                                </Col>
-                            )
-                    }
-                    {this.props.mode === "research_mode" && (
-                        <Col lg={2} xs={12} className="vcenterblock">
-                            <div className="Variant-detail-headerbar">
-                                <Button
-                                    onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                    variant="secondary"
-                                    className="text-nowrap">
-                                    { this.state.hideEmptyItems ?
-                                        <span>Show Empty Items</span> :
-                                        <span>Hide Empty Items</span>
-                                    }
-                                </Button>
-                            </div>
-                        </Col>
-                    )}
+                    <Col className="vcenterblock">
+                        <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
+                            <h1 style={{marginTop: 30}}>
+                                {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+                                {
+                                    (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                        " " + variant['HGVS_Protein'].split(":")[1]
+                                }
+                            </h1>
+                        </div>
+                    </Col>
 
                     {variant['Change_Type'] === 'deleted' &&
                         (<Col xs={12} className="vcenterblock">
@@ -1464,22 +1431,26 @@ class VariantDetail extends React.Component {
                     }
                 </Row>
 
-		{this.props.mode !== "research_mode" && (
-                    <Row>
-                        <Col xs={12} className="vcenterblock mt-3">
-                            <h2 className="text-center">
-                                <strong>Clinical Significance: </strong>{util.getFormattedFieldByProp('Pathogenicity_expert', variant)}
-                            </h2>
-                        </Col>
-                    </Row>
-                )}
+                <Row>
+                    <Col xs={12} className="vcenterblock mt-3">
+                        <h2 className="text-center">
+                            <strong>Clinical Significance: </strong>{util.getFormattedFieldByProp('Pathogenicity_expert', variant)}
+                        </h2>
+                    </Col>
+                </Row>
 
-                {this.props.mode !== "research_mode" && (
+                <Row>
+                    <Col xs={12} className="vcenterblock mt-3">
+                        <p className="text-center variant-resources-note">
+                            For educational resources, and for links to support communities and other guidance options, please visit our <Link to="/resources">Resources</Link> page.
+                        </p>
+                    </Col>
+                </Row>
+
+                {this.props.mode === "research_mode" && (
                     <Row>
-                        <Col xs={12} className="vcenterblock mt-3">
-                            <p className="text-center variant-resources-note">
-                                For educational resources, and for links to support communities and other guidance options, please visit our <Link to="/resources">Resources</Link> page.
-                            </p>
+                        <Col xs={12} className="vcenterblock mt-4">
+                            <h3 className="text-center">Variant Details</h3>
                         </Col>
                     </Row>
                 )}
