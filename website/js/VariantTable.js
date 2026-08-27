@@ -120,7 +120,7 @@ const researchModeGroups = [
         {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
         {title: 'Beacons', core: true},
         {title: 'GA4GH VRS Identifier (hg38)', prop: 'VR_ID'},
-        {title: 'Synonyms', prop: 'Synonyms'}
+        {title: 'Synonyms', prop: 'Synonyms', toggleable: true}
     ]},
 
     {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [

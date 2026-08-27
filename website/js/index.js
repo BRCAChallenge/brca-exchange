@@ -674,7 +674,8 @@ class VariantDetail extends React.Component {
             hideEmptyItems: (this.props.mode === "research_mode") && (localStorage.getItem("hide-empties") === 'true'),
             tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true'),
             // track open/closed state for cards (keyed by localStorage key)
-            openGroups: {}
+            openGroups: {},
+	    toggledFields: {}
         };
 
         // bind methods passed as callbacks / props
@@ -688,6 +689,7 @@ class VariantDetail extends React.Component {
         this.getPathogenicity = this.getPathogenicity.bind(this);
         this.generateDiffRows = this.generateDiffRows.bind(this);
         this.toggleSubmitterGroup = this.toggleSubmitterGroup.bind(this);
+	this.toggleField = this.toggleField.bind(this);
 
         // debounce relayout (same behavior as before)
         this.relayoutGrid = debounce((fullRefresh) => {
@@ -874,6 +876,14 @@ class VariantDetail extends React.Component {
         // local state wins, otherwise read from storage (for initial render)
         if (Object.prototype.hasOwnProperty.call(this.state.openGroups, key)) { return !!this.state.openGroups[key]; }
         return isOpenFromStorage(key);
+    }
+    toggleField(prop, event) {
+        event.preventDefault();
+        this.setState((prev) => ({
+            toggledFields: { ...prev.toggledFields, [prop]: !prev.toggledFields[prop] }
+        }), () => {
+            this.relayoutGrid();
+        });
     }
     toggleCard(key) {
        this.setState((prev) => {
@@ -1218,17 +1228,40 @@ class VariantDetail extends React.Component {
                     rowItem = '-';
                 }
 
+                const isToggleable = rowDescriptor.toggleable === true;
+                const isRevealed = !!this.state.toggledFields[prop];
+                if (isToggleable && !isEmptyValue && !isRevealed) {
+                    rowItem = <i>(click "{title}" to show)</i>;
+                }
+
                 // Make sure keys are unique within each tile table.
                 // `prop` alone can collide or be undefined in some cases.
                 const rowKey = `vd-${groupTitle}-${prop || idx}`;
 
                 return (
                     <tr key={rowKey} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
-                        { rowDescriptor.tableKey !== false &&
+                            { isToggleable ? (
+                                <td className='help-target'>
+                                    <span
+                                        role="button"
+                                        tabIndex={0}
+                                        style={{cursor: 'pointer'}}
+                                        onClick={(event) => this.toggleField(prop, event)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                this.toggleField(prop, e);
+                                            }
+                                        }}
+                                    >
+                                        <b>{title}</b>
+                                    </span>
+                                </td>
+                            ) : rowDescriptor.tableKey !== false &&
                             (<KeyInline
                                 tableKey={title} noHelpLink={noHelpLink}
                                 tooltip={this.state.tooltips && prop && this.state.tooltips[slugify(prop)]}
-                                onClick={(event) => this.showHelp(event, prop)}
+				onClick={(event) => this.showHelp(event, prop)}
                             />)
                         }
                         <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
@@ -1453,6 +1486,22 @@ class VariantDetail extends React.Component {
                             <h3 className="text-center">Variant Details</h3>
                         </Col>
                     </Row>
+                )}
+
+                {this.props.mode === "research_mode" && (
+                    <Col lg={2} xs={12} className="vcenterblock">
+                        <div className="Variant-detail-headerbar">
+                            <Button
+                                onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
+                                variant="secondary"
+                                className="text-nowrap">
+                                { this.state.hideEmptyItems ?
+                                    <span>Show Empty Items</span> :
+                                    <span>Hide Empty Items</span>
+                                }
+                            </Button>
+                        </div>
+                    </Col>
                 )}
 
                 <Row>
