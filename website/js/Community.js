@@ -10,7 +10,6 @@ import { Link, withRouter } from 'react-router-dom';
 // TODO: Uncomment when react-data-components-brcaex is updated/replaced
 // import { Pagination } from 'react-data-components-brcaex';
 import _ from 'underscore';
-// import placeholder from './img/placeholder.png';
 import auth from './auth';
 
 // RxJS imports

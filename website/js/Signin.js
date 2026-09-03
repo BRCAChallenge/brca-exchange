@@ -7,7 +7,6 @@ import auth from './auth';
 import {$c} from './Signup';
 import config from './config';
 import $ from 'jquery';
-// import _ from 'underscore';
 
 class ResetPassword extends React.Component {
     state = { submitted: null, success: null, error: null };
@@ -162,30 +161,6 @@ class SigninInner extends React.Component {
                     }
                     this.props.history.push(target);
                 } else {
-		    // Email verification step disabled - Uncomment to renable
-                    // if (_.contains(error.non_field_errors, 'User account is disabled.')) {
-                    //     var showSuccess = () => {this.setState({success: true, successMessage: "Activation email sent."});};
-                    //     var showFailure = msg => {this.setState({error: msg});};
-                    //     var resendActivation = function() {
-                    //         $.post({
-                    //             url: config.backend_url + "/accounts/resend-activation/",
-                    //             data: {email: formData.email},
-                    //             success: function (data) {
-                    //                 showFailure(data.error);
-                    //                 if (data.success) {
-                    //                     showSuccess();
-                    //                 }
-                    //             },
-                    //             error: function () {
-                    //                 showFailure('Could not complete this action');
-                    //             }
-                    //         });
-                    //     };
-                    //     var activationMessage = (
-                    //         <span>
-                    //             This account has not yet been activated. Please check your email for an activation link, or <a href="#" onClick={resendActivation}>resend activation</a>.
-                    //         </span>);
-                    //     this.setState({error: activationMessage});
 		    var errorMessage = error && (error.detail || error.non_field_errors);
                     if (errorMessage === 'No active account found with the given credentials') {
                         this.setState({error: "Incorrect email/password"});

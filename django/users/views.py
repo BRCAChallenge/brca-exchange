@@ -106,16 +106,8 @@ def register(request):
         if image is not None:
             save_picture(created_user.id, image)
 
-        # Email verification step disabled
-        # created_user.is_active = False
         created_user.is_active = True
         created_user.save()
-
-        # # Create and save activation key
-        # salt = hashlib.sha1(str(random.random()).encode('utf-8')).hexdigest()[:5]
-        # activation_key = hashlib.sha1((salt + created_user.email).encode('utf-8')).hexdigest()
-        # created_user.activation_key = activation_key
-        # created_user.save()
 
         # Sign up for mailchimp
         try:
@@ -130,20 +122,6 @@ def register(request):
             })
         except (mailchimpclient.MailChimpError, ValueError) as e:
             logging.error(repr(e))
-
-        # # Send activation email
-        # url = "{0}confirm/{1}".format(site_settings.URL_FRONTEND, activation_key)
-        # plaintext_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.txt'))
-        # html_email = get_template(os.path.join(settings.BASE_DIR, 'users', 'templates', 'registration_email.html'))
-        #
-        # d = {'firstname': created_user.firstName, 'url': url}
-        #
-        # subject, from_email, to = 'BRCAExchange account confirmation', 'noreply@brcaexchange.org', created_user.email
-        # text_content = plaintext_email.render(d)
-        # html_content = html_email.render(d)
-        # msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
-        # msg.attach_alternative(html_content, "text/html")
-        # msg.send()
 
     except IntegrityError:
         logging.error(repr(IntegrityError))
