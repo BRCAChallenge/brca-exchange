@@ -157,7 +157,7 @@ class FastTable extends React.Component {
                                         <p>Variants may not be found if they are not in any public databases. Many, but not all variants revealed in genetic testing are found in public databases.</p>
                                       </>
                                     : "No variants found"
-                                }	
+                                }
                             </td>
                         </tr>
                     ) : (

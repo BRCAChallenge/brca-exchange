@@ -7,7 +7,6 @@ import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
 import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
 import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
 import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
-import MupitStructure from './MupitStructure';
 
 import './favicons';
 import React from 'react';
@@ -1177,25 +1176,7 @@ class VariantDetail extends React.Component {
                     title = "Abbreviated Protein Change";
                 }
 
-                if (prop === "Mupit_Structure") {
-                    rowItem = <MupitStructure variant={variant} prop={prop} onLoad={() => this.relayoutGrid()} />;
-                    /*
-                    Don't display mupit structures if they don't have an associated Amino Acid change.
-                    Note that there shouldn't be mupit structures for these variants in the first place,
-                    but there may be as getAminoAcidCode may change after the database is populated
-                    */
-		    if (util.getAminoAcidCode(variant["HGVS_Protein"]) === false) {
-                        rowsEmpty += 1;
-                        rowItem = false;
-                    }
-                    if (rowItem === false) {
-                        return false;
-                    }
-                    if (!variant[prop]) {
-                        rowsEmpty += 1;
-                        return false;
-                    }
-                } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
+                if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
                     let val = variant["HGVS_Protein"].split(":")[0];
                     variant[prop] = val;
                     rowItem = val;
@@ -1231,7 +1212,7 @@ class VariantDetail extends React.Component {
                 const isToggleable = rowDescriptor.toggleable === true;
                 const isRevealed = !!this.state.toggledFields[prop];
                 if (isToggleable && !isEmptyValue && !isRevealed) {
-                    rowItem = <i>(click "{title}" to show)</i>;
+                    rowItem = <i>(click &quot;{title}&quot; to show)</i>;
                 }
 
                 // Make sure keys are unique within each tile table.
@@ -1282,7 +1263,7 @@ class VariantDetail extends React.Component {
             const isOpen = this.isGroupOpenLS(storageKey);
 
             return (
-                <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
+                <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) ? "group-empty" : "" }>
                     <Card className="shadow">
                         <Card.Header
                             role="button"
@@ -1309,9 +1290,6 @@ class VariantDetail extends React.Component {
                 </div>
             );
         });
-
-        // generates variant diff rows
-        const diffRows = this.generateDiffRows(cols, data, false);
 
         // generates report diff rows
         if (this.state.reports !== undefined) {

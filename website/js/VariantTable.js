@@ -392,12 +392,6 @@ const researchModeGroups = [
             }
         ]
     },
-
-    {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure',
-      hideFromColumnSelection: true,
-      innerCols: [
-        {title: 'Mupit Structure', prop: 'Mupit_Structure', tableKey: false, dummy: true}
-    ]},
 ];
 
 // subColumns populate the column selection checkboxes.

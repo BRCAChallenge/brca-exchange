@@ -12,32 +12,6 @@ export const dateKeys = [
     "Created_date_LOVD"
 ];
 
-const AminoAcids = {
-    'ala': 'a',
-    'arg': 'r',
-    'asn': 'n',
-    'asp': 'd',
-    'asx': 'b',
-    'cys': 'c',
-    'glu': 'e',
-    'gln': 'q',
-    'glx': 'z',
-    'gly': 'g',
-    'his': 'h',
-    'ile': 'i',
-    'leu': 'l',
-    'lys': 'k',
-    'met': 'm',
-    'phe': 'f',
-    'pro': 'p',
-    'ser': 's',
-    'thr': 't',
-    'trp': 'w',
-    'tyr': 'y',
-    'val': 'v'
-};
-
-
 export function isEmptyField(value) {
     if (Array.isArray(value)) {
         value = value[0];
@@ -298,24 +272,8 @@ export function abbreviatedSubmitter(originalSubmitter) {
         .replace('Breast Cancer Information Core (BIC)', 'BIC');
 }
 
-
-export function getAminoAcidCode(hgvsProtein) {
-    let trimmedHgvs = hgvsProtein.replace(/[0-9()]/g, '');
-    if (trimmedHgvs.length < 3) {
-        return false;
-    } else {
-        let lastThreeChars = trimmedHgvs.substr(trimmedHgvs.length - 3).toLowerCase();
-        if (!(lastThreeChars in AminoAcids)) {
-            return false;
-        } else {
-            return AminoAcids[lastThreeChars];
-        }
-    }
-}
-
 // For backward compatibility with code that uses require()
 export default {
-    getAminoAcidCode,
     isEmptyField,
     isNumeric,
     normalizeDateFieldDisplay,
