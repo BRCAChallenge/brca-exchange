@@ -1573,27 +1573,6 @@ class VariantDetail extends React.Component {
                     </Row>
                     )
                 }
-		{this.props.mode === "research_mode" && (
-                <Row>
-                    <Col md={12} className="variant-history-col">
-                        <h4>Variant History:</h4>
-                        <p>Variant nomenclature may change between releases, please review submission history below for further details.</p>
-                        <Table className='variant-history nopointer' responsive bordered>
-                            <thead>
-                                <tr className='table-active'>
-                                    <th>Release Date</th>
-                                    <th>Clinical Significance</th>
-                                    <th>Changes</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {diffRows}
-                            </tbody>
-                        </Table>
-                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, as well as changes to corresponding submissions. Click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
-                    </Col>
-                </Row>
-		)}
 
                 {this.props.mode === "research_mode" ? clinvarDiffRows : ''}
                 {this.props.mode === "research_mode" ? lovdDiffRows : ''}
