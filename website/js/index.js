@@ -653,12 +653,10 @@ class VariantDetail extends React.Component {
 
         // bind methods passed as callbacks / props
         this.showHelp = this.showHelp.bind(this);
-        this.relayoutOnCollapsed = this.relayoutOnCollapsed.bind(this);
         this.onChangeGroupVisibility = this.onChangeGroupVisibility.bind(this);
         this.isGroupOpenLS = this.isGroupOpenLS.bind(this);
         this.toggleCard = this.toggleCard.bind(this);
         this.setEmptyRowVisibility = this.setEmptyRowVisibility.bind(this);
-        this.toggleSubmitterGroup = this.toggleSubmitterGroup.bind(this);
 	this.toggleField = this.toggleField.bind(this);
 
         // debounce relayout (same behavior as before)
@@ -826,10 +824,6 @@ class VariantDetail extends React.Component {
         }
     }
 
-    relayoutOnCollapsed(/* collapser */) {
-        console.warn("Deprecated relayoutOnCollapsed; replace relayoutOnCollapsed handlers w/direct calls to relayoutGrid() in your collapsing components");
-    }
-    // legacy API kept for callers; now just flips storage and local openGroups
     onChangeGroupVisibility(groupTitle, event) {
         event.preventDefault();
         const key = "collapse-group_" + groupTitle;
@@ -871,15 +865,6 @@ class VariantDetail extends React.Component {
            this.relayoutGrid();
        }
    });
-    }
-
-    toggleSubmitterGroup(sourceName, submitter) {
-        this.setState((pstate) => {
-            const k = `submitter-group-${sourceName}-${submitter}`;
-            return {
-                [k]: !(!Object.prototype.hasOwnProperty.call(pstate, k) || pstate[k])
-            };
-        });
     }
 
     // render for VariantDetail
