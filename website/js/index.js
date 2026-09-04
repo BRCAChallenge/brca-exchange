@@ -26,7 +26,6 @@ import NavBarNew from './NavBarNew';
 // RxJS 6+ imports
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-var moment = require('moment');
 import DonationBar from './components/DonationBar';
 
 // masonry/isotope
@@ -53,7 +52,7 @@ var util = require('./util');
 import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } from 'react-bootstrap';
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
-import {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} from './VariantTable';
+import {VariantTable, ResearchVariantTable, researchModeGroups, expertModeGroups} from './VariantTable';
 import Signup from './Signup';
 import {Signin, ResetPassword} from './Signin';
 import {ConfirmEmail} from './ConfirmEmail';
@@ -584,31 +583,6 @@ class Database extends React.Component {
     }
 }
 
-// get display name for a given key from VariantTable.js column specification
-// if we are in summary view mode, search summary view names then fall back to
-// all data, otherwise go straight to all data. Finally, if key is not found, replace
-// _ with space in the key and return that.
-function getDisplayName(key) {
-    const researchMode = (localStorage.getItem("research-mode") === 'true');
-    let displayName;
-    if (!researchMode) {
-        displayName = columns.find(e => e.prop === key);
-        displayName = displayName && displayName.title;
-    }
-    if (displayName === undefined) {
-        displayName = researchModeColumns.find(e => e.prop === key);
-        displayName = displayName && displayName.title;
-    }
-    if (displayName === undefined) {
-        displayName = key.replace(/_/g, " ");
-    }
-    return displayName;
-}
-
-function isEmptyDiff(value) {
-    return value === null || value.length < 1;
-}
-
 class IsoGrid extends React.Component {
     static displayName = 'IsoGrid';
 
@@ -684,9 +658,6 @@ class VariantDetail extends React.Component {
         this.isGroupOpenLS = this.isGroupOpenLS.bind(this);
         this.toggleCard = this.toggleCard.bind(this);
         this.setEmptyRowVisibility = this.setEmptyRowVisibility.bind(this);
-        this.determineDiffRowColor = this.determineDiffRowColor.bind(this);
-        this.getPathogenicity = this.getPathogenicity.bind(this);
-        this.generateDiffRows = this.generateDiffRows.bind(this);
         this.toggleSubmitterGroup = this.toggleSubmitterGroup.bind(this);
 	this.toggleField = this.toggleField.bind(this);
 
@@ -837,10 +808,6 @@ class VariantDetail extends React.Component {
         }
     }
 
-    pathogenicityChanged(pathogenicityDiff) {
-        return (pathogenicityDiff.added || pathogenicityDiff.removed) ? true : false;
-    }
-
     setEmptyRowVisibility(hideEmptyItems) {
         localStorage.setItem('hide-empties', hideEmptyItems);
         this.setState({
@@ -905,105 +872,6 @@ class VariantDetail extends React.Component {
        }
    });
     }
-    determineDiffRowColor(highlightRow) {
-        return highlightRow ? 'table-danger' : '';
-    }
-    getPathogenicity(version, isReport) {
-        if (isReport) {
-            if (version.Source === "ClinVar") {
-                return util.getFormattedFieldByProp("Clinical_Significance_ClinVar", version);
-            } else {
-                return util.getFormattedFieldByProp("Classification_LOVD", version);
-            }
-        } else {
-            return util.getFormattedFieldByProp("Pathogenicity_expert", version);
-        }
-    }
-    generateDiffRows(cols, data, isReports) {
-        var diffRows = [];
-        var relevantFieldsToDisplayChanges = cols.map(function(col) {
-            return col.prop;
-        });
-
-        for (var i = 0; i < data.length; i++) {
-            let version = data[i];
-            let diff = version.Diff;
-            let release = version.Data_Release;
-            let highlightRow = false;
-            var diffHTML = [];
-            if (diff !== null) {
-                for (var j = 0; j < diff.length; j++) {
-                    let fieldDiff = diff[j];
-                    let fieldName = fieldDiff.field;
-                    var added;
-                    var removed;
-
-                    if (fieldName === "Pathogenicity_expert") {
-                        highlightRow = this.pathogenicityChanged(fieldDiff);
-                    }
-
-                    if (!_.contains(relevantFieldsToDisplayChanges, fieldName)) {
-                        continue;
-                    }
-
-                    if (_.contains(util.dateKeys, fieldName)) {
-                        added = util.reformatDate(fieldDiff.added);
-                        removed = util.reformatDate(fieldDiff.removed);
-                    } else if (fieldDiff.field_type === "list") {
-                        added = _.map(fieldDiff.added, elem => elem.replace(/_/g, " ").trim());
-                        removed = _.map(fieldDiff.removed, elem => elem.replace(/_/g, " ").trim());
-                    } else {
-                        added = fieldDiff.added.trim();
-                        removed = fieldDiff.removed.trim();
-                    }
-
-                    if (fieldName === "Summary_Evidence_ClinVar" || fieldName === "Description_ClinVar" || fieldName === "Review_Status_ClinVar") {
-                        added = fieldDiff.added.replace(/_/g, " ").trim();
-                        removed = fieldDiff.removed.replace(/_/g, " ").trim();
-                    }
-
-                    if (added !== null || removed !== null) {
-                        if (util.isEmptyField(removed)) {
-                            diffHTML.push(
-                                <span key={`diff-${i}-${j}-new`}>
-                                    <strong>{ getDisplayName(fieldName) }: </strong>
-                                    <span className='badge bg-success'><span className='fa fa-star' /> New</span>
-                                    &nbsp;{`${added}`}
-                                </span>
-                            );
-			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
-                        } else if (fieldDiff.field_type === "list") {
-                            diffHTML.push(
-                                <span key={`diff-${i}-${j}-list`}>
-                                    <strong>{ getDisplayName(fieldName) }: </strong> <br />
-                                    { !isEmptyDiff(added) && `+${added}` }{ !!(!isEmptyDiff(added) && !isEmptyDiff(removed)) && ', '}{ !isEmptyDiff(removed) && `-${removed}` }
-                                </span>
-                            );
-			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
-                        } else if (fieldDiff.field_type === "individual") {
-                            diffHTML.push(
-                                <span key={`diff-${i}-${j}-individual`}>
-                                    <strong>{ getDisplayName(fieldName) }: </strong>
-                                    {removed} <span className="fa fa-arrow-right" /> {added}
-                                </span>
-                            );
-			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
-                        }
-                    }
-                }
-            }
-
-            diffRows.push(
-                <tr key={i} className={this.determineDiffRowColor(highlightRow)}>
-                    <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
-                    <td>{this.getPathogenicity(version, isReports)}</td>
-                    <td>{diffHTML}</td>
-                </tr>
-            );
-        }
-
-        return diffRows;
-    }
 
     toggleSubmitterGroup(sourceName, submitter) {
         this.setState((pstate) => {
@@ -1025,16 +893,14 @@ class VariantDetail extends React.Component {
         const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.getParamId()));
         const variant = data[variantVersionIdx] || data[0];
         const release = variant["Data_Release"];
-        let cols, groups;
+        let groups;
 
         const { redirectedFrom, noRedirectMsg } = this.getQuery();
         const redirectedFromVariant = redirectedFrom ? data.find(x => x.id === parseInt(redirectedFrom)) : null;
 
         if (this.props.mode === 'research_mode') {
-            cols = researchModeColumns;
             groups = researchModeGroups;
         } else {
-            cols = columns;
             groups = expertModeGroups;
         }
 
