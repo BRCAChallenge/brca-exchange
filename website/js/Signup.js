@@ -220,7 +220,7 @@ export function $c(staticClassName, conditionalClassNames) {
 }
 
 class SignupForm extends React.Component {
-    state = {errors: {}, file: '', imagePreviewUrl: null, captcha: "", otherRole: false};
+    state = {errors: {}, captcha: "", otherRole: false};
     _refs = {};
     setRef = (name) => (el) => {
         if (el) this._refs[name] = el;
@@ -294,7 +294,7 @@ class SignupForm extends React.Component {
         const roleLabel = Role.get(roleVal) ? Role.get(roleVal)[2] : "";
 
 	var data = {
-            "image": this.state.file,
+            "image": "",
             "email": this._refs.email?.value,
             "email_confirm": this._refs.email_confirm?.value,
             "password": this._refs.password?.value,
@@ -308,36 +308,13 @@ class SignupForm extends React.Component {
             "city": this._refs.city?.value,
             "state": this._refs.state?.value,
             "country": this._refs.country?.value,
-            "phone_number": this._refs.phone_number?.value,
-            "hide_number": !!this._refs.hide_number?.checked,
-            "hide_email": !!this._refs.hide_email?.checked,
+            "phone_number": "",
+            "hide_number": true,
+            "hide_email": true,
 	    "captcha": this.state.captcha
         };
         return data;
     }
-
-    handleImageChange = (e) => {
-        e.preventDefault();
-
-        let reader = new FileReader();
-        let file = e.target.files[0];
-        reader.onloadend = () => {
-            if (file.size <= 4 * 1024 * 1024) {
-                this.setState({
-                    file: file,
-                    imagePreviewUrl: reader.result,
-                    imageTooBig: false
-                });
-            } else {
-                this.setState({
-                    file: null,
-                    imagePreviewUrl: null,
-                    imageTooBig: true
-                });
-            }
-        };
-        reader.readAsDataURL(file);
-    };
 
     render() {
         var onChange = function() {
@@ -346,7 +323,6 @@ class SignupForm extends React.Component {
         };
         return (
             <div className="form-horizontal" onChange={onChange.bind(this)}>
-                {this.renderImageUpload('image', 'Profile picture')}
                 {this.renderTextInput('email', 'Email')}
                 {this.renderTextInput('email_confirm', 'Confirm Email')}
                 {this.renderPassword('password', 'Password')}
@@ -364,28 +340,9 @@ class SignupForm extends React.Component {
                 {this.renderTextInput('city', 'City')}
                 {this.renderTextInput('state', 'State or Province')}
                 {this.renderSelect('country', 'Country', countries.map(v => [v, v]))}
-                {this.renderTextInput('phone_number', 'Phone number')}
-                {this.renderCheckBox('hide_number', 'Hide my phone number on this website')}
-                {this.renderCheckBox('hide_email', 'Hide my email address on this website')}
-                {this.renderCAPTCHA('captcha', 'CAPTCHA *')}
+                <hr />
+		{this.renderCAPTCHA('captcha', <span>CAPTCHA <span style={{color: '#D00000'}}>*</span></span>)}
 			</div>);
-    }
-    renderImageUpload(id, label) {
-        var {imagePreviewUrl, imageTooBig} = this.state;
-        var imagePreview = null;
-        var error = null;
-        if (imagePreviewUrl) {
-            imagePreview = (<img src={imagePreviewUrl} className="img-thumbnail" style={{maxHeight: '160px', maxWidth: '160px'}} />);
-        }
-        if (imageTooBig) {
-            error = <p className="bg-danger">Please choose an image less than 4MB</p>;
-        }
-        return this.renderField(id, label,
-            <div>
-                <input onChange={this.handleImageChange} type="file" accept="image/*"/>
-                {imagePreview}
-                {error}
-            </div>);
     }
     renderTextInput(id, label) {
         return this.renderField(id, label,
@@ -426,10 +383,13 @@ class SignupForm extends React.Component {
             var defaultChecked = (value.name === kwargs.defaultCheckedValue);
             if (value.name === "Other") {
                 return (
-                    <label key={`${id}-${value.ref}`} className="radio-inline">
-                        <input type="radio" ref={this.setRef(id + value.ref)} name={id} value={value.name} defaultChecked={defaultChecked}/>
-                        {value.name + ':'}<input className="form-control" type="text" ref={this.setRef("titlecustom")} name="titlecustom"/>
-                    </label>
+                    <span key={`${id}-${value.ref}`} className="radio-inline d-inline-flex align-items-center gap-1">
+                        <label className="mb-0">
+                            <input type="radio" ref={this.setRef(id + value.ref)} name={id} value={value.name} defaultChecked={defaultChecked}/>
+                            {' Other:'}
+                        </label>
+                        <input className="form-control d-inline-block w-auto" type="text" ref={this.setRef("titlecustom")} name="titlecustom"/>
+                    </span>
                 );
             } else {
                 return (<label key={`${id}-${value.ref}`} className="radio-inline">
