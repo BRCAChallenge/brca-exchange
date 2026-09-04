@@ -1291,99 +1291,6 @@ class VariantDetail extends React.Component {
             );
         });
 
-        // generates report diff rows
-        if (this.state.reports !== undefined) {
-            let sortedSubmissions = {'ClinVar': {}, 'LOVD': {}};
-
-            if (Object.prototype.hasOwnProperty.call(this.state.reports, 'ClinVar')) {
-                let clinvarSubmissions = this.state.reports.ClinVar;
-                for (var i = 0; i < clinvarSubmissions.length; i++) {
-                    if (clinvarSubmissions[i].Diff === null || clinvarSubmissions[i].Diff === undefined) {
-                        continue;
-                    }
-                    let key = clinvarSubmissions[i].SCV_ClinVar;
-                    if (Object.prototype.hasOwnProperty.call(sortedSubmissions.ClinVar, key)) {
-                        sortedSubmissions.ClinVar[key].push(clinvarSubmissions[i]);
-                    } else {
-                        sortedSubmissions.ClinVar[key] = [clinvarSubmissions[i]];
-                    }
-                }
-            }
-
-            if (Object.prototype.hasOwnProperty.call(this.state.reports, 'LOVD')) {
-                let lovdSubmissions = this.state.reports.LOVD;
-                for (var j = 0; j < lovdSubmissions.length; j++) {
-                    if (lovdSubmissions[j].Diff === null || lovdSubmissions[j].Diff === undefined) {
-                        continue;
-                    }
-                    let key = lovdSubmissions[j].Submission_ID_LOVD;
-                    if (Object.prototype.hasOwnProperty.call(sortedSubmissions.LOVD, key)) {
-                        sortedSubmissions.LOVD[key].push(lovdSubmissions[j]);
-                    } else {
-                        sortedSubmissions.LOVD[key] = [lovdSubmissions[j]];
-                    }
-                }
-            }
-
-            var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions, key) {
-                let newestSubmission = submissions ? submissions[0] : '';
-                let oldestSubmission = submissions ? submissions[submissions.length - 1] : '';
-                const significance = util.sentenceCase(util.getFormattedFieldByProp("Clinical_Significance_ClinVar", newestSubmission)
-                .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
-                const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitter_ClinVar", newestSubmission));
-                return (
-                    <Row key={`clinvar-${key}`}>
-                        <Col md={12} className="variant-history-col">
-                            <h3>ClinVar Submission: {newestSubmission["SCV_ClinVar"]} ({submitter}; {significance})</h3>
-                            <h4>Previous Versions of this Submission (since {util.reformatDate(oldestSubmission.Data_Release.date)}):</h4>
-                            <Table className='variant-history nopointer' responsive bordered>
-                                <thead>
-                                    <tr className='table-active'>
-                                        <th>Release Date</th>
-                                        <th>Clinical Significance</th>
-                                        <th>Changes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.generateDiffRows(cols, submissions, true)}
-                                </tbody>
-                            </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
-                        </Col>
-                    </Row>
-                );
-            }, this);
-
-            var lovdDiffRows = _.map(sortedSubmissions.LOVD, function(submissions, key) {
-                let newestSubmission = submissions ? submissions[0] : '';
-                let oldestSubmission = submissions ? submissions[submissions.length - 1] : '';
-                const significance = util.sentenceCase(util.getFormattedFieldByProp("Classification_LOVD", newestSubmission)
-                .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
-                const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitters_LOVD", newestSubmission));
-                return (
-                    <Row key={`lovd-${key}`}>
-                        <Col md={12} className="variant-history-col">
-                            <h3>LOVD Submission: {newestSubmission["DBID_LOVD"]} ({submitter}; {significance})</h3>
-                            <h4>Previous Versions of this Submission (since {util.normalizeDateFieldDisplay(oldestSubmission.Data_Release.date)}):</h4>
-                            <Table className='variant-history nopointer' responsive bordered>
-                                <thead>
-                                    <tr className='table-active'>
-                                        <th>Release Date</th>
-                                        <th>Clinical Significance</th>
-                                        <th>Changes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.generateDiffRows(cols, submissions, true)}
-                                </tbody>
-                            </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
-                        </Col>
-                    </Row>
-                );
-            }, this);
-        }
-
         const tileSizeClasses = groupTables.length < 3
             ? `col-xs-12 col-md-${12 / groupTables.length}`
             : `col-xs-12 col-md-6 col-lg-6 col-xl-4`;
@@ -1551,9 +1458,6 @@ class VariantDetail extends React.Component {
                     </Row>
                     )
                 }
-
-                {this.props.mode === "research_mode" ? clinvarDiffRows : ''}
-                {this.props.mode === "research_mode" ? lovdDiffRows : ''}
 
                 <Row>
                     <Col md={{ span: 12, offset: 0 }}>
