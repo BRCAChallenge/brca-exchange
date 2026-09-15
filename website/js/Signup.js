@@ -323,7 +323,7 @@ class SignupForm extends React.Component {
         };
         return (
             <div className="form-horizontal" onChange={onChange.bind(this)}>
-                {this.renderTextInput('email', 'Email')}
+                {this.renderTextInput('email', 'Email (will not be displayed)')}
                 {this.renderTextInput('email_confirm', 'Confirm Email')}
                 {this.renderPassword('password', 'Password')}
                 {this.renderPassword('password_confirm', 'Confirm Password')}
