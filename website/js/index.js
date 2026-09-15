@@ -57,7 +57,6 @@ import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } fro
 import {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} from './VariantTable';
 import Signup from './Signup';
 import {Signin, ResetPassword} from './Signin';
-import {ConfirmEmail} from './ConfirmEmail';
 import {ChangePassword} from './ChangePassword';
 import {Profile} from './Profile';
 import VariantSearch from './VariantSearch';
@@ -1663,7 +1662,6 @@ const routes = (
         <Route path='/signin' component={Signin}/>
         <Route path='/reset_password' component={ResetPassword}/>
 	<Route path='/profile' component={Profile}/>
-        <Route path='/confirm/:activationCode' component={ConfirmEmail}/>
 	<Route path='/reset/:resetToken' component={ChangePassword}/>
 	<Route path='/resources' component={Resources}/>
     </Switch>

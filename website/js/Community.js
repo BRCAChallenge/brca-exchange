@@ -10,7 +10,6 @@ import { Link, withRouter } from 'react-router-dom';
 // TODO: Uncomment when react-data-components-brcaex is updated/replaced
 // import { Pagination } from 'react-data-components-brcaex';
 import _ from 'underscore';
-import placeholder from './img/placeholder.png';
 import auth from './auth';
 
 // RxJS imports
@@ -108,7 +107,7 @@ class Community extends React.Component {
         if (query.get("registrationSuccess") === "true") {
             message = (
 				<div className="alert alert-success">
-					<p>Thanks for signing up. We have sent you an email with a confirmation link to complete your registration. After you complete your registration our administrator will confirm your profile and it will appear on the Community Pages.</p>
+					<p>Thanks for signing up.  Our administrator will confirm your profile and it will appear on the Community Pages.</p>
 				</div>);
         } else if (query.get("updateSuccess") === "true") {
             message = (
@@ -125,12 +124,12 @@ class Community extends React.Component {
         var rows = _.map(data, (row, i) => {
 
             var avatar;
-            if (row.has_image) {
-                var avatarLink = config.backend_url + '/site_media/media/' + row.id;
-                avatar = <img className="avatar" src={avatarLink} type="image/image"/>;
-            } else {
-                avatar = <img src={placeholder}/>;
-            }
+	    // Keep if/else logic in case we want to have different avatar logos
+            // if (true) {
+            avatar = <img className="avatar" src={require('./img/brca_logo.png')} />;
+            // } else {
+            //     avatar = <img src={placeholder}/>;
+            // }
 
             var {city, state, country} = row;
             var locationString = _.values(_.pick({city, state, country}, v => v)).join(', ');
@@ -144,7 +143,6 @@ class Community extends React.Component {
                     <span id="role"><h4>{Role.other(row.role) ? row["role_other"] : Role.get(row.role)[2]}</h4></span>
                     <span id="institution">{row.institution}</span>
                     <span id="location">{locationString}</span>
-                    <span id="contact">{row.email} {row["phone_number"]}</span>
                 </td>
             </tr>);
         });
@@ -166,7 +164,8 @@ class Community extends React.Component {
                     <Col className="text-center" md={{ span: 10, offset: 1 }} sm={12}>
                         <Link to="/signup"><Button disabled={config.environment === 'beta'}>Join the community</Button></Link>&nbsp;
                         <p className="community-disclaimer">We will add you to the BRCA Exchange News mailing list. You can unsubscribe at any time.</p>
-                        <p>To update or remove your profile, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=Update Personal Information">contact us</a>.</p>
+			<p>To update your profile, please <Link to={'/signin'}>Sign In</Link>.</p>
+			<p>To remove your profile, please <a href="mailto:brca-exchange-contact@genomicsandhealth.org?subject=Update Personal Information">contact us</a>.</p>
                     </Col>
                 </Row>
                 <Row>
@@ -175,16 +174,14 @@ class Community extends React.Component {
                     </Col>
 
                 </Row>
-                <Row>
-                    <Col className="btm-buffer" md={{ span: 10, offset: 1 }} sm={12}>
-                        <Row>
-			    <Col sm={6} lg={5} style={{paddingRight: "0"}}>
-                        	<h4>Search for a community member:</h4>
-                            </Col>
-                            <Col sm={6} lg={7}>
+                <Row className="align-items-center mb-3">
+                    <Col md={{ span: 10, offset: 1 }} sm={12}>
+			<div className="d-flex align-items-center gap-3">
+                            <h4 className="mb-0 text-nowrap">Search for a community member:</h4>
+                            <div className="flex-grow-1">
                         	<CommunitySearch ref={this.communitySearchRef} onChange={s => this.searchq.next(s)}/>
-                            </Col>
-			</Row>
+                            </div>
+			</div>
                     </Col>
                 </Row>
                 <Row>
@@ -331,15 +328,15 @@ class CommunityMap extends React.Component {
                     });
                     markers = self.markers = newMarkers;
                     /*eslint-disable camelcase*/
-                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude, has_image})  => {
+                    _.map(data, ({id, firstName, lastName, title, role, role_other, institution, latitude, longitude})  => {
                         if (latitude !== "" || longitude !== "") {
                             var avatar;
-                            if (has_image) {
-                                let avatar_link = config.backend_url + '/site_media/media/' + id;
-                                avatar = <object className="avatar" data={avatar_link} type="image/jpg"/>;
-                            } else {
-                                avatar = <img className="avatar" src={placeholder}/>;
-                            }
+			    // Keep if/else logic
+                            // if (true) {
+                            avatar = <img className="avatar" src={require('./img/brca_logo.png')} />;
+                            // } else {
+                            //     avatar = <img className="avatar" src={placeholder}/>;
+                            // }
                             var userInfo = (<div className="map-info-window">
                                 {avatar}
                                 <div>
@@ -387,7 +384,9 @@ class CommunityMap extends React.Component {
     }
 
     componentDidUpdate() {
-        this.updateMap();
+    	if (typeof this.updateMap === 'function') {
+            this.updateMap();
+    	}
     }
 
     componentWillUnmount() {
@@ -436,9 +435,8 @@ class CommunitySearch extends React.Component {
     render() {
         return (<div className='search-box'>
             <form onSubmit={this.onSubmit} style={{display: 'inline'}}>
-                <input type='submit' className='input-sm'style={{display: 'none'}} />
-                <div className='text-nowrap help-target'>
-                    <div>
+                <input type='submit' className='input-sm' style={{display: 'none'}} />
+                <div className='text-nowrap'>
                         <input className='community-search-input'
                                onBlur={this.onBlur}
                                onFocus={this.onFocus}
@@ -446,8 +444,7 @@ class CommunitySearch extends React.Component {
                                type='text'
                                onChange={this.onChange}
                                value={this.state.search} />
-                        <span className="fa fa-search search-box-icon"/>
-                    </div>
+                        <span className="fa fa-search search-box-icon" />
                 </div>
             </form>
         </div>);
