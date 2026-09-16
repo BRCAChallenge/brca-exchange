@@ -90,6 +90,7 @@ class Community extends React.Component {
     };
 
     componentDidMount() {
+	window.scrollTo(0, 0);	
 	this.fetch(this.state);
         var searchq = this.searchq = new Subject();
         this.subs = searchq.pipe(
