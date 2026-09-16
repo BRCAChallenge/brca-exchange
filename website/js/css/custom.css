@@ -1132,7 +1132,8 @@ div.variant-detail-group table td.help-target {
     font-weight: bold;
     text-align: right;
     text-decoration: dashed;
-    width: 200px;
+    width: 40%;
+    white-space: normal;
 }
 
 div.variant-detail-group .panel table {
