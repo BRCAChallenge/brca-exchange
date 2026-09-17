@@ -772,6 +772,17 @@ div#main {
     word-wrap: break-word;
 }
 
+.expandable-text-toggle {
+    cursor: pointer;
+    color: #C03657;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.expandable-text-toggle:hover {
+    text-decoration: underline;
+}
+
 /* id helper to access the variant data table for better responsive layouts */
 #data-table-container {
     overflow-x: visible;

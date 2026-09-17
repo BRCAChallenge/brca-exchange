@@ -7,6 +7,7 @@ import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
 import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
 import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
 import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
+import ExpandableText from "./components/ExpandableText";
 
 import './favicons';
 import React from 'react';
@@ -1064,6 +1065,22 @@ class VariantDetail extends React.Component {
                 const isRevealed = !!this.state.toggledFields[prop];
                 if (isToggleable && !isEmptyValue && !isRevealed) {
                     rowItem = <i>(click &quot;{title}&quot; to show)</i>;
+                }
+
+                // For long free-text fields (e.g. 'Comment on Clinical Significance'),
+                // show a short preview with a "Click for More"/"Click for Less" toggle,
+                // rather than letting the tile stretch to fit the full text.
+                // This is distinct from `toggleable` (used for Synonyms above), which
+                // hides a field's value entirely until clicked.
+                if (rowDescriptor.truncatable && !isEmptyValue) {
+                    rowItem = (
+                        <ExpandableText
+                            content={rowItem}
+                            limit={rowDescriptor.truncateLimit}
+                            mode={rowDescriptor.truncateMode}
+                            relayoutGrid={this.relayoutGrid}
+                        />
+                    );
                 }
 
                 // Make sure keys are unique within each tile table.

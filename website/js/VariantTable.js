@@ -63,7 +63,7 @@ const expertModeGroups = [
     {groupTitle: 'Overall Assessment of Clinical Significance', internalGroupName: 'Significance (ENIGMA)', subtitle: 'This assessment was made either by the ClinGen Variant Curation Expert Panel, the internationally-recognized expert body for genetic variation in this gene, or by a consensus of the laboratories that share their assessments with ClinVar.', innerCols: [
         {title: 'Clinical Significance', prop: 'Pathogenicity_expert'},
         // {title: 'IARC Class', prop: 'Clinical_significance_ENIGMA'},
-        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA'},
+        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA', truncatable: true},
         // {title: 'Clinical Significance Citations', prop: 'Clinical_significance_citations_ENIGMA'},
         // {title: 'Supporting Evidence URL(s)', prop: 'URL_ENIGMA'},
         {title: 'Date Last Evaluated', prop: 'Date_last_evaluated_ENIGMA'},
@@ -98,7 +98,7 @@ const expertModeGroups = [
                 {title: 'Date Submission Last Updated', prop: 'Date_Last_Updated_ClinVar'},
                 {title: 'Submission Type', prop: 'Method_ClinVar'},
                 {title: 'SCV Accession', prop: 'SCV_ClinVar'},
-                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true},
+                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true, truncatable: true},
                 {title: 'Supporting Observations', prop: 'Description_ClinVar', dummy: true},
                 {title: 'Review Status', prop: 'Review_Status_ClinVar', dummy: true},
             ]
@@ -125,7 +125,7 @@ const researchModeGroups = [
 
     {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
         {title: 'Clinical Significance', prop: 'Clinical_significance_ENIGMA', core: true},
-        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA', core: true},
+        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA', core: true, truncatable: true},
         {title: 'Assertion Method', prop: 'Assertion_method_ENIGMA', core: true},
         {title: 'Date last evaluated', prop: 'Date_last_evaluated_ENIGMA', core: true},
         {title: 'Collection Method', prop: 'Collection_method_ENIGMA', core: true},
@@ -173,7 +173,7 @@ const researchModeGroups = [
 
                 {title: 'Submission Type', prop: 'Method_ClinVar'},
                 {title: 'SCV Accession', prop: 'SCV_ClinVar'},
-                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true},
+                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true, truncatable: true},
                 {title: 'Supporting Observations', prop: 'Description_ClinVar', dummy: true},
                 {title: 'Review Status', prop: 'Review_Status_ClinVar', dummy: true},
                 // Note: Displayed condition value is actually a combo of Condition_Value and Condition_DB_ID,
