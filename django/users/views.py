@@ -170,7 +170,7 @@ def confirm(request, activation_key):
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
-
+@csrf_exempt
 def password_reset(request):
     email = request.POST.get('email', '')
     user = MyUser.objects.filter(email=email)
@@ -207,7 +207,7 @@ def password_reset(request):
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
-
+@csrf_exempt
 def check_password_token(request, password_reset_token):
     user = MyUser.objects.filter(password_reset_token=password_reset_token)
     if not user or user[0].password_token_expires < timezone.now():
@@ -219,7 +219,7 @@ def check_password_token(request, password_reset_token):
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
-
+@csrf_exempt
 def update_password(request, password_reset_token):
     user = MyUser.objects.filter(password_reset_token=password_reset_token)
     if not user:
