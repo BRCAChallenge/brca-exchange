@@ -5,6 +5,7 @@ import os
 import random
 import requests
 from urllib.error import HTTPError
+from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
 from django.db.models import Q
@@ -170,15 +171,54 @@ def confirm(request, activation_key):
     response['Access-Control-Allow-Origin'] = '*'
     return response
 
+# Rate limiting for password_reset: don't let it be used to spam a single
+# inbox, or to hammer the endpoint generally (e.g. to enumerate emails).
+# Backed by the DB-backed cache (see CACHES in settings.py) so the counters
+# are shared correctly across all app server worker processes.
+PASSWORD_RESET_COOLDOWN_SECONDS = 5 * 60       # 1 email per address per 5 min
+PASSWORD_RESET_IP_LIMIT = 5                    # requests per IP...
+PASSWORD_RESET_IP_WINDOW_SECONDS = 60 * 60     # ...per hour
+
+
+def _client_ip(request):
+    # Trust X-Forwarded-For if present (set by the reverse proxy in front of
+    # the app server); fall back to the direct connecting address otherwise.
+    forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '')
+
 @csrf_exempt
 def password_reset(request):
     email = request.POST.get('email', '')
+
+    # Per-IP cap, checked before any email lookup so it also limits
+    # enumeration attempts against many different addresses.
+    ip_key = 'password-reset-ip:{0}'.format(_client_ip(request))
+    ip_request_count = cache.get(ip_key, 0)
+    if ip_request_count >= PASSWORD_RESET_IP_LIMIT:
+        # Respond exactly as a normal success would, so throttling isn't
+        # observable to whoever is hitting the endpoint.
+        response = JsonResponse({'success': True})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+    cache.set(ip_key, ip_request_count + 1, PASSWORD_RESET_IP_WINDOW_SECONDS)
+
     user = MyUser.objects.filter(email=email)
     if not user:
         response = JsonResponse({'success': False, 'error': 'Email not found'})
         response['Access-Control-Allow-Origin'] = '*'
         return response
     user = user[0]
+
+    # Per-account cooldown: if we already emailed this address recently,
+    # silently skip sending again rather than flooding the inbox.
+    cooldown_key = 'password-reset-email:{0}'.format(email.lower())
+    if cache.get(cooldown_key):
+        response = JsonResponse({'success': True})
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+    cache.set(cooldown_key, True, PASSWORD_RESET_COOLDOWN_SECONDS)
 
     # Create and save password reset token
     salt = hashlib.sha1(str(random.random()).encode('utf-8')).hexdigest()[:5]

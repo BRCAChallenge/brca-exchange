@@ -143,6 +143,19 @@ AUTH_USER_MODEL = 'users.MyUser'
 
 PASSWORD_RESET_LINK_DURATION = 1
 
+# Backed by a real DB table (not Django's default in-process memory cache)
+# so counters used for rate limiting (see password_reset in users/views.py)
+# are shared correctly across every app server worker process, rather than
+# each worker keeping its own separate count.
+# Requires running `python manage.py createcachetable` once to create the
+# table named below.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache_table',
+    }
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

@@ -33,5 +33,6 @@ ssh -l${USER} ${HOST} PYTHON_VERSION="${PYTHON_VERSION}" bash <<-'ENDSSH'
     . /var/www/backend/${DST}/virtualenv3/bin/activate
     pip3 install ${requirements}
     ${PYTHON_VERSION} /var/www/backend/${DST}/django/manage.py migrate --noinput --verbosity 2
+    ${PYTHON_VERSION} /var/www/backend/${DST}/django/manage.py createcachetable
     sudo apache2ctl restart
 ENDSSH

@@ -34,5 +34,6 @@ ssh -l${USER} ${HOST} <<-ENDSSH
     fi 
     /var/www/backend/beta/virtualenv3/bin/pip3 install -r /tmp/requirements_deploy.txt
     /var/www/backend/beta/virtualenv3/bin/${PYTHON_VERSION} /var/www/backend/beta/django/manage.py migrate --noinput --verbosity 2
+    /var/www/backend/beta/virtualenv3/bin/${PYTHON_VERSION} /var/www/backend/beta/django/manage.py createcachetable
     sudo apache2ctl restart
 ENDSSH
