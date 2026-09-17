@@ -148,7 +148,7 @@ class ProfileInner extends React.Component {
 }
 
 class EditProfileForm extends React.Component {
-    state = { errors: {}, data: {}, imagePreviewUrl: '', otherRole: false };
+    state = { errors: {}, data: {}, otherRole: false };
     _refs = {};
     setRef = (name) => (el) => { if (el) this._refs[name] = el; else delete this._refs[name]; };
     getNode = (name) => this._refs[name] || null;
@@ -171,12 +171,8 @@ class EditProfileForm extends React.Component {
         var token = auth.token();
         var tokenValue = 'Bearer ' + token;
         var saveProfileData = (data) => {
-            var imagePreviewUrl = '';
-            if (data.user.has_image) {
-                imagePreviewUrl = config.backend_url + '/site_media/media/' + data.user.id;
-            }
             var otherRole = Role.other(data.user.role);
-            this.setState({data: data.user, mailingList: data.mailinglist, oldMailingList: data.mailinglist, imagePreviewUrl: imagePreviewUrl, otherRole: otherRole});
+            this.setState({data: data.user, mailingList: data.mailinglist, oldMailingList: data.mailinglist, otherRole: otherRole});
         };
         $.ajax({
             type: 'GET',
@@ -237,8 +233,7 @@ class EditProfileForm extends React.Component {
             (this.getNode('titleother') && this.getNode('titleother').checked && (this.getNode('titlecustom') ? this.getNode('titlecustom').value : ''));
 
         var data = {
-            "image": this.state.file,
-            "deleteImage": this.state.imageDelete,
+            "image": "",
             "firstName": (this.getNode('firstName') && this.getNode('firstName').value) || '',
             "lastName": (this.getNode('lastName') && this.getNode('lastName').value) || '',
             "title": title,
@@ -250,40 +245,16 @@ class EditProfileForm extends React.Component {
             "city": (this.getNode('city') && this.getNode('city').value) || '',
             "state": (this.getNode('state') && this.getNode('state').value) || '',
             "country": (this.getNode('country') && this.getNode('country').value) || '',
-            "phone_number": (this.getNode('phone_number') && this.getNode('phone_number').value) || '',
-            "hide_number": !!(this.getNode('hide_number') && this.getNode('hide_number').checked),
-            "hide_email": !!(this.getNode('hide_email') && this.getNode('hide_email').checked)
+            "phone_number": "",
+            "hide_number": true,
+            "hide_email": true
         };
         return data;
     }
 
-    handleImageChange(e) {
-        e.preventDefault();
-
-        let reader = new FileReader();
-        let file = e.target.files[0];
-        reader.onloadend = () => {
-            if (file.size <= 4 * 1024 * 1024) {
-                this.setState({
-                    file: file,
-                    imagePreviewUrl: reader.result,
-                    imageTooBig: false,
-                    imageDelete: null
-                });
-            } else {
-                this.setState({
-                    file: null,
-                    imagePreviewUrl: null,
-                    imageTooBig: true
-                });
-            }
-        };
-        reader.readAsDataURL(file);
-    }
     render() {
         return (
         <div className="form-horizontal">
-            {this.renderImageUpload('image', 'Profile picture')}
             {
                 /* {this.renderPassword('password', 'Password')}
                    {this.renderPassword('password_confirm', 'Confirm Password')}
@@ -302,41 +273,8 @@ class EditProfileForm extends React.Component {
             {this.renderTextInput('city', 'City', this.state.data.city)}
             {this.renderTextInput('state', 'State or Province', this.state.data.state)}
             {this.renderSelect('country', 'Country', countries.map(v => [v, v]), this.state.data.country)}
-            {this.renderTextInput('phone_number', 'Phone number', this.state.data.phone_number)}
-            {this.renderCheckBox('hide_number', "Don't display my phone number on this website", this.state.data.hide_number)}
-            {this.renderCheckBox('hide_email', "Don't display my email on this website", this.state.data.hide_email)}
             {this.renderMailingList('mailinglist', "Subscribed to mailing list?", this.state.mailingList)}
         </div>);
-    }
-
-    renderImageUpload(id, label) {
-        var handleImageDelete = ()=>
-            this.setState({
-                imageDelete: true,
-                imagePreviewUrl: '',
-                file: null
-            });
-        var {imagePreviewUrl, imageTooBig} = this.state;
-        var imagePreview = null;
-        var error = null;
-        if (imagePreviewUrl) {
-            imagePreview = (
-                <div>
-                    <div><img src={imagePreviewUrl} className="img-thumbnail"
-                              style={{maxHeight: '160px', maxWidth: '160px'}}/></div>
-                    <div ><Button variant="link" onClick={handleImageDelete}>Remove picture</Button></div>
-                </div>
-            );
-        }
-        if (imageTooBig) {
-            error = <p className="bg-danger">Please choose an image less than 4MB</p>;
-        }
-        return this.renderField(id, label,
-            <div>
-                <input onChange={this.handleImageChange} type="file" accept="image/*"/>
-                {imagePreview}
-                {error}
-            </div>);
     }
 
     renderTextInput(id, label, defaultValue) {
