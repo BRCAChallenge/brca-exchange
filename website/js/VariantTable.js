@@ -45,33 +45,65 @@ const filterColumns = [
 ];
 
 const expertModeGroups = [
-    {groupTitle: 'Variant Names', internalGroupName: 'Variant Nomenclature', innerCols: [
+    {groupTitle: 'Alternate Names', internalGroupName: 'Variant Nomenclature', subtitle: 'Below are some of the aliases for this gene change.', innerCols: [
         {title: 'Gene', prop: 'Gene_Symbol', render: gene => <i>{gene}</i>},
-        {title: 'HGVS Nucleotide', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
-        {title: 'Transcript Identifier', prop: 'Reference_Sequence'},
-        {title: 'HGVS RNA', prop: 'HGVS_RNA'},
-        {title: 'HGVS Protein', prop: 'HGVS_Protein', render: protein => protein.split(':')[1]},
+        {title: 'Coding Change (c.)', prop: 'HGVS_cDNA', render: nucleotide => nucleotide.split(':')[1]},
+        // {title: 'Transcript Identifier', prop: 'Reference_Sequence'},
+        // {title: 'HGVS RNA', prop: 'HGVS_RNA'},
+        {title: 'Protein Change (p.)', prop: 'HGVS_Protein', render: protein => protein.split(':')[1]},
         // Protein Identfifier is pulled from HGVS_Protein, this is handled in VariantDetail (index.js)
-        {title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
-        {title: 'Protein Abbrev', prop: 'Protein_Change'}, // this is manually renamed to 'Abbreviated AA Change' in the front-end
-        {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
-        {title: 'ClinGen Allele Registry', prop: 'CA_ID'},
-        {title: 'Genomic Nomenclature (GRCh38)', prop: 'Genomic_Coordinate_hg38'},
-        {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'}
+        //{title: 'Protein Identifier', prop: 'HGVS_Protein_ID'},
+        {title: 'Abbreviated Protein Change', prop: 'Protein_Change'}, // this is manually renamed to 'Abbreviated AA Change' in the front-end
+        // {title: 'BIC Designation', prop: 'BIC_Nomenclature'},
+        // {title: 'ClinGen Allele Registry', prop: 'CA_ID'},
+        {title: 'Genomic Change (g.)', prop: 'Genomic_Coordinate_hg38'}
+        // {title: 'Genomic Nomenclature (GRCh37)', prop: 'Genomic_Coordinate_hg37'}
     ]},
 
-    {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
+    {groupTitle: 'Overall Assessment of Clinical Significance', internalGroupName: 'Significance (ENIGMA)', subtitle: 'This assessment was made either by the ClinGen Variant Curation Expert Panel, the internationally-recognized expert body for genetic variation in this gene, or by a consensus of the laboratories that share their assessments with ClinVar.', innerCols: [
         {title: 'Clinical Significance', prop: 'Pathogenicity_expert'},
-        {title: 'IARC Class', prop: 'Clinical_significance_ENIGMA'},
-        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA'},
-        {title: 'Clinical Significance Citations', prop: 'Clinical_significance_citations_ENIGMA'},
-        {title: 'Supporting Evidence URL(s)', prop: 'URL_ENIGMA'},
+        // {title: 'IARC Class', prop: 'Clinical_significance_ENIGMA'},
+        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA', truncatable: true},
+        // {title: 'Clinical Significance Citations', prop: 'Clinical_significance_citations_ENIGMA'},
+        // {title: 'Supporting Evidence URL(s)', prop: 'URL_ENIGMA'},
         {title: 'Date Last Evaluated', prop: 'Date_last_evaluated_ENIGMA'},
-        {title: 'Assertion Method', prop: 'Assertion_method_ENIGMA'},
-        {title: 'Assertion Method Citation', prop: 'Assertion_method_citation_ENIGMA'},
-        {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA'},
-        {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'}
+        {title: 'Evaluation Method', prop: 'Assertion_method_ENIGMA'}
+        // {title: 'Assertion Method Citation', prop: 'Assertion_method_citation_ENIGMA'},
+        // {title: 'Allele Origin', prop: 'Allele_origin_ENIGMA'},
+        // {title: 'ClinVar Accession', prop: 'ClinVarAccession_ENIGMA'}
     ]},
+
+    {groupTitle: 'Clinical Significance (ClinVar)', internalGroupName: 'Significance (ClinVar)', subtitle: 'Clinical significance assessments shared with ClinVar.', reportSource: 'ClinVar',
+        reportBinding: {
+            sortBy: (a, b) => {
+                // sort first by stars, then by date in reverse chronological order
+                const starDiff = (
+                    computeReviewStatusScore(b['Review_Status_ClinVar']) -
+                    computeReviewStatusScore(a['Review_Status_ClinVar'])
+                );
+
+                const datetimeDiff = (
+                    new Date(b['Date_Last_Updated_ClinVar']).getTime() -
+                    new Date(a['Date_Last_Updated_ClinVar']).getTime()
+                );
+
+                return starDiff || datetimeDiff;
+            },
+            submitter: {title: 'Submitter', prop: 'Submitter_ClinVar'},
+            helpKey: 'clinical-significance-clinvar',
+            cols: [
+                {title: 'Submitter', prop: 'Submitter_ClinVar'},
+                {title: 'Clinical Significance', prop: 'Clinical_Significance_ClinVar'},
+                {title: 'Date Significance Last Evaluated', prop: 'DateSignificanceLastEvaluated_ClinVar'},
+                {title: 'Date Submission Last Updated', prop: 'Date_Last_Updated_ClinVar'},
+                {title: 'Submission Type', prop: 'Method_ClinVar'},
+                {title: 'SCV Accession', prop: 'SCV_ClinVar'},
+                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true, truncatable: true},
+                {title: 'Supporting Observations', prop: 'Description_ClinVar', dummy: true},
+                {title: 'Review Status', prop: 'Review_Status_ClinVar', dummy: true},
+            ]
+        }
+    },
 ];
 
 const researchModeGroups = [
@@ -88,12 +120,12 @@ const researchModeGroups = [
         {title: 'RNA (LOVD)', prop: 'RNA_LOVD'},
         {title: 'Beacons', core: true},
         {title: 'GA4GH VRS Identifier (hg38)', prop: 'VR_ID'},
-        {title: 'Synonyms', prop: 'Synonyms'}
+        {title: 'Synonyms', prop: 'Synonyms', toggleable: true}
     ]},
 
     {groupTitle: 'Clinical Significance (ENIGMA)', internalGroupName: 'Significance (ENIGMA)', innerCols: [
         {title: 'Clinical Significance', prop: 'Clinical_significance_ENIGMA', core: true},
-        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA', core: true},
+        {title: 'Comment on Clinical Significance', prop: 'Comment_on_clinical_significance_ENIGMA', core: true, truncatable: true},
         {title: 'Assertion Method', prop: 'Assertion_method_ENIGMA', core: true},
         {title: 'Date last evaluated', prop: 'Date_last_evaluated_ENIGMA', core: true},
         {title: 'Collection Method', prop: 'Collection_method_ENIGMA', core: true},
@@ -141,7 +173,7 @@ const researchModeGroups = [
 
                 {title: 'Submission Type', prop: 'Method_ClinVar'},
                 {title: 'SCV Accession', prop: 'SCV_ClinVar'},
-                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true},
+                {title: 'Summary Evidence', prop: 'Summary_Evidence_ClinVar', dummy: true, truncatable: true},
                 {title: 'Supporting Observations', prop: 'Description_ClinVar', dummy: true},
                 {title: 'Review Status', prop: 'Review_Status_ClinVar', dummy: true},
                 // Note: Displayed condition value is actually a combo of Condition_Value and Condition_DB_ID,
@@ -360,12 +392,6 @@ const researchModeGroups = [
             }
         ]
     },
-
-    {groupTitle: 'CRAVAT - MuPIT 3D Protein View', internalGroupName: 'Mupit Structure',
-      hideFromColumnSelection: true,
-      innerCols: [
-        {title: 'Mupit Structure', prop: 'Mupit_Structure', tableKey: false, dummy: true}
-    ]},
 ];
 
 // subColumns populate the column selection checkboxes.

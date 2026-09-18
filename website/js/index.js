@@ -7,7 +7,7 @@ import SilicoPredTile from "./components/insilicopred/SilicoPredTile";
 import FunctionalAssayTile from "./components/functionalassay/FunctionalAssayTile";
 import ComputationalPredictionTile from "./components/computationalprediction/ComputationalPredictionTile";
 import ProvisionalEvidenceTile from "./components/ProvisionalEvidenceTile";
-import MupitStructure from './MupitStructure';
+import ExpandableText from "./components/ExpandableText";
 
 import './favicons';
 import React from 'react';
@@ -27,7 +27,6 @@ import NavBarNew from './NavBarNew';
 // RxJS 6+ imports
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-var moment = require('moment');
 import DonationBar from './components/DonationBar';
 
 // masonry/isotope
@@ -54,7 +53,7 @@ var util = require('./util');
 import { Container as Grid, Col, Row, Table, Button, Modal, Card, Collapse } from 'react-bootstrap';
 
 /* FAISAL: added 'groups' collection that specifies how to map columns to higher-level groups */
-import {VariantTable, ResearchVariantTable, researchModeColumns, columns, researchModeGroups, expertModeGroups} from './VariantTable';
+import {VariantTable, ResearchVariantTable, researchModeGroups, expertModeGroups} from './VariantTable';
 import Signup from './Signup';
 import {Signin, ResetPassword} from './Signin';
 import {ChangePassword} from './ChangePassword';
@@ -584,31 +583,6 @@ class Database extends React.Component {
     }
 }
 
-// get display name for a given key from VariantTable.js column specification
-// if we are in summary view mode, search summary view names then fall back to
-// all data, otherwise go straight to all data. Finally, if key is not found, replace
-// _ with space in the key and return that.
-function getDisplayName(key) {
-    const researchMode = (localStorage.getItem("research-mode") === 'true');
-    let displayName;
-    if (!researchMode) {
-        displayName = columns.find(e => e.prop === key);
-        displayName = displayName && displayName.title;
-    }
-    if (displayName === undefined) {
-        displayName = researchModeColumns.find(e => e.prop === key);
-        displayName = displayName && displayName.title;
-    }
-    if (displayName === undefined) {
-        displayName = key.replace(/_/g, " ");
-    }
-    return displayName;
-}
-
-function isEmptyDiff(value) {
-    return value === null || value.length < 1;
-}
-
 class IsoGrid extends React.Component {
     static displayName = 'IsoGrid';
 
@@ -670,23 +644,20 @@ class VariantDetail extends React.Component {
         super(props);
 
         this.state = {
-            hideEmptyItems: (localStorage.getItem("hide-empties") === 'true'),
+            hideEmptyItems: (this.props.mode === "research_mode") && (localStorage.getItem("hide-empties") === 'true'),
             tooltips: parseTooltips(localStorage.getItem("research-mode") === 'true'),
             // track open/closed state for cards (keyed by localStorage key)
-            openGroups: {}
+            openGroups: {},
+	    toggledFields: {}
         };
 
         // bind methods passed as callbacks / props
         this.showHelp = this.showHelp.bind(this);
-        this.relayoutOnCollapsed = this.relayoutOnCollapsed.bind(this);
         this.onChangeGroupVisibility = this.onChangeGroupVisibility.bind(this);
         this.isGroupOpenLS = this.isGroupOpenLS.bind(this);
         this.toggleCard = this.toggleCard.bind(this);
         this.setEmptyRowVisibility = this.setEmptyRowVisibility.bind(this);
-        this.determineDiffRowColor = this.determineDiffRowColor.bind(this);
-        this.getPathogenicity = this.getPathogenicity.bind(this);
-        this.generateDiffRows = this.generateDiffRows.bind(this);
-        this.toggleSubmitterGroup = this.toggleSubmitterGroup.bind(this);
+	this.toggleField = this.toggleField.bind(this);
 
         // debounce relayout (same behavior as before)
         this.relayoutGrid = debounce((fullRefresh) => {
@@ -835,10 +806,6 @@ class VariantDetail extends React.Component {
         }
     }
 
-    pathogenicityChanged(pathogenicityDiff) {
-        return (pathogenicityDiff.added || pathogenicityDiff.removed) ? true : false;
-    }
-
     setEmptyRowVisibility(hideEmptyItems) {
         localStorage.setItem('hide-empties', hideEmptyItems);
         this.setState({
@@ -857,10 +824,6 @@ class VariantDetail extends React.Component {
         }
     }
 
-    relayoutOnCollapsed(/* collapser */) {
-        console.warn("Deprecated relayoutOnCollapsed; replace relayoutOnCollapsed handlers w/direct calls to relayoutGrid() in your collapsing components");
-    }
-    // legacy API kept for callers; now just flips storage and local openGroups
     onChangeGroupVisibility(groupTitle, event) {
         event.preventDefault();
         const key = "collapse-group_" + groupTitle;
@@ -873,6 +836,14 @@ class VariantDetail extends React.Component {
         // local state wins, otherwise read from storage (for initial render)
         if (Object.prototype.hasOwnProperty.call(this.state.openGroups, key)) { return !!this.state.openGroups[key]; }
         return isOpenFromStorage(key);
+    }
+    toggleField(prop, event) {
+        event.preventDefault();
+        this.setState((prev) => ({
+            toggledFields: { ...prev.toggledFields, [prop]: !prev.toggledFields[prop] }
+        }), () => {
+            this.relayoutGrid();
+        });
     }
     toggleCard(key) {
        this.setState((prev) => {
@@ -895,114 +866,6 @@ class VariantDetail extends React.Component {
        }
    });
     }
-    determineDiffRowColor(highlightRow) {
-        return highlightRow ? 'table-danger' : '';
-    }
-    getPathogenicity(version, isReport) {
-        if (isReport) {
-            if (version.Source === "ClinVar") {
-                return util.getFormattedFieldByProp("Clinical_Significance_ClinVar", version);
-            } else {
-                return util.getFormattedFieldByProp("Classification_LOVD", version);
-            }
-        } else {
-            return util.getFormattedFieldByProp("Pathogenicity_expert", version);
-        }
-    }
-    generateDiffRows(cols, data, isReports) {
-        var diffRows = [];
-        var relevantFieldsToDisplayChanges = cols.map(function(col) {
-            return col.prop;
-        });
-
-        for (var i = 0; i < data.length; i++) {
-            let version = data[i];
-            let diff = version.Diff;
-            let release = version.Data_Release;
-            let highlightRow = false;
-            var diffHTML = [];
-            if (diff !== null) {
-                for (var j = 0; j < diff.length; j++) {
-                    let fieldDiff = diff[j];
-                    let fieldName = fieldDiff.field;
-                    var added;
-                    var removed;
-
-                    if (fieldName === "Pathogenicity_expert") {
-                        highlightRow = this.pathogenicityChanged(fieldDiff);
-                    }
-
-                    if (!_.contains(relevantFieldsToDisplayChanges, fieldName)) {
-                        continue;
-                    }
-
-                    if (_.contains(util.dateKeys, fieldName)) {
-                        added = util.reformatDate(fieldDiff.added);
-                        removed = util.reformatDate(fieldDiff.removed);
-                    } else if (fieldDiff.field_type === "list") {
-                        added = _.map(fieldDiff.added, elem => elem.replace(/_/g, " ").trim());
-                        removed = _.map(fieldDiff.removed, elem => elem.replace(/_/g, " ").trim());
-                    } else {
-                        added = fieldDiff.added.trim();
-                        removed = fieldDiff.removed.trim();
-                    }
-
-                    if (fieldName === "Summary_Evidence_ClinVar" || fieldName === "Description_ClinVar" || fieldName === "Review_Status_ClinVar") {
-                        added = fieldDiff.added.replace(/_/g, " ").trim();
-                        removed = fieldDiff.removed.replace(/_/g, " ").trim();
-                    }
-
-                    if (added !== null || removed !== null) {
-                        if (util.isEmptyField(removed)) {
-                            diffHTML.push(
-                                <span key={`diff-${i}-${j}-new`}>
-                                    <strong>{ getDisplayName(fieldName) }: </strong>
-                                    <span className='badge bg-success'><span className='fa fa-star' /> New</span>
-                                    &nbsp;{`${added}`}
-                                </span>
-                            );
-			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
-                        } else if (fieldDiff.field_type === "list") {
-                            diffHTML.push(
-                                <span key={`diff-${i}-${j}-list`}>
-                                    <strong>{ getDisplayName(fieldName) }: </strong> <br />
-                                    { !isEmptyDiff(added) && `+${added}` }{ !!(!isEmptyDiff(added) && !isEmptyDiff(removed)) && ', '}{ !isEmptyDiff(removed) && `-${removed}` }
-                                </span>
-                            );
-			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
-                        } else if (fieldDiff.field_type === "individual") {
-                            diffHTML.push(
-                                <span key={`diff-${i}-${j}-individual`}>
-                                    <strong>{ getDisplayName(fieldName) }: </strong>
-                                    {removed} <span className="fa fa-arrow-right" /> {added}
-                                </span>
-                            );
-			    diffHTML.push(<br key={`diff-${i}-${j}-br`} />);
-                        }
-                    }
-                }
-            }
-
-            diffRows.push(
-                <tr key={i} className={this.determineDiffRowColor(highlightRow)}>
-                    <td><Link to={`/release/${release.id}`}>{moment(release.date, "YYYY-MM-DDTHH:mm:ss").format("DD MMMM YYYY")}</Link></td>
-                    <td>{this.getPathogenicity(version, isReports)}</td>
-                    <td>{diffHTML}</td>
-                </tr>
-            );
-        }
-
-        return diffRows;
-    }
-
-    toggleSubmitterGroup(sourceName, submitter) {
-        this.setState((pstate) => {
-            const k = `submitter-group-${sourceName}-${submitter}`;
-            return {
-                [k]: !(!Object.prototype.hasOwnProperty.call(pstate, k) || pstate[k])
-            };
-        });
-    }
 
     // render for VariantDetail
     render() {
@@ -1015,20 +878,18 @@ class VariantDetail extends React.Component {
         const variantVersionIdx = data.findIndex(x => x.id === parseInt(this.getParamId()));
         const variant = data[variantVersionIdx] || data[0];
         const release = variant["Data_Release"];
-        let cols, groups;
+        let groups;
 
         const { redirectedFrom, noRedirectMsg } = this.getQuery();
         const redirectedFromVariant = redirectedFrom ? data.find(x => x.id === parseInt(redirectedFrom)) : null;
 
         if (this.props.mode === 'research_mode') {
-            cols = researchModeColumns;
             groups = researchModeGroups;
         } else {
-            cols = columns;
             groups = expertModeGroups;
         }
 
-        const groupTables = _.map(groups, ({ groupTitle, innerCols, reportSource, reportBinding, alleleFrequencies, inSilicoPred, innerGroups }) => {
+        const groupTables = _.map(groups, ({ groupTitle, subtitle, innerCols, reportSource, reportBinding, alleleFrequencies, inSilicoPred, innerGroups }) => {
             let rowsEmpty = 0;
 
             if (reportSource) {
@@ -1044,6 +905,7 @@ class VariantDetail extends React.Component {
                     <SourceReportsTile
                         key={`tile-${groupTitle}`}
                         groupTitle={groupTitle}
+			subtitle={subtitle}
                         sourceName={reportSource}
                         reportBinding={reportBinding}
                         submissions={this.state.reports[reportSource]}
@@ -1162,28 +1024,10 @@ class VariantDetail extends React.Component {
                 let rowItem;
 
                 if (prop === "Protein_Change") {
-                    title = "Abbreviated AA Change";
+                    title = "Abbreviated Protein Change";
                 }
 
-                if (prop === "Mupit_Structure") {
-                    rowItem = <MupitStructure variant={variant} prop={prop} onLoad={() => this.relayoutGrid()} />;
-                    /*
-                    Don't display mupit structures if they don't have an associated Amino Acid change.
-                    Note that there shouldn't be mupit structures for these variants in the first place,
-                    but there may be as getAminoAcidCode may change after the database is populated
-                    */
-		    if (util.getAminoAcidCode(variant["HGVS_Protein"]) === false) {
-                        rowsEmpty += 1;
-                        rowItem = false;
-                    }
-                    if (rowItem === false) {
-                        return false;
-                    }
-                    if (!variant[prop]) {
-                        rowsEmpty += 1;
-                        return false;
-                    }
-                } else if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
+                if (prop === "HGVS_Protein_ID" && variant["HGVS_Protein"] !== null) {
                     let val = variant["HGVS_Protein"].split(":")[0];
                     variant[prop] = val;
                     rowItem = val;
@@ -1216,17 +1060,56 @@ class VariantDetail extends React.Component {
                     rowItem = '-';
                 }
 
+                const isToggleable = rowDescriptor.toggleable === true;
+                const isRevealed = !!this.state.toggledFields[prop];
+                if (isToggleable && !isEmptyValue && !isRevealed) {
+                    rowItem = <i>(click &quot;{title}&quot; to show)</i>;
+                }
+
+                // For long free-text fields (e.g. 'Comment on Clinical Significance'),
+                // show a short preview with a "Click for More"/"Click for Less" toggle,
+                // rather than letting the tile stretch to fit the full text.
+                // This is distinct from `toggleable` (used for Synonyms above), which
+                // hides a field's value entirely until clicked.
+                if (rowDescriptor.truncatable && !isEmptyValue) {
+                    rowItem = (
+                        <ExpandableText
+                            content={rowItem}
+                            limit={rowDescriptor.truncateLimit}
+                            mode={rowDescriptor.truncateMode}
+                            relayoutGrid={this.relayoutGrid}
+                        />
+                    );
+                }
+
                 // Make sure keys are unique within each tile table.
                 // `prop` alone can collide or be undefined in some cases.
                 const rowKey = `vd-${groupTitle}-${prop || idx}`;
 
                 return (
                     <tr key={rowKey} className={ (isEmptyValue && this.state.hideEmptyItems) ? "variantfield-empty" : "" }>
-                        { rowDescriptor.tableKey !== false &&
+                            { isToggleable ? (
+                                <td className='help-target'>
+                                    <span
+                                        role="button"
+                                        tabIndex={0}
+                                        style={{cursor: 'pointer'}}
+                                        onClick={(event) => this.toggleField(prop, event)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                this.toggleField(prop, e);
+                                            }
+                                        }}
+                                    >
+                                        <b>{title}</b>
+                                    </span>
+                                </td>
+                            ) : rowDescriptor.tableKey !== false &&
                             (<KeyInline
                                 tableKey={title} noHelpLink={noHelpLink}
                                 tooltip={this.state.tooltips && prop && this.state.tooltips[slugify(prop)]}
-                                onClick={(event) => this.showHelp(event, prop)}
+				onClick={(event) => this.showHelp(event, prop)}
                             />)
                         }
                         <td colSpan={rowDescriptor.tableKey === false ? 2 : null} ><span className={ this.truncateData(prop) ? "row-value-truncated" : "row-value" }>{rowItem}</span></td>
@@ -1247,7 +1130,7 @@ class VariantDetail extends React.Component {
             const isOpen = this.isGroupOpenLS(storageKey);
 
             return (
-                <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) || (allEmpty && groupTitle === 'CRAVAT - MuPIT 3D Protein View') ? "group-empty" : "" }>
+                <div key={`group_collection-${groupTitle}`} className={ (allEmpty && this.state.hideEmptyItems) ? "group-empty" : "" }>
                     <Card className="shadow">
                         <Card.Header
                             role="button"
@@ -1255,7 +1138,10 @@ class VariantDetail extends React.Component {
                             className="d-flex justify-content-between align-items-center"
                             onClick={(event) => { event.preventDefault(); this.toggleCard(storageKey); }}
                         >
-                            <span className="title fw-bold">{groupTitle}</span>
+			    <div>
+                            	<span className="title fw-bold">{groupTitle}</span>
+				{subtitle && <div className="text-muted" style={{fontSize: '0.85em', fontWeight: 'normal'}}>{subtitle}</div>}
+			    </div>
                             <span className="d-flex align-items-center">
                                 <GroupHelpButton onClick={(event) => { this.showHelp(event, groupTitle); return true; }} />
                             </span>
@@ -1272,102 +1158,6 @@ class VariantDetail extends React.Component {
             );
         });
 
-        // generates variant diff rows
-        const diffRows = this.generateDiffRows(cols, data, false);
-
-        // generates report diff rows
-        if (this.state.reports !== undefined) {
-            let sortedSubmissions = {'ClinVar': {}, 'LOVD': {}};
-
-            if (Object.prototype.hasOwnProperty.call(this.state.reports, 'ClinVar')) {
-                let clinvarSubmissions = this.state.reports.ClinVar;
-                for (var i = 0; i < clinvarSubmissions.length; i++) {
-                    if (clinvarSubmissions[i].Diff === null || clinvarSubmissions[i].Diff === undefined) {
-                        continue;
-                    }
-                    let key = clinvarSubmissions[i].SCV_ClinVar;
-                    if (Object.prototype.hasOwnProperty.call(sortedSubmissions.ClinVar, key)) {
-                        sortedSubmissions.ClinVar[key].push(clinvarSubmissions[i]);
-                    } else {
-                        sortedSubmissions.ClinVar[key] = [clinvarSubmissions[i]];
-                    }
-                }
-            }
-
-            if (Object.prototype.hasOwnProperty.call(this.state.reports, 'LOVD')) {
-                let lovdSubmissions = this.state.reports.LOVD;
-                for (var j = 0; j < lovdSubmissions.length; j++) {
-                    if (lovdSubmissions[j].Diff === null || lovdSubmissions[j].Diff === undefined) {
-                        continue;
-                    }
-                    let key = lovdSubmissions[j].Submission_ID_LOVD;
-                    if (Object.prototype.hasOwnProperty.call(sortedSubmissions.LOVD, key)) {
-                        sortedSubmissions.LOVD[key].push(lovdSubmissions[j]);
-                    } else {
-                        sortedSubmissions.LOVD[key] = [lovdSubmissions[j]];
-                    }
-                }
-            }
-
-            var clinvarDiffRows = _.map(sortedSubmissions.ClinVar, function(submissions, key) {
-                let newestSubmission = submissions ? submissions[0] : '';
-                let oldestSubmission = submissions ? submissions[submissions.length - 1] : '';
-                const significance = util.sentenceCase(util.getFormattedFieldByProp("Clinical_Significance_ClinVar", newestSubmission)
-                .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
-                const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitter_ClinVar", newestSubmission));
-                return (
-                    <Row key={`clinvar-${key}`}>
-                        <Col md={12} className="variant-history-col">
-                            <h3>ClinVar Submission: {newestSubmission["SCV_ClinVar"]} ({submitter}; {significance})</h3>
-                            <h4>Previous Versions of this Submission (since {util.reformatDate(oldestSubmission.Data_Release.date)}):</h4>
-                            <Table className='variant-history nopointer' responsive bordered>
-                                <thead>
-                                    <tr className='table-active'>
-                                        <th>Release Date</th>
-                                        <th>Clinical Significance</th>
-                                        <th>Changes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.generateDiffRows(cols, submissions, true)}
-                                </tbody>
-                            </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
-                        </Col>
-                    </Row>
-                );
-            }, this);
-
-            var lovdDiffRows = _.map(sortedSubmissions.LOVD, function(submissions, key) {
-                let newestSubmission = submissions ? submissions[0] : '';
-                let oldestSubmission = submissions ? submissions[submissions.length - 1] : '';
-                const significance = util.sentenceCase(util.getFormattedFieldByProp("Classification_LOVD", newestSubmission)
-                .replace(/(variant of unknown significance|uncertain significance)/i, 'VUS'));
-                const submitter = util.abbreviatedSubmitter(util.getFormattedFieldByProp("Submitters_LOVD", newestSubmission));
-                return (
-                    <Row key={`lovd-${key}`}>
-                        <Col md={12} className="variant-history-col">
-                            <h3>LOVD Submission: {newestSubmission["DBID_LOVD"]} ({submitter}; {significance})</h3>
-                            <h4>Previous Versions of this Submission (since {util.normalizeDateFieldDisplay(oldestSubmission.Data_Release.date)}):</h4>
-                            <Table className='variant-history nopointer' responsive bordered>
-                                <thead>
-                                    <tr className='table-active'>
-                                        <th>Release Date</th>
-                                        <th>Clinical Significance</th>
-                                        <th>Changes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.generateDiffRows(cols, submissions, true)}
-                                </tbody>
-                            </Table>
-                            <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
-                        </Col>
-                    </Row>
-                );
-            }, this);
-        }
-
         const tileSizeClasses = groupTables.length < 3
             ? `col-xs-12 col-md-${12 / groupTables.length}`
             : `col-xs-12 col-md-6 col-lg-6 col-xl-4`;
@@ -1380,47 +1170,15 @@ class VariantDetail extends React.Component {
         return (error ? <p>{error}</p> :
             <Grid>
                 <Row>
-                    {
-                        (this.props.mode !== "research_mode")
-                            ? (
-                                <>
-                                    <Col lg={2}>
-                                        <h3>Variant Details</h3>
-                                    </Col>
-                                    <Col lg={8} className="vcenterblock">
-                                        <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
-                                            <h1 style={{marginTop: 30}}>{variant.Genomic_HGVS_38 ? variant.Genomic_HGVS_38 : variant.Genomic_Coordinate_hg38}</h1>
-                                            <div><i>or</i></div>
-                                            <h3 style={{marginTop: 10}}>
-                                                {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
-                                                {
-                                                    (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
-                                                        " " + variant['HGVS_Protein'].split(":")[1]
-                                                }
-                                            </h3>
-                                        </div>
-                                    </Col>
-                                </>
-                            )
-                            : (
-                                <Col xs={4} sm={{ span: 4, offset: 4 }} md={{ span: 4, offset: 4 }} className="vcenterblock">
-                                    <div className='text-center Variant-detail-title'>
-                                        <h3>Variant Details</h3>
-                                    </div>
-                                </Col>
-                            )
-                    }
-                    <Col lg={2} xs={12} className={`d-flex align-items-end ${(this.props.mode !== "research_mode") ? "vlowerblock" : "vcenterblock"}`}>
-                        <div className="Variant-detail-headerbar">
-                            <Button
-                                onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
-                                variant="secondary"
-				className="text-nowrap">
-                                { this.state.hideEmptyItems ?
-                                    <span>Show Empty Items</span> :
-                                    <span>Hide Empty Items</span>
+                    <Col className="vcenterblock">
+                        <div className='text-center Variant-detail-title' style={{textAlign: 'center'}}>
+                            <h1 style={{marginTop: 30}}>
+                                {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+                                {
+                                    (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                        " " + variant['HGVS_Protein'].split(":")[1]
                                 }
-                            </Button>
+                            </h1>
                         </div>
                     </Col>
 
@@ -1457,6 +1215,46 @@ class VariantDetail extends React.Component {
                         )
                     }
                 </Row>
+
+                <Row>
+                    <Col xs={12} className="vcenterblock mt-3">
+                        <h2 className="text-center">
+                            <strong>Clinical Significance: </strong>{util.getFormattedFieldByProp('Pathogenicity_expert', variant)}
+                        </h2>
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col xs={12} className="vcenterblock mt-3">
+                        <p className="text-center variant-resources-note">
+                            For educational resources, and for links to support communities and other guidance options, please visit our <Link to="/resources">Resources</Link> page.
+                        </p>
+                    </Col>
+                </Row>
+
+                {this.props.mode === "research_mode" && (
+                    <Row>
+                        <Col xs={12} className="vcenterblock mt-4">
+                            <h3 className="text-center">Variant Details</h3>
+                        </Col>
+                    </Row>
+                )}
+
+                {this.props.mode === "research_mode" && (
+                    <Col lg={2} xs={12} className="vcenterblock">
+                        <div className="Variant-detail-headerbar">
+                            <Button
+                                onClick={this.setEmptyRowVisibility.bind(this, !this.state.hideEmptyItems)}
+                                variant="secondary"
+                                className="text-nowrap">
+                                { this.state.hideEmptyItems ?
+                                    <span>Show Empty Items</span> :
+                                    <span>Hide Empty Items</span>
+                                }
+                            </Button>
+                        </div>
+                    </Col>
+                )}
 
                 <Row>
                     <div className="container-fluid variant-details-body">
@@ -1505,17 +1303,19 @@ class VariantDetail extends React.Component {
                     </div>
                 </Row>
 
-                <Row>
-                    <Col md={12} className="variant-history-col">
-                        <h3>
-                            {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
-                            {
-                                (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
-                                " " + variant['HGVS_Protein'].split(":")[1]
-                            }
-                        </h3>
-                    </Col>
-                </Row>
+                {this.props.mode === "research_mode" && (
+                    <Row>
+                        <Col md={12} className="variant-history-col">
+                            <h3>
+                                {variant['Reference_Sequence']}(<i>{variant['Gene_Symbol']}</i>){`:${variant['HGVS_cDNA'].split(":")[1]}`}
+                                {
+                                    (variant['HGVS_Protein'] && variant['HGVS_Protein'] !== "None") &&
+                                    " " + variant['HGVS_Protein'].split(":")[1]
+                                }
+                            </h3>
+                        </Col>
+                    </Row>
+                )}
 
                 { this.props.mode === "research_mode" && (
                     <Row>
@@ -1525,29 +1325,6 @@ class VariantDetail extends React.Component {
                     </Row>
                     )
                 }
-
-                <Row>
-                    <Col md={12} className="variant-history-col">
-                        <h4>Variant History:</h4>
-                        <p>Variant nomenclature may change between releases, please review submission history below for further details.</p>
-                        <Table className='variant-history nopointer' responsive bordered>
-                            <thead>
-                                <tr className='table-active'>
-                                    <th>Release Date</th>
-                                    <th>Clinical Significance</th>
-                                    <th>Changes</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {diffRows}
-                            </tbody>
-                        </Table>
-                        <p style={{display: this.props.mode === "research_mode" ? 'none' : 'block' }}>There may be additional changes to this variant, as well as changes to corresponding submissions. Click &quot;Show Detail View for this Variant&quot; to see these changes.</p>
-                    </Col>
-                </Row>
-
-                {this.props.mode === "research_mode" ? clinvarDiffRows : ''}
-                {this.props.mode === "research_mode" ? lovdDiffRows : ''}
 
                 <Row>
                     <Col md={{ span: 12, offset: 0 }}>

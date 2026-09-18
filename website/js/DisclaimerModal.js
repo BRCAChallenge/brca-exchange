@@ -37,7 +37,7 @@ class DisclaimerModal extends React.Component {
         } else {
             return (
                 <span>
-                    <Button className="btn-default" onClick={this.open}>{this.props.text}</Button>
+                    <Button variant="outline-primary" onClick={this.open}>{this.props.text}</Button>
 
                     {
                         this.state.showModal &&

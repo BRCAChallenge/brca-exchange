@@ -12,32 +12,6 @@ export const dateKeys = [
     "Created_date_LOVD"
 ];
 
-const AminoAcids = {
-    'ala': 'a',
-    'arg': 'r',
-    'asn': 'n',
-    'asp': 'd',
-    'asx': 'b',
-    'cys': 'c',
-    'glu': 'e',
-    'gln': 'q',
-    'glx': 'z',
-    'gly': 'g',
-    'his': 'h',
-    'ile': 'i',
-    'leu': 'l',
-    'lys': 'k',
-    'met': 'm',
-    'phe': 'f',
-    'pro': 'p',
-    'ser': 's',
-    'thr': 't',
-    'trp': 'w',
-    'tyr': 'y',
-    'val': 'v'
-};
-
-
 export function isEmptyField(value) {
     if (Array.isArray(value)) {
         value = value[0];
@@ -291,6 +265,102 @@ export function getFormattedFieldByProp(prop, variant) {
     return rowItem;
 }
 
+// Finds sentence-ending boundaries in `str` -- a run of '.', '!', or '?'
+// followed by whitespace or end-of-string -- and returns the string split
+// into chunks that each end at one of those boundaries, with any trailing
+// unterminated text returned as a final chunk.
+//
+// This scans for boundaries rather than matching whole sentences in one
+// pattern, so it never drops characters that appear before the first
+// boundary. A pattern like /[^.!?]*[.!?]+(?:\s+|$)/g looks reasonable but is
+// unsafe here: scientific text is full of periods that aren't followed by
+// whitespace (e.g. "p.Glu23ValfsTer17", "gnomAD v2.1", ">0.00002"). Because
+// that pattern's `[^.!?]*` can't span across those internal periods, a match
+// attempt starting before one of them fails outright, and String.match()
+// silently skips ahead one character at a time looking for a position where
+// a full match succeeds -- discarding everything it skipped, including the
+// start of the sentence. Scanning for boundaries with regex.exec() and
+// always slicing from the previous boundary avoids that: every character
+// ends up in some chunk no matter how many non-terminating periods it
+// contains.
+function splitStringAtSentenceBoundaries(str) {
+    const chunks = [];
+    const boundaryRe = /[.!?]+(?=\s|$)/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = boundaryRe.exec(str)) !== null) {
+        const end = match.index + match[0].length;
+        chunks.push(str.slice(lastIndex, end));
+        lastIndex = end;
+    }
+
+    if (lastIndex < str.length) {
+        chunks.push(str.slice(lastIndex));
+    }
+
+    return chunks;
+}
+
+// Splits `content` (a plain string, a single React node, or an array mixing
+// strings and React nodes -- e.g. the output of getFormattedFieldByProp for a
+// field with embedded PMID links) into an array of "sentence groups".
+//
+// Each group is itself an array of parts (strings/nodes) that together make up
+// one sentence, in original order. Non-string parts (like links) are attached
+// to whichever sentence they appear in; they don't count as sentence
+// boundaries themselves. This is used to power ExpandableText's truncation.
+export function splitPartsIntoSentences(content) {
+    const parts = Array.isArray(content) ? content : [content];
+    const groups = [];
+    let current = [];
+
+    parts.forEach((part) => {
+        if (typeof part !== "string") {
+            // non-text parts (e.g. PMID links) belong to the sentence in progress
+            current.push(part);
+            return;
+        }
+
+        // split the string into chunks that each end at a sentence boundary
+        // (a run of '.', '!', or '?' followed by whitespace or end-of-string),
+        // with any trailing unterminated text captured as a final chunk
+        const chunks = splitStringAtSentenceBoundaries(part);
+
+        chunks.forEach((chunk) => {
+            current.push(chunk);
+            if (/[.!?]\s*$/.test(chunk)) {
+                groups.push(current);
+                current = [];
+            }
+        });
+    });
+
+    if (current.length > 0) {
+        groups.push(current);
+    }
+
+    return groups;
+}
+
+// Like splitPartsIntoSentences, but splits into individual words instead.
+// Non-string parts (e.g. links) count as a single "word" each.
+export function splitPartsIntoWords(content) {
+    const parts = Array.isArray(content) ? content : [content];
+    const groups = [];
+
+    parts.forEach((part) => {
+        if (typeof part !== "string") {
+            groups.push([part]);
+            return;
+        }
+
+        const words = part.match(/\s*\S+/g) || [];
+        words.forEach((word) => groups.push([word]));
+    });
+
+    return groups;
+}
 
 export function abbreviatedSubmitter(originalSubmitter) {
     return originalSubmitter
@@ -298,24 +368,8 @@ export function abbreviatedSubmitter(originalSubmitter) {
         .replace('Breast Cancer Information Core (BIC)', 'BIC');
 }
 
-
-export function getAminoAcidCode(hgvsProtein) {
-    let trimmedHgvs = hgvsProtein.replace(/[0-9()]/g, '');
-    if (trimmedHgvs.length < 3) {
-        return false;
-    } else {
-        let lastThreeChars = trimmedHgvs.substr(trimmedHgvs.length - 3).toLowerCase();
-        if (!(lastThreeChars in AminoAcids)) {
-            return false;
-        } else {
-            return AminoAcids[lastThreeChars];
-        }
-    }
-}
-
 // For backward compatibility with code that uses require()
 export default {
-    getAminoAcidCode,
     isEmptyField,
     isNumeric,
     normalizeDateFieldDisplay,
@@ -326,5 +380,7 @@ export default {
     sentenceCase,
     reformatDate,
     dateKeys,
-    capitalize
+    capitalize,
+    splitPartsIntoSentences,
+    splitPartsIntoWords
 };

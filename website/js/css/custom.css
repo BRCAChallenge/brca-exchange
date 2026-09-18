@@ -365,22 +365,6 @@ i.gnomad-header-row {
     margin-right: 6px;
 }
 
-.mupit-structure img {
-    width: 100%;
-}
-
-.mupit-structure h5 {
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
-.mupit-structure p {
-    font-weight: normal;
-    font-size: 14px;
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
 @media only screen and (max-width : 767px) {
     .deleted-variant-message {
         text-align: left;
@@ -788,6 +772,17 @@ div#main {
     word-wrap: break-word;
 }
 
+.expandable-text-toggle {
+    cursor: pointer;
+    color: #C03657;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.expandable-text-toggle:hover {
+    text-decoration: underline;
+}
+
 /* id helper to access the variant data table for better responsive layouts */
 #data-table-container {
     overflow-x: visible;
@@ -1148,7 +1143,8 @@ div.variant-detail-group table td.help-target {
     font-weight: bold;
     text-align: right;
     text-decoration: dashed;
-    width: 200px;
+    width: 40%;
+    white-space: normal;
 }
 
 div.variant-detail-group .panel table {
