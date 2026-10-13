@@ -20,7 +20,7 @@ certifi>=2024.8.30
 chardet==5.2.0
 humanize==4.11.0
 idna==3.10
-protobuf==5.28.3
+protobuf==5.29.6
 pyyaml>=6.0.2
 requests>=2.32.3
 six==1.16.0
