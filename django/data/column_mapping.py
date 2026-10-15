@@ -84,7 +84,6 @@ def _build_gnomad_columns():
     cols['faf95_popmax_genome_GnomADv3'] = _gnomad_subquery('v3', 'genome', field='faf95_popmax')
     for pop in _GNOMAD_POPULATIONS:
         cols[f'Allele_frequency_genome_{pop}_GnomADv3'] = _gnomad_subquery('v3', 'genome', population=pop.lower())
-    return cols
 
     # _GnomADv41 families -> v4.1/joint and v4.1/exome
     for dt in ('joint', 'exome'):
