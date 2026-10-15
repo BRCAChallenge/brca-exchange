@@ -288,7 +288,7 @@ export function getFormattedFieldByProp(prop, variant) {
     } else if (prop === "faf95_popmax_genome_GnomADv3") {
         rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant.faf95_popmax_population_genome_GnomADv3})</small>];
     } else if (prop === "faf95_popmax_joint_GnomADv41" || prop === "faf95_popmax_exome_GnomADv41") {
-        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant[prop.replace("faf95_popmax_", "faf95_popmax_population_")]})</small>];    
+        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant[prop.replace("faf95_popmax_", "faf95_popmax_population_")]})</small>];
     } else if ((prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") && !isEmptyField(variant[prop])) {
         let hgvs;
         if (prop === "Genomic_Coordinate_hg38") {
