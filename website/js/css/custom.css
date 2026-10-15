@@ -338,6 +338,16 @@ i.gnomad-header-row {
     margin-right: 6px;
 }
 
+/* gnomAD v4.1 joint (exome + genome) badge */
+.joint-header {
+    color: white;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: #6f42c1;
+    padding: 4px 7px;
+    margin-right: 6px;
+}
+
 .protein-header {
     color: white;
     border: 1px solid black;

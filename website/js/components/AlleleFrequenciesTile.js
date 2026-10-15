@@ -4,12 +4,17 @@ import React from "react";
 import { Card, Collapse } from 'react-bootstrap';
 import AlleleFrequencyField from "./AlleleFrequencyField";
 import GroupHelpButton from './GroupHelpButton';
+import util from '../util';
 
 const _ = require('underscore');
 
 // Includes the Allele Frequency fields.
 // when true, the field starts in the expanded state.
 const fieldsOfInterest = {
+    'gnomAD v4.1 Joint (Graphical)': true,
+    'gnomAD v4.1 Joint (Numerical)': false,
+    'gnomAD v4.1 Exomes (Graphical)': false,
+    'gnomAD v4.1 Exomes (Numerical)': false,
     'gnomAD V2.1 Exomes, Non-Cancer (Graphical)': true,
     'gnomAD V2.1 Exomes, Non-Cancer (Numerical)': false,
     'gnomAD V3.1 Genomes, Non-Cancer (Graphical)': true,
@@ -79,7 +84,26 @@ export default class AlleleFrequenciesTile extends React.Component {
             return dd.source === "GnomADv3 Genomes";
         }).data, "gnomAD V3.1 Genomes, Non-Cancer (Numerical)"];
 
-        const alleleFrequencyFields = [gnomadExomeGraph, gnomadExomeData, gnomadGenomeGraph, gnomadGenomeData];
+        const gnomadV41JointGraph = [_.find(data, function (dd) {
+            return dd.source === "GnomADv41 Joint";
+        }).chart[0], "gnomAD v4.1 Joint (Graphical)"];
+
+        const gnomadV41JointData = [_.find(data, function (dd) {
+            return dd.source === "GnomADv41 Joint";
+        }).data, "gnomAD v4.1 Joint (Numerical)"];
+
+        const gnomadV41ExomeGraph = [_.find(data, function (dd) {
+            return dd.source === "GnomADv41 Exomes";
+        }).chart[0], "gnomAD v4.1 Exomes (Graphical)"];
+
+        const gnomadV41ExomeData = [_.find(data, function (dd) {
+            return dd.source === "GnomADv41 Exomes";
+        }).data, "gnomAD v4.1 Exomes (Numerical)"];
+
+        const alleleFrequencyFields = [
+		gnomadExomeGraph, gnomadExomeData, gnomadGenomeGraph, gnomadGenomeData,
+		gnomadV41JointGraph, gnomadV41JointData, gnomadV41ExomeGraph, gnomadV41ExomeData
+	];
 
         const renderedAlleleFrequencyFields = alleleFrequencyFields.map((field, idx) => {
             let fieldValue = field[0];
@@ -103,7 +127,9 @@ export default class AlleleFrequenciesTile extends React.Component {
         });
 
         // TODO: figure out how to determine if everything is empty even though variant is in GnomAD
-        const allEmpty = !variant.Variant_in_GnomAD;
+        const allEmpty = !variant.Variant_in_GnomAD
+            && util.isEmptyField(variant.Allele_frequency_joint_GnomADv41)
+            && util.isEmptyField(variant.Allele_frequency_exome_GnomADv41);
 
         // create the source panel itself now
         const groupTitle = `source-panel-${this.props.sourceName}`;
@@ -163,10 +189,12 @@ export default class AlleleFrequenciesTile extends React.Component {
                             <Card.Body>
                                 <div className="tile-disclaimer">
                                     <div>
-                                        The gnomAD data sets used by BRCA Exchange are the “non-cancer” subsets
+                                        The gnomAD V2.1 and V3.1 data sets used by BRCA Exchange are the “non-cancer” subsets
                                         of these sources. Data from <a href="https://tcga-data.nci.nih.gov/docs/publications/tcga/about.html">TCGA</a>
                                         &nbsp;and other cancer cohorts are excluded to ensure that the frequencies used
                                         to assess pathogenicity represent individuals not affected by cancer.
+					gnomAD v4.1 does not provide a non-cancer subset, so the v4.1 data shown here
+					are from the full data set.
                                     </div>
                                 </div>
                                 {renderedAlleleFrequencyFields}

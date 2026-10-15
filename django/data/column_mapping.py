@@ -67,7 +67,7 @@ def _gnomad_subquery(version, data_type, field=None, population=None):
 
 
 _GNOMAD_POPULATIONS = ['AFR', 'AMR', 'ASJ', 'EAS', 'FIN', 'NFE', 'OTH', 'SAS', 'MID', 'AMI']
-
+_GNOMAD_V41_POPULATIONS = ['AFR', 'AMI', 'AMR', 'ASJ', 'EAS', 'FIN', 'MID', 'NFE', 'REMAINING', 'SAS']
 
 def _build_gnomad_columns():
     cols = {}
@@ -84,6 +84,17 @@ def _build_gnomad_columns():
     cols['faf95_popmax_genome_GnomADv3'] = _gnomad_subquery('v3', 'genome', field='faf95_popmax')
     for pop in _GNOMAD_POPULATIONS:
         cols[f'Allele_frequency_genome_{pop}_GnomADv3'] = _gnomad_subquery('v3', 'genome', population=pop.lower())
+    return cols
+
+    # _GnomADv41 families -> v4.1/joint and v4.1/exome
+    for dt in ('joint', 'exome'):
+        cols[f'Allele_frequency_{dt}_GnomADv41'] = _gnomad_subquery('v4.1', dt, field='Allele_frequency')
+        cols[f'faf95_popmax_{dt}_GnomADv41'] = _gnomad_subquery('v4.1', dt, field='faf95_popmax')
+        cols[f'faf95_popmax_population_{dt}_GnomADv41'] = _gnomad_subquery('v4.1', dt, field='faf95_popmax_population')
+        for pop in _GNOMAD_V41_POPULATIONS:
+            if dt == 'exome' and pop == 'AMI':  # v4.1 exomes have no Amish
+                continue
+            cols[f'Allele_frequency_{dt}_{pop}_GnomADv41'] = _gnomad_subquery('v4.1', dt, population=pop.lower())
     return cols
 
 

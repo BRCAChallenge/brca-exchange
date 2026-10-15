@@ -274,6 +274,10 @@ export function getFormattedFieldByProp(prop, variant) {
         } else {
             rowItem = normalizedFieldDisplay(variant[prop]);
         }
+    } else if (/^Allele_frequency_(joint|exome)_.*GnomADv41$/.test(prop)) {
+        // v4.1: AF only - count/number/hom aren't served yet, so skip the
+        // "(AC of AN, Hom=n)" suffix the generic branch below would add
+        rowItem = normalizedFieldDisplay(variant[prop]);
     } else if (/Allele_frequency_.*_GnomAD/.test(prop)) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")],
@@ -283,6 +287,8 @@ export function getFormattedFieldByProp(prop, variant) {
         rowItem = variant[prop];
     } else if (prop === "faf95_popmax_genome_GnomADv3") {
         rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant.faf95_popmax_population_genome_GnomADv3})</small>];
+    } else if (prop === "faf95_popmax_joint_GnomADv41" || prop === "faf95_popmax_exome_GnomADv41") {
+        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant[prop.replace("faf95_popmax_", "faf95_popmax_population_")]})</small>];    
     } else if ((prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") && !isEmptyField(variant[prop])) {
         let hgvs;
         if (prop === "Genomic_Coordinate_hg38") {

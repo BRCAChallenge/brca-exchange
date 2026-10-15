@@ -196,6 +196,45 @@ const researchModeGroups = [
     {groupTitle: 'Allele Frequency Reference Sets', internalGroupName: 'Allele Frequency Reference Sets', alleleFrequencies: true,
         innerGroups: [
             {
+                source: "GnomADv41 Joint",
+                chart: [
+                    {title: 'Allele Frequency Charts (gnomAD v4.1 Joint)', prop: 'Allele_Frequency_Charts_Joint_GnomADv41', replace: alleleFrequencyCharts, tableKey: false, dummy: true},
+                ],
+                data: [
+                    {title: 'Total Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_GnomADv41', core: true},
+                    {title: 'Grpmax Filtering Allele Frequency (95% confidence) (gnomAD v4.1 Joint)', prop: 'faf95_popmax_joint_GnomADv41', core: true},
+                    {title: 'Allele frequency African/African American (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_AFR_GnomADv41', core: true},
+                    {title: 'Allele frequency Admixed American (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_AMR_GnomADv41', core: true},
+                    {title: 'Allele frequency Amish (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_AMI_GnomADv41', core: true},
+                    {title: 'Allele frequency Ashkenazi Jewish (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_ASJ_GnomADv41', core: true},
+		    {title: 'Allele frequency East Asian (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_EAS_GnomADv41', core: true},
+                    {title: 'Allele frequency Finnish (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_FIN_GnomADv41', core: true},
+                    {title: 'Allele frequency Middle Eastern (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_MID_GnomADv41', core: true},
+                    {title: 'Allele frequency Non-Finnish European (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_NFE_GnomADv41', core: true},
+                    {title: 'Allele frequency South Asian (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_SAS_GnomADv41', core: true},
+                    {title: 'Allele frequency Remaining (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_REMAINING_GnomADv41', core: true}
+                ]
+            },
+            {
+                source: "GnomADv41 Exomes",
+                chart: [
+                    {title: 'Allele Frequency Charts (gnomAD v4.1 Exomes)', prop: 'Allele_Frequency_Charts_Exome_GnomADv41', replace: alleleFrequencyCharts, tableKey: false, dummy: true},
+                ],
+                data: [
+                    {title: 'Total Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_GnomADv41', core: true},
+                    {title: 'Grpmax Filtering Allele Frequency (95% confidence) (gnomAD v4.1 Exomes)', prop: 'faf95_popmax_exome_GnomADv41', core: true},
+                    {title: 'Allele frequency African/African American (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_AFR_GnomADv41', core: true},
+                    {title: 'Allele frequency Admixed American (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_AMR_GnomADv41', core: true},
+                    {title: 'Allele frequency Ashkenazi Jewish (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_ASJ_GnomADv41', core: true},
+                    {title: 'Allele frequency East Asian (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_EAS_GnomADv41', core: true},
+                    {title: 'Allele frequency Finnish (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_FIN_GnomADv41', core: true},
+                    {title: 'Allele frequency Middle Eastern (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_MID_GnomADv41', core: true},
+                    {title: 'Allele frequency Non-Finnish European (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_NFE_GnomADv41', core: true},
+                    {title: 'Allele frequency South Asian (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_SAS_GnomADv41', core: true},
+                    {title: 'Allele frequency Remaining (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_REMAINING_GnomADv41', core: true}
+                ]
+            },
+            {
                 source: "GnomADv3 Genomes",
                 chart: [
                     {title: 'Allele Frequency Charts (gnomAD V3.1 Genomes)', prop: 'Allele_Frequency_Charts_Genome_GnomADv3', replace: alleleFrequencyCharts, tableKey: false, dummy: true},
@@ -509,6 +548,27 @@ const researchModeColumns = [
     {title: 'URL (ENIGMA)', prop: 'URL_ENIGMA'},
     {title: 'Allele Frequency', prop: 'Allele_Frequency'},
     {title: 'Maximum Allele Frequency', prop: 'Max_Allele_Frequency'},
+    {title: 'Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_GnomADv41'},
+    {title: 'AFR Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_AFR_GnomADv41'},
+    {title: 'AMR Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_AMR_GnomADv41'},
+    {title: 'AMI Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_AMI_GnomADv41'},
+    {title: 'ASJ Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_ASJ_GnomADv41'},
+    {title: 'EAS Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_EAS_GnomADv41'},
+    {title: 'FIN Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_FIN_GnomADv41'},
+    {title: 'MID Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_MID_GnomADv41'},
+    {title: 'NFE Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_NFE_GnomADv41'},
+    {title: 'SAS Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_SAS_GnomADv41'},
+    {title: 'Remaining Allele frequency (gnomAD v4.1 Joint)', prop: 'Allele_frequency_joint_REMAINING_GnomADv41'},
+    {title: 'Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_GnomADv41'},
+    {title: 'AFR Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_AFR_GnomADv41'},
+    {title: 'AMR Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_AMR_GnomADv41'},
+    {title: 'ASJ Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_ASJ_GnomADv41'},
+    {title: 'EAS Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_EAS_GnomADv41'},
+    {title: 'FIN Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_FIN_GnomADv41'},
+    {title: 'MID Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_MID_GnomADv41'},
+    {title: 'NFE Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_NFE_GnomADv41'},
+    {title: 'SAS Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_SAS_GnomADv41'},
+    {title: 'Remaining Allele frequency (gnomAD v4.1 Exomes)', prop: 'Allele_frequency_exome_REMAINING_GnomADv41'},
     {title: 'Allele frequency (gnomAD V3.1 Genomes)', prop: 'Allele_frequency_genome_GnomADv3'},
     {title: 'AFR Allele frequency (gnomAD V3.1 Genomes)', prop: 'Allele_frequency_genome_AFR_GnomADv3'},
     {title: 'AMR Allele frequency (gnomAD V3.1 Genomes)', prop: 'Allele_frequency_genome_AMR_GnomADv3'},
