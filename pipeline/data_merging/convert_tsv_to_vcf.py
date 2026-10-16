@@ -83,8 +83,11 @@ def write_body(path_output, infos):
         [chrom, pos, ref, alt] = parse_genome_coor(info["Genomic_Coordinate"])
         INFOs = []
         for key, value in info.items():
-            ## ; space : not allowed
-            value = value.replace(";",".").replace(":",".").replace(" ","_")
+            # ';' is this file's own INFO-field delimiter (see the
+            # ";".join(INFOs) below), so a literal ';' in a value would
+            # corrupt the row's INFO structure. ':' and ' ' aren't used as
+            # delimiters anywhere in this script and are left untouched.
+            value = value.replace(";",".")
             INFOs.append(key + "=" + value)
         new_line = "\t".join([chrom, pos, ".", ref, alt, ".", ".", ";".join(INFOs)])
         f_out.write(new_line + "\n")

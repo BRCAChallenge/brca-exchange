@@ -1,3 +1,5 @@
+import os
+
 ALLOWED_HOSTS = (
     'localhost:8080',
     'localhost'
@@ -26,5 +28,21 @@ DATABASES = {
         'NAME': 'storage.pg',
         'USER': 'postgres',
         'PASSWORD': 'postgres'
-    }
+    },
+    'pipeline': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'localhost',
+        'NAME': 'storage.pg',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'OPTIONS': {'options': '-c search_path=' + os.environ.get('PIPELINE_SCHEMA', 'pipeline')},
+    },
+    'test_pipeline': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'localhost',
+        'NAME': 'storage.pg',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'OPTIONS': {'options': '-c search_path=test_pipeline'},
+    },
 }

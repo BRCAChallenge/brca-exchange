@@ -17,14 +17,6 @@ default_val = None
 MULTI_ENTRY_SEP = ','
 
 
-three_letters_aa = re.compile('p.\\(?[A-Z][a-z]{2}[0-9]+[A-Z][a-z]{2}') # e.g. p.(Tyr831SerfsTer9)
-
-def _is_bic_designation(s):
-    return any(k in s.lower() for k in {'ins', 'del', 'dup'}) or \
-        (not s.startswith('p.') and '>' in s) or \
-        (s.startswith('p.') and ':' not in s and three_letters_aa.match(s) is None) # shouldn't match for a BIC designator
-
-
 def _compute_protein_changes(hgvs_cdna, hgvs_util):
     if hgvs_cdna is not None:
         v_protein = hgvs_util.cdna_to_protein(hgvs_cdna, return_str=False) 
@@ -44,19 +36,6 @@ def _compute_protein_changes(hgvs_cdna, hgvs_util):
                 abbrev_aa_change = default_val
             return (abbrev_aa_change, hgvs_protein)
     return (default_val, default_val)
-
-
-def _fetch_bic(va_el):
-    bic_list = list()
-    for name_item in va_el.findall("./ClassifiedRecord/SimpleAllele/OtherNameList/Name"):
-        name = name_item.text
-        if _is_bic_designation(name):
-            bic_list.append(name)
-    if len(bic_list) > 0:
-        return '|'.join(bic_list)
-    return default_val
-
-
 
 
 
@@ -105,8 +84,8 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
     rec = {}
     va = clinvar.variationArchive(va_el, gene_symbols=symbols, debug=debug,
                                   mane_transcripts=mane_transcript)
-    if not hasattr(va, 'variant'):
-        logging.warning("Skipping VariationArchive %s as no variant record was found", va.id)
+    if not hasattr(va, 'variant') or not va.valid:
+        logging.warning("Skipping VariationArchive %s as no valid variant record was found", va.id)
         return(None)
     variant = va.variant
     if variant.valid:
@@ -118,7 +97,7 @@ def parse_record(va_el, hgvs_util, symbols, mane_transcript,
             return None
         coords = variant.coordinates[assembly]
         rec["Genomic_Coordinate"] = "chr%d:%d:%s>%s" % (coords.chr, coords.pos, coords.ref, coords.alt)
-        rec["BIC_Nomenclature"] = _fetch_bic(va_el)
+        rec["BIC_Nomenclature"] = variant.bic_nomenclature or default_val
         rec["Reference_sequence"] = default_val
         rec["HGVS_cDNA"] = default_val
         rec["Abbrev_AA_change"] = default_val

@@ -17,7 +17,6 @@ PREVIOUS_RELEASE_DIR := {{ PREVIOUS_RELEASE_DIR }}
 # path to seqrepo instance downloads
 {% set SEQ_REPO_DIR = SEQ_REPO_DIR|default("/data/seqrepo") %}
 SEQ_REPO_DIR := {{ SEQ_REPO_DIR }}
-HGVS_SEQREPO_DIR := {{ SEQ_REPO_DIR }}
 
 # path to release notes
 RELEASE_NOTES_PATH := {{ RELEASE_NOTES_PATH | default(WORK_DIR + "/release_notes_" + RELEASE_TAG + ".txt") }}
@@ -26,22 +25,22 @@ RELEASE_NOTES_PATH := {{ RELEASE_NOTES_PATH | default(WORK_DIR + "/release_notes
 OUT_DIR := {{ OUT_DIR | default(WORK_DIR + "/data_out") }}
 
 CODE_BASE := {{ CODE_BASE|default("../../..") }}
-GIT_COMMIT := {{ GIT_COMMIT|default("master") }}
 BRCA_GIT_REPO := {{ BRCA_GIT_REPO|default("https://github.com/BRCAChallenge/brca-exchange-kb.git") }}
+# GIT_BRANCH is tracked (fast-forwarded to its latest commit) unless GIT_COMMIT
+# pins an exact commit -- see the `checkout` target.
+GIT_BRANCH := {{ GIT_BRANCH|default("master") }}
+{% if GIT_COMMIT is defined %}
+GIT_COMMIT := {{ GIT_COMMIT }}
+{% endif %}
 
-PIPELINE_IMAGE := {{ PIPELINE_IMAGE | default("brcachallenge/brca-exchange-pipeline:" + RELEASE_TAG) }}
 RESOURCES_DIR := {{ RESOURCES_DIR|default(WORK_DIR + "/resources") }}
-
-{% set PRIORS_IMAGE_DEFAULT_TAG = "0.0.9" %}
-
-{% set PRIORS_IMAGE_TAG = PRIORS_IMAGE_TAG|default(PRIORS_IMAGE_DEFAULT_TAG) %}
-PRIORS_IMAGE := {{ PRIORS_IMAGE | default("brcachallenge/splicing-pipeline:" + PRIORS_IMAGE_TAG) }}
 PRIORS_REFERENCES := {{ PRIORS_REFERENCES|default(WORK_DIR + "/references") }}
 
-# VR configurations
-
-{% set VR_IMAGE_DEFAULT_TAG = "0.2" %}
-VR_IMAGE := {{ VR_IMAGE | default("brcachallenge/append-vr-ids:" + VR_IMAGE_DEFAULT_TAG) }}
+# Whether DownloadGnomADCoverage (workflow/variant_assembly.py) should recompute the
+# gnomAD coverage parquets from raw gnomAD data instead of downloading the pre-built
+# parquets from brcaexchange.org (the default). Set by generate_release.py's
+# --run-gnomad-coverage-estimation flag.
+DOWNLOAD_GNOMAD_COVERAGE_COMPUTE_NEW := {{ RUN_GNOMAD_COVERAGE_ESTIMATION|default("false") }}
 
 ## UTA configurations
 
@@ -57,5 +56,27 @@ UTA_DB_URL := {{ "postgresql://anonymous@localhost:" + UTA_PORT + "/uta/uta_" + 
 {% set UTA_VOLUME = UTA_VOLUME | default("uta_vol") %}
 UTA_VOLUME := {{ UTA_VOLUME }}
 
+## VEP REST server configuration
+
+VEP_CACHE_DIR := {{ VEP_CACHE_DIR | default(WORK_DIR + "/vep_cache") }}
+VEP_FASTA := $(RESOURCES_DIR)/hg38.fa
 
 LOG_DIR := {{ LOG_DIR | default(WORK_DIR) }}
+
+# --- local (no-Docker) Luigi pipeline execution ---
+# these drive the run-variant-assembly / run-variant-analysis / run-pipeline
+# targets; wired to the WORK_DIR-derived paths above so a build-release run
+# stays fully scoped to WORK_DIR instead of falling back to the Makefile's
+# own hardcoded dev-box defaults.
+PYTHONPATH_PIPELINE := $(CODE_BASE)/pipeline
+VCF_ASSEMBLY_OUT_DIR := $(OUT_DIR)
+VCF_ASSEMBLY_SEQ_REPO_DIR := $(SEQ_REPO_DIR)/latest
+GENE_CONFIG_PIPELINE := $(PYTHONPATH_PIPELINE)/workflow/{{ GENE_CONFIG_FILENAME|default("gene_config_brca_only.txt") }}
+VCF_ASSEMBLY_UTA_DB_URL := $(UTA_DB_URL)
+{% set DB_SCHEMA = DB_SCHEMA|default(WORK_DIR.rstrip("/").rsplit("/", 1)[-1]) %}
+# schema name matches the work directory's own name (e.g. data_release_2026_07_24);
+# generate_release.py builds WORK_DIR with underscores rather than DATA_DATE's
+# hyphenated ISO form so this is a valid unquoted Postgres identifier as-is.
+# generate_release.py creates this schema in Postgres before rendering this file.
+PIPELINE_DB_SCHEMA := {{ DB_SCHEMA }}
+VCF_ANALYSIS_GENOME_FA := $(RESOURCES_DIR)/hg38.fa

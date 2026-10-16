@@ -28,12 +28,16 @@ files[hg38.fa.gz]=d329507d63d32405664053785b2bfdc02b3e6b28
 files[refseq_annotation.hg18.gp]=21911f9cd02f00b82eeb6068b7ab737c4d89f896
 files[refseq_annotation.hg19.gp]=e12092220926fe112da26ffdc8188b76aef83231
 files[refseq_annotation.hg38.gp]=9fb29159e516d2f28c2ec0e41a338c85ac699528
+files[gnomADv3.1.coverage.genome.parquet]=380edf6501236949e8d0997f689793c41a8b9fb2
+files[gnomADv4.1.coverage.exome.parquet]=e629c094f9b3a58ec98bddc8a531d38f683ac6d1
+files[gnomADv4.1.coverage.joint.parquet]=5427d91b6ac88c2e72b91c7d422e5d6d472e12b2
+files[LCRFromHengHg38.bed]=7e167edcee968e9992fc729fb42a2d13e1eaf0cb
 
 for file in "${!files[@]}"; do
     hash=$(${HASH} $file | cut -f1 -d' ')
     if [ "$hash" != "${files[$file]}" ]; then
         echo "Downloading ${file}..."
-        wget ${URL_PREFIX}/${file} -O ${file}
+        wget --progress=dot:giga ${URL_PREFIX}/${file} -O ${file}
     fi
     hash=$(${HASH} $file | cut -f1 -d' ')
     if [ "$hash" != "${files[$file]}" ]; then

@@ -30,6 +30,23 @@ def textIfPresent(element, field):
         return None
 
     
+three_letters_aa = re.compile('p.\\(?[A-Z][a-z]{2}[0-9]+[A-Z][a-z]{2}') # e.g. p.(Tyr831SerfsTer9)
+single_letter_aa_change = re.compile(r'^[A-Z][0-9]+[A-Z=]$') # e.g. S76X, R245X, E1703V, S309=
+
+
+def is_bic_designation(s):
+    """True if a ClinVar OtherNameList/Name synonym looks like a BIC (pre-HGVS)
+    designator rather than an HGVS-style name."""
+    if ':' in s:
+        # A colon always marks an accession-qualified HGVS name
+        # (NM_/NC_/NG_/NP_/LRG_...:c./g./p./n.), never legacy BIC nomenclature.
+        return False
+    return any(k in s.lower() for k in {'ins', 'del', 'dup'}) or \
+        (not s.startswith('p.') and '>' in s) or \
+        (s.startswith('p.') and three_letters_aa.match(s) is None) or \
+        single_letter_aa_change.match(s) is not None # shouldn't match for a BIC designator
+
+
 def findUniqueElement(name, parent):
     """Find a child element directly or indirectly underneath this parent
        element which should occur only once (i.e. there should be no other
@@ -115,13 +132,13 @@ def accession_to_genomic_coordinates(accession, assemblies = [hgvs_utils.HgvsWra
             elif v.ac.startswith('NM_'):
                 v_g = hutils.nm_to_genomic(v, assembly)
             else:
-                logging.warning("Skipping genomic coordinate extraction for " + preprocessed_var)
+                logging.warning("Skipping genomic coordinate extraction for " + accession)
                 continue
             if v_g:
                 vcf = variant_utils.VCFVariant.from_hgvs_obj(v_g)
                 coords[assembly] = vcf
     except HGVSError as e:
-        logging.warning("HGVS Error while attempting to process " + preprocessed_var + " : " + str(e))
+        logging.warning("HGVS Error while attempting to process " + accession + " : " + str(e))
     return coords
 
 def _extract_genomic_coordinates_from_non_genomic_fields(meas_el, assemblies = [hgvs_utils.HgvsWrapper.GRCh38_Assem], hgvs_wrapper = hgvs_utils.HgvsWrapper.get_instance()):
@@ -162,7 +179,15 @@ class genomicCoordinates:
 class variant:
     """The variant (SimpleAllele) set.  """
 
-    def __init__(self, element, target_gene_symbols=None, debug=True):
+    def __init__(self, element, target_gene_symbols=None, gene_chromosomes=None, debug=True):
+        """
+        :param gene_chromosomes: optional dict mapping gene symbol -> expected
+            chromosome (int), e.g. from common.config.load_config(...)['chr'].
+            When given, a GeneList entry is rejected if its gene's expected
+            chromosome doesn't match this variant's own genomic coordinates --
+            ClinVar's GeneList occasionally tags a variant with a gene symbol
+            that doesn't belong on that chromosome.
+        """
         self.element = element
         self.valid = True
         self.variantType = textIfPresent(element, "VariantType")
@@ -172,6 +197,12 @@ class variant:
             self.id = None
         if debug:
             print("Parsing variant", self.id)
+        location = element.find("Location")
+        if location is None:
+            self.valid = False
+            return
+        self.coordinates = extract_genomic_coordinates_from_location(location)
+        variant_chrom = next((c.chr for c in self.coordinates.values()), None)
         self.geneSymbol = None
         geneList = element.find("GeneList")
         if geneList is not None:
@@ -183,27 +214,34 @@ class variant:
                 else:
                     if geneSymbol in target_gene_symbols:
                         goodSymbol = True
+                if goodSymbol and gene_chromosomes and variant_chrom is not None:
+                    expected_chrom = gene_chromosomes.get(geneSymbol)
+                    if expected_chrom is not None and expected_chrom != variant_chrom:
+                        logging.warning(
+                            "Rejecting gene symbol %s for variant %s: %s is on chromosome %s, "
+                            "not chromosome %s", geneSymbol, self.id, geneSymbol,
+                            expected_chrom, variant_chrom)
+                        goodSymbol = False
                 if goodSymbol:
                     if self.geneSymbol is None:
                         self.geneSymbol = geneSymbol
                     else:
                         self.geneSymbol = self.geneSymbol + "," + geneSymbol
-        location = element.find("Location")
-        if location is None:
-            self.valid = False
-            return
-        self.coordinates = extract_genomic_coordinates_from_location(location)
         self.hgvs_cdna = None
         self.proteinChange = None
         self.synonyms = list()
+        bic_names = list()
         spdi = textIfPresent(element, "CanonicalSPDI")
         pc = textIfPresent(element, "ProteinChange")
         if pc is not None:
             self.synonyms.append(pc)
-        if element.find("OtherNameList"):
+        if element.find("OtherNameList") is not None:
             for name in element.find("OtherNameList").iter("Name"):
                 self.synonyms.append(name.text)
-        if element.find("HGVSlist"):
+                if is_bic_designation(name.text):
+                    bic_names.append(name.text)
+        self.bic_nomenclature = '|'.join(bic_names) if bic_names else None
+        if element.find("HGVSlist") is not None:
             for hgvsObj in element.find("HGVSlist").iter("HGVS"):
                 pe = hgvsObj.find("ProteinExpression")
                 if pe:
@@ -252,6 +290,75 @@ class referenceAssertion:
         self.summaryDescription = None
 
 
+def _collapse_whitespace(s):
+    """Collapse runs of whitespace, including tabs and newlines that would
+    break tab-delimited output, into single spaces"""
+    if s is None:
+        return None
+    return re.sub(r'\s+', ' ', s).strip()
+
+
+class aggregateClassification:
+    """The VCV-level aggregate germline classification: the single
+    ClassifiedRecord/Classifications/GermlineClassification that ClinVar
+    computes for a VariationArchive across all of its RCVs and submissions.
+    Unlike referenceAssertion, this doesn't depend on which RCV is picked."""
+
+    def __init__(self, element, debug=False):
+        self.element = element
+        self.variationID = element.get("VariationID")
+        self.accession = element.get("Accession")
+        self.version = element.get("Version")
+        self.dateLastUpdated = element.get("DateLastUpdated")
+        self.clinicalSignificance = None
+        self.reviewStatus = None
+        self.dateLastEvaluated = None
+        self.numberOfSubmissions = None
+        self.numberOfSubmitters = None
+        self.mostRecentSubmission = None
+        self.explanation = None
+        self.conditions = list()
+        self.conditionDbIds = list()
+        if debug:
+            print("Parsing aggregate classification", self.accession)
+        gc = element.find("./ClassifiedRecord/Classifications/GermlineClassification")
+        if gc is None:
+            self.valid = False
+            return
+        self.valid = True
+        self.clinicalSignificance = _collapse_whitespace(textIfPresent(gc, "Description"))
+        self.reviewStatus = _collapse_whitespace(textIfPresent(gc, "ReviewStatus"))
+        self.explanation = _collapse_whitespace(textIfPresent(gc, "Explanation"))
+        self.dateLastEvaluated = gc.get("DateLastEvaluated")
+        self.numberOfSubmissions = gc.get("NumberOfSubmissions")
+        self.numberOfSubmitters = gc.get("NumberOfSubmitters")
+        self.mostRecentSubmission = gc.get("MostRecentSubmission")
+        #
+        # One entry per Trait in the TraitSets that feed the aggregate call.
+        # Condition IDs are the XRefs on the Trait itself or on its preferred
+        # Name; XRefs nested in AttributeSets describe the attributes instead.
+        for traitSet in gc.iterfind("ConditionList/TraitSet"):
+            if traitSet.get("ContributesToAggregateClassification") == "false":
+                continue
+            for trait in traitSet.iterfind("Trait"):
+                preferred = None
+                xrefs = list(trait.iterfind("XRef"))
+                for name in trait.iterfind("Name"):
+                    ev = name.find("ElementValue")
+                    if ev is not None and ev.get("Type") == "Preferred":
+                        preferred = _collapse_whitespace(ev.text)
+                        xrefs += name.findall("XRef")
+                db_ids = list()
+                for xref in xrefs:
+                    if re.search("Genetic Testing Registry", xref.get("DB")):
+                        continue
+                    xref_string = xref.get("DB") + "_" + xref.get("ID")
+                    if not xref_string in db_ids:
+                        db_ids.append(xref_string)
+                self.conditions.append(preferred if preferred is not None else '-')
+                self.conditionDbIds.append(db_ids)
+
+
 class classification:
     """For gathering data on the trait.  This code expects only one trait"""
     def __init__(self, element, debug=False):
@@ -265,7 +372,7 @@ class classification:
             for name in trait.iter("Name"):
                 ev = name.find("ElementValue")
                 if ev.get("Type") == "Preferred":
-                    self.condition_category = ev.text
+                    self.condition_value = ev.text
                 for xref in trait.iter("XRef"):
                     if not re.search("Genetic Testing Registry", xref.get("DB")):
                         xref_string = xref.get("DB") + "_" + xref.get("ID")
@@ -332,10 +439,10 @@ class clinicalAssertion:
                 for attr in od.iter("Attribute"):
                     if attr.get("Type") == 'Description':
                         newDescription = textIfPresent(od, "Attribute")
-                    else:
-                        newDescription = "None"
-                    if not newDescription in self.description:
-                        self.description.append(newDescription)
+                        if not newDescription in self.description:
+                            self.description.append(newDescription)
+        if not self.description:
+            self.description.append("not_provided")
 
 
 
@@ -348,7 +455,7 @@ class variationArchive:
     one or more submissions ("SCV Accessions").
     """
 
-    def __init__(self, element, gene_symbols=None,
+    def __init__(self, element, gene_symbols=None, gene_chromosomes=None,
                  mane_transcripts=None, debug=False):
         self.element = element
         self.id = element.get("VariationID")
@@ -360,7 +467,7 @@ class variationArchive:
             self.valid = False
             return
         self.variant = variant(sa, target_gene_symbols=gene_symbols,
-                               debug=False)
+                               gene_chromosomes=gene_chromosomes, debug=False)
         if not self.variant.valid:
             self.valid = False
             return
@@ -395,6 +502,7 @@ class variationArchive:
         # Look for the GermlineClassification object.
         cl = element.find("./ClassifiedRecord/Classifications")
         self.classification = classification(cl, debug=debug)
+        self.aggregateClassification = aggregateClassification(element, debug=debug)
         self.otherAssertions = dict()
         for item in element.iter("ClinicalAssertion"):
             if isCurrent(item):

@@ -802,7 +802,7 @@ class VariantDetail extends React.Component {
             const dataNow = this.state.data;
             const variantVersionIdx = dataNow.findIndex(x => x.id === parseInt(this.getParamId()));
             const variant = dataNow[variantVersionIdx] || dataNow[0];
-            document.title = `${variant['HGVS_cDNA'].split(":")[1]} (${variant['Gene_Symbol']}) - BRCA Exchange`;
+            document.title = `${variant['HGVS_cDNA']} (${variant['Gene_Symbol']}) - BRCA Exchange`;
         }
     }
 
@@ -1040,7 +1040,9 @@ class VariantDetail extends React.Component {
                     : util.isEmptyField(variant[prop]);
 
                 if (title === "Beacons") {
-                    if (variant.Ref.length > 1 || variant.Alt.length > 1) {
+                    if (util.isEmptyField(variant.Ref) || util.isEmptyField(variant.Alt) ||
+                        util.isEmptyField(variant.Chr) || util.isEmptyField(variant.Hg37_Start) ||
+                        variant.Ref.length > 1 || variant.Alt.length > 1) {
                         isEmptyValue = true;
                     } else {
                         let websiteUrl = `https://beacon-network.org/#/search?chrom=${variant.Chr}&pos=${variant.Hg37_Start}&ref=${variant.Ref}&allele=${variant.Alt}&rs=GRCh37`;
@@ -1326,6 +1328,7 @@ class VariantDetail extends React.Component {
                     )
                 }
 
+                { diffRows.length > 0 && (
                 <Row>
                     <Col md={{ span: 12, offset: 0 }}>
                         <DisclaimerModal buttonModal onToggleMode={this.props.toggleMode} text="Show Detail View for this Variant"/>

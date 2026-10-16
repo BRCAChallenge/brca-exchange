@@ -15,6 +15,8 @@ class AlleleFrequencyCharts extends React.Component {
         this.state = {
             scaleIndex: 0
         };
+        this.scaledChartRef = React.createRef();
+        this.toggleScale = this.toggleScale.bind(this);
     }
     shouldComponentUpdate(nextProps, nextState) {
         if (this.props.variant !== nextProps.variant) {
@@ -70,6 +72,35 @@ class AlleleFrequencyCharts extends React.Component {
             ];
             title = 'gnomAD Genomes';
             pointFormat =  "{point.y}<br /><em>({point.count} of {point.number})</em>";
+        } else if (prop === 'Allele_Frequency_Charts_Joint_GnomADv41') {
+            frequencyProps = [
+                {label: 'AFR', prop: 'Allele_frequency_joint_AFR_GnomADv41'},
+                {label: 'AMR', prop: 'Allele_frequency_joint_AMR_GnomADv41'},
+                {label: 'AMI', prop: 'Allele_frequency_joint_AMI_GnomADv41'},
+                {label: 'ASJ', prop: 'Allele_frequency_joint_ASJ_GnomADv41'},
+                {label: 'EAS', prop: 'Allele_frequency_joint_EAS_GnomADv41'},
+                {label: 'FIN', prop: 'Allele_frequency_joint_FIN_GnomADv41'},
+                {label: 'MID', prop: 'Allele_frequency_joint_MID_GnomADv41'},
+                {label: 'NFE', prop: 'Allele_frequency_joint_NFE_GnomADv41'},
+                {label: 'SAS', prop: 'Allele_frequency_joint_SAS_GnomADv41'},
+                {label: 'RMN', prop: 'Allele_frequency_joint_REMAINING_GnomADv41'},
+            ];
+            title = 'gnomAD v4.1 Joint';
+            pointFormat = "{point.y}";
+        } else if (prop === 'Allele_Frequency_Charts_Exome_GnomADv41') {
+            frequencyProps = [
+                {label: 'AFR', prop: 'Allele_frequency_exome_AFR_GnomADv41'},
+                {label: 'AMR', prop: 'Allele_frequency_exome_AMR_GnomADv41'},
+                {label: 'ASJ', prop: 'Allele_frequency_exome_ASJ_GnomADv41'},
+                {label: 'EAS', prop: 'Allele_frequency_exome_EAS_GnomADv41'},
+                {label: 'FIN', prop: 'Allele_frequency_exome_FIN_GnomADv41'},
+                {label: 'MID', prop: 'Allele_frequency_exome_MID_GnomADv41'},
+                {label: 'NFE', prop: 'Allele_frequency_exome_NFE_GnomADv41'},
+                {label: 'SAS', prop: 'Allele_frequency_exome_SAS_GnomADv41'},
+                {label: 'RMN', prop: 'Allele_frequency_exome_REMAINING_GnomADv41'},
+            ];
+            title = 'gnomAD v4.1 Exomes';
+            pointFormat = "{point.y}";
         } else {
             return null;
         }

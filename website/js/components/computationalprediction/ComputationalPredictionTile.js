@@ -112,11 +112,13 @@ export default class ComputationalPredictionTile extends React.Component {
         let sections = _.map(['varType', 'varLoc', 'BayesDel', 'SpliceAI'], (group) => {
 
             if (group === 'varType') {
+                // varType isn't in the finalized schema's AnalysisPriors (or
+                // anywhere else) - no data source to show a result for yet.
                 return ( <CollapsibleSection
 			key={`cp-section-${group}`}
                         fieldName={group}
                         computationalPrediction={true}
-                        extraHeaderItems={this.generateHeader(variant.priors[group])}
+                        extraHeaderItems={this.generateHeader(variant.priors && variant.priors[group])}
                         twoColumnExtraHeader={true}
                         defaultVisible={false}
                         id={group}

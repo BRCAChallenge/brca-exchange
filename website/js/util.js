@@ -94,12 +94,25 @@ export function normalizedFieldDisplay(value, prop) {
 export function generateLinkToGenomeBrowser(prop, value, hgvs) {
     let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
     let genomicCoordinate = value;
-    let genomicCoordinateElements = genomicCoordinate.split(':');
-    let ref = genomicCoordinateElements[2].split('>')[0];
-    let position = parseInt(genomicCoordinateElements[1].split('.')[1]);
-    let positionRangeStart = position - 1;
-    let positionRangeEnd = position + ref.length + 1;
-    let positionParameter = (genomicCoordinate.length > 1500) ? positionRangeStart + '-' + positionRangeEnd : genomicCoordinate;
+    let positionParameter = genomicCoordinate;
+
+    // Only used for pathologically long descriptions (structural variants),
+    // where UCSC needs a start-end range instead of the raw notation. The
+    // schema's g. notation is now "g.<position><ref>><alt>" (or a range
+    // "g.<start>_<end>..." for indels) in one segment, rather than the old
+    // "chr:g.<position>:<ref>><alt>" 3-segment format - parsed defensively
+    // since this branch is essentially never exercised in practice.
+    if (genomicCoordinate.length > 1500) {
+        let match = /g\.(\d+)(?:_(\d+))?(?:([A-Za-z]+)>[A-Za-z]+)?/.exec(genomicCoordinate);
+        if (match) {
+            let position = parseInt(match[1]);
+            let refLength = match[3] ? match[3].length : (match[2] ? parseInt(match[2]) - position + 1 : 1);
+            let positionRangeStart = position - 1;
+            let positionRangeEnd = position + refLength + 1;
+            positionParameter = positionRangeStart + '-' + positionRangeEnd;
+        }
+    }
+
     let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + positionParameter + '&hubUrl=https://brcaexchange.org/trackhubs/hub.txt';
     if (!isEmptyField(hgvs)) {
         value = hgvs;
@@ -142,10 +155,10 @@ export function getFormattedFieldByProp(prop, variant) {
     if (prop === "Gene_Symbol") {
         rowItem = <i>{variant[prop]}</i>;
     } else if (prop === "URL_ENIGMA") {
-        if (variant[prop].length) {
+        if (!isEmptyField(variant[prop])) {
             rowItem = <a target="_blank" href={variant[prop]} rel="noreferrer">link to multifactorial analysis</a>;
         }
-    } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
+    } else if (prop === "SCV_ClinVar" && !isEmptyField(variant[prop]) && variant[prop].toLowerCase().indexOf("scv") !== -1) {
         // Link all clinvar submissions back to clinvar
         let accessions = variant[prop].split(',');
         let versions = variant["SCV_Version_ClinVar"] ? variant["SCV_Version_ClinVar"].split(',') : null;
@@ -184,7 +197,7 @@ export function getFormattedFieldByProp(prop, variant) {
             }
         }
         rowItem.push(']');
-    }  else if (prop === "Condition_ID_value_ENIGMA" && !isEmptyField(variant['Condition_ID_type_ENIGMA'])) {
+    }  else if (prop === "Condition_ID_value_ENIGMA" && !isEmptyField(variant['Condition_ID_type_ENIGMA']) && !isEmptyField(variant['Condition_ID_value_ENIGMA'])) {
         let db = variant['Condition_ID_type_ENIGMA'];
         let id = extractValInsideParens(variant['Condition_ID_value_ENIGMA']);
         let conditionValue = sentenceCase(normalizedFieldDisplay(variant['Condition_ID_value_ENIGMA'].split(';')[0]).toLowerCase());
@@ -192,7 +205,7 @@ export function getFormattedFieldByProp(prop, variant) {
         rowItem.push(' [');
         rowItem.push(formatConditionLink(db, id));
         rowItem.push(']');
-    } else if (prop === "DBID_LOVD" && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
+    } else if (prop === "DBID_LOVD" && !isEmptyField(variant[prop]) && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
         let ids = variant[prop].split(',');
         rowItem = [];
         for (let i = 0; i < ids.length; i++) {
@@ -205,18 +218,20 @@ export function getFormattedFieldByProp(prop, variant) {
         }
     } else if (prop === "Assertion_method_citation_ENIGMA") {
         rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/" rel="noreferrer">Enigma Rules version Mar 26, 2015</a>;
-    } else if (prop === "Source_URL") {
+    } else if (prop === "Source_URL" && !isEmptyField(variant[prop])) {
         if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
             rowItem = <a target="_blank" href={variant[prop].split(',')[0]} rel="noreferrer">link to multifactorial analysis</a>;
         }
-    } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
+    } else if ((prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") && !isEmptyField(variant[prop])) {
         const pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
         rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), (piece, idx) =>
             (/^[0-9]+$/.test(piece)) ? <a key={`pmid-${piece}-${idx}`} target="_blank" href={pubmed + piece} rel="noreferrer">PMID: {piece}</a> : piece);
-    } else if (prop === "HGVS_cDNA") {
-        rowItem = variant[prop].split(":")[1];
-    } else if (prop === "HGVS_Protein") {
-        rowItem = variant[prop].split(":")[1];
+    } else if (prop === "HGVS_cDNA" || prop === "HGVS_Protein") {
+        // old schema packed "transcript:notation" into one string; this
+        // schema keeps just the notation (no colon) in HGVS_cDNA, but
+        // HGVS_Protein still has one (protein accession:notation) - handle
+        // both instead of assuming a colon is always present.
+        rowItem = !isEmptyField(variant[prop]) && variant[prop].includes(':') ? variant[prop].split(":")[1] : variant[prop];
     } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")];
@@ -233,6 +248,10 @@ export function getFormattedFieldByProp(prop, variant) {
         } else {
             rowItem = normalizedFieldDisplay(variant[prop]);
         }
+    } else if (/^Allele_frequency_(joint|exome)_.*GnomADv41$/.test(prop)) {
+        // v4.1: AF only - count/number/hom aren't served yet, so skip the
+        // "(AC of AN, Hom=n)" suffix the generic branch below would add
+        rowItem = normalizedFieldDisplay(variant[prop]);
     } else if (/Allele_frequency_.*_GnomAD/.test(prop)) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")],
@@ -242,7 +261,9 @@ export function getFormattedFieldByProp(prop, variant) {
         rowItem = variant[prop];
     } else if (prop === "faf95_popmax_genome_GnomADv3") {
         rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant.faf95_popmax_population_genome_GnomADv3})</small>];
-    } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
+    } else if (prop === "faf95_popmax_joint_GnomADv41" || prop === "faf95_popmax_exome_GnomADv41") {
+        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant[prop.replace("faf95_popmax_", "faf95_popmax_population_")]})</small>];
+    } else if ((prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") && !isEmptyField(variant[prop])) {
         let hgvs;
         if (prop === "Genomic_Coordinate_hg38") {
             hgvs = variant.Genomic_HGVS_38;
@@ -250,7 +271,7 @@ export function getFormattedFieldByProp(prop, variant) {
             hgvs = variant.Genomic_HGVS_37;
         }
         rowItem = generateLinkToGenomeBrowser(prop, variant[prop], hgvs);
-    } else if (prop === "Synonyms") {
+    } else if (prop === "Synonyms" && !isEmptyField(variant[prop])) {
         let syns = variant[prop].split(',');
         let synsNoWhitespace = _.map(syns, s => s.replace(' ', '_'));
         rowItem = synsNoWhitespace.join(", ");

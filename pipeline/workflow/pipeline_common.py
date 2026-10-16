@@ -7,7 +7,7 @@ import luigi
 from common import config
 from workflow import pipeline_utils
 
-DEFAULT_BRCA_RESOURCES_DIR = (os.path.abspath('../brca/brca-resources'))
+DEFAULT_BRCA_RESOURCES_DIR = '/data/new_schema/resources'
 DEFAULT_OUTPUT_DIR = (
     os.path.abspath('../brca/pipeline-data/data/pipeline_input'))
 DEFAULT_FILE_PARENT_DIR = (os.path.abspath('../brca/pipeline-data/data'))
@@ -66,6 +66,9 @@ class PipelineParams(luigi.Config):
 
     seq_repo_dir = luigi.Parameter(default=str(None),
                                    description='directory of seq_repo')
+
+    db_schema = luigi.Parameter(default='pipeline',
+                                description='PostgreSQL schema name for pipeline DB tables')
 
     victor_docker_image_name = luigi.Parameter(default=str(None),
                                                description='docker image name for running the victor annotation pipeline')

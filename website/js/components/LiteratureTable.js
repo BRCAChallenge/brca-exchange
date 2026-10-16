@@ -252,8 +252,10 @@ class LiteratureTable extends React.Component {
         if (util.isEmptyField(cDNA)) {
             return '';
         }
-        // remove refseq and c.
-        cDNA = cDNA.split(':')[1].replace('c.', '');
+        // remove refseq prefix (old schema packed "transcript:c.notation"
+        // into one string; this schema's HGVS_cDNA is just the notation)
+        // and the leading "c."
+        cDNA = (cDNA.includes(':') ? cDNA.split(':')[1] : cDNA).replace('c.', '');
         return cDNA;
     }
 

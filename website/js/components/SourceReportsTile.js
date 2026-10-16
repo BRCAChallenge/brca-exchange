@@ -87,18 +87,10 @@ export default class SourceReportsTile extends React.Component {
 
     render() {
         // put it in a temp b/c we're going to resort it
+        // (no per-release filtering needed here anymore - the finalized
+        // schema's reports are current-state-only, so every submission
+        // this component receives is already the latest one)
         let submissions = this.props.submissions;
-
-        // get latest release id
-        let latestReleaseID = 0;
-        for (let i = 0; i < submissions.length; i++) {
-            let releaseID = submissions[i].Data_Release.id;
-            latestReleaseID = (releaseID > latestReleaseID) ? releaseID : latestReleaseID;
-        }
-
-        // filter out all old submissions
-        let filteredSubmissions = submissions.filter(submission => submission.Data_Release.id === latestReleaseID);
-        submissions = filteredSubmissions;
 
         // sort the submissions if this source specifies a sort function
         if (this.props.reportBinding.sortBy) {
@@ -119,7 +111,7 @@ export default class SourceReportsTile extends React.Component {
 
             return (
                 <VariantSubmitter
-                    key={submissionData.id}
+                    key={idx}
                     idx={idx}
                     submitter={submitterName}
                     source={this.props.sourceName}
