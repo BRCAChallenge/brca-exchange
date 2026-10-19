@@ -46,9 +46,11 @@ class GenerateSpliceAIData(DefaultPipelineTask):
         previous_vcf_path = pipeline_utils.extract_file(
             self.cfg.previous_release_tar, tmp_dir,
             'output/release/artifacts/variants_with_splice_ai.vcf')
+        # -g (annotation) and -p (precision) are left at their defaults: the
+        # MANE Select table for BRCA1/2, scored to three decimal places.
         args = ["python", "add_spliceai_scores_for_new_variants.py",
                 "-a", self.input().path, "-b", "1000", "-d", "4999",
-                "-f", brca_resources_dir + "/hg38.fa", "-g", "grch38",
+                "-f", brca_resources_dir + "/hg38.fa",
                 "-o", self.output().path, "-s", previous_vcf_path,
                 "-t", tmp_dir]
         pipeline_utils.run_process(args)

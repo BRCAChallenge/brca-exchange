@@ -23,12 +23,6 @@ import whyDonateMd from '../content/whyDonate.md';
 import whyDonateSubtextMd from '../content/whyDonateSubtext.md';
 import fundraisingDetailsMd from '../content/fundraisingDetails.md';
 
-// MuPIT images
-import mupit1t15 from '../content/mupit/1t15.png';
-import mupit1jm7 from '../content/mupit/1jm7.png';
-import mupit4igk from '../content/mupit/4igk.png';
-import mupitENSP from '../content/mupit/fENSP00000380152_7.png';
-
 // Help content - Default
 import howDoISearchMd from '../content/help/default/how-do-i-search-for-a-variant.md';
 import variantClassificationsPathogenicMd from '../content/help/default/variant-classifications-pathogenic.md';
@@ -64,7 +58,6 @@ import functionalAssayDisclaimerMd from '../content/help/research/functional-ass
 import functionalAssaysMd from '../content/help/research/functional-assays.md';
 import computationalPredictionsMd from '../content/help/research/computational-predictions.md';
 import insilicoPredMd from '../content/help/research/insilico/insilico-pred.md';
-import cravatMupitMd from '../content/help/research/cravat-mupit.md';
 import literatureSearchMd from '../content/help/research/literature-search.md';
 import whatGenomeBuildMd from '../content/help/research/what-genome-build-is-this-site-using.md';
 import howIsDataUpdatedResearchMd from '../content/help/research/how-is-the-data-on-this-site-updated.md';
@@ -89,33 +82,6 @@ const content = {
     whyDonateSubtext: whyDonateSubtextMd,
     fundraisingDetails: fundraisingDetailsMd
 };
-
-export const mupitStructures = [
-    {
-        "name": "1t15",
-        "image": mupit1t15,
-        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=1t15&addtlinfo=brca",
-        "humanReadableName": "BRCA1 BRCT Domain"
-    },
-    {
-        "name": "1jm7",
-        "image": mupit1jm7,
-        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=1jm7&addtlinfo=brca",
-        "humanReadableName": "BRCA1 Ring Domain"
-    },
-    {
-        "name": "4igk",
-        "image": mupit4igk,
-        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive?structure_id=4igk&addtlinfo=brca",
-        "humanReadableName": "BRCA1 BRCT Domain"
-    },
-    {
-        "name": "fENSP00000380152_7",
-        "image": mupitENSP,
-        "url": "http://mupit.icm.jhu.edu/MuPIT_Interactive/?gene=BRCA2&addtlinfo=brca",
-        "humanReadableName": "BRCA2 Homology Model"
-    }
-];
 
 export const helpContentDefault = [
     {
@@ -356,11 +322,6 @@ export const helpContentResearch = [
                 contents: insilicoPredMd
             },
             {
-                name: "How do I interpret the CRAVAT/MuPIT Interactive Protein Structure Viewer?",
-                id: "cravat-mupit-3d-protein-view",
-                contents: cravatMupitMd
-            },
-            {
                 name: "How does the BRCA Exchange provide Literature Search Results for variants?",
                 contents: literatureSearchMd,
                 isBeta: true
@@ -483,7 +444,6 @@ export const pages = content;
 // Default export for backward compatibility
 export default {
     pages: content,
-    mupitStructures,
     parseTooltips,
     helpContentDefault,
     helpContentResearch,

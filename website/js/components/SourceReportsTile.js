@@ -87,18 +87,10 @@ export default class SourceReportsTile extends React.Component {
 
     render() {
         // put it in a temp b/c we're going to resort it
+        // (no per-release filtering needed here anymore - the finalized
+        // schema's reports are current-state-only, so every submission
+        // this component receives is already the latest one)
         let submissions = this.props.submissions;
-
-        // get latest release id
-        let latestReleaseID = 0;
-        for (let i = 0; i < submissions.length; i++) {
-            let releaseID = submissions[i].Data_Release.id;
-            latestReleaseID = (releaseID > latestReleaseID) ? releaseID : latestReleaseID;
-        }
-
-        // filter out all old submissions
-        let filteredSubmissions = submissions.filter(submission => submission.Data_Release.id === latestReleaseID);
-        submissions = filteredSubmissions;
 
         // sort the submissions if this source specifies a sort function
         if (this.props.reportBinding.sortBy) {
@@ -113,13 +105,13 @@ export default class SourceReportsTile extends React.Component {
 
             // extract fields we care about from the submission data
             const formattedCols = this.props.reportBinding.cols
-                .map(({ title, prop, helpKey, noHelpLink }) => ({
-                    title, prop, helpKey, noHelpLink, value: submissionData[prop]
+                .map(({ title, prop, helpKey, noHelpLink, truncatable, truncateLimit, truncateMode }) => ({
+                    title, prop, helpKey, noHelpLink, truncatable, truncateLimit, truncateMode, value: submissionData[prop]
                 }));
 
             return (
                 <VariantSubmitter
-                    key={submissionData.id}
+                    key={idx}
                     idx={idx}
                     submitter={submitterName}
                     source={this.props.sourceName}
@@ -148,11 +140,16 @@ export default class SourceReportsTile extends React.Component {
                     <Card.Header as="div" className="d-flex align-items-center fw-bold">
                         <span
                             role="button"
-                            className="title text-decoration-none flex-grow-1"
+                            className="title text-decoration-none flex-grow-1 d-flex flex-column"
                             onClick={this.toggleGroupOpen}
                             aria-expanded={this.state.groupOpen}
                         >
-                            {this.props.groupTitle}
+                            <span>{this.props.groupTitle}</span>
+                            {this.props.subtitle && (
+                                <span className="text-muted" style={{fontSize: '0.85em', fontWeight: 'normal'}}>
+                                    {this.props.subtitle}
+				</span>
+			    )}
                         </span>
 
                         <span

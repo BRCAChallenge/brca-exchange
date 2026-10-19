@@ -5,48 +5,44 @@
 In order to faciliate working with the pipeline a makefile is included in the code base under `pipeline/Makefile`. It is parametrized using a configuration file which by default is assumed to be in `pipeline/brca_pipeline_cfg.mk`.
 
 ### Requirements
-
-In order to successfully run the pipeline using this setup your environment needs to be equipped with the following:
-
 * docker
 * GNU make >=v3.82
 * python with jinja2-cli installed (`pip install jinja2-cli`)
 
-#### Mac OS X
-
-Additional steps have to be taken on Mac OS X:
-
-* brew install make --with-default-names
-* brew install coreutils
-* setup bash version >= 4.0 (https://coderwall.com/p/dmuxma/upgrade-bash-on-your-mac-os)
-
-## Creating a New Data Release
+## Data Releases
 
 New data releases should ideally be generated on a dedicated pipeline machine. Although it could be run on any other machine in principle, some sources (e.g. LOVD) are only available from there.
 
 ### Create a Data Release
-To create a new data release the entry point is the `pipeline/pipeline_running/generate_release.sh` script. It needs to be invoked with appropriate arguments, i.e.
 
- * root working directory
- * path to luigi credentials file (see section below)
- * directory where previous release archives are stored
- * gene config filename (optional, defaults to gene_config_brca_only.txt)
- * git commit (optional, defaults to master)
+To create a new data release the entry point is the `pipeline/pipeline_running/generate_release.py` script. You must be checked out on a branch that has been pushed to GitHub because the first thing the script does is clone the repo from scratch into the new working directory.
 
-For the pipeline machine, we for example get:
+#### Mandatory Arguments
+ * `root_dir` : Root directory for the release (working directory will be created here)
+ * `credentials_path` : Path to Luigi credentials configuration file
+
+#### Optional Arguments
+ * `gene_config_filename` : Gene configuration filename (default: `gene_config_brca_only.txt`)
+ * `--previous-release-dir` : Directory containing previous release bundle, for comparison to the new release (default: the new working directory)
+
+#### Usage Example
 
 ```
-/home/brca/brca_upstream/pipeline/pipeline_running/generate_release.sh /data/monthly_releases /data/luigi_pipeline_credentials.cfg /data/previous_releases gene_config_brca_only.txt dff32a9c
+git clone https://github.com/BRCAChallenge/brca-exchange.git
+~/brca-exchange/pipeline/pipeline_running/generate_release.py \
+	/data/monthly_releases \
+	/data/luigi_pipeline_credentials.cfg \
+	gene_config_brca_only.txt
 ```
 
-This script clones the BRCA Exchange repo into a directory in `WORKING_DIR/data_release_yyyy-MM-dd` referring to the current date and checks out the latest commit on master. It then generates a configuration file `brca_pipeline_cfg.mk` where paths and other settings are set up.
+This script clones the BRCA Exchange repo into a directory `data_release_yyyy-MM-dd` within `root_dir` referring to the current date and checks out the same commit as the repo you invoked the script with. It then generates a configuration file `brca_pipeline_cfg.mk` where paths and other settings are set up.
 
-Finally, the following steps are done via the Makefile:
+Then, the following steps are done via the Makefile:
  * downloads resources files
  * builds a docker image
  * kicks off the pipeline in the docker image just created
 
-Should anything go wrong, the pipeline can be easily restarted by issuing `make run-pipeline` in the `pipeline` directory of the code base of the corresponding release (that's where both the `Makefile` and the configuration in `brca_pipeline_cfg.mk` is stored).
+Should anything go wrong, the pipeline can be easily restarted by issuing `make build-release` from the generated data release dir `data_release_yyyy-MM-dd/code/pipeline` (that's where both the `Makefile` and the configuration in `brca_pipeline_cfg.mk` are stored).
 
 ### Postprocessing
 

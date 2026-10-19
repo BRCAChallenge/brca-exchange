@@ -8,7 +8,17 @@ import xml.etree.ElementTree as ET
 import re
 
 from clinvar import clinvar_common as clinvar
-from common import utils
+from common import config, utils
+
+
+# Columns describing the VCV-level aggregate classification.  These are the
+# same on every row (submission) of a given variant.
+VCV_COLUMNS = ("VCV_VariationID", "VCV_Accession", "VCV_Version",
+               "VCV_ClinicalSignificance", "VCV_ReviewStatus",
+               "VCV_DateLastEvaluated", "VCV_NumberOfSubmissions",
+               "VCV_NumberOfSubmitters", "VCV_MostRecentSubmission",
+               "VCV_Explanation", "VCV_Conditions", "VCV_ConditionDB_IDs",
+               "VCV_DateLastUpdated")
 
 
 def printHeader():
@@ -17,22 +27,49 @@ def printHeader():
                      "SCV_Version", "ID", "Origin", "Method", "Genomic_Coordinate",
                      "Symbol", "Protein", "Description", "SummaryEvidence",
                      "ReviewStatus", "ConditionType", "ConditionValue",
-                     "ConditionDB_ID", "Synonyms")))
+                     "ConditionDB_ID", "Synonyms", "BIC_Nomenclature")
+                    + VCV_COLUMNS))
 
 MULTI_VALUE_SEP = ','
+CONDITION_SEP = '|'
+
+
+def _vcv_value(value):
+    """Render an aggregate classification value, '-' if absent.  ';' becomes
+    ',' because convert_tsv_to_vcf.py rewrites ';' (its INFO delimiter) to '.',
+    which would mangle an Explanation like 'Pathogenic(3); Benign(1)'."""
+    if value is None or value == '':
+        return '-'
+    return str(value).replace(';', ',')
+
+
+def aggregateFields(agg):
+    """The values for VCV_COLUMNS, in order"""
+    conditions = CONDITION_SEP.join(agg.conditions)
+    # Keep empty per-condition slots so IDs stay aligned with VCV_Conditions
+    condition_db_ids = (CONDITION_SEP.join(MULTI_VALUE_SEP.join(ids)
+                                           for ids in agg.conditionDbIds)
+                        if any(agg.conditionDbIds) else None)
+    return tuple(_vcv_value(v) for v in (
+        agg.variationID, agg.accession, agg.version,
+        agg.clinicalSignificance, agg.reviewStatus, agg.dateLastEvaluated,
+        agg.numberOfSubmissions, agg.numberOfSubmitters,
+        agg.mostRecentSubmission, agg.explanation,
+        conditions, condition_db_ids,
+        agg.dateLastUpdated))
+
 
 def processSubmission(submissionSet, assembly):
-    ra = submissionSet.referenceAssertion
     classification = submissionSet.classification
     variant = submissionSet.variant
 
     if variant is None:
-        logging.warning("Warning","No variant information could be extracted for ReferenceClinVarAssertion ID %s %s",
-                     submissionSet.referenceAssertion.id, [c.accession for c in submissionSet.otherAssertions.values()])
+        logging.warning("No variant information could be extracted for VariationArchive %s %s",
+                        submissionSet.id, [c.accession for c in submissionSet.otherAssertions.values()])
         return None
 
     hgvs = submissionSet.name
-    debug = False
+    aggregate = aggregateFields(submissionSet.aggregateClassification)
     for oa in list(submissionSet.otherAssertions.values()):
         if ("somatic" in oa.origin and len(oa.origin) == 1):
             logging.warning("HGVS %s because submissions are only somatic in origin", hgvs)
@@ -66,7 +103,9 @@ def processSubmission(submissionSet, assembly):
                                      str(classification.condition_type),
                                      str(classification.condition_value),
                                      ",".join(classification.condition_db_id),
-                                     str(synonyms))))
+                                     str(synonyms),
+                                     variant.bic_nomenclature or '-')
+                                    + aggregate))
 
 
 def _bases_only(seq):
@@ -79,9 +118,18 @@ def main():
     parser.add_argument("clinVarXmlFilename")
     parser.add_argument('-a', "--assembly", default="GRCh38")
     parser.add_argument('-l', "--logs")
+    parser.add_argument('--configfile',
+                        help="path to gene configuration file; when given, "
+                             "GeneList entries whose gene's known chromosome "
+                             "doesn't match the variant's own coordinates are rejected")
     args = parser.parse_args()
 
     utils.setup_logfile(args.logs)
+
+    gene_chromosomes = None
+    if args.configfile:
+        gene_config_df = config.load_config(args.configfile)
+        gene_chromosomes = dict(zip(gene_config_df[config.SYMBOL_COL], gene_config_df[config.CHROM_COL]))
 
     printHeader()
 
@@ -90,7 +138,7 @@ def main():
         for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
             if event == 'end' and elem.tag == 'VariationArchive':
                 if clinvar.isCurrent(elem):
-                    submissionSet = clinvar.variationArchive(elem, debug=False)
+                    submissionSet = clinvar.variationArchive(elem, gene_chromosomes=gene_chromosomes, debug=False)
                     if submissionSet.valid:
                         processSubmission(submissionSet, args.assembly)
                     else:

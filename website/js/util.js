@@ -12,32 +12,6 @@ export const dateKeys = [
     "Created_date_LOVD"
 ];
 
-const AminoAcids = {
-    'ala': 'a',
-    'arg': 'r',
-    'asn': 'n',
-    'asp': 'd',
-    'asx': 'b',
-    'cys': 'c',
-    'glu': 'e',
-    'gln': 'q',
-    'glx': 'z',
-    'gly': 'g',
-    'his': 'h',
-    'ile': 'i',
-    'leu': 'l',
-    'lys': 'k',
-    'met': 'm',
-    'phe': 'f',
-    'pro': 'p',
-    'ser': 's',
-    'thr': 't',
-    'trp': 'w',
-    'tyr': 'y',
-    'val': 'v'
-};
-
-
 export function isEmptyField(value) {
     if (Array.isArray(value)) {
         value = value[0];
@@ -120,12 +94,25 @@ export function normalizedFieldDisplay(value, prop) {
 export function generateLinkToGenomeBrowser(prop, value, hgvs) {
     let hgVal = (prop === "Genomic_Coordinate_hg38") ? '38' : '19';
     let genomicCoordinate = value;
-    let genomicCoordinateElements = genomicCoordinate.split(':');
-    let ref = genomicCoordinateElements[2].split('>')[0];
-    let position = parseInt(genomicCoordinateElements[1].split('.')[1]);
-    let positionRangeStart = position - 1;
-    let positionRangeEnd = position + ref.length + 1;
-    let positionParameter = (genomicCoordinate.length > 1500) ? positionRangeStart + '-' + positionRangeEnd : genomicCoordinate;
+    let positionParameter = genomicCoordinate;
+
+    // Only used for pathologically long descriptions (structural variants),
+    // where UCSC needs a start-end range instead of the raw notation. The
+    // schema's g. notation is now "g.<position><ref>><alt>" (or a range
+    // "g.<start>_<end>..." for indels) in one segment, rather than the old
+    // "chr:g.<position>:<ref>><alt>" 3-segment format - parsed defensively
+    // since this branch is essentially never exercised in practice.
+    if (genomicCoordinate.length > 1500) {
+        let match = /g\.(\d+)(?:_(\d+))?(?:([A-Za-z]+)>[A-Za-z]+)?/.exec(genomicCoordinate);
+        if (match) {
+            let position = parseInt(match[1]);
+            let refLength = match[3] ? match[3].length : (match[2] ? parseInt(match[2]) - position + 1 : 1);
+            let positionRangeStart = position - 1;
+            let positionRangeEnd = position + refLength + 1;
+            positionParameter = positionRangeStart + '-' + positionRangeEnd;
+        }
+    }
+
     let genomeBrowserUrl = 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg' + hgVal + '&position=' + positionParameter + '&hubUrl=https://brcaexchange.org/trackhubs/hub.txt';
     if (!isEmptyField(hgvs)) {
         value = hgvs;
@@ -168,10 +155,10 @@ export function getFormattedFieldByProp(prop, variant) {
     if (prop === "Gene_Symbol") {
         rowItem = <i>{variant[prop]}</i>;
     } else if (prop === "URL_ENIGMA") {
-        if (variant[prop].length) {
+        if (!isEmptyField(variant[prop])) {
             rowItem = <a target="_blank" href={variant[prop]} rel="noreferrer">link to multifactorial analysis</a>;
         }
-    } else if (prop === "SCV_ClinVar" && variant[prop].toLowerCase().indexOf("scv") !== -1) {
+    } else if (prop === "SCV_ClinVar" && !isEmptyField(variant[prop]) && variant[prop].toLowerCase().indexOf("scv") !== -1) {
         // Link all clinvar submissions back to clinvar
         let accessions = variant[prop].split(',');
         let versions = variant["SCV_Version_ClinVar"] ? variant["SCV_Version_ClinVar"].split(',') : null;
@@ -210,7 +197,7 @@ export function getFormattedFieldByProp(prop, variant) {
             }
         }
         rowItem.push(']');
-    }  else if (prop === "Condition_ID_value_ENIGMA" && !isEmptyField(variant['Condition_ID_type_ENIGMA'])) {
+    }  else if (prop === "Condition_ID_value_ENIGMA" && !isEmptyField(variant['Condition_ID_type_ENIGMA']) && !isEmptyField(variant['Condition_ID_value_ENIGMA'])) {
         let db = variant['Condition_ID_type_ENIGMA'];
         let id = extractValInsideParens(variant['Condition_ID_value_ENIGMA']);
         let conditionValue = sentenceCase(normalizedFieldDisplay(variant['Condition_ID_value_ENIGMA'].split(';')[0]).toLowerCase());
@@ -218,7 +205,7 @@ export function getFormattedFieldByProp(prop, variant) {
         rowItem.push(' [');
         rowItem.push(formatConditionLink(db, id));
         rowItem.push(']');
-    } else if (prop === "DBID_LOVD" && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
+    } else if (prop === "DBID_LOVD" && !isEmptyField(variant[prop]) && variant[prop].toLowerCase().indexOf("brca") !== -1) { // Link all dbid's back to LOVD
         let ids = variant[prop].split(',');
         rowItem = [];
         for (let i = 0; i < ids.length; i++) {
@@ -231,18 +218,20 @@ export function getFormattedFieldByProp(prop, variant) {
         }
     } else if (prop === "Assertion_method_citation_ENIGMA") {
         rowItem = <a target="_blank" href="https://enigmaconsortium.org/library/general-documents/" rel="noreferrer">Enigma Rules version Mar 26, 2015</a>;
-    } else if (prop === "Source_URL") {
+    } else if (prop === "Source_URL" && !isEmptyField(variant[prop])) {
         if (variant[prop].startsWith("http://hci-exlovd.hci.utah.edu")) {
             rowItem = <a target="_blank" href={variant[prop].split(',')[0]} rel="noreferrer">link to multifactorial analysis</a>;
         }
-    } else if (prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") {
+    } else if ((prop === "Comment_on_clinical_significance_ENIGMA" || prop === "Clinical_significance_citations_ENIGMA") && !isEmptyField(variant[prop])) {
         const pubmed = "http://ncbi.nlm.nih.gov/pubmed/";
         rowItem = _.map(variant[prop].split(/PMID:? ?([0-9]+)/), (piece, idx) =>
             (/^[0-9]+$/.test(piece)) ? <a key={`pmid-${piece}-${idx}`} target="_blank" href={pubmed + piece} rel="noreferrer">PMID: {piece}</a> : piece);
-    } else if (prop === "HGVS_cDNA") {
-        rowItem = variant[prop].split(":")[1];
-    } else if (prop === "HGVS_Protein") {
-        rowItem = variant[prop].split(":")[1];
+    } else if (prop === "HGVS_cDNA" || prop === "HGVS_Protein") {
+        // old schema packed "transcript:notation" into one string; this
+        // schema keeps just the notation (no colon) in HGVS_cDNA, but
+        // HGVS_Protein still has one (protein accession:notation) - handle
+        // both instead of assuming a colon is always present.
+        rowItem = !isEmptyField(variant[prop]) && variant[prop].includes(':') ? variant[prop].split(":")[1] : variant[prop];
     } else if (/Allele_frequency_.*_ExAC/.test(prop)) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")];
@@ -259,6 +248,10 @@ export function getFormattedFieldByProp(prop, variant) {
         } else {
             rowItem = normalizedFieldDisplay(variant[prop]);
         }
+    } else if (/^Allele_frequency_(joint|exome)_.*GnomADv41$/.test(prop)) {
+        // v4.1: AF only - count/number/hom aren't served yet, so skip the
+        // "(AC of AN, Hom=n)" suffix the generic branch below would add
+        rowItem = normalizedFieldDisplay(variant[prop]);
     } else if (/Allele_frequency_.*_GnomAD/.test(prop)) {
         let count = variant[prop.replace("frequency", "count")],
             number = variant[prop.replace("frequency", "number")],
@@ -268,7 +261,9 @@ export function getFormattedFieldByProp(prop, variant) {
         rowItem = variant[prop];
     } else if (prop === "faf95_popmax_genome_GnomADv3") {
         rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant.faf95_popmax_population_genome_GnomADv3})</small>];
-    } else if (prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") {
+    } else if (prop === "faf95_popmax_joint_GnomADv41" || prop === "faf95_popmax_exome_GnomADv41") {
+        rowItem = [variant[prop], <small key={`${prop}-meta`} style={{float: 'right'}}>({variant[prop.replace("faf95_popmax_", "faf95_popmax_population_")]})</small>];
+    } else if ((prop === "Genomic_Coordinate_hg38" || prop === "Genomic_Coordinate_hg37") && !isEmptyField(variant[prop])) {
         let hgvs;
         if (prop === "Genomic_Coordinate_hg38") {
             hgvs = variant.Genomic_HGVS_38;
@@ -276,7 +271,7 @@ export function getFormattedFieldByProp(prop, variant) {
             hgvs = variant.Genomic_HGVS_37;
         }
         rowItem = generateLinkToGenomeBrowser(prop, variant[prop], hgvs);
-    } else if (prop === "Synonyms") {
+    } else if (prop === "Synonyms" && !isEmptyField(variant[prop])) {
         let syns = variant[prop].split(',');
         let synsNoWhitespace = _.map(syns, s => s.replace(' ', '_'));
         rowItem = synsNoWhitespace.join(", ");
@@ -291,6 +286,102 @@ export function getFormattedFieldByProp(prop, variant) {
     return rowItem;
 }
 
+// Finds sentence-ending boundaries in `str` -- a run of '.', '!', or '?'
+// followed by whitespace or end-of-string -- and returns the string split
+// into chunks that each end at one of those boundaries, with any trailing
+// unterminated text returned as a final chunk.
+//
+// This scans for boundaries rather than matching whole sentences in one
+// pattern, so it never drops characters that appear before the first
+// boundary. A pattern like /[^.!?]*[.!?]+(?:\s+|$)/g looks reasonable but is
+// unsafe here: scientific text is full of periods that aren't followed by
+// whitespace (e.g. "p.Glu23ValfsTer17", "gnomAD v2.1", ">0.00002"). Because
+// that pattern's `[^.!?]*` can't span across those internal periods, a match
+// attempt starting before one of them fails outright, and String.match()
+// silently skips ahead one character at a time looking for a position where
+// a full match succeeds -- discarding everything it skipped, including the
+// start of the sentence. Scanning for boundaries with regex.exec() and
+// always slicing from the previous boundary avoids that: every character
+// ends up in some chunk no matter how many non-terminating periods it
+// contains.
+function splitStringAtSentenceBoundaries(str) {
+    const chunks = [];
+    const boundaryRe = /[.!?]+(?=\s|$)/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = boundaryRe.exec(str)) !== null) {
+        const end = match.index + match[0].length;
+        chunks.push(str.slice(lastIndex, end));
+        lastIndex = end;
+    }
+
+    if (lastIndex < str.length) {
+        chunks.push(str.slice(lastIndex));
+    }
+
+    return chunks;
+}
+
+// Splits `content` (a plain string, a single React node, or an array mixing
+// strings and React nodes -- e.g. the output of getFormattedFieldByProp for a
+// field with embedded PMID links) into an array of "sentence groups".
+//
+// Each group is itself an array of parts (strings/nodes) that together make up
+// one sentence, in original order. Non-string parts (like links) are attached
+// to whichever sentence they appear in; they don't count as sentence
+// boundaries themselves. This is used to power ExpandableText's truncation.
+export function splitPartsIntoSentences(content) {
+    const parts = Array.isArray(content) ? content : [content];
+    const groups = [];
+    let current = [];
+
+    parts.forEach((part) => {
+        if (typeof part !== "string") {
+            // non-text parts (e.g. PMID links) belong to the sentence in progress
+            current.push(part);
+            return;
+        }
+
+        // split the string into chunks that each end at a sentence boundary
+        // (a run of '.', '!', or '?' followed by whitespace or end-of-string),
+        // with any trailing unterminated text captured as a final chunk
+        const chunks = splitStringAtSentenceBoundaries(part);
+
+        chunks.forEach((chunk) => {
+            current.push(chunk);
+            if (/[.!?]\s*$/.test(chunk)) {
+                groups.push(current);
+                current = [];
+            }
+        });
+    });
+
+    if (current.length > 0) {
+        groups.push(current);
+    }
+
+    return groups;
+}
+
+// Like splitPartsIntoSentences, but splits into individual words instead.
+// Non-string parts (e.g. links) count as a single "word" each.
+export function splitPartsIntoWords(content) {
+    const parts = Array.isArray(content) ? content : [content];
+    const groups = [];
+
+    parts.forEach((part) => {
+        if (typeof part !== "string") {
+            groups.push([part]);
+            return;
+        }
+
+        const words = part.match(/\s*\S+/g) || [];
+        words.forEach((word) => groups.push([word]));
+    });
+
+    return groups;
+}
 
 export function abbreviatedSubmitter(originalSubmitter) {
     return originalSubmitter
@@ -298,24 +389,8 @@ export function abbreviatedSubmitter(originalSubmitter) {
         .replace('Breast Cancer Information Core (BIC)', 'BIC');
 }
 
-
-export function getAminoAcidCode(hgvsProtein) {
-    let trimmedHgvs = hgvsProtein.replace(/[0-9()]/g, '');
-    if (trimmedHgvs.length < 3) {
-        return false;
-    } else {
-        let lastThreeChars = trimmedHgvs.substr(trimmedHgvs.length - 3).toLowerCase();
-        if (!(lastThreeChars in AminoAcids)) {
-            return false;
-        } else {
-            return AminoAcids[lastThreeChars];
-        }
-    }
-}
-
 // For backward compatibility with code that uses require()
 export default {
-    getAminoAcidCode,
     isEmptyField,
     isNumeric,
     normalizeDateFieldDisplay,
@@ -326,5 +401,7 @@ export default {
     sentenceCase,
     reformatDate,
     dateKeys,
-    capitalize
+    capitalize,
+    splitPartsIntoSentences,
+    splitPartsIntoWords
 };

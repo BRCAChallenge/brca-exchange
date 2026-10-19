@@ -65,11 +65,17 @@ def download_file_and_display_progress(url, file_name=None):
     u = urlopen_with_retry(url)
     f = open(file_name, 'wb')
     meta = u.info()
-    file_size = int(meta.get("Content-Length")[0])
+    file_size = int(meta.get("Content-Length"))
     print("Downloading: %s Bytes: %s" % (file_name, file_size))
 
+    # Log progress at most once per percentage point (in place of the old
+    # print-every-8KB-chunk-with-backspaces behavior, which was fine on an
+    # interactive terminal but produced an unusably huge log -- tens of
+    # thousands of prints, no newlines -- once redirected to a log file, as
+    # every non-interactive invocation via Luigi is).
     file_size_dl = 0
     block_sz = 8192
+    last_reported_pct = -1
     while True:
         buffer = u.read(block_sz)
         if not buffer:
@@ -77,10 +83,10 @@ def download_file_and_display_progress(url, file_name=None):
 
         file_size_dl += len(buffer)
         f.write(buffer)
-        status = r"%10d  [%3.2f%%]" % (
-        file_size_dl, file_size_dl * 100. / file_size)
-        status = status + chr(8) * (len(status) + 1)
-        print(status, end=' ')
+        pct = int(file_size_dl * 100. / file_size)
+        if pct != last_reported_pct:
+            print("%10d  [%3d%%]" % (file_size_dl, pct))
+            last_reported_pct = pct
 
     f.close()
     print("Finished downloading %s" % (file_name))

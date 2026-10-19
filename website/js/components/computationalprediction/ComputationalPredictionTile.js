@@ -112,11 +112,13 @@ export default class ComputationalPredictionTile extends React.Component {
         let sections = _.map(['varType', 'varLoc', 'BayesDel', 'SpliceAI'], (group) => {
 
             if (group === 'varType') {
+                // varType isn't in the finalized schema's AnalysisPriors (or
+                // anywhere else) - no data source to show a result for yet.
                 return ( <CollapsibleSection
 			key={`cp-section-${group}`}
                         fieldName={group}
                         computationalPrediction={true}
-                        extraHeaderItems={this.generateHeader(variant.priors[group])}
+                        extraHeaderItems={this.generateHeader(variant.priors && variant.priors[group])}
                         twoColumnExtraHeader={true}
                         defaultVisible={false}
                         id={group}
@@ -228,12 +230,10 @@ export default class ComputationalPredictionTile extends React.Component {
              return section !== undefined;
         });
 
-	const {onFieldToggled, relayoutGrid, hideEmptyItems, tooltips, showHelp, ...tileprops} = this.props;
-
         return (
-            <CollapsibleTile allEmpty={allEmpty} {...tileprops}>
+            <CollapsibleTile allEmpty={allEmpty} {...this.props}>
                 <div className="tile-disclaimer">
-                    This tile displays computational predictions and other annotations relevant for assigning ACMG/AMP bioinformatic codes.  Additional computational predictions are available via the <em>in Silico</em> Prior Predictions tile. Variants that are outside of the potentially clincially-important functional domains are noted as Outside Domain.
+                    This tile displays computational predictions and other annotations relevant for assigning ACMG/AMP bioinformatic codes.  Additional computational predictions are available via the <em>in Silico</em> Prior Predictions tile. Variants that are outside of the potentially clinically-important functional domains are noted as Outside Domain.
                 </div>
                 {filteredSections}
             </CollapsibleTile>
